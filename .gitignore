@@ -1,0 +1,8 @@
+# ignore
+MaxwellsCPU2d
+lib/libmetis.a
+lib/libparmetis.a
+.cproject
+.project
+.settings
+Makefile~
