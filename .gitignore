@@ -6,3 +6,4 @@ lib/libparmetis.a
 .project
 .settings
 Makefile~
+build
