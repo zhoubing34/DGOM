@@ -38,11 +38,11 @@ void MaxwellsRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
     if(p!=mesh->procid){
       int Nout = mesh->Npar[p]*p_Nfields*p_Nfp;
       if(Nout){
-	/* symmetric communications (different ordering) */
-	MPI_Isend(f_outQ+sk, Nout, MPI_FLOAT, p, 6666+p,            MPI_COMM_WORLD, mpi_out_requests +Nmess);
-	MPI_Irecv(f_inQ+sk,  Nout, MPI_FLOAT, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_in_requests +Nmess);
-	sk+=Nout;
-	++Nmess;
+        /* symmetric communications (different ordering) */
+        MPI_Isend(f_outQ+sk, Nout, MPI_FLOAT, p, 6666+p,            MPI_COMM_WORLD, mpi_out_requests +Nmess);
+        MPI_Irecv(f_inQ+sk,  Nout, MPI_FLOAT, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_in_requests +Nmess);
+        sk+=Nout;
+        ++Nmess;
       }
     }
   }
@@ -78,17 +78,17 @@ void MaxwellsRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
       
       sk = 0;
       for(m=0;m<p_Np;++m){
-	const float dr = ptDr[m];
-	const float ds = ptDs[m];
-	const float dx = drdx*dr+dsdx*ds;
-	const float dy = drdy*dr+dsdy*ds;
-	const float nHx = Qk[sk++];
-	const float nHy = Qk[sk++];
-	const float nEz = Qk[sk++];
+        const float dr = ptDr[m];
+        const float ds = ptDs[m];
+        const float dx = drdx*dr+dsdx*ds;
+        const float dy = drdy*dr+dsdy*ds;
+        const float nHx = Qk[sk++];
+        const float nHy = Qk[sk++];
+        const float nEz = Qk[sk++];
 
-	rhsHx += -dy*nEz;
-	rhsHy +=  dx*nEz;
-	rhsEz +=  dx*nHy-dy*nHx;
+        rhsHx += -dy*nEz;
+        rhsHy +=  dx*nEz;
+        rhsEz +=  dx*nHy-dy*nHx;
       }
 
       id = p_Nfields*(n+k*p_Np);
@@ -126,15 +126,15 @@ void MaxwellsRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 
       float dHx, dHy, dEz;
       if(idP<0){
-	idP = p_Nfields*(-1-idP);
-	dHx = FSc*(f_inQ[idP++] -f_Q[idM++]);
-	dHy = FSc*(f_inQ[idP++] -f_Q[idM++]);
-	dEz = FSc*(f_inQ[idP  ] -f_Q[idM ]);
+        idP = p_Nfields*(-1-idP);
+        dHx = FSc*(f_inQ[idP++] -f_Q[idM++]);
+        dHy = FSc*(f_inQ[idP++] -f_Q[idM++]);
+        dEz = FSc*(f_inQ[idP  ] -f_Q[idM ]);
       }
       else{
-	dHx = FSc*(    f_Q[idP++] -f_Q[idM++]);
-	dHy = FSc*(    f_Q[idP++] -f_Q[idM++]);
-	dEz = FSc*(BSc*f_Q[idP  ] -f_Q[idM ]);
+        dHx = FSc*(    f_Q[idP++] -f_Q[idM++]);
+        dHy = FSc*(    f_Q[idP++] -f_Q[idM++]);
+        dEz = FSc*(BSc*f_Q[idP  ] -f_Q[idM ]);
       }
       
       const float ndotdH = NXf*dHx + NYf*dHy;
@@ -153,10 +153,10 @@ void MaxwellsRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 
       sk = 0;
       for(m=0;m<p_Nfp*p_Nfaces;++m){
-	const float L = ptLIFT[m];
-	rhsHx += L*fluxQ[sk++];
-	rhsHy += L*fluxQ[sk++];
-	rhsEz += L*fluxQ[sk++];
+        const float L = ptLIFT[m];
+        rhsHx += L*fluxQ[sk++];
+        rhsHy += L*fluxQ[sk++];
+        rhsEz += L*fluxQ[sk++];
       }
      
       int id = p_Nfields*(n+k*p_Np);
