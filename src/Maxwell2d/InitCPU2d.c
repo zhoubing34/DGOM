@@ -1,4 +1,4 @@
-#include "mpi.h"
+#include <mpi.h>
 #include "fem.h"
 
 double InitCPU2d(Mesh *mesh, int Nfields){
@@ -30,7 +30,7 @@ double InitCPU2d(Mesh *mesh, int Nfields){
 
   sk = 0;
   for(n=0;n<p_Np;++n){
-    for(m=0;m<p_Np;++m){    
+    for(m=0;m<p_Np;++m){
       mesh->f_Dr[sk] = mesh->Dr[n][m];
       mesh->f_Ds[sk] = mesh->Ds[n][m];
       ++sk;
@@ -80,7 +80,7 @@ double InitCPU2d(Mesh *mesh, int Nfields){
         int  kM = (idM-nM)/p_Np;
         int  kP = (idP-nP)/p_Np;
 
-        idM = Nfields*(nM+p_Np*kM);
+        idM = Nfields*(nM+p_Np*kM); // change node connections
         idP = Nfields*(nP+p_Np*kP);
 
         /* stub resolve some other way */

@@ -36,11 +36,11 @@ void MaxwellsMPISend2d(Mesh *mesh){
     if(p!=procid){
       int Nout = mesh->Npar[p]*p_Nfields*p_Nfp;
       if(Nout){
-	/* symmetric communications (different ordering) */
-	MPI_Isend(mesh->f_outQ+sk, Nout, MPI_FLOAT, p, 6666+p,      MPI_COMM_WORLD, mpi_out_requests +Nmess);
-	MPI_Irecv(mesh->f_inQ+sk,  Nout, MPI_FLOAT, p, 6666+procid, MPI_COMM_WORLD,  mpi_in_requests +Nmess);
-	sk+=Nout;
-	++Nmess;
+        /* symmetric communications (different ordering) */
+        MPI_Isend(mesh->f_outQ+sk, Nout, MPI_FLOAT, p, 6666+p,      MPI_COMM_WORLD, mpi_out_requests +Nmess);
+        MPI_Irecv(mesh->f_inQ+sk,  Nout, MPI_FLOAT, p, 6666+procid, MPI_COMM_WORLD,  mpi_in_requests +Nmess);
+        sk+=Nout;
+        ++Nmess;
       }
     }
   }

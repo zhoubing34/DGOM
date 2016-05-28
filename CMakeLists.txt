@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 project(DGOM)
 
 # set compilers
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+set(CMAKE_C_FLAGS "-Wall")
 set(CMAKE_C_COMPILER /usr/local/bin/mpicc)
 set(CMAKE_CXX_COMPILER /usr/local/bin/mpicxx)
 

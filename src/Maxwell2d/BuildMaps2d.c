@@ -189,21 +189,21 @@ void BuildMaps2d(Mesh *mesh){
       
       for(n1=0;n1<p_Nfp;++n1){
 
-	x1 = mesh->x[k1][mesh->Fmask[f1][n1]];
-	y1 = mesh->y[k1][mesh->Fmask[f1][n1]];
-	
-	d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))/(sJk[f1]*sJk[f1]); 
-	
-	if(d12<NODETOL){
-	  int fld;
-	  for(fld=0;fld<p_Nfields;++fld){
+        x1 = mesh->x[k1][mesh->Fmask[f1][n1]];
+        y1 = mesh->y[k1][mesh->Fmask[f1][n1]];
+
+        d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))/(sJk[f1]*sJk[f1]);
+
+        if(d12<NODETOL){
+          int fld;
+          for(fld=0;fld<p_Nfields;++fld){
 #ifdef CUDA
-	    mesh->parmapOUT[sk++] = k1*BSIZE*p_Nfields+mesh->Fmask[f1][n1] + BSIZE*fld;
+            mesh->parmapOUT[sk++] = k1*BSIZE*p_Nfields+mesh->Fmask[f1][n1] + BSIZE*fld;
 #else
-	    mesh->parmapOUT[sk++] = p_Nfields*(k1*p_Np+mesh->Fmask[f1][n1]) + fld;
+            mesh->parmapOUT[sk++] = p_Nfields*(k1*p_Np+mesh->Fmask[f1][n1]) + fld;
 #endif
-	  }
-	}
+          }
+        }
       }
     }
   }

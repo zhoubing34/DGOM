@@ -115,35 +115,36 @@ void MaxwellsRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
     int surfid=k*6*p_Nfp*p_Nfaces;
 
     int sk = 0;
-    for(m=0;m<p_Nfp*p_Nfaces;++m){
-    
-      int   idM       = surfinfo[surfid++];
-      int   idP       = surfinfo[surfid++];
-      const float FSc = surfinfo[surfid++];
-      const float BSc = surfinfo[surfid++];
-      const float NXf = surfinfo[surfid++];
-      const float NYf = surfinfo[surfid++];
+    for(m=0;m<p_Nfp*p_Nfaces;++m) {
 
-      float dHx, dHy, dEz;
-      if(idP<0){
-        idP = p_Nfields*(-1-idP);
-        dHx = FSc*(f_inQ[idP++] -f_Q[idM++]);
-        dHy = FSc*(f_inQ[idP++] -f_Q[idM++]);
-        dEz = FSc*(f_inQ[idP  ] -f_Q[idM ]);
-      }
-      else{
-        dHx = FSc*(    f_Q[idP++] -f_Q[idM++]);
-        dHy = FSc*(    f_Q[idP++] -f_Q[idM++]);
-        dEz = FSc*(BSc*f_Q[idP  ] -f_Q[idM ]);
-      }
-      
-      const float ndotdH = NXf*dHx + NYf*dHy;
-      
-      fluxQ[sk++] = -NYf*dEz           + dHx - ndotdH*NXf;
-      fluxQ[sk++] =  NXf*dEz           + dHy - ndotdH*NYf;
-      fluxQ[sk++] =  NXf*dHy - NYf*dHx + dEz;
-      
-    }
+        int idM = surfinfo[surfid++];
+        int idP = surfinfo[surfid++];
+        const float FSc = surfinfo[surfid++];
+        const float BSc = surfinfo[surfid++];
+        const float NXf = surfinfo[surfid++];
+        const float NYf = surfinfo[surfid++];
+
+
+        float dHx, dHy, dEz;
+        if(idP<0){
+            idP = p_Nfields*(-1-idP);
+            dHx = FSc*(f_inQ[idP++] -f_Q[idM++]);
+            dHy = FSc*(f_inQ[idP++] -f_Q[idM++]);
+            dEz = FSc*(f_inQ[idP  ] -f_Q[idM ]);
+        }
+        else{
+            dHx = FSc*(    f_Q[idP++] -f_Q[idM++]);
+            dHy = FSc*(    f_Q[idP++] -f_Q[idM++]);
+            dEz = FSc*(BSc*f_Q[idP  ] -f_Q[idM ]);
+        }
+
+        const float ndotdH = NXf*dHx + NYf*dHy;
+
+        fluxQ[sk++] = -NYf*dEz           + dHx - ndotdH*NXf;
+        fluxQ[sk++] =  NXf*dEz           + dHy - ndotdH*NYf;
+        fluxQ[sk++] =  NXf*dHy - NYf*dHx + dEz;
+
+        }
 
     for(n=0;n<p_Np;++n){
 

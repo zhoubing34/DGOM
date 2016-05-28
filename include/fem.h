@@ -88,6 +88,8 @@ void cpu_set_data2d(Mesh *mesh, double *Hx, double *Hy, double *Ez);
 void cpu_set_data3d(Mesh *mesh, double *Hx, double *Hy, double *Hz,
 		                double *Ex, double *Ey, double *Ez);
 
+void cpu_get_data2d(Mesh *, double *, double *, double *);
+
 double InitCPU2d(Mesh *mesh, int Nfields);
 double InitCPU3d(Mesh *mesh, int Nfields);
 

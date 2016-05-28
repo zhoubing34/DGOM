@@ -2,19 +2,30 @@
 <module type="CPP_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/src/MaxwellsRun2d.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/FacePair2d.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/StartUp2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Utilities/Utils.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Utilities/ParallelPairs.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/Mesh2d.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/MaxwellsRHS2d.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/Utils.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/LoadBalance2d.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/InitCPU2d.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/MaxwellsMPI2d.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/MaxwellsDriver2d.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ParallelPairs.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/BuildMaps2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Convection2d/InitialCondition.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Convection2d/InitMeshInfo.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Convection2d/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Convection2d/Mesh2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Convection2d/ConvectionRun2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Convection2d/PairFace.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Convection2d/ConvectionDriver2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Convection2d/SetUp.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Convection2d/BuildMaps.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Convection2d/ConvectionRHS2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/MaxwellsRun2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/FacePair2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/StartUp2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/Mesh2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/MaxwellsRHS2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/LoadBalance2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/InitCPU2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/MaxwellsMPI2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/MaxwellsDriver2d.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/Maxwell2d/BuildMaps2d.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />

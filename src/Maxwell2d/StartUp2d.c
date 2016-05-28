@@ -4,11 +4,11 @@
 void StartUp2d(Mesh *mesh){
 
 #if p_N==1
-#include "dataN01.h"
+#include "TriShape/dataN01.h"
 #elif p_N==2
-#include "dataN02.h"
+#include "TriShape/dataN02.h"
 #elif p_N==3
-#include "dataN03.h"
+#include "TriShape/dataN03.h"
 #elif p_N==4
 #include "dataN04.h"
 #elif p_N==5

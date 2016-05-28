@@ -6,3 +6,4 @@ MaxwellsCPU2d
 Makefile~
 build
 lib
+*.nc
