@@ -1,5 +1,12 @@
 #include "Convection2d/Convection2d.h"
 
+/*
+ * Set initial condition
+ *
+ *  1. scalar distribution
+ *  2. constant velocity field
+ *
+ * */
 void InitData(Mesh * mesh){
     double sigma = 125*1e3/(33*33);
     double xc, yc, t;

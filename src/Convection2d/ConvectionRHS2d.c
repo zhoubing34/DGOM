@@ -43,9 +43,9 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
                 MPI_Irecv(f_inQ+sk,  Nout, MPI_FLOAT, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_in_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;
-            }
-        }
-    }
+            }// if
+        }// if
+    }// for
 
     // volume integral
     for(k=0;k<K;++k){
@@ -101,14 +101,13 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 
             int id = p_Nfields*(k*p_Np + n);
             f_rhsQ[id] = rhs;
-        }
-    }
+        }// for n
+    }// for k
 
     /* DO RECV */
     MPI_Status *instatus  = (MPI_Status*) calloc(mesh->nprocs, sizeof(MPI_Status));
     MPI_Waitall(Nmess, mpi_in_requests, instatus);
     free(instatus);
-
 
     // surface integral
     for(k=0;k<K;++k){
@@ -122,7 +121,7 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
         /* NOTE: index into geometric factors */
         int surfid=k*6*p_Nfp*p_Nfaces;
 
-        /* numerical flux */
+        /* Lax-Friedrichs flux */
         int sk = 0;
         for(m=0;m<p_Nfp*p_Nfaces;++m){
 

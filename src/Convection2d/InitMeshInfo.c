@@ -1,15 +1,12 @@
 #include "Convection2d/Convection2d.h"
 
-
+/* get the surface  */
 double InitTriMeshInfo(Mesh * mesh, int Nfields){
     printf("Np = %d, BSIZE = %d\n", p_Np, BSIZE);
 
-    /* Q  */
-    int sz = mesh->K*(BSIZE)*Nfields*sizeof(float);
-
 
     /*  float LIFT  */
-    sz = p_Np*(p_Nfp)*(p_Nfaces)*sizeof(float);
+    int sz = p_Np*(p_Nfp)*(p_Nfaces)*sizeof(float);
     mesh->f_LIFT = (float*) malloc(sz);
     int sk = 0, n, m, f, k;
 

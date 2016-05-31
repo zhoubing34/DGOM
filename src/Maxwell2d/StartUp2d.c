@@ -4,37 +4,37 @@
 void StartUp2d(Mesh *mesh){
 
 #if p_N==1
-#include "TriShape/dataN01.h"
+#include "Triangle/dataN01.h"
 #elif p_N==2
-#include "TriShape/dataN02.h"
+#include "Triangle/dataN02.h"
 #elif p_N==3
 #include "Triangle/dataN03.h"
 #elif p_N==4
-#include "dataN04.h"
+#include "Triangle/dataN04.h"
 #elif p_N==5
-#include "dataN05.h"
+#include "Triangle/dataN05.h"
 #elif p_N==6
-#include "dataN06.h"
+#include "Triangle/dataN06.h"
 #elif p_N==7
-#include "dataN07.h"
+#include "Triangle/dataN07.h"
 #elif p_N==8
-#include "dataN08.h"
+#include "Triangle/dataN08.h"
 #elif p_N==9
-#include "dataN09.h"
+#include "Triangle/dataN09.h"
 #elif p_N==10
-#include "dataN10.h"
+#include "Triangle/dataN10.h"
 #elif p_N==11
-#include "dataN11.h"
+#include "Triangle/dataN11.h"
 #elif p_N==12
-#include "dataN12.h"
+#include "Triangle/dataN12.h"
 #elif p_N==13
-#include "dataN13.h"
+#include "Triangle/dataN13.h"
 #elif p_N==14
-#include "dataN14.h"
+#include "Triangle/dataN14.h"
 #elif p_N==15
-#include "dataN15.h"
+#include "Triangle/dataN15.h"
 #elif p_N==16
-#include "dataN16.h"
+#include "Triangle/dataN16.h"
 #endif
 
   int n, m, k;
