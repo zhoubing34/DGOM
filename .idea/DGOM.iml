@@ -32,27 +32,29 @@
     <orderEntry type="module-library">
       <library name="Header Search Paths">
         <CLASSES>
+          <root url="file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/6.0/include" />
           <root url="file:///opt/intel/composer_xe_2015.5.222/compiler/include" />
           <root url="file:///opt/intel/composer_xe_2015.5.222/mkl/include" />
           <root url="file:///opt/intel/composer_xe_2015.5.222/tbb/include" />
           <root url="file:///opt/intel/composer_xe_2015.5.222/ipp/include" />
-          <root url="file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/6.0/include" />
           <root url="file:///System/Library/Frameworks" />
           <root url="file:///usr/include" />
           <root url="file:///usr/local/include" />
           <root url="file:///usr/local/Cellar/mpich2/1.4.1/include" />
+          <root url="file:///usr/local/Cellar/netcdf/3.6.2/include" />
           <root url="file:///Library/Frameworks" />
         </CLASSES>
         <SOURCES>
+          <root url="file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/6.0/include" />
           <root url="file:///opt/intel/composer_xe_2015.5.222/compiler/include" />
           <root url="file:///opt/intel/composer_xe_2015.5.222/mkl/include" />
           <root url="file:///opt/intel/composer_xe_2015.5.222/tbb/include" />
           <root url="file:///opt/intel/composer_xe_2015.5.222/ipp/include" />
-          <root url="file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/6.0/include" />
           <root url="file:///System/Library/Frameworks" />
           <root url="file:///usr/include" />
           <root url="file:///usr/local/include" />
           <root url="file:///usr/local/Cellar/mpich2/1.4.1/include" />
+          <root url="file:///usr/local/Cellar/netcdf/3.6.2/include" />
           <root url="file:///Library/Frameworks" />
         </SOURCES>
       </library>
