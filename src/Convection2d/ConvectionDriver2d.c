@@ -1,4 +1,4 @@
-#include "Convection2d/ConvectionDriver.h"
+#include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
 /*
@@ -24,8 +24,13 @@ main(int argc, char **argv){
     printf("          Convection2d\n");
     printf("--------------------------------\n");
     printf("\n    2d Convection Test Case\n");
-    printf("\n        Node = %d \n", p_Np);
-    printf("\n        Ele  = %d \n", Ne);
+    printf("\n        Deg = %d \n", p_N);
+#ifdef Tri
+    printf("\n       Triangle Element \n");
+#else
+    printf("\n     Quadrilateral Element \n");
+#endif
+    printf("        Ele = %d \n", Ne);
     printf("--------------------------------\n");
 
 
@@ -40,16 +45,15 @@ main(int argc, char **argv){
     // set node connection
     BuildTriMaps(mesh);
 
-    // init mesh coefficent
+    // init mesh coeff
     dt = InitTriMeshInfo(mesh, p_Nfields);
-
+    dt = .5*dt/((p_N+1)*(p_N+1)); // CFL
 
 #else
     mesh = ReadQuadMesh();
 
     /* find element connections */
     FacePairQuad(mesh);
-
 #endif
 
 #if 0 // check mesh
@@ -67,6 +71,46 @@ main(int argc, char **argv){
     /* solve */
     ConvectionRun2d(mesh, FinalTime, dt);
 
-    /* get max and min */
 
+    /* get output */
+    Write2TestFile(mesh, FinalTime);
+}
+
+void Write2TestFile(Mesh * mesh, double time){
+
+    char filename[10];
+    FILE *fig;
+    int n, m, std = 0;
+
+    sprintf(filename,"%f",time);
+    fig = fopen(filename, "w");
+
+    fprintf(fig, "%s", "\n x=[ \n");
+    for (m = 0; m < mesh->K; m ++){
+        for (n = 0; n < p_Np; ++n) {
+            fprintf(fig, "%f\t", mesh->x[m][n]);
+        }
+        fprintf(fig, "\n");
+    }
+    fprintf(fig, "];\n");
+
+    fprintf(fig, "%s", "\n y=[ \n");
+    for (m = 0; m < mesh->K; m ++){
+        for (n = 0; n < p_Np; ++n) {
+            fprintf(fig, "%f\t", mesh->y[m][n]);
+        }
+        fprintf(fig, "\n");
+    }
+    fprintf(fig, "];\n");
+
+    fprintf(fig, "%s", "\n var=[ \n");
+    for (m = 0; m < mesh->K; m ++){
+        for (n = 0; n < p_Np; ++n) {
+            fprintf(fig, "%f\t", mesh->f_Q[std++]);
+        }
+        fprintf(fig, "\n");
+    }
+    fprintf(fig, "];\n");
+
+    fclose(fig);
 }

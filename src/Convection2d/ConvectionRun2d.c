@@ -1,4 +1,4 @@
-#include "Convection2d/ConvectionDriver.h"
+#include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
 void ConvectionRun2d(Mesh *mesh, double FinalTime, double dt){
@@ -15,7 +15,7 @@ void ConvectionRun2d(Mesh *mesh, double FinalTime, double dt){
 
         for (INTRK=1; INTRK<=5; ++INTRK) {
 
-            /* compute rhs of TM-mode MaxwellsGPU's equations */
+            /* compute rhs of equations */
             const float fdt = dt;
             const float fa = (float)mesh->rk4a[INTRK-1];
             const float fb = (float)mesh->rk4b[INTRK-1];
@@ -25,6 +25,8 @@ void ConvectionRun2d(Mesh *mesh, double FinalTime, double dt){
 
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
+
+        Write2TestFile(mesh, time);
     }
 
     int Kloc = mesh->K;
@@ -35,6 +37,5 @@ void ConvectionRun2d(Mesh *mesh, double FinalTime, double dt){
 
     MPI_Barrier(MPI_COMM_WORLD);
     printf("proc: %d,\t order: %d,\t time taken: %lg\n", mesh->procid, p_N, time_total);
-
-
+    
 }

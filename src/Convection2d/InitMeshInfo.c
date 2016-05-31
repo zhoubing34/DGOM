@@ -1,4 +1,4 @@
-#include "Convection2d/ConvectionDriver.h"
+#include "Convection2d/Convection2d.h"
 
 
 double InitTriMeshInfo(Mesh * mesh, int Nfields){
@@ -15,7 +15,7 @@ double InitTriMeshInfo(Mesh * mesh, int Nfields){
 
     for(n=0;n<p_Np;++n){
         for(m=0;m<p_Nfp*p_Nfaces;++m){
-            mesh->f_LIFT[sk++] = mesh->LIFT[n][m];
+            mesh->f_LIFT[sk++] = (float) mesh->LIFT[n][m];
         }
     }
 

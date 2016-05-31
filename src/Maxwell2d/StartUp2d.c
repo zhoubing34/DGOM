@@ -8,7 +8,7 @@ void StartUp2d(Mesh *mesh){
 #elif p_N==2
 #include "TriShape/dataN02.h"
 #elif p_N==3
-#include "TriShape/dataN03.h"
+#include "Triangle/dataN03.h"
 #elif p_N==4
 #include "dataN04.h"
 #elif p_N==5

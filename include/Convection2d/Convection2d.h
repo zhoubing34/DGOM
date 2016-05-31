@@ -58,3 +58,6 @@ void InitData(Mesh *);
 void ConvectionRun2d(Mesh *, double, double);
 
 void ConvectionRHS2d(Mesh *, float, float, float);
+
+// get output
+void Write2TestFile(Mesh *, double);

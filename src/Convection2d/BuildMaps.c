@@ -1,4 +1,4 @@
-#include "Convection2d/ConvectionDriver.h"
+#include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
 void BuildTriMaps(Mesh *mesh){

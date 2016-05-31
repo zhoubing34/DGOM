@@ -1,4 +1,4 @@
-#include "Convection2d/ConvectionDriver.h"
+#include "Convection2d/Convection2d.h"
 
 void InitData(Mesh * mesh){
     double sigma = 125*1e3/(33*33);
@@ -9,7 +9,7 @@ void InitData(Mesh * mesh){
     int k, n, sk=0;
 
     // initial position
-    xc = 0.0; yc = 0.0;
+    xc = 0.0; yc = 0.6;
 
     // allocate memory
     mesh->f_Q    = (float*) calloc(mesh->K*BSIZE*p_Nfields, sizeof(float));
@@ -21,6 +21,7 @@ void InitData(Mesh * mesh){
     // initial scalar field
     for(k=0;k<K;++k){
         for(n=0;n<p_Np;++n){
+//            mesh->f_Q[sk++] = mesh->x[k][n];
             t = -sigma * ( ( mesh->x[k][n] - xc )*( mesh->x[k][n] - xc )
                            + ( mesh->y[k][n] - yc )*( mesh->y[k][n] - yc ) );
             mesh->f_Q[sk++] = (float) exp(t);
@@ -33,8 +34,10 @@ void InitData(Mesh * mesh){
     // flow rate field
     for (k=0; k<K; ++k){
         for (n=0; n<p_Np; ++n){
-            mesh->f_s[sk++] = (float)(-w * mesh->y[k][n]);
-            mesh->f_s[sk++] = (float)(w * mesh->x[k][n]);
+//            mesh->f_s[sk++] = 1;
+//            mesh->f_s[sk++] = 0;
+            mesh->f_s[sk++] = (float)(-w * mesh->y[k][n]); // flow rate at x-coordinate
+            mesh->f_s[sk++] = (float)(w * mesh->x[k][n]);  // flow rate at y-coordinate
         }
     }
 }

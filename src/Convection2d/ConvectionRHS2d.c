@@ -1,4 +1,4 @@
-#include "Convection2d/ConvectionDriver.h"
+#include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
 void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
@@ -47,6 +47,7 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
         }
     }
 
+    // volume integral
     for(k=0;k<K;++k){
 
         /* NOTE: once k is known, all other indexing variables etc are derived */
@@ -62,14 +63,12 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
         const float drdx = vgeo[geoid++], drdy = vgeo[geoid++];
         const float dsdx = vgeo[geoid++], dsdy = vgeo[geoid++];
 
-        int id = k*p_Nfp*p_Nfaces;
-
         /* NOTE: buffer element k into local storage */
         float *qpt = f_Q + p_Nfields*p_Np*k;
         float *upt = f_s + 2*p_Np*k;
 
         uk = 0;
-        for(m=0;m<p_Nfields*p_Np;++m){
+        for(m=0;m<p_Np;++m){
             Uf[uk++] = upt[uk];
             Uf[uk++] = upt[uk];
         }
@@ -100,8 +99,8 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
                 rhs += - dy*v*C;
             }
 
-            id = p_Nfields*(n+k*p_Np);
-            f_rhsQ[id]   = rhs;
+            int id = p_Nfields*(k*p_Np + n);
+            f_rhsQ[id] = rhs;
         }
     }
 
@@ -110,6 +109,8 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
     MPI_Waitall(Nmess, mpi_in_requests, instatus);
     free(instatus);
 
+
+    // surface integral
     for(k=0;k<K;++k){
 
         /* NOTE: once k is known, all other indexing variables etc are derived */
@@ -121,6 +122,7 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
         /* NOTE: index into geometric factors */
         int surfid=k*6*p_Nfp*p_Nfaces;
 
+        /* numerical flux */
         int sk = 0;
         for(m=0;m<p_Nfp*p_Nfaces;++m){
 
@@ -134,10 +136,10 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
             float dC, dF, dG;
             if(idP<0){
                 idP = p_Nfields*(-1-idP);
-                dC = (f_Q[idM] - f_inQ[idP]);
+                dC = (f_Q[idP] - f_inQ[idM]);
             }
             else{
-                dC = ( f_Q[idM] - f_Q[idP] );
+                dC = ( f_Q[idP] - f_Q[idM] );
             }
 
             const float uM = f_s[idM*2];
@@ -147,11 +149,11 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
             dG = vM*dC;
 
             const float un = fabsf(NXf*uM + NYf*vM);
-
-            fluxQ[sk++] = FSc*( NXf*dF + NYf*dG + un*dC);
+            fluxQ[sk++] = FSc*( - NXf*dF - NYf*dG + un*dC);
 
         }
 
+        /* Lift the flux term */
         for(n=0;n<p_Np;++n){
 
             const float *ptLIFT = f_LIFT+n*p_Nfp*p_Nfaces;
@@ -182,4 +184,3 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
     free(mpi_out_requests);
     free(mpi_in_requests);
 }
-

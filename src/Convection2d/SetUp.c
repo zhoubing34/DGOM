@@ -1,10 +1,10 @@
-#include "Convection2d/ConvectionDriver.h"
+#include "Convection2d/Convection2d.h"
 
 
 void SetupTri(Mesh *mesh){
 
 #if p_N==1
-#include "TriShape/dataN01.h"
+#include "Triangle/dataN01.h"
 #elif p_N==2
 #include "TriShape/dataN02.h"
 #elif p_N==3

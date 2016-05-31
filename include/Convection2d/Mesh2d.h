@@ -1,10 +1,10 @@
-/* default order */
+/* default degree */
 #ifndef p_N
-#define p_N 2
+#define p_N 1
 #endif
 
 #ifndef Ne
-#define Ne 2
+#define Ne 200
 #endif
 
 #define NODETOL   1e-4
@@ -101,11 +101,3 @@ typedef struct foo {
     double *rk4a, *rk4b, *rk4c;
 
 }Mesh;
-
-typedef struct fva{
-    float *f_var;
-    float *f_rhs, *f_res;
-
-    /* MPI stuff */
-    float *f_in, f_out; /* MPI data buffers */
-}Var;
