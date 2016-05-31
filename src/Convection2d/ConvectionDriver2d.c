@@ -2,7 +2,7 @@
 #include <mpi.h>
 
 /*
- * 2d scalar convection problem
+ * 2d Convection problem
  */
 
 main(int argc, char **argv){
@@ -49,7 +49,7 @@ main(int argc, char **argv){
     dt = InitTriMeshInfo(mesh, p_Nfields);
     dt = .5*dt/((p_N+1)*(p_N+1)); // CFL
 
-#else
+#else // TODO quad shape
     mesh = ReadQuadMesh();
 
     /* find element connections */
@@ -64,15 +64,13 @@ main(int argc, char **argv){
     PrintMeshConnectionTri(mesh);
 #endif
 
-
     /* initial conditions */
     InitData(mesh);
 
     /* solve */
     ConvectionRun2d(mesh, FinalTime, dt);
 
-
-    /* get output */
+    /* TODO output */
     Write2TestFile(mesh, FinalTime);
 }
 

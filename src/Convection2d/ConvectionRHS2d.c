@@ -1,6 +1,7 @@
 #include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
+
 void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 /* registers and temporary */
     register unsigned int k, n;
@@ -170,9 +171,10 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
         }
     }
 
+
     for(n=0;n<K*p_Np*p_Nfields;++n){
-        f_resQ[n] = frka*f_resQ[n]+fdt*f_rhsQ[n];
-        f_Q[n]   += frkb*f_resQ[n];
+        f_resQ[n] = frka*f_resQ[n]+fdt*f_rhsQ[n];   // calculate the resdiual of the equation
+        f_Q[n]   += frkb*f_resQ[n];                 // evaluate scalar at next internal time step
     }
 
     /* make sure all messages went out */

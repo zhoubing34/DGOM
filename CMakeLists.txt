@@ -6,7 +6,6 @@ set(CMAKE_C_FLAGS "-Wall")
 set(CMAKE_C_COMPILER /usr/local/bin/mpicc)
 set(CMAKE_CXX_COMPILER /usr/local/bin/mpicxx)
 
-
 # 3rdParty library
 # Build with original makefile
 set(METIS_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/lib/libmetis.a)

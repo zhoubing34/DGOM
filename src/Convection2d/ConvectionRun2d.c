@@ -29,8 +29,6 @@ void ConvectionRun2d(Mesh *mesh, double FinalTime, double dt){
         Write2TestFile(mesh, time);
     }
 
-    int Kloc = mesh->K;
-
     double mpitime1 = MPI_Wtime();
 
     double time_total = mpitime1-mpitime0;

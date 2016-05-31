@@ -1,5 +1,4 @@
 # ignore
-MaxwellsCPU2d
 .cproject
 .project
 .settings
@@ -7,3 +6,4 @@ Makefile~
 build
 lib
 *.nc
+*.xml
