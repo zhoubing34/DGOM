@@ -8,3 +8,4 @@ lib
 *.nc
 *.xml
 3rdParty
+.idea
