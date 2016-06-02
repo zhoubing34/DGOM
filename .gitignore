@@ -4,6 +4,7 @@
 .settings
 Makefile~
 build
+.DS_Store
 lib
 *.nc
 *.xml
