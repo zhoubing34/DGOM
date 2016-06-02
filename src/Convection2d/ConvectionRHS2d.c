@@ -48,15 +48,15 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
         }// if
     }// for
 
+    /* NOTE: should be local memory */
+    float  Qk[p_Np*p_Nfields];
+    float  Uf[p_Np*2];
+
     // volume integral
     for(k=0;k<K;++k){
 
         /* NOTE: once k is known, all other indexing variables etc are derived */
         register unsigned int n, m;
-
-        /* NOTE: should be local memory */
-        float  Qk[p_Np*p_Nfields];
-        float  Uf[p_Np*2];
 
         /* NOTE: index into geometric factors */
         int geoid=k*4;
@@ -96,8 +96,8 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 
                 const float C = Qk[sk++];
 
-                rhs += - dx*u*C;
-                rhs += - dy*v*C;
+                rhs -= dx*u*C;
+                rhs -= dy*v*C;
             }
 
             int id = p_Nfields*(k*p_Np + n);
@@ -136,7 +136,7 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
             float dC, dF, dG;
             if(idP<0){
                 idP = p_Nfields*(-1-idP);
-                dC = (f_Q[idP] - f_inQ[idM]);
+                dC = (f_inQ[idP] - f_Q[idM]);
             }
             else{
                 dC = ( f_Q[idP] - f_Q[idM] );

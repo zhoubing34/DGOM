@@ -1,10 +1,13 @@
+#ifndef MESH2D_H
+#define MESH2D_H
+
 /* default degree */
 #ifndef p_N
 #define p_N 1
 #endif
 
 #ifndef Ne
-#define Ne 40
+#define Ne 100
 #endif
 
 #define NODETOL   1e-4
@@ -101,3 +104,5 @@ typedef struct foo {
     double *rk4a, *rk4b, *rk4c;
 
 }Mesh;
+
+#endif

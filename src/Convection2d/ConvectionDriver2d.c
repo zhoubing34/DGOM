@@ -10,34 +10,41 @@ main(int argc, char **argv){
     /* read mesh */
     Mesh * mesh;
     Ncfile * outfile;
-    int procid, nprocs, maxNv;
+    int procid, nprocs;
     double dt, FinalTime = 2.4;
     char filename[16] = "Convection2d";
 
     /* initialize MPI */
     MPI_Init(&argc, &argv);
 
-    /* assign gpu */
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
-
-    printf("--------------------------------\n");
-    printf("          Convection2d\n");
-    printf("--------------------------------\n");
-    printf("\n    2d Convection Test Case\n");
-    printf("\n        Deg = %d \n", p_N);
+    if(!procid) {
+        printf("--------------------------------\n");
+        printf("          Convection2d\n");
+        printf("--------------------------------\n");
+        printf("\n    2d Convection Test Case\n");
+        printf("\n        Deg = %d \n", p_N);
 #ifdef Tri
-    printf("\n    Tri Ele = %d \n", Ne);
+        printf("\n    Tri Ele = %d \n", Ne);
 #else
-    printf("\n   Quad Ele = %d \n", Ne);
+        printf("\n   Quad Ele = %d \n", Ne);
 #endif
-    printf("\n");
-    printf("--------------------------------\n");
-
+        printf("\n");
+        printf("--------------------------------\n");
+    }
 
 #ifdef Tri
     mesh = ReadTriMesh();
+
+#if 0 // check mesh
+    PrintMeshTri(mesh);
+#endif
+
+    /* redistribute element */
+    LoadBalanceTri(mesh);
+
     /* find element connections */
     FacePairTri(mesh);
 
@@ -56,10 +63,6 @@ main(int argc, char **argv){
 
     /* find element connections */
     FacePairQuad(mesh);
-#endif
-
-#if 0 // check mesh
-    PrintMeshTri(mesh);
 #endif
 
 #if 0 // check mesh connection
@@ -86,10 +89,8 @@ main(int argc, char **argv){
 void ConvectionFinish(Mesh * mesh, Ncfile * outfile){
 
     int ret;
-
     ret = ncmpi_close(outfile->ncfile);
     if (ret != NC_NOERR) handle_error(ret, __LINE__);
-
 
     MPI_Finalize();
 }

@@ -1,14 +1,17 @@
 #include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
+/*
+ * Set local mesh grid
+ * */
 Mesh* ReadTriMesh(){
     // generate uniform triangle mesh
     // ne - # of element on each edge
 
     Mesh *mesh = (Mesh*) calloc(1, sizeof(Mesh));
-    int *upIndex; // up layer vertex index
-    int *downIndex; // down layer vertex index
-    int irow, icol, ie;
+    int upIndex[2], downIndex[2]; // up and down layer vertex index
+    int irow, icol, p, ie, K, Klocal, Kstart;
+    int * Kprocs;
 
     /* decide on parition */
     int procid, nprocs;
@@ -16,18 +19,30 @@ Mesh* ReadTriMesh(){
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
+    if(!procid) printf("Root: Entering ReadTriMesh\n");
+
     mesh->procid = procid;
     mesh->nprocs = nprocs;
-
-#if 0 // check
-    printf("success, procid = %d\n", mesh->procid);
-    printf("success, nprocs = %d\n", mesh->nprocs);
-#endif
 
     mesh->Nverts = 3; /* assume triangles */
     mesh->Nfaces = 3; /* assume triangles */
 
-    mesh->K = Ne* Ne *2; /* # of elements */
+    Kprocs = (int *) calloc(nprocs, sizeof(int));
+    K = Ne* Ne *2; /* total # of elements */
+    Klocal = (int)( (double)K/ (double)nprocs );
+
+    /* # of elements in each process */
+    for(p = 0; p < nprocs - 1; ++p){
+        Kprocs[p] = Klocal;
+    }
+    Kprocs[p] = K + Klocal - nprocs*Klocal;
+
+    Klocal = Kprocs[procid]; // local process element number
+
+    Kstart= 0; // local element start index
+    for(p=0;p<procid;++p)
+        Kstart += Kprocs[p];
+
     mesh->Nv = (Ne + 1)*(Ne + 1); // # of vertex
 
     // allocate vertex memory
@@ -35,26 +50,27 @@ Mesh* ReadTriMesh(){
     double *VY = BuildVector(mesh->Nv);
 
     // allocate element memory
-    mesh->EToV = BuildIntMatrix(mesh->K, mesh->Nverts);
-
-    upIndex = (int *) calloc(2, sizeof(int));
-    downIndex = (int *) calloc(2, sizeof(int));
+    int **newEToV = BuildIntMatrix(K, mesh->Nverts);
+    mesh->EToV = BuildIntMatrix(Klocal, mesh->Nverts);
 
     for (irow = 0; irow < Ne; irow++){
         for (ie = 0; ie < Ne; ie++){
-            upIndex[0] = irow*(Ne + 1)+ie; upIndex[1] = irow*(Ne + 1)+ ie + 1;
-            downIndex[0] = upIndex[0] + Ne + 1; downIndex[1] = upIndex[1] + Ne + 1;
+            // vertex index, start from 0
+            upIndex[0] = irow*(Ne + 1)+ie;
+            upIndex[1] = irow*(Ne + 1)+ ie + 1;
+            downIndex[0] = upIndex[0] + Ne + 1;
+            downIndex[1] = upIndex[1] + Ne + 1;
 
             // set EToV
 #define UP_RIGHT
 #ifdef UP_RIGHT
-            mesh->EToV[irow * Ne * 2 + ie][0] = downIndex[0];
-            mesh->EToV[irow * Ne * 2 + ie][1] = upIndex[1];
-            mesh->EToV[irow * Ne * 2 + ie][2] = upIndex[0];
+            newEToV[irow * Ne * 2 + ie][0] = downIndex[0];
+            newEToV[irow * Ne * 2 + ie][1] = upIndex[1];
+            newEToV[irow * Ne * 2 + ie][2] = upIndex[0];
 
-            mesh->EToV[irow * Ne * 2 + Ne + ie][0] = downIndex[0];
-            mesh->EToV[irow * Ne * 2 + Ne + ie][1] = downIndex[1];
-            mesh->EToV[irow * Ne * 2 + Ne + ie][2] = upIndex[1];
+            newEToV[irow * Ne * 2 + Ne + ie][0] = downIndex[0];
+            newEToV[irow * Ne * 2 + Ne + ie][1] = downIndex[1];
+            newEToV[irow * Ne * 2 + Ne + ie][2] = upIndex[1];
 #else // up-left
             mesh->EToV[irow * Ne * 2 + ie][0] = downIndex[1];
             mesh->EToV[irow * Ne * 2 + ie][1] = upIndex[1];
@@ -67,10 +83,8 @@ Mesh* ReadTriMesh(){
         }
     }
 
-    free(upIndex);
-    free(downIndex);
-
     int index;
+
     for (irow = 0; irow<Ne+1; irow++){
         for (icol = 0; icol<Ne+1; icol++){
             index = irow*(Ne+1) + icol;
@@ -79,25 +93,36 @@ Mesh* ReadTriMesh(){
         }
     }
 
-    mesh->GX = BuildMatrix(mesh->K, mesh->Nverts);
-    mesh->GY = BuildMatrix(mesh->K, mesh->Nverts);
+    mesh->GX = BuildMatrix(Klocal, mesh->Nverts);
+    mesh->GY = BuildMatrix(Klocal, mesh->Nverts);
 
-    for(irow=0;irow<mesh->K;++irow){
-        for (icol=0; icol<mesh->Nverts; icol ++){
-            mesh->GX[irow][icol] = VX[mesh->EToV[irow][icol]];
-            mesh->GY[irow][icol] = VY[mesh->EToV[irow][icol]];
+    int sk = 0;
+    for (ie = 0; ie < K; ie++){
+        if(ie>=Kstart && ie<Kstart+Klocal) {
+            mesh->EToV[sk][0] = newEToV[ie][0];
+            mesh->EToV[sk][1] = newEToV[ie][1];
+            mesh->EToV[sk][2] = newEToV[ie][2];
+
+            mesh->GX[sk][0] = VX[mesh->EToV[sk][0]];
+            mesh->GX[sk][1] = VX[mesh->EToV[sk][1]];
+            mesh->GX[sk][2] = VX[mesh->EToV[sk][2]];
+
+            mesh->GY[sk][0] = VY[mesh->EToV[sk][0]];
+            mesh->GY[sk][1] = VY[mesh->EToV[sk][1]];
+            mesh->GY[sk][2] = VY[mesh->EToV[sk][2]];
+            ++sk;
+
         }
     }
 
+    mesh->K = Klocal;
+
     DestroyVector(VX);
     DestroyVector(VY);
+    DestroyIntMatrix(newEToV);
 
-#if 0
-    printf("success");
-#endif
-
+    if(!procid) printf("Root: Leaving ReadTriMesh\n");
     return mesh;
-
 }
 
 Mesh* ReadQuadMesh(){
@@ -175,34 +200,50 @@ void NormalsTri(Mesh *mesh, int k, double *nx, double *ny, double *sJ){
     }
 }
 
+#define DSET_NAME_LEN 1024
+
 void PrintMeshTri ( Mesh *mesh ){
-    int n, m;
-    printf("Mesh data: \n");
-    printf("\n K = %d\n", mesh->K);
-    printf("\n Nv = %d\n", mesh->Nv);
-    printf("\n Nverts = %d\n", mesh->Nverts);
-    printf("\n Vertex coordinates X: \n");
-    for (n = 0; n < mesh->K; n ++){
-        printf("%f, \t %f, \t %f\n", mesh->GX[n][0], mesh->GX[n][1], mesh->GX[n][2]);
+    int n, m, rank, nprocs, ret;
+    char filename[DSET_NAME_LEN];
+
+    rank = mesh->procid;
+    nprocs = mesh->nprocs;
+
+    ret = snprintf(filename, DSET_NAME_LEN, "%d-%d.txt", rank, nprocs);
+    if (ret >= DSET_NAME_LEN) {
+        fprintf(stderr, "name too long \n");
+        exit(-1);
     }
 
-    printf("\n Vertex coordinates Y: \n");
+    FILE *fig = fopen(filename, "w");
+
+    fprintf(fig, "Mesh data: \n");
+    fprintf(fig, "\n K = %d\n", mesh->K);
+    fprintf(fig, "\n Nv = %d\n", mesh->Nv);
+    fprintf(fig, "\n Nverts = %d\n", mesh->Nverts);
+    fprintf(fig, "\n Vertex coordinates X: \n");
     for (n = 0; n < mesh->K; n ++){
-        printf("%f, \t %f, \t %f\n", mesh->GY[n][0], mesh->GY[n][1], mesh->GY[n][2]);
+        fprintf(fig, "%f, \t %f, \t %f\n", mesh->GX[n][0], mesh->GX[n][1], mesh->GX[n][2]);
     }
 
-    printf("\n Element to vertex connectivity = \n");
+    fprintf(fig, "\n Vertex coordinates Y: \n");
+    for (n = 0; n < mesh->K; n ++){
+        fprintf(fig, "%f, \t %f, \t %f\n", mesh->GY[n][0], mesh->GY[n][1], mesh->GY[n][2]);
+    }
+
+    fprintf(fig, "\n Element to vertex connectivity = \n");
     for(n=0;n<mesh->K;++n){
-        printf("%d: %d %d %d \n", n,
+        fprintf(fig, "%d: %d %d %d \n", n,
                mesh->EToV[n][0], mesh->EToV[n][1], mesh->EToV[n][2]);
     }
 
-    printf("\n Node coordinates: \n");
-    for (m = 0; m<mesh->K; m++){
-        for (n = 0; n<p_Np; n++)
-            printf("[%f, %f] \t", mesh->x[m][n], mesh->y[m][n]);
-        printf("\n");
-    }
+//    fprintf(fig, "\n Node coordinates: \n");
+//    for (m = 0; m<mesh->K; m++){
+//        for (n = 0; n<p_Np; n++)
+//            fprintf(fig, "[%f, %f] \t", mesh->x[m][n], mesh->y[m][n]);
+//        fprintf(fig, "\n");
+//    }
+    fclose(fig);
 
 }
 

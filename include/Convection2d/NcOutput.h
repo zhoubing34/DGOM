@@ -1,3 +1,6 @@
+#ifndef NCOUTPUT_H
+#define NCOUTPUT_H
+
 #include <pnetcdf.h>
 
 static void handle_error(int status, int lineno)
@@ -17,3 +20,5 @@ typedef struct ncstru {
 Ncfile* SetupOutput(Mesh *, char* );
 
 void PutVar(Ncfile * , int , double , Mesh * );
+
+#endif

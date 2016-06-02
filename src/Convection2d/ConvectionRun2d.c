@@ -37,6 +37,6 @@ void ConvectionRun2d(Mesh *mesh, Ncfile * outfile, double FinalTime, double dt){
     double time_total = mpitime1 - mpitime0;
 
     MPI_Barrier(MPI_COMM_WORLD);
-    printf("proc: %d,\t order: %d,\t time taken: %lg\n", mesh->procid, p_N, time_total);
-    
+    printf("proc: %d,\t order: %d,\t time taken: %lg,\t MNUPS: %lg\n",
+           mesh->procid, p_N, time_total, p_N*mesh->K*counter/time_total*1e-6);
 }

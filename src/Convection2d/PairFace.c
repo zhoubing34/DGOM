@@ -58,6 +58,7 @@ void pairmarry(const void *obj1, const void *obj2){
 }
 
 void FacePairTri(Mesh *mesh) {
+
     int procid = mesh->procid;
     int nprocs = mesh->nprocs;
 
@@ -67,46 +68,41 @@ void FacePairTri(Mesh *mesh) {
 
     int **EToV = mesh->EToV;
 
-    const int vnum[3][2] = {{0, 1},
-                            {1, 2},
-                            {2, 0}};
+    const int vnum[3][2] = { {0,1}, {1,2}, {2,0} };
 
     int n, k, e, sk, v;
 
-    face *myfaces = (face *) calloc(Klocal * Nfaces, sizeof(face));
+    face *myfaces = (face*) calloc(Klocal*Nfaces, sizeof(face));
 
     /* find maximum local vertex number */
     int localmaxgnum = 0;
-    for (k = 0; k < Klocal; ++k)
-        for (v = 0; v < Nverts; ++v)
+    for(k=0;k<Klocal;++k)
+        for(v=0;v<Nverts;++v)
             localmaxgnum = max(localmaxgnum, EToV[k][v]);
 
     ++localmaxgnum;
 
     int maxgnum;
     MPI_Allreduce(&localmaxgnum, &maxgnum, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+//    *maxNv = maxgnum;
 
     sk = 0;
-    for (k = 0; k < Klocal; ++k) {
-        for (e = 0; e < Nfaces; ++e) {
+    for(k=0;k<Klocal;++k){
+        for(e=0;e<Nfaces;++e){
             int n1 = EToV[k][vnum[e][0]];
             int n2 = EToV[k][vnum[e][1]];
 
-            myfaces[sk].p1 = procid;
-            myfaces[sk].k1 = k;
-            myfaces[sk].f1 = e;
-            myfaces[sk].p2 = procid;
-            myfaces[sk].k2 = k;
-            myfaces[sk].f2 = e;
+            myfaces[sk].p1 = procid; myfaces[sk].k1 = k; myfaces[sk].f1 = e;
+            myfaces[sk].p2 = procid; myfaces[sk].k2 = k; myfaces[sk].f2 = e;
 
-            myfaces[sk].va = max(n1, n2);
-            myfaces[sk].vb = min(n1, n2);
-            myfaces[sk].g = max(n1, n2); /* marker for sorting into bins */
+            myfaces[sk].va = max(n1,n2);
+            myfaces[sk].vb = min(n1,n2);
+            myfaces[sk].g  = max(n1,n2); /* marker for sorting into bins */
             ++sk;
         }
     }
 
-    ParallelPairs(myfaces, Klocal * Nfaces, sizeof(face),
+    ParallelPairs(myfaces, Klocal*Nfaces, sizeof(face),
                   pairnumget, pairnumset, pairprocget,
                   pairmarry, compare_pairs);
 
@@ -119,39 +115,35 @@ void FacePairTri(Mesh *mesh) {
     int id, k1, k2, f1, f2, p1, p2;
     sk = 0;
 
-    for (n = 0; n < Klocal * Nfaces; ++n) {
+    for(n=0;n<Klocal*Nfaces;++n){
 
-        k1 = myfaces[n].k1;
-        f1 = myfaces[n].f1;
-        p1 = myfaces[n].p1;
-        k2 = myfaces[n].k2;
-        f2 = myfaces[n].f2;
-        p2 = myfaces[n].p2;
+        k1 = myfaces[n].k1; f1 = myfaces[n].f1; p1 = myfaces[n].p1;
+        k2 = myfaces[n].k2; f2 = myfaces[n].f2; p2 = myfaces[n].p2;
 
-        if (p1 != procid)
+        if(p1!=procid)
             fprintf(stderr, "WARNING WRONG proc\n");
 
         mesh->EToE[k1][f1] = k2;
         mesh->EToF[k1][f1] = f2;
         mesh->EToP[k1][f1] = p2;
 
-        if (p1 != p2) {
+        if(p1!=p2){
             /* increment number of links */
             ++mesh->Npar[p2];
         }
     }
 
-    mesh->parK = (int **) calloc(nprocs, sizeof(int *));
-    mesh->parF = (int **) calloc(nprocs, sizeof(int *));
-    for (p2 = 0; p2 < nprocs; ++p2) {
+    mesh->parK = (int**) calloc(nprocs, sizeof(int*));
+    mesh->parF = (int**) calloc(nprocs, sizeof(int*));
+    for(p2=0;p2<nprocs;++p2){
         mesh->parK[p2] = BuildIntVector(mesh->Npar[p2]);
         mesh->parF[p2] = BuildIntVector(mesh->Npar[p2]);
         mesh->Npar[p2] = 0;
-        for (n = 0; n < Klocal * Nfaces; ++n) {
-            if (myfaces[n].p2 == p2 && p2 != procid) {
+        for(n=0;n<Klocal*Nfaces;++n){
+            if(myfaces[n].p2==p2 && p2!=procid){
                 int k1 = myfaces[n].k1, f1 = myfaces[n].f1;
                 int k2 = myfaces[n].k2, f2 = myfaces[n].f2;
-                mesh->parK[p2][mesh->Npar[p2]] = k1;
+                mesh->parK[p2][mesh->Npar[p2]  ] = k1;
                 mesh->parF[p2][mesh->Npar[p2]++] = f1;
             }
         }

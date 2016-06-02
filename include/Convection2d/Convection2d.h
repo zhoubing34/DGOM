@@ -33,13 +33,15 @@ void PrintMeshTri ( Mesh * );
 void FacePairTri( Mesh * );
 void PrintMeshConnectionTri( Mesh * );
 
+// mesh seperation
+void LoadBalanceTri(Mesh *);
 
-void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
-                   int  (*numget)(const void *),
-                   void (*numset)(const void *, int ),
-                   int  (*procget)(const void *),
-                   void (*marry)(const void *, const void *),
-                   int (*compare_objs)(const void *, const void *));
+void ParallelPairs(void *, int, int ,
+                   int  (*)(const void *),
+                   void (*)(const void *, int ),
+                   int  (*)(const void *),
+                   void (*)(const void *, const void *),
+                   int (*)(const void *, const void *));
 
 void SetupTriCoeff(Mesh *);
 
