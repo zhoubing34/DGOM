@@ -1,7 +1,7 @@
 #include "Convection2d/Convection2d.h"
 
 
-void SetupTri(Mesh *mesh){
+void SetupTriCoeff(Mesh *mesh){
 
 #if p_N==1
 #include "Triangle/dataN01.h"

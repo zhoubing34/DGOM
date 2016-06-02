@@ -4,7 +4,7 @@
 #endif
 
 #ifndef Ne
-#define Ne 200
+#define Ne 40
 #endif
 
 #define NODETOL   1e-4

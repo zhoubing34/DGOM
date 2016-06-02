@@ -9,8 +9,10 @@ main(int argc, char **argv){
 
     /* read mesh */
     Mesh * mesh;
+    Ncfile * outfile;
     int procid, nprocs, maxNv;
     double dt, FinalTime = 2.4;
+    char filename[16] = "Convection2d";
 
     /* initialize MPI */
     MPI_Init(&argc, &argv);
@@ -26,11 +28,11 @@ main(int argc, char **argv){
     printf("\n    2d Convection Test Case\n");
     printf("\n        Deg = %d \n", p_N);
 #ifdef Tri
-    printf("\n       Triangle Element \n");
+    printf("\n    Tri Ele = %d \n", Ne);
 #else
-    printf("\n     Quadrilateral Element \n");
+    printf("\n   Quad Ele = %d \n", Ne);
 #endif
-    printf("        Ele = %d \n", Ne);
+    printf("\n");
     printf("--------------------------------\n");
 
 
@@ -40,7 +42,7 @@ main(int argc, char **argv){
     FacePairTri(mesh);
 
     /* setup mesh */
-    SetupTri(mesh);
+    SetupTriCoeff(mesh);
 
     // set node connection
     BuildTriMaps(mesh);
@@ -67,48 +69,27 @@ main(int argc, char **argv){
     /* initial conditions */
     InitData(mesh);
 
+    /* setup output file */
+    outfile = SetupOutput(mesh, filename);
+
     /* solve */
-    ConvectionRun2d(mesh, FinalTime, dt);
+    ConvectionRun2d(mesh, outfile ,FinalTime, dt);
 
     /* TODO output */
-    Write2TestFile(mesh, FinalTime);
+//    Write2TestFile(mesh, FinalTime);
+
+    /* finish */
+    ConvectionFinish(mesh, outfile);
+
 }
 
-void Write2TestFile(Mesh * mesh, double time){
+void ConvectionFinish(Mesh * mesh, Ncfile * outfile){
 
-    char filename[10];
-    FILE *fig;
-    int n, m, std = 0;
+    int ret;
 
-    sprintf(filename,"%f",time);
-    fig = fopen(filename, "w");
+    ret = ncmpi_close(outfile->ncfile);
+    if (ret != NC_NOERR) handle_error(ret, __LINE__);
 
-    fprintf(fig, "%s", "\n x=[ \n");
-    for (m = 0; m < mesh->K; m ++){
-        for (n = 0; n < p_Np; ++n) {
-            fprintf(fig, "%f\t", mesh->x[m][n]);
-        }
-        fprintf(fig, "\n");
-    }
-    fprintf(fig, "];\n");
 
-    fprintf(fig, "%s", "\n y=[ \n");
-    for (m = 0; m < mesh->K; m ++){
-        for (n = 0; n < p_Np; ++n) {
-            fprintf(fig, "%f\t", mesh->y[m][n]);
-        }
-        fprintf(fig, "\n");
-    }
-    fprintf(fig, "];\n");
-
-    fprintf(fig, "%s", "\n var=[ \n");
-    for (m = 0; m < mesh->K; m ++){
-        for (n = 0; n < p_Np; ++n) {
-            fprintf(fig, "%f\t", mesh->f_Q[std++]);
-        }
-        fprintf(fig, "\n");
-    }
-    fprintf(fig, "];\n");
-
-    fclose(fig);
+    MPI_Finalize();
 }

@@ -1,9 +1,10 @@
 #include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
-void ConvectionRun2d(Mesh *mesh, double FinalTime, double dt){
+void ConvectionRun2d(Mesh *mesh, Ncfile * outfile, double FinalTime, double dt){
     double time = 0;
     int    INTRK, tstep=0;
+    int    counter = 0;
 
     double mpitime0 = MPI_Wtime();
 
@@ -26,12 +27,14 @@ void ConvectionRun2d(Mesh *mesh, double FinalTime, double dt){
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
 
-        Write2TestFile(mesh, time);
+        PutVar(outfile, counter, time, mesh);
+        counter += 1;
+
     }
 
     double mpitime1 = MPI_Wtime();
 
-    double time_total = mpitime1-mpitime0;
+    double time_total = mpitime1 - mpitime0;
 
     MPI_Barrier(MPI_COMM_WORLD);
     printf("proc: %d,\t order: %d,\t time taken: %lg\n", mesh->procid, p_N, time_total);

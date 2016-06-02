@@ -3,12 +3,14 @@
 #include <stdio.h>
 #include <math.h>
 
+
 #if 1 // triangle shape
 #define Tri
 #else // quad shape
 #endif
 
 #include "Convection2d/Mesh2d.h"
+#include "NcOutput.h"
 
 Mesh* ReadTriMesh();
 Mesh* ReadQuadMesh();
@@ -39,8 +41,7 @@ void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
                    void (*marry)(const void *, const void *),
                    int (*compare_objs)(const void *, const void *));
 
-void SetupTri(Mesh *);
-
+void SetupTriCoeff(Mesh *);
 
 void BuildTriMaps(Mesh *);
 
@@ -55,9 +56,8 @@ double InitTriMeshInfo(Mesh *, int);
 // Initial Condition
 void InitData(Mesh *);
 
-void ConvectionRun2d(Mesh *, double, double);
+void ConvectionRun2d(Mesh *, Ncfile * , double, double);
 
 void ConvectionRHS2d(Mesh *, float, float, float);
 
-// get output
-void Write2TestFile(Mesh *, double);
+void ConvectionFinish(Mesh *, Ncfile *);
