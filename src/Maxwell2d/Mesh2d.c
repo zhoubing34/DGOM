@@ -99,7 +99,6 @@ Mesh *ReadMesh2d(char *filename){
   fgets(buf, BUFSIZ, fp);
 
   mesh->K = Klocal;
-
   fclose(fp);
 
   return mesh;

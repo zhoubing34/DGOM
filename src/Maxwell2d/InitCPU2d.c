@@ -1,4 +1,4 @@
-#include "mpi.h"
+#include <mpi.h>
 #include "fem.h"
 
 double InitCPU2d(Mesh *mesh, int Nfields){
@@ -30,7 +30,7 @@ double InitCPU2d(Mesh *mesh, int Nfields){
 
   sk = 0;
   for(n=0;n<p_Np;++n){
-    for(m=0;m<p_Np;++m){    
+    for(m=0;m<p_Np;++m){
       mesh->f_Dr[sk] = mesh->Dr[n][m];
       mesh->f_Ds[sk] = mesh->Ds[n][m];
       ++sk;
@@ -72,28 +72,28 @@ double InitCPU2d(Mesh *mesh, int Nfields){
 
       for(m=0;m<p_Nfp;++m){
 
-	int id  = m + f*p_Nfp + p_Nfp*p_Nfaces*k;
-	int idM = mesh->vmapM[id];
-	int idP = mesh->vmapP[id];
-	int  nM = idM%p_Np; 
-	int  nP = idP%p_Np; 
-	int  kM = (idM-nM)/p_Np;
-	int  kP = (idP-nP)/p_Np;
+        int id  = m + f*p_Nfp + p_Nfp*p_Nfaces*k;
+        int idM = mesh->vmapM[id];
+        int idP = mesh->vmapP[id];
+        int  nM = idM%p_Np;
+        int  nP = idP%p_Np;
+        int  kM = (idM-nM)/p_Np;
+        int  kP = (idP-nP)/p_Np;
 
-	idM = Nfields*(nM+p_Np*kM);
-	idP = Nfields*(nP+p_Np*kP);
-	
-	/* stub resolve some other way */
-	if(mesh->vmapP[id]<0){
-	  idP = mesh->vmapP[id]; /* -ve numbers */
-	}
-	
-	mesh->surfinfo[sk++] = idM;
-	mesh->surfinfo[sk++] = idP;
-	mesh->surfinfo[sk++] = sJk[f]/(2.*J);
-	mesh->surfinfo[sk++] = (idM==idP)?-1.:1.; 
-	mesh->surfinfo[sk++] = nxk[f];
-	mesh->surfinfo[sk++] = nyk[f];
+        idM = Nfields*(nM+p_Np*kM); // change node connections
+        idP = Nfields*(nP+p_Np*kP);
+
+        /* stub resolve some other way */
+        if(mesh->vmapP[id]<0){
+          idP = mesh->vmapP[id]; /* -ve numbers */
+        }
+
+        mesh->surfinfo[sk++] = idM;
+        mesh->surfinfo[sk++] = idP;
+        mesh->surfinfo[sk++] = sJk[f]/(2.*J);
+        mesh->surfinfo[sk++] = (idM==idP)?-1.:1.;
+        mesh->surfinfo[sk++] = nxk[f];
+        mesh->surfinfo[sk++] = nyk[f];
       }
     }
   }

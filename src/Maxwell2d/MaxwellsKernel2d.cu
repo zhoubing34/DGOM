@@ -156,28 +156,28 @@ double InitGPU2d(Mesh *mesh, int Nfields){
        dt = min(dt, J/sJk[f]);
   
        for(int m=0;m<p_Nfp;++m){
-	 int n = m + f*p_Nfp + p_Nfp*p_Nfaces*k;
-	 int idM = mesh->vmapM[n];
-	 int idP = mesh->vmapP[n];
-	 int  nM = idM%p_Np; 
-	 int  nP = idP%p_Np; 
-	 int  kM = (idM-nM)/p_Np;
-	 int  kP = (idP-nP)/p_Np;
-	 idM = nM + Nfields*BSIZE*kM;
-	 idP = nP + Nfields*BSIZE*kP;
-	 
-	 /* stub resolve some other way */
-	 if(mesh->vmapP[n]<0){
-	   idP = mesh->vmapP[n]; /* -ve numbers */
-	 }
- 
-	 sk = 6*p_Nfp*p_Nfaces*k+m+f*p_Nfp;
-	 h_surfinfo[sk + 0*p_Nfp*p_Nfaces] = idM;
-	 h_surfinfo[sk + 1*p_Nfp*p_Nfaces] = idP;
-	 h_surfinfo[sk + 2*p_Nfp*p_Nfaces] = sJk[f]/(2.*J);
-	 h_surfinfo[sk + 3*p_Nfp*p_Nfaces] = (idM==idP)?-1.:1.; 
-	 h_surfinfo[sk + 4*p_Nfp*p_Nfaces] = nxk[f];
-	 h_surfinfo[sk + 5*p_Nfp*p_Nfaces] = nyk[f];
+         int n = m + f*p_Nfp + p_Nfp*p_Nfaces*k;
+         int idM = mesh->vmapM[n];
+         int idP = mesh->vmapP[n];
+         int  nM = idM%p_Np;
+         int  nP = idP%p_Np;
+         int  kM = (idM-nM)/p_Np;
+         int  kP = (idP-nP)/p_Np;
+         idM = nM + Nfields*BSIZE*kM;
+         idP = nP + Nfields*BSIZE*kP;
+
+         /* stub resolve some other way */
+         if(mesh->vmapP[n]<0){
+           idP = mesh->vmapP[n]; /* -ve numbers */
+         }
+
+         sk = 6*p_Nfp*p_Nfaces*k+m+f*p_Nfp;
+         h_surfinfo[sk + 0*p_Nfp*p_Nfaces] = idM;
+         h_surfinfo[sk + 1*p_Nfp*p_Nfaces] = idP;
+         h_surfinfo[sk + 2*p_Nfp*p_Nfaces] = sJk[f]/(2.*J);
+         h_surfinfo[sk + 3*p_Nfp*p_Nfaces] = (idM==idP)?-1.:1.;
+         h_surfinfo[sk + 4*p_Nfp*p_Nfaces] = nxk[f];
+         h_surfinfo[sk + 5*p_Nfp*p_Nfaces] = nyk[f];
        }
      }
   }

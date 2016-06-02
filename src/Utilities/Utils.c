@@ -1,4 +1,5 @@
-#include "fem.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 /* some very basic memory allocation routines */
 
@@ -96,7 +97,7 @@ void SaveMatrix(char *filename, double **A, int Nrows, int Ncols){
   fclose(fp);
 }
 
-
+/*
 int trianglebase(Mesh *mesh, int k){
 
   double x1 = mesh->GX[k][0];
@@ -111,7 +112,7 @@ int trianglebase(Mesh *mesh, int k){
   double d2 = (x2-x3)*(x2-x3) + (y2-y3)*(y2-y3);
   double d3 = (x3-x1)*(x3-x1) + (y3-y1)*(y3-y1);
 
-  /* find maximum length face */
+  // find maximum length face
   if(d1>=d2 && d1>=d3)
     return 0;
   else if(d2>=d3)
@@ -143,7 +144,7 @@ int tetbase(Mesh *mesh, int k){
   double d3 = (x3-x4)*(x3-x4) + (y3-y4)*(y3-y4) + (z3-z4)*(z3-z4);
   double d4 = (x4-x1)*(x4-x1) + (y4-y1)*(y4-y1) + (z4-z1)*(z4-z1);
 
-  /* find maximum length face */
+  // find maximum length face
   if(d1>=d2 && d1>=d3 && d1>=d4)
     return 0;
   else if(d2>=d3 && d2>=d4)
@@ -153,3 +154,4 @@ int tetbase(Mesh *mesh, int k){
   
   return 3;
 }
+*/

@@ -80,6 +80,7 @@ main(int argc, char **argv){
   
   double FinalTime = .1;
 
+
   /* solve */
   void MaxwellsRun2d(Mesh *mesh, double FinalTime, double dt);
   MaxwellsRun2d(mesh, FinalTime, dt); 

@@ -1,11 +1,12 @@
 # ignore
-MaxwellsCPU2d
-lib/libmetis.a
-lib/libparmetis.a
 .cproject
 .project
 .settings
 Makefile~
 build
-3rdParty
 .DS_Store
+lib
+*.nc
+*.xml
+3rdParty
+.idea
