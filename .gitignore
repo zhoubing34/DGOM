@@ -7,3 +7,5 @@ lib/libparmetis.a
 .settings
 Makefile~
 build
+3rdParty
+.DS_Store
