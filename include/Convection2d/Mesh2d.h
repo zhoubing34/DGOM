@@ -35,69 +35,104 @@
 
 typedef struct foo {
 
-    int nprocs; /* number of processes */
-    int procid; /* number of this process */
+    /** number of processes */
+    int nprocs;
+    /** number of this process */
+    int procid;
 
-    int Nverts; /* number of vertices per element */
-    int Nfaces; /* number of faces per element */
-    int Nedges; /* number of faces per element (3d only) */
+    /** number of vertices per element */
+    int Nverts;
+    /** number of faces per element */
+    int Nfaces;
+    /** number of faces per element (3d only) */
+    int Nedges;
 
-    int Nv;     /* number of mesh vertices */
-    int K;      /* number of mesh elements */
-    int **EToV; /* element to global vertex list  */
-    int **EToG; /* element to global face number list */
-    int **EToS; /* element to global edge number list */
+    /** number of mesh vertices */
+    int Nv;
+    /** number of mesh elements */
+    int K;
+    /** element to global vertex list  */
+    int **EToV;
+    /** element to global face number list */
+    int **EToG;
+    /** element to global edge number list */
+    int **EToS;
 
-    int **EToE; /* element to neighbor element (elements numbered by their proc) */
-    int **EToF; /* element to neighbor face    (element local number 0,1,2) */
-    int **EToP; /* element to neighbor proc    (element prc number 0,1,.., nprocs-1) */
+    /** element to neighbor element (elements numbered by their proc) */
+    int **EToE;
+    /** element to neighbor face    (element local number 0,1,2) */
+    int **EToF;
+    /** element to neighbor proc    (element prc number 0,1,.., nprocs-1) */
+    int **EToP;
 
-    int **localEToV; /* element to process local vertex list */
-    int localNunique; /* number of unique nodes on this process */
+    /** element to process local vertex list */
+    int **localEToV;
+    /** number of unique nodes on this process */
+    int localNunique;
 
-    int *bcflag; /* vector. entry n is 1 if vertex n is on a boundary */
+    /** vector. entry n is 1 if vertex n is on a boundary */
+    int *bcflag;
 
-    double **GX; /* x-coordinates of element vertices */
-    double **GY; /* y-coordinates of element vertices */
-    double **GZ; /* z-coordinates of element vertices (3d) */
+    /** x-coordinates of element vertices */
+    double **GX;
+    /** y-coordinates of element vertices */
+    double **GY;
+    /** z-coordinates of element vertices (3d) */
+    double **GZ;
 
     /* high order node info */
-    int   **Fmask; /* node numbers at faces */
+    /** node numbers at faces */
+    int   **Fmask;
+    /* (r,s) coordinates of reference nodes */
+    double  *r,   *s,   *t;
+    /** local nodal derivative matrices */
+    double **Dr, **Ds, **Dt;
+    /** local lift matrix */
+    double **LIFT;
 
-    double  *r,   *s,   *t;  /* (r,s) coordinates of reference nodes */
-    double **Dr, **Ds, **Dt; /* local nodal derivative matrices */
-    double **LIFT;     /* local lift matrix */
+    /** x-coordinates of element nodes */
+    double **x;
+    /** y-coordinates of element nodes */
+    double **y;
+    /** z-coordinates of element nodes (3d) */
+    double **z;
 
-    double **x; /* x-coordinates of element nodes */
-    double **y; /* y-coordinates of element nodes */
-    double **z; /* z-coordinates of element nodes (3d) */
-
-    /* DG STUFF (EXPERIMENTAL) */
-    int     *vmapM; /* volume id of -ve trace of face node */
-    int     *vmapP; /* volume id of +ve trace of face node */
-    int     *Npar;  /* # of faces to send recv to each proc */
-    int    **parK;  /* element of parallel nodes */
-    int    **parF;  /* face of parallel nodes */
+    /** volume id of -ve trace of face node */
+    int     *vmapM;
+    /** volume id of +ve trace of face node */
+    int     *vmapP;
+    /** # of faces to send recv to each proc */
+    int     *Npar;
+    /** element of parallel nodes */
+    int    **parK;
+    /** face of parallel nodes */
+    int    **parF;
 
     /* MPI stuff */
-    int    parNtotalout; /* total number of nodes to send */
-    int   *parmapOUT;    /* list of nodes to send out */
-    int   *c_parmapOUT;  /* device list */
 
-    float *f_outQ, *f_inQ; /* MPI data buffers */
+    /** total number of nodes to send */
+    int    parNtotalout;
+    /** list of nodes to send out */
+    int   *parmapOUT;
+    /** device list */
+    int   *c_parmapOUT;
+
+    /* MPI data buffers */
+    float *f_outQ, *f_inQ;
 
     /* float version of operators */
     float *f_Dr, *f_Ds, *f_Dt;
     float *f_LIFT;
 
     /* float geometric info */
-    float   *vgeo;    /* geometric factors */
+    /** geometric factors */
+    float   *vgeo;
     float   *surfinfo;
 
     /* float field storage (CPU) */
     float  *f_Q, *f_rhsQ, *f_resQ;
 
-    /* float speed field */
+    /** flow rate field */
     float  *f_s;
 
     /* time stepping constants */

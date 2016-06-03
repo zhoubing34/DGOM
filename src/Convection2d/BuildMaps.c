@@ -1,6 +1,11 @@
 #include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
+/** Build node pairing and collect outgoing node index
+ *
+ *  Build node pairing for vmapM & vmapP, and collect the outgoing node index for parmapOUT
+ */
+
 void BuildTriMaps(Mesh *mesh){
 
     int nprocs = mesh->nprocs;
@@ -13,7 +18,7 @@ void BuildTriMaps(Mesh *mesh){
     mesh->vmapP = BuildIntVector(p_Nfp*p_Nfaces*K);
 
     int m;
-    int k1,f1,p1,n1,id1, k2,f2,p2,n2;
+    int k1,f1, n1, id1, k2,f2,p2,n2;
 
     double x1, y1, x2, y2, d12;
 
@@ -31,18 +36,21 @@ void BuildTriMaps(Mesh *mesh){
 
             /* volume -> face nodes */
             for(n1=0;n1<p_Nfp;++n1){
+                /**> node index as face node */
                 id1 = n1+f1*p_Nfp+k1*p_Nfp*p_Nfaces;
                 mesh->vmapM[id1] = mesh->Fmask[f1][n1] + k1*p_Np;
             }
 
             /* find neighbor */
-            k2 = mesh->EToE[k1][f1];
-            f2 = mesh->EToF[k1][f1];
-            p2 = mesh->EToP[k1][f1];
+            k2 = mesh->EToE[k1][f1]; // adjacent element
+            f2 = mesh->EToF[k1][f1]; // adjacent face index
+            p2 = mesh->EToP[k1][f1]; // process id
 
             if(k1==k2 || procid!=p2 ){
+                /* adjacent to the boundary */
                 for(n1=0;n1<p_Nfp;++n1){
                     id1 = n1+f1*p_Nfp+k1*p_Nfp*p_Nfaces;
+                    /* set the adjacent node index */
                     mesh->vmapP[id1] = k1*p_Np + mesh->Fmask[f1][n1];
                 }
             }else{
@@ -51,9 +59,9 @@ void BuildTriMaps(Mesh *mesh){
                     id1 = n1+f1*p_Nfp+k1*p_Nfp*p_Nfaces;
                     x1 = mesh->x[k1][mesh->Fmask[f1][n1]];
                     y1 = mesh->y[k1][mesh->Fmask[f1][n1]];
-                    for(n2=0;n2<p_Nfp;++n2){
 
-                        //id2 = n2+f2*p_Nfp+k2*p_Nfp*p_Nfaces;
+                    /* loop over of adjacent face node */
+                    for(n2=0;n2<p_Nfp;++n2){
 
                         x2 = mesh->x[k2][mesh->Fmask[f2][n2]];
                         y2 = mesh->y[k2][mesh->Fmask[f2][n2]];
@@ -62,7 +70,7 @@ void BuildTriMaps(Mesh *mesh){
                         /* [ use sJk as a measure of edge length (ignore factor of 2) ] */
 
                         d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))/(sJk[f1]*sJk[f1]);
-
+                        /* judge adjacent node */
                         if(d12<NODETOL){
                             mesh->vmapP[id1] = k2*p_Np + mesh->Fmask[f2][n2];
                         }
@@ -71,18 +79,6 @@ void BuildTriMaps(Mesh *mesh){
             }
         }
     }
-
-#if 0
-    int n;
-  for(n=0;n<p_Nfp*p_Nfaces*mesh->K;++n){
-    x1 = mesh->x[0][mesh->vmapM[n]];
-    y1 = mesh->y[0][mesh->vmapM[n]];
-    x2 = mesh->x[0][mesh->vmapP[n]];
-    y2 = mesh->y[0][mesh->vmapP[n]];
-    d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
-    printf("n:%d  %d -> %d  d=%lg\n", n, mesh->vmapM[n], mesh->vmapP[n], d12);
-  }
-#endif
 
     /* now build parallel maps */
     double **xsend = (double**) calloc(nprocs, sizeof(double*));
@@ -174,7 +170,6 @@ void BuildTriMaps(Mesh *mesh){
     mesh->parmapOUT = BuildIntVector(mesh->parNtotalout);
 
     /* now match up local nodes with the requested (recv'ed nodes) */
-    int idout = -1;
     int sk = 0;
     for(p2=0;p2<nprocs;++p2){
         /* for each received face */

@@ -21,3 +21,6 @@ LINK_DIRECTORIES("${NETCDF_PATH}/lib/" "${METIS_PATH}/lib")
 
 # source file
 add_subdirectory(src)
+
+# add docs
+add_subdirectory(doc)
