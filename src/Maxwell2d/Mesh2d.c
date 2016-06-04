@@ -1,5 +1,5 @@
 #include "mpi.h"
-#include "fem.h"
+#include "Maxwell2d/fem.h"
 
 /* vertices on each edge */
 int vnum[3][2] = { { 0, 1}, {1, 2}, {2, 0}};
@@ -106,20 +106,22 @@ Mesh *ReadMesh2d(char *filename){
 }
 
 void PrintMesh2d ( Mesh *mesh ){
-  int n;
-  printf("Mesh data: \n");
-  printf("\n K = %d\n", mesh->K);
-  printf("\n Nv = %d\n", mesh->Nv);
-  printf("\n Nverts = %d\n", mesh->Nverts);
-  printf("\n Node coordinates = \n");
-  for(n=0;n<mesh->Nv;++n){
-    printf("%d %g %g\n", n, mesh->GX[n], mesh->GY[n]);
-  }
-  printf("\n Element to vertex connectivity = \n");
-  for(n=0;n<mesh->K;++n){
-    printf("%d: %d %d %d \n", n, 
-	   mesh->EToV[n][0], mesh->EToV[n][1], mesh->EToV[n][2]);
-  }
+    int k,n;
+    printf("Mesh data: \n");
+    printf("\n K = %d\n", mesh->K);
+    printf("\n Nv = %d\n", mesh->Nv);
+    printf("\n Nverts = %d\n", mesh->Nverts);
+    printf("\n Node coordinates = \n");
+    for(k=0; k<mesh->K; k++) {
+      for (n = 0; n < mesh->Nverts; ++n) {
+          printf("ele: %d, [%g, %g]\n", k, mesh->GX[k][n], mesh->GY[k][n]);
+      }
+    }
+    printf("\n Element to vertex connectivity = \n");
+    for(n=0;n<mesh->K;++n){
+    printf("%d: %d %d %d \n", n,
+       mesh->EToV[n][0], mesh->EToV[n][1], mesh->EToV[n][2]);
+    }
 
 }
 

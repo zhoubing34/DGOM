@@ -2,7 +2,7 @@
 #include "mpi.h"
 #include <parmetisbin.h>
 
-#include "fem.h"
+#include "Maxwell2d/fem.h"
 
 static MPI_Request *mpi_out_requests = NULL;
 static MPI_Request *mpi_in_requests  = NULL;

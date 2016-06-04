@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <math.h>
 
+#define TRI
+#define p_Nfields 3
+
 #include "Mesh.h"
 
 /* prototypes for storage functions (Utils.c) */

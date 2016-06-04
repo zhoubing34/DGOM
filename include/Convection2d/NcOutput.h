@@ -1,8 +1,19 @@
+/** \file   NcOutput.c
+ *  \brief
+ *  pnetcdf output function declarations
+ */
+
 #ifndef NCOUTPUT_H
 #define NCOUTPUT_H
 
 #include <pnetcdf.h>
 
+/**
+ * @brief pnetcdf error handle function
+ * @details
+ * @param[in] status error number
+ * @param[in] lineno line number
+ */
 static void handle_error(int status, int lineno)
 {
     fprintf(stderr, "Error at line %d: %s\n", lineno, ncmpi_strerror(status));
@@ -10,10 +21,13 @@ static void handle_error(int status, int lineno)
 }
 
 
-typedef struct ncstru {
-    int ncfile;     // file handle
-    int * varid;    // variable id
-    char * filename; // filename
+typedef struct Ncfile {
+    /** nc file handle */
+    int ncfile;
+    /** array of variable id */
+    int * varid;
+    /** nc file name */
+    char * filename;
 }Ncfile;
 
 

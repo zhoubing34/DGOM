@@ -1,10 +1,30 @@
+/** \file   ConvectionDriver2d.c
+ *  \brief  2d scalar convection problem
+ */
+
 #include <Convection2d/Convection2d.h>
 #include <mpi.h>
 
-/*
- * 2d Convection problem
+/**
+ * @brief
+ * main function for 2d convection problem
+ *
+ * @details
+ * 2d scalar convection problem
+ * \f[ \frac{\partial C}{\partial t} +
+ * \frac{\partial uC}{\partial x} + \frac{\partial vC}{\partial y} = 0 \f]
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ * @note
+ * The Mass, Derivative and LIFT matrix for each order is include from the header files.
+ * In the future, these matrix will be generate from library.
+ *
+ * @todo
+ * 1. quadrilateral shapes
+ * 2. slope limiter for high order shapes
  */
-
 main(int argc, char **argv){
 
     /* read mesh */
@@ -35,7 +55,7 @@ main(int argc, char **argv){
         printf("--------------------------------\n");
     }
 
-#ifdef Tri
+#if defined TRI
     mesh = ReadTriMesh();
 
 #if 0 // check mesh
@@ -51,21 +71,22 @@ main(int argc, char **argv){
     /* setup mesh */
     SetupTriCoeff(mesh);
 
-    // set node connection
+    /* set node connection */
     BuildTriMaps(mesh);
 
-    // init mesh coeff
+    /* init mesh coeff */
     dt = InitTriMeshInfo(mesh, p_Nfields);
     dt = .5*dt/((p_N+1)*(p_N+1)); // CFL
 
-#else // TODO quad shape
+#elif defined QUAD // TODO quad shape
     mesh = ReadQuadMesh();
 
     /* find element connections */
     FacePairQuad(mesh);
 #endif
 
-#if 0 // check mesh connection
+    // check mesh connection
+#if 0
     PrintMeshConnectionTri(mesh);
 #endif
 
@@ -78,13 +99,11 @@ main(int argc, char **argv){
     /* solve */
     ConvectionRun2d(mesh, outfile ,FinalTime, dt);
 
-    /* TODO output */
-//    Write2TestFile(mesh, FinalTime);
-
     /* finish */
     ConvectionFinish(mesh, outfile);
 
 }
+
 
 void ConvectionFinish(Mesh * mesh, Ncfile * outfile){
 

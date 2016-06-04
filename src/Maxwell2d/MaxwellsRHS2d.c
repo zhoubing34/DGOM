@@ -1,5 +1,5 @@
 #include "mpi.h"
-#include "fem.h"
+#include "Maxwell2d/fem.h"
 
 void MaxwellsRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 

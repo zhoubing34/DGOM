@@ -6,15 +6,15 @@ void SetupTriCoeff(Mesh *mesh){
 #if p_N==1
 #include "Triangle/dataN01.h"
 #elif p_N==2
-#include "TriShape/dataN02.h"
+#include "Triangle/dataN02.h"
 #elif p_N==3
-#include "TriShape/dataN03.h"
+#include "Triangle/dataN03.h"
 #elif p_N==4
-    #include "TriShape/dataN04.h"
+#include "Triangle/dataN04.h"
 #elif p_N==5
-#include "TriShape/dataN05.h"
+#include "Triangle/dataN05.h"
 #elif p_N==6
-#include "TriShape/dataN06.h"
+#include "Triangle/dataN06.h"
 #endif
 
     int n, m, k;

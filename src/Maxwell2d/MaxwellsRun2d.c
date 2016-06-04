@@ -1,5 +1,5 @@
 #include "mpi.h"
-#include "fem.h"
+#include "Maxwell2d/fem.h"
 
 void MaxwellsRun2d(Mesh *mesh, double FinalTime, double dt){
 

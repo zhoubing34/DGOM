@@ -1,31 +1,46 @@
+/* Define physical constant and mesh structure
+ *
+ * Define physical constant and mesh structure
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ * */
+
 #ifndef MESH2D_H
 #define MESH2D_H
 
 /* default degree */
 #ifndef p_N
-#define p_N 1
+/** default order */
+#define p_N 2
 #endif
 
+/* default element number in mesh */
 #ifndef Ne
-#define Ne 100
+#define Ne 50
 #endif
 
 #define NODETOL   1e-4
 
-// define shape
-#ifdef Tri // triangle shape
+/* element shape constant for triangle */
+#ifdef TRI
+/** number of nodes in each face */
 #define p_Nfp     (p_N+1)
+/** number of nodes in elements */
 #define p_Np      ((p_N+1)*(p_N+2)/2)
-#define p_Nfields 1
+/** number of faces */
 #define p_Nfaces  3
+#endif
 
-#else // quadrial shape
+/* element shape constant for quadrilateral */
+#ifdef QUAD
+/** number of nodes in each face */
 #define p_Nfp     (p_N+1)
+/** number of nodes in elements */
 #define p_Np      ((p_N+1)*(p_N+1))
-#define p_Nfields 1
+/** number of faces */
 #define p_Nfaces  4
-
-#endif // end define shape
+#endif
 
 //#define BSIZE   (16*((p_Np+15)/16))
 #define BSIZE p_Np
@@ -33,11 +48,11 @@
 #define max(a,b)  ( (a>b)?a:b )
 #define min(a,b)  ( (a<b)?a:b )
 
-typedef struct foo {
-
+/** Mesh struct for RKDG methods */
+struct RKDG2d {
     /** number of processes */
     int nprocs;
-    /** number of this process */
+    /** index of this process */
     int procid;
 
     /** number of vertices per element */
@@ -137,7 +152,8 @@ typedef struct foo {
 
     /* time stepping constants */
     double *rk4a, *rk4b, *rk4c;
+};
 
-}Mesh;
+typedef struct RKDG2d Mesh;
 
 #endif

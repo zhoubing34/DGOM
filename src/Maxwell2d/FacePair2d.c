@@ -1,5 +1,5 @@
 #include "mpi.h"
-#include "fem.h"
+#include "Maxwell2d/fem.h"
 
 typedef struct foob {
   int p1, k1, f1, p2, k2, f2, va, vb, g; 

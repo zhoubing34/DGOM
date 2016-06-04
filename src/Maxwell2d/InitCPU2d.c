@@ -1,5 +1,5 @@
 #include <mpi.h>
-#include "fem.h"
+#include "Maxwell2d/fem.h"
 
 double InitCPU2d(Mesh *mesh, int Nfields){
 

@@ -5,17 +5,22 @@
 #endif
 
 #define NODETOL   1e-4
-//#ifdef NDG2d
+
+#if defined TRI
 #define p_Nfp     (p_N+1)
 #define p_Np      ((p_N+1)*(p_N+2)/2)
-#define p_Nfields 3
 #define p_Nfaces  3
-//#endif
 
-#ifdef NDG3d
+#elif defined QUAD
+#define p_Nfp     (p_N+1)
+#define p_Np      ((p_N+1)*(p_N+1))
+#define p_Nfaces  4
+
+#endif
+
+#ifdef TETRA
 #define p_Nfp     ((p_N+1)*(p_N+2)/2)
 #define p_Np      ((p_N+1)*(p_N+2)*(p_N+3)/6)
-#define p_Nfields 6
 #define p_Nfaces  4
 #endif
 
@@ -25,7 +30,6 @@
 #define max(a,b)  ( (a>b)?a:b )
 #define min(a,b)  ( (a<b)?a:b )
 
-/* list of vertices on each edge */
 
 typedef struct foo {
 

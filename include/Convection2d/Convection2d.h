@@ -1,13 +1,18 @@
+/** \file   Convection2d.h
+ *  \brief
+ *  header file for 2d convection problem
+ */
+
 #include <strings.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
+/** element shape */
+#define TRI
 
-#if 1 // triangle shape
-#define Tri
-#else // quad shape
-#endif
+/** number of unknown variables */
+#define p_Nfields 1
 
 #include "Convection2d/Mesh2d.h"
 #include "NcOutput.h"

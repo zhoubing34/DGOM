@@ -1,7 +1,7 @@
 #include "mpi.h"
 #include <parmetisbin.h>
 
-#include "fem.h"
+#include "Maxwell2d/fem.h"
 
 void LoadBalance2d(Mesh *mesh){
 
