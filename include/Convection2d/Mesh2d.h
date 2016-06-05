@@ -12,12 +12,12 @@
 /* default degree */
 #ifndef p_N
 /** default order */
-#define p_N 2
+#define p_N 1
 #endif
 
 /* default element number in mesh */
 #ifndef Ne
-#define Ne 50
+#define Ne 80
 #endif
 
 #define NODETOL   1e-4

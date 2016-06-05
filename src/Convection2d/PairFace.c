@@ -1,10 +1,32 @@
 #include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
-typedef struct foob {
-    int p1, k1, f1, p2, k2, f2, va, vb, g;
+typedef struct face {
+    int p1, k1, f1;
+    int p2, k2, f2;
+    /** max index of vertex on face */
+    int va;
+    /** min index of vertex on face */
+    int vb;
+    /** max index of vertex */
+    int g;
 }face;
 
+/**
+ * @brief
+ * Comparation of face objects: obj1 and obj2
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ * @return
+ * return values：
+ * value| description of value
+ * ---  |-------
+ * -1   | not adjacent
+ *  1   | not adjacent
+ *  0   | two faces are adjacent
+ */
 int compare_pairs(const void *obj1, const void *obj2){
 
     face *e1 = (face*) obj1;
@@ -33,6 +55,7 @@ int compare_pairs(const void *obj1, const void *obj2){
     return 0;
 }
 
+
 int pairprocget(const void *obj1){
     face *e1 = (face*) obj1;
     return (e1->p1);
@@ -50,41 +73,47 @@ void pairnumset(const void *obj1, int g){
 }
 
 void pairmarry(const void *obj1, const void *obj2){
-
     face *e1 = (face*) obj1;
     face *e2 = (face*) obj2;
     e1->p2 = e2->p1;  e1->k2 = e2->k1;  e1->f2 = e2->f1;
     e2->p2 = e1->p1;  e2->k2 = e1->k1;  e2->f2 = e1->f1;
 }
 
-void FacePairTri(Mesh *mesh) {
+/**
+ * @brief 简要说明
+ * @details 详细说明
+ * @date
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ * @param[in] beginPos 对应区域开始显示的地址
+ * @param[in] order order>0: year/month/date;order=0: date/month/year
+ * @return
+ * return values：
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * car_id   | int      |
+ * car_info | object   |
+ *
+ */
+void FacePair(Mesh *mesh) {
 
     int procid = mesh->procid;
     int nprocs = mesh->nprocs;
 
     int Klocal = mesh->K;
     int Nfaces = mesh->Nfaces;
-    int Nverts = mesh->Nverts;
 
     int **EToV = mesh->EToV;
 
+#if defined TRI
     const int vnum[3][2] = { {0,1}, {1,2}, {2,0} };
-
+#elif defined QUAD
+    const int vnum[4][2] = { {0,1}, {1,2}, {2,3}, {3,0}};
+#endif
     int n, k, e, sk, v;
 
     face *myfaces = (face*) calloc(Klocal*Nfaces, sizeof(face));
-
-    /* find maximum local vertex number */
-    int localmaxgnum = 0;
-    for(k=0;k<Klocal;++k)
-        for(v=0;v<Nverts;++v)
-            localmaxgnum = max(localmaxgnum, EToV[k][v]);
-
-    ++localmaxgnum;
-
-    int maxgnum;
-    MPI_Allreduce(&localmaxgnum, &maxgnum, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-//    *maxNv = maxgnum;
 
     sk = 0;
     for(k=0;k<Klocal;++k){
@@ -112,8 +141,7 @@ void FacePairTri(Mesh *mesh) {
     mesh->EToF = BuildIntMatrix(Klocal, Nfaces);
     mesh->EToP = BuildIntMatrix(Klocal, Nfaces);
 
-    int id, k1, k2, f1, f2, p1, p2;
-    sk = 0;
+    int k1, k2, f1, f2, p1, p2;
 
     for(n=0;n<Klocal*Nfaces;++n){
 
@@ -141,8 +169,8 @@ void FacePairTri(Mesh *mesh) {
         mesh->Npar[p2] = 0;
         for(n=0;n<Klocal*Nfaces;++n){
             if(myfaces[n].p2==p2 && p2!=procid){
-                int k1 = myfaces[n].k1, f1 = myfaces[n].f1;
-                int k2 = myfaces[n].k2, f2 = myfaces[n].f2;
+                k1 = myfaces[n].k1, f1 = myfaces[n].f1;
+                k2 = myfaces[n].k2, f2 = myfaces[n].f2;
                 mesh->parK[p2][mesh->Npar[p2]  ] = k1;
                 mesh->parF[p2][mesh->Npar[p2]++] = f1;
             }
@@ -152,27 +180,61 @@ void FacePairTri(Mesh *mesh) {
     free(myfaces);
 }
 
-void PrintMeshConnectionTri(Mesh* mesh){
-    int n, m, f1;
+#define DSET_NAME_LEN 1024
 
-    printf("\n Element to Element connectivity = \n");
-    for(n=0;n<mesh->K;++n){
-        printf("%d: %d %d %d \n", n,
-               mesh->EToE[n][0], mesh->EToE[n][1], mesh->EToE[n][2]);
+/**
+ * @brief
+ * print out mesh connectivity
+ *
+ * @details
+ * each processor generate a file and print the result
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ */
+void PrintMeshConnection(Mesh* mesh){
+
+    int n, m, rank, nprocs, ret;
+    char filename[DSET_NAME_LEN];
+
+    rank = mesh->procid;
+    nprocs = mesh->nprocs;
+
+    ret = snprintf(filename, DSET_NAME_LEN, "%d-%d.txt", rank, nprocs);
+    if (ret >= DSET_NAME_LEN) {
+        fprintf(stderr, "name too long \n");
+        exit(-1);
     }
 
-    printf("\n Element to Face connectivity = \n");
-    for(n=0;n<mesh->K;++n){
-        printf("%d: %d %d %d \n", n,
-               mesh->EToF[n][0], mesh->EToF[n][1], mesh->EToF[n][2]);
+    FILE *fig = fopen(filename, "w");
+
+    fprintf(fig, "Mesh data: \n");
+    fprintf(fig, "\n K = %d\n", mesh->K);
+    fprintf(fig, "\n Nv = %d\n", mesh->Nv);
+    fprintf(fig, "\n Nverts = %d\n", mesh->Nverts);
+    fprintf(fig, "\n Element to element connectivity: \n");
+    for (n = 0; n < mesh->K; n ++){
+        for( m = 0; m < mesh->Nfaces; m++)
+            fprintf(fig, "%d,\t", mesh->EToE[n][m]);
+        fprintf(fig, "\n");
     }
 
-    printf("\n Element to Process connectivity = \n");
-    for(n=0;n<mesh->K;++n){
-        printf("%d: %d %d %d \n", n,
-               mesh->EToP[n][0], mesh->EToP[n][1], mesh->EToP[n][2]);
+    fprintf(fig, "\n Element to face connectivity: \n");
+    for (n = 0; n < mesh->K; n ++){
+        for( m = 0; m < mesh->Nfaces; m++)
+            fprintf(fig, "%d,\t", mesh->EToF[n][m]);
+        fprintf(fig, "\n");
     }
 
+    fprintf(fig, "\n Element to processor connectivity = \n");
+    for(n=0;n<mesh->K;++n){
+        for( m = 0; m < mesh->Nfaces; m++)
+            fprintf(fig, "%d,\t", mesh->EToP[n][m]);
+        fprintf(fig, "\n");
+    }
+
+#if 0
     printf("\n vmapM = \n");
     for(m = 0; m<mesh->K; m++){
         printf("\nElement %d:\n", m);
@@ -194,4 +256,7 @@ void PrintMeshConnectionTri(Mesh* mesh){
             }
         }
     }
+#endif
+
+    fclose(fig);
 }

@@ -46,7 +46,7 @@ main(int argc, char **argv){
         printf("--------------------------------\n");
         printf("\n    2d Convection Test Case\n");
         printf("\n        Deg = %d \n", p_N);
-#ifdef Tri
+#ifdef TRI
         printf("\n    Tri Ele = %d \n", Ne);
 #else
         printf("\n   Quad Ele = %d \n", Ne);
@@ -56,39 +56,35 @@ main(int argc, char **argv){
     }
 
 #if defined TRI
-    mesh = ReadTriMesh();
 
-#if 0 // check mesh
-    PrintMeshTri(mesh);
+    mesh = ReadTriMesh();
+#elif defined QUAD
+
+    mesh = ReadQuadMesh();
 #endif
 
     /* redistribute element */
-    LoadBalanceTri(mesh);
+    LoadBalance(mesh);
 
     /* find element connections */
-    FacePairTri(mesh);
+    FacePair(mesh);
 
     /* setup mesh */
+#if defined TRI
+
     SetupTriCoeff(mesh);
 
+#elif defined QUAD
+
+    SetupQuadCoeff(mesh);
+#endif
+
     /* set node connection */
-    BuildTriMaps(mesh);
+    BuildMaps(mesh);
 
     /* init mesh coeff */
-    dt = InitTriMeshInfo(mesh, p_Nfields);
+    dt = InitMeshInfo(mesh, p_Nfields);
     dt = .5*dt/((p_N+1)*(p_N+1)); // CFL
-
-#elif defined QUAD // TODO quad shape
-    mesh = ReadQuadMesh();
-
-    /* find element connections */
-    FacePairQuad(mesh);
-#endif
-
-    // check mesh connection
-#if 0
-    PrintMeshConnectionTri(mesh);
-#endif
 
     /* initial conditions */
     InitData(mesh);

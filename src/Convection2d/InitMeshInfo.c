@@ -1,15 +1,15 @@
 #include "Convection2d/Convection2d.h"
 
 /* get the surface  */
-double InitTriMeshInfo(Mesh * mesh, int Nfields){
+double InitMeshInfo(Mesh * mesh, int Nfields){
     printf("Np = %d, BSIZE = %d\n", p_Np, BSIZE);
 
 
     /*  float LIFT  */
     int sz = p_Np*(p_Nfp)*(p_Nfaces)*sizeof(float);
     mesh->f_LIFT = (float*) malloc(sz);
-    int sk = 0, n, m, f, k;
 
+    int sk = 0, n, m, f, k;
     for(n=0;n<p_Np;++n){
         for(m=0;m<p_Nfp*p_Nfaces;++m){
             mesh->f_LIFT[sk++] = (float) mesh->LIFT[n][m];
@@ -31,15 +31,25 @@ double InitTriMeshInfo(Mesh * mesh, int Nfields){
     }
 
     /* vgeo */
-    double drdx, dsdx, drdy, dsdy, J;
-    mesh->vgeo = (float*) calloc(4*mesh->K, sizeof(float));
+    double *drdx, *dsdx, *drdy, *dsdy, *J;
+    sz = p_Np*sizeof(double);
 
+    drdx = (double*) malloc(sz);
+    drdy = (double*) malloc(sz);
+    dsdx = (double*) malloc(sz);
+    dsdy = (double*) malloc(sz);
+    J    = (double*) malloc(sz);
+
+    mesh->vgeo = (float*) calloc(4*mesh->K*p_Np, sizeof(float));
+    sk = 0;
     for(k=0;k<mesh->K;++k){
-        GeometricFactorsTri(mesh, k, &drdx, &dsdx, &drdy, &dsdy, &J);
-        mesh->vgeo[k*4+0] = drdx;
-        mesh->vgeo[k*4+1] = drdy;
-        mesh->vgeo[k*4+2] = dsdx;
-        mesh->vgeo[k*4+3] = dsdy;
+        GeometricFactors(mesh, k, drdx, dsdx, drdy, dsdy, J);
+        for(n=0;n<p_Np;n++){
+            mesh->vgeo[sk++] = drdx[n];
+            mesh->vgeo[sk++] = drdy[n];
+            mesh->vgeo[sk++] = dsdx[n];
+            mesh->vgeo[sk++] = dsdy[n];
+        }
     }
 
     /* surfinfo (vmapM, vmapP, Fscale, Bscale, nx, ny, nz, 0) */
@@ -47,8 +57,6 @@ double InitTriMeshInfo(Mesh * mesh, int Nfields){
     mesh->surfinfo = (float*) malloc(sz);
 
     /* local-local info */
-    sk = 0;
-    int skP = -1;
     double *nxk = BuildVector(mesh->Nfaces);
     double *nyk = BuildVector(mesh->Nfaces);
     double *sJk = BuildVector(mesh->Nfaces);
@@ -57,13 +65,13 @@ double InitTriMeshInfo(Mesh * mesh, int Nfields){
 
     sk = 0;
     for(k=0;k<mesh->K;++k){
-        GeometricFactorsTri(mesh, k, &drdx, &dsdx, &drdy, &dsdy, &J);
-        NormalsTri(mesh, k, nxk, nyk, sJk);
+        GeometricFactors(mesh, k, drdx, dsdx, drdy, dsdy, J);
+        Normals(mesh, k, nxk, nyk, sJk);
 
         for(f=0;f<mesh->Nfaces;++f){
-            dt = min(dt, J/sJk[f]);
 
             for(m=0;m<p_Nfp;++m){
+                dt = min(dt, J[mesh->Fmask[f][m]]/sJk[f]);
 
                 int id  = m + f*p_Nfp + p_Nfp*p_Nfaces*k;
                 int idM = mesh->vmapM[id];
@@ -83,7 +91,7 @@ double InitTriMeshInfo(Mesh * mesh, int Nfields){
 
                 mesh->surfinfo[sk++] = idM;
                 mesh->surfinfo[sk++] = idP;
-                mesh->surfinfo[sk++] = sJk[f]/(2*J);
+                mesh->surfinfo[sk++] = sJk[f]/(2*J[mesh->Fmask[f][m]]);
                 mesh->surfinfo[sk++] = (idM==idP)?-1.:1.;
                 mesh->surfinfo[sk++] = nxk[f];
                 mesh->surfinfo[sk++] = nyk[f];

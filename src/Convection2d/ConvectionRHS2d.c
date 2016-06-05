@@ -4,7 +4,7 @@
 
 void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 /* registers and temporary */
-    register unsigned int k, n;
+    register unsigned int k, n, geoid=0;
 
     /* mesh parameters */
     const int K = mesh->K;
@@ -58,12 +58,6 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
         /* NOTE: once k is known, all other indexing variables etc are derived */
         register unsigned int n, m;
 
-        /* NOTE: index into geometric factors */
-        int geoid=k*4;
-
-        const float drdx = vgeo[geoid++], drdy = vgeo[geoid++];
-        const float dsdx = vgeo[geoid++], dsdy = vgeo[geoid++];
-
         /* NOTE: buffer element k into local storage */
         float *qpt = f_Q + p_Nfields*p_Np*k;
         float *upt = f_s + 2*p_Np*k;
@@ -82,6 +76,9 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 
             const float *ptDr = f_Dr+n*p_Np;
             const float *ptDs = f_Ds+n*p_Np;
+
+            const float drdx = vgeo[geoid++], drdy = vgeo[geoid++];
+            const float dsdx = vgeo[geoid++], dsdy = vgeo[geoid++];
 
             float rhs = 0;
 

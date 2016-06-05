@@ -2,7 +2,28 @@
 #include "mpi.h"
 #include <parmetisbin.h>
 
-void LoadBalanceTri(Mesh *mesh){
+
+/**
+ * @brief 简要说明
+ * @details 详细说明
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ * @param[in] beginPos 对应区域开始显示的地址
+ * @param[in] order order>0: year/month/date;order=0: date/month/year
+ * @return
+ * return values：
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * car_id   | int      |
+ * car_info | object   |
+ * @warning
+ * @attention
+ * @note
+ * @todo
+ */
+void LoadBalance(Mesh *mesh){
 
     int n,p,k,v,f;
 
@@ -14,7 +35,7 @@ void LoadBalanceTri(Mesh *mesh){
 
     if(!procid) printf("Root: Entering LoadBalance\n");
 
-    int Nverts = 3;
+    int Nverts = mesh->Nverts;
 
     int *Kprocs = BuildIntVector(nprocs);
 

@@ -1,16 +1,38 @@
 #include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
-/*
- * Set local mesh grid
- * */
+/**
+ * @brief
+ * Generate local uniform triangle mesh for each processor
+ *
+ * @details
+ * The whole mesh is generate with newEToV for element to vertex list. Each processor
+ * reads part of mesh into mesh->EToV and its corresponding vertex coordinate
+ * mesh->GX and mesh->GY. The uniform triangle element is separated from the
+ * square, and the separation is controlled by UP_RIGHT macro.
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ * @return
+ * return values：
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * mesh   | Mesh* | mesh object
+ *
+ */
 Mesh* ReadTriMesh(){
-    // generate uniform triangle mesh
-    // ne - # of element on each edge
 
+    /* mesh object and allocation */
     Mesh *mesh = (Mesh*) calloc(1, sizeof(Mesh));
-    int upIndex[2], downIndex[2]; // up and down layer vertex index
-    int irow, icol, p, ie, K, Klocal, Kstart;
+    /* index of vertex at upper and lower layer */
+    int upperNode[2], lowerNode[2];
+    int irow, icol, ie, p, K;
+    /** number of elements in local processor */
+    int Klocal;
+    /** start index of element in all element */
+    int Kstart = 0;
+    /** number of elements in each processor */
     int * Kprocs;
 
     /* decide on parition */
@@ -31,60 +53,64 @@ Mesh* ReadTriMesh(){
     K = Ne* Ne *2; /* total # of elements */
     Klocal = (int)( (double)K/ (double)nprocs );
 
-    /* # of elements in each process */
+    /* number of elements in each process */
     for(p = 0; p < nprocs - 1; ++p){
         Kprocs[p] = Klocal;
     }
+    /* the rest elements is distributed to the last process: p = nprocs - 1  */
     Kprocs[p] = K + Klocal - nprocs*Klocal;
 
-    Klocal = Kprocs[procid]; // local process element number
+    /* number of element in local process */
+    Klocal = Kprocs[procid];
 
-    Kstart= 0; // local element start index
+    /* start index of element */
     for(p=0;p<procid;++p)
         Kstart += Kprocs[p];
 
-    mesh->Nv = (Ne + 1)*(Ne + 1); // # of vertex
+    /* # of all vertex */
+    mesh->Nv = (Ne + 1)*(Ne + 1);
 
-    // allocate vertex memory
+    /* allocate coordinate of all vertex */
     double *VX = BuildVector(mesh->Nv);
     double *VY = BuildVector(mesh->Nv);
 
-    // allocate element memory
+    /** element to vertex list for all elements */
     int **newEToV = BuildIntMatrix(K, mesh->Nverts);
+    /* EToV of local mesh */
     mesh->EToV = BuildIntMatrix(Klocal, mesh->Nverts);
 
     for (irow = 0; irow < Ne; irow++){
         for (ie = 0; ie < Ne; ie++){
-            // vertex index, start from 0
-            upIndex[0] = irow*(Ne + 1)+ie;
-            upIndex[1] = irow*(Ne + 1)+ ie + 1;
-            downIndex[0] = upIndex[0] + Ne + 1;
-            downIndex[1] = upIndex[1] + Ne + 1;
+            /* Assignment of vertex index, which start from 0 */
+            upperNode[0] = irow*(Ne + 1)+ie;
+            upperNode[1] = irow*(Ne + 1)+ ie + 1;
+            lowerNode[0] = upperNode[0] + Ne + 1;
+            lowerNode[1] = upperNode[1] + Ne + 1;
 
-            // set EToV
+            /* Assignment of EToV */
 #define UP_RIGHT
 #ifdef UP_RIGHT
-            newEToV[irow * Ne * 2 + ie][0] = downIndex[0];
-            newEToV[irow * Ne * 2 + ie][1] = upIndex[1];
-            newEToV[irow * Ne * 2 + ie][2] = upIndex[0];
+            newEToV[irow * Ne * 2 + ie][0] = lowerNode[0];
+            newEToV[irow * Ne * 2 + ie][1] = upperNode[1];
+            newEToV[irow * Ne * 2 + ie][2] = upperNode[0];
 
-            newEToV[irow * Ne * 2 + Ne + ie][0] = downIndex[0];
-            newEToV[irow * Ne * 2 + Ne + ie][1] = downIndex[1];
-            newEToV[irow * Ne * 2 + Ne + ie][2] = upIndex[1];
+            newEToV[irow * Ne * 2 + Ne + ie][0] = lowerNode[0];
+            newEToV[irow * Ne * 2 + Ne + ie][1] = lowerNode[1];
+            newEToV[irow * Ne * 2 + Ne + ie][2] = upperNode[1];
 #else // up-left
-            mesh->EToV[irow * Ne * 2 + ie][0] = downIndex[1];
-            mesh->EToV[irow * Ne * 2 + ie][1] = upIndex[1];
-            mesh->EToV[irow * Ne * 2 + ie][2] = upIndex[0];
+            newEToV[irow * Ne * 2 + ie][0] = lowerNode[1];
+            newEToV[irow * Ne * 2 + ie][1] = upperNode[1];
+            newEToV[irow * Ne * 2 + ie][2] = upperNode[0];
 
-            mesh->EToV[irow * Ne * 2 + Ne + ie][0] = downIndex[0];
-            mesh->EToV[irow * Ne * 2 + Ne + ie][1] = downIndex[1];
-            mesh->EToV[irow * Ne * 2 + Ne + ie][2] = upIndex[0];
+            newEToV[irow * Ne * 2 + Ne + ie][0] = lowerNode[0];
+            newEToV[irow * Ne * 2 + Ne + ie][1] = lowerNode[1];
+            newEToV[irow * Ne * 2 + Ne + ie][2] = upperNode[0];
 #endif
         }
     }
 
-    int index;
-
+    /* Assignment of coordinate for vertex */
+    int index; /* vertex index */
     for (irow = 0; irow<Ne+1; irow++){
         for (icol = 0; icol<Ne+1; icol++){
             index = irow*(Ne+1) + icol;
@@ -96,6 +122,7 @@ Mesh* ReadTriMesh(){
     mesh->GX = BuildMatrix(Klocal, mesh->Nverts);
     mesh->GY = BuildMatrix(Klocal, mesh->Nverts);
 
+    /* Assignment of local mesh information */
     int sk = 0;
     for (ie = 0; ie < K; ie++){
         if(ie>=Kstart && ie<Kstart+Klocal) {
@@ -125,74 +152,226 @@ Mesh* ReadTriMesh(){
     return mesh;
 }
 
+/**
+ * @brief
+ * Generate uniform quadrilateral mesh
+ *
+ * @details
+ * The whole mesh is generate with newEToV for element to vertex list.
+ * Each processor reads part of mesh into mesh->EToV and its corresponding
+ * vertex coordinate mesh->GX and mesh->GY.
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ * @return
+ * return values：
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * mesh   | Mesh* | mesh object
+ *
+ */
 Mesh* ReadQuadMesh(){
-    // generate uniform quad mesh
+    /* mesh object and allocation */
+    Mesh *mesh = (Mesh*) calloc(1, sizeof(Mesh));
+    /* index of vertex at upper and lower layer */
+    int upperNode[2], lowerNode[2];
+    int irow, icol, ie, p, K;
+    /** number of elements in local processor */
+    int Klocal;
+    /** start index of element in all element */
+    int Kstart = 0;
+    /** number of elements in each processor */
+    int * Kprocs;
 
-    Mesh * mesh;
-    int i;
+    /* decide on parition */
+    int procid, nprocs;
 
-    mesh->Nverts = 4; /* assume quadrial */
-    mesh->Nfaces = 4; /* assume quadrial */
+    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
-    mesh->K = Ne* Ne *2; // # of elements
-    mesh->Nv = (Ne + 1)*(Ne + 1); // # of vertex
+    if(!procid) printf("Root: Entering ReadTriMesh\n");
 
+    mesh->procid = procid;
+    mesh->nprocs = nprocs;
 
+    mesh->Nverts = 4; /* assume triangles */
+    mesh->Nfaces = 4; /* assume triangles */
+
+    Kprocs = (int *) calloc(nprocs, sizeof(int));
+    K = Ne* Ne; /* total # of elements */
+    Klocal = (int)( (double)K/ (double)nprocs );
+
+    /* number of elements in each process */
+    for(p = 0; p < nprocs - 1; ++p){
+        Kprocs[p] = Klocal;
+    }
+    /* the rest elements is distributed to the last process: p = nprocs - 1  */
+    Kprocs[p] = K + Klocal - nprocs*Klocal;
+
+    /* number of element in local process */
+    Klocal = Kprocs[procid];
+
+    /* start index of element */
+    for(p=0;p<procid;++p)
+        Kstart += Kprocs[p];
+
+    /* # of all vertex */
+    mesh->Nv = (Ne + 1)*(Ne + 1);
+
+    /* allocate coordinate of all vertex */
     double *VX = BuildVector(mesh->Nv);
     double *VY = BuildVector(mesh->Nv);
 
-    for (i = 0; i < Ne+1; i++){
+    /** element to vertex list for all elements */
+    int **newEToV = BuildIntMatrix(K, mesh->Nverts);
+    /* EToV of local mesh */
+    mesh->EToV = BuildIntMatrix(Klocal, mesh->Nverts);
 
+    for (irow = 0; irow < Ne; irow++){
+        for (ie = 0; ie < Ne; ie++){
+            /* Assignment of vertex index, which start from 0 */
+            upperNode[0] = irow*(Ne + 1)+ie;
+            upperNode[1] = irow*(Ne + 1)+ ie + 1;
+            lowerNode[0] = upperNode[0] + Ne + 1;
+            lowerNode[1] = upperNode[1] + Ne + 1;
+
+            /* Assignment of EToV,
+             * each element start from the left lower vertex */
+            newEToV[irow * Ne + ie][0] = lowerNode[0];
+            newEToV[irow * Ne + ie][1] = lowerNode[1];
+            newEToV[irow * Ne + ie][2] = upperNode[1];
+            newEToV[irow * Ne + ie][3] = upperNode[0];
+        }
     }
+
+    /* Assignment of coordinate for vertex */
+    int index; /* vertex index */
+    for (irow = 0; irow<Ne+1; irow++){
+        for (icol = 0; icol<Ne+1; icol++){
+            index = irow*(Ne+1) + icol;
+            VX[index] = (double)icol/Ne *2.0 -1;
+            VY[index] = (double)irow/Ne * (-2.0) + 1;
+        }
+    }
+
+    mesh->GX = BuildMatrix(Klocal, mesh->Nverts);
+    mesh->GY = BuildMatrix(Klocal, mesh->Nverts);
+
+    /* Assignment of local mesh information */
+    int sk = 0;
+    for (ie = 0; ie < K; ie++){
+        if(ie>=Kstart && ie<Kstart+Klocal) {
+            mesh->EToV[sk][0] = newEToV[ie][0];
+            mesh->EToV[sk][1] = newEToV[ie][1];
+            mesh->EToV[sk][2] = newEToV[ie][2];
+            mesh->EToV[sk][3] = newEToV[ie][3];
+
+            mesh->GX[sk][0] = VX[mesh->EToV[sk][0]];
+            mesh->GX[sk][1] = VX[mesh->EToV[sk][1]];
+            mesh->GX[sk][2] = VX[mesh->EToV[sk][2]];
+            mesh->GX[sk][3] = VX[mesh->EToV[sk][3]];
+
+            mesh->GY[sk][0] = VY[mesh->EToV[sk][0]];
+            mesh->GY[sk][1] = VY[mesh->EToV[sk][1]];
+            mesh->GY[sk][2] = VY[mesh->EToV[sk][2]];
+            mesh->GY[sk][3] = VY[mesh->EToV[sk][3]];
+            ++sk;
+        }
+    }
+
+    mesh->K = Klocal;
 
     DestroyVector(VX);
     DestroyVector(VY);
+    DestroyIntMatrix(newEToV);
 
+    if(!procid) printf("Root: Leaving ReadTriMesh\n");
     return mesh;
-
 }
 
-void GeometricFactorsTri(Mesh *mesh, int k,
-                        double *drdx, double *dsdx, double *drdy, double *dsdy,
-                        double *J){
 
-    double x1 = mesh->GX[k][0], y1 =  mesh->GY[k][0];
-    double x2 = mesh->GX[k][1], y2 =  mesh->GY[k][1];
-    double x3 = mesh->GX[k][2], y3 =  mesh->GY[k][2];
 
-    /* compute geometric factors of the following afine map */
-    /* x = 0.5*( -(r+s)*x1 + (1+r)*x2 + (1+s)*x3 ) */
-    /* y = 0.5*( -(r+s)*y1 + (1+r)*y2 + (1+s)*y3 ) */
+void GeometricFactors(Mesh *mesh, int k,
+                      double *drdx, double *dsdx, double
+                      *drdy, double *dsdy, double *J){
 
-    double dxdr = (x2-x1)/2,  dxds = (x3-x1)/2;
-    double dydr = (y2-y1)/2,  dyds = (y3-y1)/2;
+    double *dxdr, *dxds;
+    double *dydr, *dyds;
+    const double *x = mesh->x[k];
+    const double *y = mesh->y[k];
+    int n, m;
 
-    /* Jacobian of coordinate mapping */
-    *J = -dxds*dydr + dxdr*dyds;
+    dxdr = (double *)calloc(p_Np, sizeof(double));
+    dxds = (double *)calloc(p_Np, sizeof(double));
+    dydr = (double *)calloc(p_Np, sizeof(double));
+    dyds = (double *)calloc(p_Np, sizeof(double));
 
-    if(*J<0)
-        printf("warning: J = %lg\n", *J);
+    for (n = 0; n<p_Np; n++){
+        for (m = 0; m<p_Np; m++){
+            dxdr[n] += mesh->Dr[n][m]*x[m];
+            dxds[n] += mesh->Ds[n][m]*x[m];
+            dydr[n] += mesh->Dr[n][m]*y[m];
+            dyds[n] += mesh->Ds[n][m]*y[m];
+        }
+        /* Jacobian of coordinate mapping */
+        J[n] = -dxds[n]*dydr[n] + dxdr[n]*dyds[n];
 
-    /* inverted Jacobian matrix for coordinate mapping */
-    *drdx =  dyds/(*J);
-    *dsdx = -dydr/(*J);
-    *drdy = -dxds/(*J);
-    *dsdy =  dxdr/(*J);
+        if(J[n]<0)
+            printf("warning: J = %lg\n", J[n]);
+
+        /* inverted Jacobian matrix for coordinate mapping */
+        drdx[n] =  dyds[n]/(J[n]);
+        dsdx[n] = -dydr[n]/(J[n]);
+        drdy[n] = -dxds[n]/(J[n]);
+        dsdy[n] =  dxdr[n]/(J[n]);
+    }
 }
 
-void NormalsTri(Mesh *mesh, int k, double *nx, double *ny, double *sJ){
-
+/**
+ * @brief
+ * Get normal vector and Jacobian transfer coefficient of each faces
+ *
+ * @details
+ * The outward normal vector \f$ \vec{n} = \left(n_x, n_y \right) \f$ is perpendicular
+ * to each side \f$ \vec{r} = \left(\Delta x, \Delta y \right) \f$, thus the normal vector
+ * can be obtained as
+ * \f[ \vec{n} = \frac{1}{s} \left(\Delta y, -\Delta x \right) \f]
+ * where s is the length of each side.
+ * The Jacobian transfer coefficient is \f$ J_s = s/2 \f$, where the length of each sides
+ * in standard quadrilateral element is 2.
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ */
+void Normals(Mesh *mesh, int k, double *nx, double *ny, double *sJ){
     int f;
+    double x1, x2, y1, y2;
 
-    double x1 = mesh->GX[k][0], y1 = mesh->GY[k][0];
-    double x2 = mesh->GX[k][1], y2 = mesh->GY[k][1];
-    double x3 = mesh->GX[k][2], y3 = mesh->GY[k][2];
+//    double x1 = mesh->GX[k][0], y1 = mesh->GY[k][0];
+//    double x2 = mesh->GX[k][1], y2 = mesh->GY[k][1];
+//    double x3 = mesh->GX[k][2], y3 = mesh->GY[k][2];
+//    double x4 = mesh->GX[k][3], y4 = mesh->GY[k][3];
 
-    nx[0] =  (y2-y1);  ny[0] = -(x2-x1);
-    nx[1] =  (y3-y2);  ny[1] = -(x3-x2);
-    nx[2] =  (y1-y3);  ny[2] = -(x1-x3);
+    for(f=0; f<(mesh->Nfaces -1); f++){
+        x1 = mesh->GX[k][f]; x2 = mesh->GX[k][f+1];
+        y1 = mesh->GY[k][f]; y2 = mesh->GY[k][f+1];
+        nx[f] =  (y2-y1);
+        ny[f] = -(x2-x1);
+    }
+    /* the last face */
+    x1 = mesh->GX[k][f]; x2 = mesh->GX[k][0];
+    y1 = mesh->GY[k][f]; y2 = mesh->GY[k][0];
+    nx[f] =  (y2-y1);
+    ny[f] = -(x2-x1);
 
-    for(f=0;f<3;++f){
+//    nx[0] =  (y2-y1);  ny[0] = -(x2-x1);
+//    nx[1] =  (y3-y2);  ny[1] = -(x3-x2);
+//    nx[2] =  (y4-y3);  ny[2] = -(x4-x3);
+//    nx[3] =  (y1-y4);  ny[3] = -(x1-x4);
+
+    for(f=0;f<mesh->Nfaces;++f){
         sJ[f] = sqrt(nx[f]*nx[f]+ny[f]*ny[f]);
         nx[f] /= sJ[f];
         ny[f] /= sJ[f];
@@ -202,8 +381,8 @@ void NormalsTri(Mesh *mesh, int k, double *nx, double *ny, double *sJ){
 
 #define DSET_NAME_LEN 1024
 
-void PrintMeshTri ( Mesh *mesh ){
-    int n, m, rank, nprocs, ret;
+void PrintMesh ( Mesh *mesh ){
+    int n, m, rank, nprocs, ret, sk, sf;
     char filename[DSET_NAME_LEN];
 
     rank = mesh->procid;
@@ -223,26 +402,58 @@ void PrintMeshTri ( Mesh *mesh ){
     fprintf(fig, "\n Nverts = %d\n", mesh->Nverts);
     fprintf(fig, "\n Vertex coordinates X: \n");
     for (n = 0; n < mesh->K; n ++){
-        fprintf(fig, "%f, \t %f, \t %f\n", mesh->GX[n][0], mesh->GX[n][1], mesh->GX[n][2]);
+        for( m = 0; m < mesh->Nverts; m++)
+            fprintf(fig, "%f,\t", mesh->GX[n][m]);
+        fprintf(fig, "\n");
     }
 
     fprintf(fig, "\n Vertex coordinates Y: \n");
     for (n = 0; n < mesh->K; n ++){
-        fprintf(fig, "%f, \t %f, \t %f\n", mesh->GY[n][0], mesh->GY[n][1], mesh->GY[n][2]);
+        for( m = 0; m < mesh->Nverts; m++)
+            fprintf(fig, "%f,\t", mesh->GY[n][m]);
+        fprintf(fig, "\n");
     }
 
     fprintf(fig, "\n Element to vertex connectivity = \n");
     for(n=0;n<mesh->K;++n){
-        fprintf(fig, "%d: %d %d %d \n", n,
-               mesh->EToV[n][0], mesh->EToV[n][1], mesh->EToV[n][2]);
+        for( m = 0; m < mesh->Nverts; m++)
+            fprintf(fig, "%d,\t", mesh->EToV[n][m]);
+        fprintf(fig, "\n");
     }
 
-//    fprintf(fig, "\n Node coordinates: \n");
-//    for (m = 0; m<mesh->K; m++){
-//        for (n = 0; n<p_Np; n++)
-//            fprintf(fig, "[%f, %f] \t", mesh->x[m][n], mesh->y[m][n]);
-//        fprintf(fig, "\n");
-//    }
+#if 1
+    fprintf(fig, "\n Node coordinate = \n");
+    for (n = 0; n < mesh->K; n ++){
+        for( m = 0; m < p_Np; m++)
+            fprintf(fig, "[%f, %f],\t", mesh->x[n][m], mesh->y[n][m]);
+        fprintf(fig, "\n");
+    }
+
+#endif
+
+#if 1
+
+    sk = 0;
+    fprintf(fig, "\n Node vgeo = \n");
+    for (n = 0; n < mesh->K; n ++){
+        fprintf(fig, "Ele %d:\n", n);
+        for( m = 0; m < p_Np; m++)
+            fprintf(fig, "drdx = %f, drdy = %f, dsdx = %f, dsdy = %f\n",
+                    mesh->vgeo[sk++], mesh->vgeo[sk++], mesh->vgeo[sk++], mesh->vgeo[sk++]);
+        fprintf(fig, "\n");
+    }
+
+    sf = 2;
+    for (n = 0; n < mesh->K; n ++){
+        fprintf(fig, "Ele %d:\n", n);
+        for( m = 0; m < p_Nfp*p_Nfaces; m++) {
+            fprintf(fig, "%f\t", mesh->surfinfo[sf]);
+            sf+=6;
+        }
+        fprintf(fig, "\n");
+    }
+#endif
+
     fclose(fig);
 
 }

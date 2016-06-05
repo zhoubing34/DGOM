@@ -9,7 +9,8 @@
 #include <math.h>
 
 /** element shape */
-#define TRI
+//#define TRI
+#define QUAD
 
 /** number of unknown variables */
 #define p_Nfields 1
@@ -34,12 +35,14 @@ int     *DestroyIntVector(int *);
 void PrintMatrix(char *message, double **A, int Nrows, int Ncols);
 void SaveMatrix(char *filename, double **A, int Nrows, int Ncols);
 
-void PrintMeshTri ( Mesh * );
-void FacePairTri( Mesh * );
-void PrintMeshConnectionTri( Mesh * );
+
+void FacePair( Mesh * );
+
+void PrintMesh ( Mesh * );
+void PrintMeshConnection( Mesh * );
 
 // mesh seperation
-void LoadBalanceTri(Mesh *);
+void LoadBalance(Mesh *);
 
 void ParallelPairs(void *, int, int ,
                    int  (*)(const void *),
@@ -49,16 +52,17 @@ void ParallelPairs(void *, int, int ,
                    int (*)(const void *, const void *));
 
 void SetupTriCoeff(Mesh *);
+void SetupQuadCoeff(Mesh *);
 
-void BuildTriMaps(Mesh *);
+void BuildMaps(Mesh*);
 
-void NormalsTri(Mesh *, int, double *, double *, double *);
+void Normals(Mesh *, int, double *, double *, double *);
 
-void GeometricFactorsTri(Mesh *, int ,
+void GeometricFactors(Mesh *, int ,
                          double *, double *, double *, double *,
                          double *);
 
-double InitTriMeshInfo(Mesh *, int);
+double InitMeshInfo(Mesh *, int);
 
 // Initial Condition
 void InitData(Mesh *);

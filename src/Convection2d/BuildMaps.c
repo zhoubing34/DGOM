@@ -1,12 +1,17 @@
 #include "Convection2d/Convection2d.h"
 #include <mpi.h>
 
-/** Build node pairing and collect outgoing node index
+/**
+ * @brief
+ * Build node pairing and collect outgoing node index
  *
- *  Build node pairing for vmapM & vmapP, and collect the outgoing node index for parmapOUT
+ * @details
+ * Build node pairing for vmapM & vmapP, and collect the outgoing node index for parmapOUT
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
  */
-
-void BuildTriMaps(Mesh *mesh){
+void BuildMaps(Mesh *mesh){
 
     int nprocs = mesh->nprocs;
     int procid = mesh->procid;
@@ -30,7 +35,7 @@ void BuildTriMaps(Mesh *mesh){
     for(k1=0;k1<K;++k1){
 
         /* get some information about the face geometries */
-        NormalsTri(mesh, k1, nxk, nyk, sJk);
+        Normals(mesh, k1, nxk, nyk, sJk);
 
         for(f1=0;f1<Nfaces;++f1){
 
@@ -179,7 +184,7 @@ void BuildTriMaps(Mesh *mesh){
             x2 = xrecv[p2][m];
             y2 = yrecv[p2][m];
 
-            NormalsTri(mesh, k1, nxk, nyk, sJk);
+            Normals(mesh, k1, nxk, nyk, sJk);
 
             for(n1=0;n1<p_Nfp;++n1){
 
