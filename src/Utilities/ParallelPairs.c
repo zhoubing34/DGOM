@@ -17,7 +17,7 @@ void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
 
   char *myobjs = (char*) objs;
 
-  int n, p, sk, cnt, num;
+  int n, p, sk, num;
   int maxind = 0;
 
   int procid, nprocs;

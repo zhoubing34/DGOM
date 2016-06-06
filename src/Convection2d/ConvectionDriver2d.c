@@ -11,8 +11,8 @@
  *
  * @details
  * 2d scalar convection problem
- * \f[ \frac{\partial C}{\partial t} +
- * \frac{\partial uC}{\partial x} + \frac{\partial vC}{\partial y} = 0 \f]
+ * \f[ \frac{\partial C}{\partial t} + \frac{\partial uC}{\partial x}
+ * + \frac{\partial vC}{\partial y} = 0 \f]
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
@@ -22,10 +22,9 @@
  * In the future, these matrix will be generate from library.
  *
  * @todo
- * 1. quadrilateral shapes
- * 2. slope limiter for high order shapes
+ * 1. slope limiter for high order shapes
  */
-main(int argc, char **argv){
+int main(int argc, char **argv){
 
     /* read mesh */
     Mesh * mesh;
@@ -98,6 +97,7 @@ main(int argc, char **argv){
     /* finish */
     ConvectionFinish(mesh, outfile);
 
+    return 0;
 }
 
 

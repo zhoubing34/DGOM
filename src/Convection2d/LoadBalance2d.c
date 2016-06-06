@@ -4,24 +4,19 @@
 
 
 /**
- * @brief 简要说明
- * @details 详细说明
+ * @brief
+ * Call ParMetis library to make mesh partition and redistribute the 
+ * elements on each process
+ *
+ * @details
+ * The function calls ParMetis library to re-partition the two-dimensional 
+ * mesh and redistribute the elements to balance the number of element 
+ * on each process. The mesh can be discretize with triangle or quadrilateral
+ * elements.
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
- * @param[in] beginPos 对应区域开始显示的地址
- * @param[in] order order>0: year/month/date;order=0: date/month/year
- * @return
- * return values：
- * name     | type     | description of value
- * -------- |----------|----------------------
- * car_id   | int      |
- * car_info | object   |
- * @warning
- * @attention
- * @note
- * @todo
  */
 void LoadBalance(Mesh *mesh){
 
@@ -106,11 +101,13 @@ void LoadBalance(Mesh *mesh){
 
     int edgecut;
 
+    /** the process index of redistributing each element */
     idxtype *part = idxmalloc(Klocal, "part");
 
     MPI_Comm comm;
     MPI_Comm_dup(MPI_COMM_WORLD, &comm);
 
+    /* call ParMetis lib to make mesh partition */
     ParMETIS_V3_PartMeshKway
             (elmdist,
              eptr,
@@ -131,9 +128,11 @@ void LoadBalance(Mesh *mesh){
     int **outlist = (int**) calloc(nprocs, sizeof(int*));
     double **xoutlist = (double**) calloc(nprocs, sizeof(double*));
     double **youtlist = (double**) calloc(nprocs, sizeof(double*));
+    /** number of elements send to each process */
     int *outK = (int*) calloc(nprocs, sizeof(int));
-
+    /** number of elements to receive from each process */
     int *inK = (int*) calloc(nprocs, sizeof(int));
+
 
     MPI_Request *inrequests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
     MPI_Request *outrequests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
@@ -151,15 +150,17 @@ void LoadBalance(Mesh *mesh){
                  MPI_COMM_WORLD);
 
     /* count totals on each process */
-    int *  newKprocs = BuildIntVector(nprocs);
-    MPI_Allreduce(outK, newKprocs, nprocs, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+//    int *  newKprocs = BuildIntVector(nprocs);
+//    MPI_Allreduce(outK, newKprocs, nprocs, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
 
-    int totalinK = 0; // total element number
+	/** total element number receive from process */
+    int totalinK = 0;
     for(p=0;p<nprocs;++p){
         totalinK += inK[p];
     }
 
+    /* receive the element to vertex list and vertex coordinates from each process, including itself */
     int **newEToV = BuildIntMatrix(totalinK, Nverts);
     double **newx   = BuildMatrix(totalinK, Nverts);
     double **newy   = BuildMatrix(totalinK, Nverts);
@@ -175,6 +176,7 @@ void LoadBalance(Mesh *mesh){
         cnt = cnt + inK[p];
     }
 
+    /* send the element to vertex list and vertex coordinates to each process, including itself */
     for(p=0;p<nprocs;++p){
         int cnt = 0;
         outlist[p]  = BuildIntVector(Nverts*outK[p]);
@@ -210,10 +212,35 @@ void LoadBalance(Mesh *mesh){
     MPI_Waitall(nprocs, xoutrequests, outstatus);
     MPI_Waitall(nprocs, youtrequests, outstatus);
 
+    /* deallocate mem before assignment */
+    DestroyMatrix(mesh->GX);
+    DestroyMatrix(mesh->GY);
+    DestroyIntMatrix(mesh->EToV);
+
+    /* assignment of the new element list and vertex coordinate */
     mesh->GX = newx;
     mesh->GY = newy;
     mesh->EToV = newEToV;
     mesh->K =  totalinK;
+
+    /* deallocate mem */
+    DestroyIntVector(Kprocs);
+
+    free(tpwgts);
+
+    for(p=0;p<nprocs;++p){
+        DestroyIntVector(outlist[p]);
+        DestroyVector(xoutlist[p]);
+        DestroyVector(youtlist[p]);
+    }
+
+    free(outlist);
+    free(xoutlist);
+    free(youtlist);
+
+    free(inrequests);   free(outrequests);
+    free(xinrequests);  free(xoutrequests);
+    free(yinrequests);  free(youtrequests);
 
     if(!procid) printf("Root: Leaving LoadBalance\n");
 }

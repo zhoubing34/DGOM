@@ -41,25 +41,24 @@ void BuildMaps(Mesh *mesh){
 
             /* volume -> face nodes */
             for(n1=0;n1<p_Nfp;++n1){
-                /**> node index as face node */
-                id1 = n1+f1*p_Nfp+k1*p_Nfp*p_Nfaces;
+                id1 = n1+f1*p_Nfp+k1*p_Nfp*p_Nfaces; /* node index as face node */
                 mesh->vmapM[id1] = mesh->Fmask[f1][n1] + k1*p_Np;
             }
 
             /* find neighbor */
-            k2 = mesh->EToE[k1][f1]; // adjacent element
-            f2 = mesh->EToF[k1][f1]; // adjacent face index
-            p2 = mesh->EToP[k1][f1]; // process id
+            k2 = mesh->EToE[k1][f1]; /* adjacent element */
+            f2 = mesh->EToF[k1][f1]; /* adjacent face index */
+            p2 = mesh->EToP[k1][f1]; /* process id */
 
             if(k1==k2 || procid!=p2 ){
                 /* adjacent to the boundary */
                 for(n1=0;n1<p_Nfp;++n1){
                     id1 = n1+f1*p_Nfp+k1*p_Nfp*p_Nfaces;
-                    /* set the adjacent node index */
+                    /* set itself as the adjacent node index */
                     mesh->vmapP[id1] = k1*p_Np + mesh->Fmask[f1][n1];
                 }
             }else{
-                /* treat as boundary for the moment */
+                /* inner boundary */
                 for(n1=0;n1<p_Nfp;++n1){
                     id1 = n1+f1*p_Nfp+k1*p_Nfp*p_Nfaces;
                     x1 = mesh->x[k1][mesh->Fmask[f1][n1]];
@@ -202,6 +201,18 @@ void BuildMaps(Mesh *mesh){
             }
         }
     }
+
+    /* deallocate mem */
+    DestroyVector(nxk);
+    DestroyVector(nyk);
+    DestroyVector(sJk);
+
+    free(xsendrequests); free(ysendrequests);
+    free(xrecvrequests); free(yrecvrequests);
+    free(Esendrequests); free(Fsendrequests);
+    free(Erecvrequests); free(Frecvrequests);
+
+    free(status);
 
     /* create incoming node map */
     int parcnt = -1;

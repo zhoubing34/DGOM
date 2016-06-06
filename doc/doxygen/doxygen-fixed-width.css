@@ -14,6 +14,10 @@ div.contents {
         border-radius: 8px;
 }
 
+div.image img[src="icon.png"]{ 
+    width:10px; 
+}
+
 #titlearea {
         background-color: white;
 }

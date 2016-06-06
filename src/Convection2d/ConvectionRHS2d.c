@@ -34,7 +34,7 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
         mesh->f_outQ[n] = f_Q[mesh->parmapOUT[n]];
 
     /* do sends */
-    int sk = 0, Nmess = 0, uk = 0;
+    int sk = 0, Nmess = 0, uk;
     for(p=0;p<mesh->nprocs;++p){
         if(p!=mesh->procid){
             int Nout = mesh->Npar[p]*p_Nfields*p_Nfp; // # of variables send to process p
@@ -52,7 +52,7 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
     float  Qk[p_Np*p_Nfields];
     float  Uf[p_Np*2];
 
-    // volume integral
+    /* volume integral */
     for(k=0;k<K;++k){
 
         /* NOTE: once k is known, all other indexing variables etc are derived */

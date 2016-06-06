@@ -6,19 +6,22 @@
  * Generate local uniform triangle mesh for each processor
  *
  * @details
- * The whole mesh is generate with newEToV for element to vertex list. Each processor
- * reads part of mesh into mesh->EToV and its corresponding vertex coordinate
- * mesh->GX and mesh->GY. The uniform triangle element is separated from the
- * square, and the separation is controlled by UP_RIGHT macro.
+ * The whole domain is [-1, 1]x[-1, 1], with each edge partition to *Ne* 
+ * elements. The vertex list is arranged from upper left to lower right
+ * directions. The whole mesh is generate with newEToV for element to 
+ * vertex list. Each process reads part of mesh into mesh->EToV and its 
+ * corresponding vertex coordinate mesh->GX and mesh->GY. The uniform 
+ * triangle element is separated from the square, and the separation is 
+ * controlled by UP_RIGHT macro.
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
  * @return
  * return values：
- * name     | type     | description of value
- * -------- |----------|----------------------
- * mesh   | Mesh* | mesh object
+ * name     | type      | description of value
+ * -------- |---------- |----------------------
+ * mesh     | Mesh*     | mesh object
  *
  */
 Mesh* ReadTriMesh(){
@@ -74,7 +77,7 @@ Mesh* ReadTriMesh(){
     double *VX = BuildVector(mesh->Nv);
     double *VY = BuildVector(mesh->Nv);
 
-    /** element to vertex list for all elements */
+    /* element to vertex list for all elements */
     int **newEToV = BuildIntMatrix(K, mesh->Nverts);
     /* EToV of local mesh */
     mesh->EToV = BuildIntMatrix(Klocal, mesh->Nverts);
@@ -157,18 +160,20 @@ Mesh* ReadTriMesh(){
  * Generate uniform quadrilateral mesh
  *
  * @details
- * The whole mesh is generate with newEToV for element to vertex list.
- * Each processor reads part of mesh into mesh->EToV and its corresponding
- * vertex coordinate mesh->GX and mesh->GY.
+ * The whole domain is [-1, 1]x[-1, 1], with each edge partition to *Ne* 
+ * elements. The vertex list is arranged from upper left to lower right
+ * directions. The whole mesh is generate with newEToV for element to 
+ * vertex list. Each processor reads part of mesh into mesh->EToV and 
+ * its corresponding vertex coordinate mesh->GX and mesh->GY.
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
  * @return
  * return values：
- * name     | type     | description of value
- * -------- |----------|----------------------
- * mesh   | Mesh* | mesh object
+ * name     | type      | description of value
+ * -------- |---------- |----------------------
+ * mesh     | Mesh*     | mesh object
  *
  */
 Mesh* ReadQuadMesh(){
@@ -223,7 +228,7 @@ Mesh* ReadQuadMesh(){
     double *VX = BuildVector(mesh->Nv);
     double *VY = BuildVector(mesh->Nv);
 
-    /** element to vertex list for all elements */
+    /* element to vertex list for all elements */
     int **newEToV = BuildIntMatrix(K, mesh->Nverts);
     /* EToV of local mesh */
     mesh->EToV = BuildIntMatrix(Klocal, mesh->Nverts);
@@ -282,16 +287,71 @@ Mesh* ReadQuadMesh(){
 
     mesh->K = Klocal;
 
+    /* deallocate memory */
     DestroyVector(VX);
     DestroyVector(VY);
     DestroyIntMatrix(newEToV);
 
+    free(Kprocs);
     if(!procid) printf("Root: Leaving ReadTriMesh\n");
     return mesh;
 }
 
 
-
+/**
+ * @brief
+ * Get the geometric factor of kth element
+ *
+ * @details
+ * Get the geometric factor in element *k*, the derived geometric factor 
+ * on each node is calculated as
+ * \f[ \left. \frac{\partial x}{\partial r} \right|_{\mathbf{r}_i} = 
+ * \left. \frac{\partial \mathbf{\varphi}^T_j}{\partial r} \right|_{\mathbf{r}_i} \mathbf{x}_j \f]
+ * where \f$ \mathbf{\varphi} \f$ is the vector of Lagrangian basis functions. The same as 
+ * \f$ \frac{\partial x}{\partial s}, \frac{\partial y}{\partial r} \frac{\partial y}{\partial s} \f$
+ *
+ * The Jacobian matrix is to transfer the differentials of \f$ \{x,y\}\f$ to 
+ * \f$ \{r,s \}\f$. Using the chain rule:
+ * \f[ \begin{bmatrix} dx \cr dy \end{bmatrix} =
+ * \begin{bmatrix} 
+ * \frac{\partial x}{\partial r} & \frac{\partial x}{\partial s} \cr
+ * \frac{\partial y}{\partial r} & \frac{\partial y}{\partial s} \cr
+ * \end{bmatrix}
+ * \begin{bmatrix} dr \cr ds \end{bmatrix} = 
+ * \mathbf{J}^T \begin{bmatrix} dr \cr ds \end{bmatrix} \f]
+ *
+ * The corresponding Jacobian and inverse Jacobian is 
+ * \f[ \mathbf{J} = \frac{\partial (x, y)}{\partial (r, s)} =
+ * \begin{bmatrix} 
+ * \frac{\partial x}{\partial r} & \frac{\partial x}{\partial s} \cr
+ * \frac{\partial y}{\partial r} & \frac{\partial y}{\partial s} \cr
+ * \end{bmatrix} = \begin{bmatrix} J_{11} & J_{12} \cr
+ * J_{21} & J_{22} \end{bmatrix}, \quad 
+ * \mathbf{J}^{-1} = \frac{\partial (r, s)}{\partial (x,y)} =
+ * \begin{bmatrix} 
+ * \frac{\partial r}{\partial x} & \frac{\partial s}{\partial x} \cr
+ * \frac{\partial r}{\partial y} & \frac{\partial s}{\partial y} \cr
+ * \end{bmatrix} = \frac{1}{J} \begin{bmatrix} J_{22} & -J_{12} \cr
+ * -J_{21} & J_{11} \end{bmatrix}, \quad \f]
+ * where \f$ J = det(\mathbf{J}) = J_{11}J_{22} - J_{12}J_{21}\f$
+ * 
+ * @author 
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ * @param[in] mesh The Mesh object
+ * @param[in] k The element index
+ *
+ * @return  
+ * return values：
+ * name     | type      | description of value
+ * -------- |---------- |----------------------
+ * drdx     | double*   | the drdx on each node
+ * drdy     | double*   | the drdy on each node
+ * dsdx     | double*   | the dsdx on each node
+ * dsdy     | double*   | the dsdy on each node
+ * J        | double*   | the Jacobi on each node
+ *
+ */
 void GeometricFactors(Mesh *mesh, int k,
                       double *drdx, double *dsdx, double
                       *drdy, double *dsdy, double *J){
@@ -330,16 +390,16 @@ void GeometricFactors(Mesh *mesh, int k,
 
 /**
  * @brief
- * Get normal vector and Jacobian transfer coefficient of each faces
+ * Get normal vector and Jacobian coefficient of each faces in kth element
  *
  * @details
  * The outward normal vector \f$ \vec{n} = \left(n_x, n_y \right) \f$ is perpendicular
  * to each side \f$ \vec{r} = \left(\Delta x, \Delta y \right) \f$, thus the normal vector
  * can be obtained as
  * \f[ \vec{n} = \frac{1}{s} \left(\Delta y, -\Delta x \right) \f]
- * where s is the length of each side.
- * The Jacobian transfer coefficient is \f$ J_s = s/2 \f$, where the length of each sides
- * in standard quadrilateral element is 2.
+ * where s is the length of each side. The Jacobian transfer coefficient is 
+ * \f$ J_s = s/2 \f$, where the length of each sides in standard quadrilateral 
+ * element is 2.
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
@@ -349,11 +409,7 @@ void Normals(Mesh *mesh, int k, double *nx, double *ny, double *sJ){
     int f;
     double x1, x2, y1, y2;
 
-//    double x1 = mesh->GX[k][0], y1 = mesh->GY[k][0];
-//    double x2 = mesh->GX[k][1], y2 = mesh->GY[k][1];
-//    double x3 = mesh->GX[k][2], y3 = mesh->GY[k][2];
-//    double x4 = mesh->GX[k][3], y4 = mesh->GY[k][3];
-
+    /*  */
     for(f=0; f<(mesh->Nfaces -1); f++){
         x1 = mesh->GX[k][f]; x2 = mesh->GX[k][f+1];
         y1 = mesh->GY[k][f]; y2 = mesh->GY[k][f+1];
@@ -366,11 +422,7 @@ void Normals(Mesh *mesh, int k, double *nx, double *ny, double *sJ){
     nx[f] =  (y2-y1);
     ny[f] = -(x2-x1);
 
-//    nx[0] =  (y2-y1);  ny[0] = -(x2-x1);
-//    nx[1] =  (y3-y2);  ny[1] = -(x3-x2);
-//    nx[2] =  (y4-y3);  ny[2] = -(x4-x3);
-//    nx[3] =  (y1-y4);  ny[3] = -(x1-x4);
-
+    /* normalize the outward vector */
     for(f=0;f<mesh->Nfaces;++f){
         sJ[f] = sqrt(nx[f]*nx[f]+ny[f]*ny[f]);
         nx[f] /= sJ[f];
@@ -379,8 +431,18 @@ void Normals(Mesh *mesh, int k, double *nx, double *ny, double *sJ){
     }
 }
 
-#define DSET_NAME_LEN 1024
 
+/**
+ * @brief
+ * Print the mesh information of each process in files
+ *
+ * @details
+ *
+ * @author 
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ */
+#define DSET_NAME_LEN 1024
 void PrintMesh ( Mesh *mesh ){
     int n, m, rank, nprocs, ret, sk, sf;
     char filename[DSET_NAME_LEN];
@@ -431,7 +493,7 @@ void PrintMesh ( Mesh *mesh ){
 
 #endif
 
-#if 1
+#if 0
 
     sk = 0;
     fprintf(fig, "\n Node vgeo = \n");
@@ -447,7 +509,7 @@ void PrintMesh ( Mesh *mesh ){
     for (n = 0; n < mesh->K; n ++){
         fprintf(fig, "Ele %d:\n", n);
         for( m = 0; m < p_Nfp*p_Nfaces; m++) {
-            fprintf(fig, "%f\t", mesh->surfinfo[sf]);
+            fprintf(fig, "Js/J = %f\t", mesh->surfinfo[sf]);
             sf+=6;
         }
         fprintf(fig, "\n");

@@ -17,7 +17,7 @@
 
 /* default element number in mesh */
 #ifndef Ne
-#define Ne 80
+#define Ne 2
 #endif
 
 #define NODETOL   1e-4

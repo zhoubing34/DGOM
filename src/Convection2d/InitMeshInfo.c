@@ -1,6 +1,24 @@
 #include "Convection2d/Convection2d.h"
 
-/* get the surface  */
+/**
+ * @brief
+ *
+ *
+ * @details
+ *
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ * @return
+ * return values：
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * car_id   | int      |
+ * car_info | object   |
+ *
+ */
+
 double InitMeshInfo(Mesh * mesh, int Nfields){
     printf("Np = %d, BSIZE = %d\n", p_Np, BSIZE);
 
@@ -98,6 +116,13 @@ double InitMeshInfo(Mesh * mesh, int Nfields){
             }
         }
     }
+
+    /* deallocate mem */
+    free(drdx); free(drdy); free(dsdx); free(dsdy); free(J);
+
+    DestroyVector(nxk);
+    DestroyVector(nyk);
+    DestroyVector(sJk);
 
     return dt;
 }

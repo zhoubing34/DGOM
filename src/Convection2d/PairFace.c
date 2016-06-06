@@ -111,7 +111,7 @@ void FacePair(Mesh *mesh) {
 #elif defined QUAD
     const int vnum[4][2] = { {0,1}, {1,2}, {2,3}, {3,0}};
 #endif
-    int n, k, e, sk, v;
+    int n, k, e, sk;
 
     face *myfaces = (face*) calloc(Klocal*Nfaces, sizeof(face));
 
