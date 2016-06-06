@@ -1,5 +1,7 @@
 #Discontinuous Galerkin Ocean Model
 
+![](http://images.cnblogs.com/cnblogs_com/li12242/812136/o_icon_s.png)
+
 #What is it about
 
 Implement the DGM (Discontinuous Galerkin Method) in various applications, include 
