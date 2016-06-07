@@ -9,5 +9,5 @@ set(SRC_LIST
 add_executable(Maxwells2d ${SRC_LIST})
 
 # add static library
-target_link_libraries(Maxwells2d metis)
 target_link_libraries(Maxwells2d parmetis)
+target_link_libraries(Maxwells2d metis)

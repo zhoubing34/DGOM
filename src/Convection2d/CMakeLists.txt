@@ -9,5 +9,5 @@ add_executable(Convection2d ${SRC_LIST})
 
 # set static library
 target_link_libraries(Convection2d pnetcdf)
-target_link_libraries(Convection2d metis)
 target_link_libraries(Convection2d parmetis)
+target_link_libraries(Convection2d metis)

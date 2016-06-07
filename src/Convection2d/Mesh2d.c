@@ -151,6 +151,8 @@ Mesh* ReadTriMesh(){
     DestroyVector(VY);
     DestroyIntMatrix(newEToV);
 
+    free(Kprocs);
+
     if(!procid) printf("Root: Leaving ReadTriMesh\n");
     return mesh;
 }
@@ -386,6 +388,11 @@ void GeometricFactors(Mesh *mesh, int k,
         drdy[n] = -dxds[n]/(J[n]);
         dsdy[n] =  dxdr[n]/(J[n]);
     }
+
+    free(dxdr);
+    free(dxds);
+    free(dydr);
+    free(dyds);
 }
 
 /**

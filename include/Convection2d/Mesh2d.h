@@ -17,7 +17,7 @@
 
 /* default element number in mesh */
 #ifndef Ne
-#define Ne 2
+#define Ne 80
 #endif
 
 #define NODETOL   1e-4
@@ -140,9 +140,13 @@ struct RKDG2d {
     float *f_LIFT;
 
     /* float geometric info */
-    /** geometric factors */
+    /** volume geometric factors */
     float   *vgeo;
+    /** surface geometric factors */
     float   *surfinfo;
+
+    /** trouble cell indicator, entry n is 1 if cell is trouble cell */
+    int *tcflag;
 
     /* float field storage (CPU) */
     float  *f_Q, *f_rhsQ, *f_resQ;

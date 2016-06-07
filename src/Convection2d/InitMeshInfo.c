@@ -48,7 +48,7 @@ double InitMeshInfo(Mesh * mesh, int Nfields){
         }
     }
 
-    /* vgeo */
+    /* volume geometric factor */
     double *drdx, *dsdx, *drdy, *dsdy, *J;
     sz = p_Np*sizeof(double);
 
@@ -118,7 +118,11 @@ double InitMeshInfo(Mesh * mesh, int Nfields){
     }
 
     /* deallocate mem */
-    free(drdx); free(drdy); free(dsdx); free(dsdy); free(J);
+    free(drdx);
+    free(drdy);
+    free(dsdx);
+    free(dsdy);
+    free(J);
 
     DestroyVector(nxk);
     DestroyVector(nyk);

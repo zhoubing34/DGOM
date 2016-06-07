@@ -6,14 +6,15 @@
  * create output files in NetCDF format
  * one file per process
  * */
-Ncfile* SetupOutput(Mesh *mesh, char* filename){
+Ncfile* SetupOutput(Mesh *mesh, char* casename){
     Ncfile * outfile = (Ncfile *) calloc(1, sizeof(Ncfile));
 
     int ret, ncfile, ndims;
     int node_dim, time_dim, var_dim[2];
     int xid, yid, timeid, varid;
+    char filename[DSET_NAME_LEN];
 
-    ret = snprintf(filename, DSET_NAME_LEN, "%s.%d-%d.nc", filename, mesh->procid, mesh->nprocs);
+    ret = snprintf(filename, DSET_NAME_LEN, "%s.%d-%d.nc", casename, mesh->procid, mesh->nprocs);
     // check file name length
     if (ret >= DSET_NAME_LEN) {
         fprintf(stderr, "file name too long \n");

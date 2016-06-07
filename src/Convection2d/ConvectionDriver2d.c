@@ -31,7 +31,7 @@ int main(int argc, char **argv){
     Ncfile * outfile;
     int procid, nprocs;
     double dt, FinalTime = 2.4;
-    char filename[16] = "Convection2d";
+    char casename[16] = "Convection2d";
 
     /* initialize MPI */
     MPI_Init(&argc, &argv);
@@ -89,7 +89,7 @@ int main(int argc, char **argv){
     InitData(mesh);
 
     /* setup output file */
-    outfile = SetupOutput(mesh, filename);
+    outfile = SetupOutput(mesh, casename);
 
     /* solve */
     ConvectionRun2d(mesh, outfile ,FinalTime, dt);
@@ -104,8 +104,57 @@ int main(int argc, char **argv){
 void ConvectionFinish(Mesh * mesh, Ncfile * outfile){
 
     int ret;
+    /* close NetCDF output file */
     ret = ncmpi_close(outfile->ncfile);
     if (ret != NC_NOERR) handle_error(ret, __LINE__);
+
+    /* NcOutput.c */
+    free(outfile->varid);
+
+    /* Mesh2d.c */
+    DestroyMatrix(mesh->GX);
+    DestroyMatrix(mesh->GY);
+    DestroyIntMatrix(mesh->EToV);
+
+    /* PairFace */
+    DestroyIntVector(mesh->Npar);
+    DestroyIntMatrix(mesh->EToE);
+    DestroyIntMatrix(mesh->EToF);
+    DestroyIntMatrix(mesh->EToP);
+    free(mesh->parK);
+    free(mesh->parF);
+
+    /* SetUp.c */
+    DestroyVector(mesh->r);
+    DestroyVector(mesh->s);
+    DestroyMatrix(mesh->Dr);
+    DestroyMatrix(mesh->Ds);
+    DestroyMatrix(mesh->LIFT);
+    DestroyIntMatrix(mesh->Fmask);
+    DestroyVector(mesh->rk4a);
+    DestroyVector(mesh->rk4b);
+    DestroyVector(mesh->rk4c);
+
+    /* BuildMaps.c */
+    DestroyIntVector(mesh->vmapM);
+    DestroyIntVector(mesh->vmapP);
+    DestroyIntVector(mesh->parmapOUT);
+    free(mesh->f_outQ);
+    free(mesh->f_inQ);
+
+    /* InitialCondition.c */
+    free(mesh->f_Q);
+    free(mesh->f_rhsQ);
+    free(mesh->f_resQ);
+    free(mesh->f_s);
+
+    /* InitMeshInfo.c */
+    free(mesh->f_LIFT);
+    free(mesh->f_Dr);
+    free(mesh->f_Ds);
+    free(mesh->vgeo);
+    free(mesh->surfinfo);
+
 
     MPI_Finalize();
 }

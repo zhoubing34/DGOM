@@ -170,7 +170,7 @@ void FacePair(Mesh *mesh) {
         for(n=0;n<Klocal*Nfaces;++n){
             if(myfaces[n].p2==p2 && p2!=procid){
                 k1 = myfaces[n].k1, f1 = myfaces[n].f1;
-                k2 = myfaces[n].k2, f2 = myfaces[n].f2;
+//                k2 = myfaces[n].k2, f2 = myfaces[n].f2;
                 mesh->parK[p2][mesh->Npar[p2]  ] = k1;
                 mesh->parF[p2][mesh->Npar[p2]++] = f1;
             }

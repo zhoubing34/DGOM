@@ -9,8 +9,8 @@
 #include <math.h>
 
 /** element shape */
-//#define TRI
-#define QUAD
+#define TRI
+//#define QUAD
 
 /** number of unknown variables */
 #define p_Nfields 1
