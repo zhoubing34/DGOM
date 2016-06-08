@@ -8,9 +8,11 @@
 #include <stdio.h>
 #include <math.h>
 
+#define DEBUG
+
 /** element shape */
-#define TRI
-//#define QUAD
+//#define TRI
+#define QUAD
 
 /** number of unknown variables */
 #define p_Nfields 1
@@ -18,10 +20,60 @@
 #include "Convection2d/Mesh2d.h"
 #include "NcOutput.h"
 
+/* Mesh2d.c */
 Mesh* ReadTriMesh();
 Mesh* ReadQuadMesh();
+void GeometricFactors(Mesh *, int ,
+                      double *, double *, double *, double *,
+                      double *);
+void Normals(Mesh *, int, double *, double *, double *);
+void PrintMesh ( Mesh * );
 
-/* prototypes for storage functions (Utils.c) */
+/* PairFace.c */
+void FacePair( Mesh * );
+void PrintMeshConnection( Mesh * );
+
+/* LoadBalance.c */
+void LoadBalance(Mesh *);
+
+/* ParallelPairs.c */
+void ParallelPairs(void *, int, int ,
+                   int  (*)(const void *),
+                   void (*)(const void *, int ),
+                   int  (*)(const void *),
+                   void (*)(const void *, const void *),
+                   int (*)(const void *, const void *));
+
+/* Setup.c */
+void SetMeshCoeff(Mesh *mesh);
+void SetupTriCoeff(Mesh *);
+void SetupQuadCoeff(Mesh *);
+
+/* BuildMaps.c */
+void BuildMaps(Mesh*);
+
+/* InitMeshInfo.c */
+double InitMeshInfo(Mesh *, int);
+
+/* InitialCondition.c */
+void InitData(Mesh *);
+
+/* ConvectionRun2d.c */
+void ConvectionRun2d(Mesh *, Ncfile * , double, double);
+
+/* ConvectionRHS2d.c */
+void ConvectionRHS2d(Mesh *, float, float, float);
+
+/* ConvectionDriver2d.c */
+void ConvectionFinish(Mesh *, Ncfile *);
+
+/* DsiDetector.c */
+void DisDetector(Mesh *);
+
+/* Utils.c */
+FILE* CreateLog(char *, int, int);
+
+/* prototypes for storage functions */
 double **BuildMatrix(int Nrows, int Ncols);
 double  *BuildVector(int Nrows);
 int    **BuildIntMatrix(int Nrows, int Ncols);
@@ -34,41 +86,3 @@ int     *DestroyIntVector(int *);
 
 void PrintMatrix(char *message, double **A, int Nrows, int Ncols);
 void SaveMatrix(char *filename, double **A, int Nrows, int Ncols);
-
-
-void FacePair( Mesh * );
-
-void PrintMesh ( Mesh * );
-void PrintMeshConnection( Mesh * );
-
-// mesh seperation
-void LoadBalance(Mesh *);
-
-void ParallelPairs(void *, int, int ,
-                   int  (*)(const void *),
-                   void (*)(const void *, int ),
-                   int  (*)(const void *),
-                   void (*)(const void *, const void *),
-                   int (*)(const void *, const void *));
-
-void SetupTriCoeff(Mesh *);
-void SetupQuadCoeff(Mesh *);
-
-void BuildMaps(Mesh*);
-
-void Normals(Mesh *, int, double *, double *, double *);
-
-void GeometricFactors(Mesh *, int ,
-                         double *, double *, double *, double *,
-                         double *);
-
-double InitMeshInfo(Mesh *, int);
-
-// Initial Condition
-void InitData(Mesh *);
-
-void ConvectionRun2d(Mesh *, Ncfile * , double, double);
-
-void ConvectionRHS2d(Mesh *, float, float, float);
-
-void ConvectionFinish(Mesh *, Ncfile *);

@@ -80,14 +80,13 @@ void pairmarry(const void *obj1, const void *obj2){
 }
 
 /**
- * @brief 简要说明
- * @details 详细说明
+ * @brief
+ * @details
  * @date
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
- * @param[in] beginPos 对应区域开始显示的地址
- * @param[in] order order>0: year/month/date;order=0: date/month/year
+ *
  * @return
  * return values：
  * name     | type     | description of value
@@ -105,6 +104,10 @@ void FacePair(Mesh *mesh) {
     int Nfaces = mesh->Nfaces;
 
     int **EToV = mesh->EToV;
+
+#if defined DEBUG
+    if(!procid) printf("Root: Entering FacePair\n");
+#endif
 
 #if defined TRI
     const int vnum[3][2] = { {0,1}, {1,2}, {2,0} };
@@ -178,9 +181,12 @@ void FacePair(Mesh *mesh) {
     }
 
     free(myfaces);
+
+#if defined DEBUG
+    if(!procid) printf("Root: Leaving FacePair\n");
+#endif
 }
 
-#define DSET_NAME_LEN 1024
 
 /**
  * @brief
@@ -195,6 +201,9 @@ void FacePair(Mesh *mesh) {
  */
 void PrintMeshConnection(Mesh* mesh){
 
+#ifndef DSET_NAME_LEN
+#define DSET_NAME_LEN 1024
+#endif
     int n, m, rank, nprocs, ret;
     char filename[DSET_NAME_LEN];
 

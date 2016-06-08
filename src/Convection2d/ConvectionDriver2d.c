@@ -1,5 +1,9 @@
-/** \file   ConvectionDriver2d.c
- *  \brief  2d scalar convection problem
+/**
+ * @file
+ * ConvectionDriver2d.c
+ *
+ * @brief
+ * 2d scalar convection problem
  */
 
 #include <Convection2d/Convection2d.h>
@@ -81,6 +85,10 @@ int main(int argc, char **argv){
     /* set node connection */
     BuildMaps(mesh);
 
+#if 0 /* check mesh */
+    PrintMesh(mesh);
+#endif
+
     /* init mesh coeff */
     dt = InitMeshInfo(mesh, p_Nfields);
     dt = .5*dt/((p_N+1)*(p_N+1)); // CFL
@@ -127,6 +135,8 @@ void ConvectionFinish(Mesh * mesh, Ncfile * outfile){
     /* SetUp.c */
     DestroyVector(mesh->r);
     DestroyVector(mesh->s);
+    DestroyVector(mesh->w);
+    DestroyVector(mesh->wv);
     DestroyMatrix(mesh->Dr);
     DestroyMatrix(mesh->Ds);
     DestroyMatrix(mesh->LIFT);
@@ -154,6 +164,7 @@ void ConvectionFinish(Mesh * mesh, Ncfile * outfile){
     free(mesh->f_Ds);
     free(mesh->vgeo);
     free(mesh->surfinfo);
+    free(mesh->ciradius);
 
 
     MPI_Finalize();

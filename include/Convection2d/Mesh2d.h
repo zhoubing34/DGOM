@@ -12,15 +12,16 @@
 /* default degree */
 #ifndef p_N
 /** default order */
-#define p_N 1
+#define p_N 2
 #endif
 
 /* default element number in mesh */
 #ifndef Ne
-#define Ne 80
+#define Ne 30
 #endif
 
-#define NODETOL   1e-4
+#define NODETOL   1e-4f
+#define DETECTOR  5.0f
 
 /* element shape constant for triangle */
 #ifdef TRI
@@ -96,10 +97,18 @@ struct RKDG2d {
     double **GZ;
 
     /* high order node info */
+
     /** node numbers at faces */
     int   **Fmask;
     /* (r,s) coordinates of reference nodes */
-    double  *r,   *s,   *t;
+    double  *r, *s, *t;
+
+    /** integral coefficient between [-1, 1] */
+    double *w;
+
+    /** volume integral coefficient */
+    double *wv;
+
     /** local nodal derivative matrices */
     double **Dr, **Ds, **Dt;
     /** local lift matrix */
@@ -123,6 +132,9 @@ struct RKDG2d {
     /** face of parallel nodes */
     int    **parF;
 
+    /** radius of the circumscribed circle */
+    double *ciradius;
+
     /* MPI stuff */
 
     /** total number of nodes to send */
@@ -132,6 +144,9 @@ struct RKDG2d {
     /** device list */
     int   *c_parmapOUT;
 
+    /** list of element to send out */
+    int   *elemapOUT;
+
     /* MPI data buffers */
     float *f_outQ, *f_inQ;
 
@@ -140,13 +155,14 @@ struct RKDG2d {
     float *f_LIFT;
 
     /* float geometric info */
+
     /** volume geometric factors */
-    float   *vgeo;
+    float *vgeo;
     /** surface geometric factors */
-    float   *surfinfo;
+    float *surfinfo;
 
     /** trouble cell indicator, entry n is 1 if cell is trouble cell */
-    int *tcflag;
+    float *tcflag;
 
     /* float field storage (CPU) */
     float  *f_Q, *f_rhsQ, *f_resQ;

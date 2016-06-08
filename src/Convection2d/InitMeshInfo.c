@@ -20,8 +20,25 @@
  */
 
 double InitMeshInfo(Mesh * mesh, int Nfields){
+
+    int procid = mesh->procid;
+
+#if defined DEBUG
+    printf("Procs %d: Entering InitMeshInfo\n", procid);
+#endif
+
     printf("Np = %d, BSIZE = %d\n", p_Np, BSIZE);
 
+
+    /* allocate memory for variables */
+    mesh->f_Q    = (float*) calloc(mesh->K*BSIZE*p_Nfields, sizeof(float));
+    mesh->f_rhsQ = (float*) calloc(mesh->K*BSIZE*p_Nfields, sizeof(float));
+    mesh->f_resQ = (float*) calloc(mesh->K*BSIZE*p_Nfields, sizeof(float));
+
+    mesh->f_s = (float*) calloc(mesh->K*BSIZE*2, sizeof(float));
+
+    mesh->tcflag = (float *) calloc(mesh->K, sizeof(float));
+    mesh->ciradius = (double*) calloc(mesh->K, sizeof(double));
 
     /*  float LIFT  */
     int sz = p_Np*(p_Nfp)*(p_Nfaces)*sizeof(float);
@@ -48,7 +65,8 @@ double InitMeshInfo(Mesh * mesh, int Nfields){
         }
     }
 
-    /* volume geometric factor */
+    /* volume geometric factor and
+     * radius circumscribed circle  */
     double *drdx, *dsdx, *drdy, *dsdy, *J;
     sz = p_Np*sizeof(double);
 
@@ -58,7 +76,7 @@ double InitMeshInfo(Mesh * mesh, int Nfields){
     dsdy = (double*) malloc(sz);
     J    = (double*) malloc(sz);
 
-    mesh->vgeo = (float*) calloc(4*mesh->K*p_Np, sizeof(float));
+    mesh->vgeo = (float*) calloc(5*mesh->K*p_Np, sizeof(float));
     sk = 0;
     for(k=0;k<mesh->K;++k){
         GeometricFactors(mesh, k, drdx, dsdx, drdy, dsdy, J);
@@ -67,7 +85,11 @@ double InitMeshInfo(Mesh * mesh, int Nfields){
             mesh->vgeo[sk++] = drdy[n];
             mesh->vgeo[sk++] = dsdx[n];
             mesh->vgeo[sk++] = dsdy[n];
+            mesh->vgeo[sk++] = J[n];
+
+            mesh->ciradius[k] += J[n]*mesh->wv[n];
         }
+        mesh->ciradius[k] = sqrt(mesh->ciradius[k]/M_PI);
     }
 
     /* surfinfo (vmapM, vmapP, Fscale, Bscale, nx, ny, nz, 0) */
@@ -110,7 +132,7 @@ double InitMeshInfo(Mesh * mesh, int Nfields){
                 mesh->surfinfo[sk++] = idM;
                 mesh->surfinfo[sk++] = idP;
                 mesh->surfinfo[sk++] = sJk[f]/(2*J[mesh->Fmask[f][m]]);
-                mesh->surfinfo[sk++] = (idM==idP)?-1.:1.;
+                mesh->surfinfo[sk++] = sJk[f];
                 mesh->surfinfo[sk++] = nxk[f];
                 mesh->surfinfo[sk++] = nyk[f];
             }
@@ -127,6 +149,10 @@ double InitMeshInfo(Mesh * mesh, int Nfields){
     DestroyVector(nxk);
     DestroyVector(nyk);
     DestroyVector(sJk);
+
+#if defined DEBUG
+    printf("Procs %d: Leaving InitMeshInfo\n", procid);
+#endif
 
     return dt;
 }

@@ -490,7 +490,7 @@ void PrintMesh ( Mesh *mesh ){
         fprintf(fig, "\n");
     }
 
-#if 1
+#if 0
     fprintf(fig, "\n Node coordinate = \n");
     for (n = 0; n < mesh->K; n ++){
         for( m = 0; m < p_Np; m++)

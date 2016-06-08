@@ -10,11 +10,17 @@ Ncfile* SetupOutput(Mesh *mesh, char* casename){
     Ncfile * outfile = (Ncfile *) calloc(1, sizeof(Ncfile));
 
     int ret, ncfile, ndims;
-    int node_dim, time_dim, var_dim[2];
-    int xid, yid, timeid, varid;
+    int ele_dim, node_dim, time_dim, var_dim[2];
+    int xid, yid, timeid, tcid, varid;
     char filename[DSET_NAME_LEN];
+    int procid=mesh->procid, nprocs=mesh->nprocs;
 
-    ret = snprintf(filename, DSET_NAME_LEN, "%s.%d-%d.nc", casename, mesh->procid, mesh->nprocs);
+#if defined DEBUG
+    printf("Procs %d: Entering SetupOutput\n", procid);
+#endif
+
+
+    ret = snprintf(filename, DSET_NAME_LEN, "%s.%d-%d.nc", casename, procid, nprocs);
     // check file name length
     if (ret >= DSET_NAME_LEN) {
         fprintf(stderr, "file name too long \n");
@@ -27,6 +33,9 @@ Ncfile* SetupOutput(Mesh *mesh, char* casename){
     if (ret != NC_NOERR) handle_error(ret, __LINE__);
 
     // define dimensions
+    ret = ncmpi_def_dim(ncfile, "ele", mesh->K, &ele_dim);
+    if (ret != NC_NOERR) handle_error(ret, __LINE__);
+
     ret = ncmpi_def_dim(ncfile, "node", p_Np*mesh->K, &node_dim);
     if (ret != NC_NOERR) handle_error(ret, __LINE__);
 
@@ -49,6 +58,11 @@ Ncfile* SetupOutput(Mesh *mesh, char* casename){
     ret = ncmpi_def_var(ncfile, "var", NC_FLOAT, ndims, var_dim, &varid);
     if (ret != NC_NOERR) handle_error(ret, __LINE__);
 
+    var_dim[0] = time_dim; var_dim[1] = ele_dim; // set var dimensions
+
+    ret = ncmpi_def_var(ncfile, "tcflag", NC_FLOAT, ndims, var_dim, &tcid);
+    if (ret != NC_NOERR) handle_error(ret, __LINE__);
+
     // end definations
     ret = ncmpi_enddef(ncfile); if (ret != NC_NOERR) handle_error(ret, __LINE__);
 
@@ -61,9 +75,15 @@ Ncfile* SetupOutput(Mesh *mesh, char* casename){
 
     // set to outfile field
     outfile->ncfile = ncfile;
-    outfile->varid = (int *)calloc(2, sizeof(int));
+    outfile->varid = (int *)calloc(3, sizeof(int));
 
-    outfile->varid[0] = timeid; outfile->varid[1] = varid;
+    outfile->varid[0] = timeid;
+    outfile->varid[1] = varid;
+    outfile->varid[2] = tcid;
+
+#if defined DEBUG
+    printf("Procs %d: Leaving SetupOutput\n", procid);
+#endif
 
     return outfile;
 }
@@ -73,19 +93,29 @@ void PutVar(Ncfile * outfile, int outStep, double time, Mesh* mesh){
     MPI_Offset start_v[2], count_v[2];
     MPI_Offset start_t, count_t;
 
-    // put time
+    /* put time */
     start_t = outStep; // start index
     count_t = 1;       // length
     ret = ncmpi_put_vara_double_all(outfile->ncfile, outfile->varid[0], &start_t, &count_t, &time);
     if (ret != NC_NOERR) handle_error(ret, __LINE__);
 
-    // put var
+    /* put var */
     start_v[0] = outStep;
     start_v[1] = 0;
     count_v[0] = 1;
     count_v[1] = p_Np*mesh->K;
     ret = ncmpi_put_vara_float_all(outfile->ncfile, outfile->varid[1], start_v, count_v, mesh->f_Q);
     if (ret != NC_NOERR) handle_error(ret, __LINE__);
+
+    /* put trouble cell flag */
+    start_v[0] = outStep;
+    start_v[1] = 0;
+    count_v[0] = 1;
+    count_v[1] = mesh->K;
+    ret = ncmpi_put_vara_float_all(outfile->ncfile, outfile->varid[2], start_v, count_v, mesh->tcflag);
+//    ret = ncmpi_put_vara_double_all(outfile->ncfile, outfile->varid[2], start_v, count_v, mesh->ciradius);
+    if (ret != NC_NOERR) handle_error(ret, __LINE__);
+
 
 }
 

@@ -24,12 +24,13 @@ void ConvectionRun2d(Mesh *mesh, Ncfile * outfile, double FinalTime, double dt){
             ConvectionRHS2d(mesh, fa, fb, fdt);
         }
 
+        DisDetector(mesh); /* discontinuity detector */
+
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
 
         PutVar(outfile, counter, time, mesh);
         counter += 1;
-
     }
 
     double mpitime1 = MPI_Wtime();

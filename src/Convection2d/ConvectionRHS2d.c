@@ -23,7 +23,7 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
     float *f_inQ  = mesh->f_inQ;
     float *f_outQ  = mesh->f_outQ;
 
-    int p;
+    int p, Nout;
 
     /* mpi request buffer */
     MPI_Request *mpi_out_requests = (MPI_Request*) calloc(mesh->nprocs, sizeof(MPI_Request));
@@ -37,16 +37,16 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
     int sk = 0, Nmess = 0, uk;
     for(p=0;p<mesh->nprocs;++p){
         if(p!=mesh->procid){
-            int Nout = mesh->Npar[p]*p_Nfields*p_Nfp; // # of variables send to process p
+            Nout = mesh->Npar[p]*p_Nfields*p_Nfp; // # of variables send to process p
             if(Nout){
                 /* symmetric communications (different ordering) */
                 MPI_Isend(f_outQ+sk, Nout, MPI_FLOAT, p, 6666+p,            MPI_COMM_WORLD, mpi_out_requests +Nmess);
                 MPI_Irecv(f_inQ+sk,  Nout, MPI_FLOAT, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_in_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;
-            }// if
-        }// if
-    }// for
+            }
+        }
+    }
 
     /* NOTE: should be local memory */
     float  Qk[p_Np*p_Nfields];
@@ -79,6 +79,7 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 
             const float drdx = vgeo[geoid++], drdy = vgeo[geoid++];
             const float dsdx = vgeo[geoid++], dsdy = vgeo[geoid++];
+            geoid++; /* volume Jaocbi */
 
             float rhs = 0;
 
@@ -99,8 +100,8 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 
             int id = p_Nfields*(k*p_Np + n);
             f_rhsQ[id] = rhs;
-        }// for n
-    }// for k
+        }
+    }
 
     /* DO RECV */
     MPI_Status *instatus  = (MPI_Status*) calloc(mesh->nprocs, sizeof(MPI_Status));

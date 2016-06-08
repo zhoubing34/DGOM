@@ -3,6 +3,34 @@
 
 /**
  * @brief
+ * Check element parallel pair
+ *
+ * @details
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ */
+void PrintBuilMapsLog(FILE *fig, Mesh *mesh){
+
+    int parEtotalout = mesh->parNtotalout/p_Nfp;
+    int n, f;
+    for(n=0;n<parEtotalout;n++){
+        fprintf(fig, "%d, ", mesh->elemapOUT[n]);
+    }
+    fprintf(fig, "\n");
+
+    fprintf(fig, "EToE = \n");
+    for(n=0;n<mesh->K;n++){
+        for(f=0;f<p_Nfaces;f++)
+            fprintf(fig, "%d, ", mesh->EToE[n][f]);
+
+        fprintf(fig, "\n");
+    }
+}
+
+/**
+ * @brief
  * Build node pairing and collect outgoing node index
  *
  * @details
@@ -15,6 +43,10 @@ void BuildMaps(Mesh *mesh){
 
     int nprocs = mesh->nprocs;
     int procid = mesh->procid;
+
+#if defined DEBUG
+    printf("Procs %d: Entering BuildMaps\n", procid);
+#endif
 
     int K = mesh->K;
     int Nfaces = mesh->Nfaces;
@@ -109,6 +141,7 @@ void BuildMaps(Mesh *mesh){
         }
     }
 
+    /* number of nodes adjacent to each process */
     int *skP = BuildIntVector(nprocs);
 
     /* send coordinates in local order */
@@ -174,12 +207,12 @@ void BuildMaps(Mesh *mesh){
     mesh->parmapOUT = BuildIntVector(mesh->parNtotalout);
 
     /* now match up local nodes with the requested (recv'ed nodes) */
-    int sk = 0;
+    int sk = 0, fld;
     for(p2=0;p2<nprocs;++p2){
         /* for each received face */
         for(m=0;m<skP[p2];++m){
-            k1 = Erecv[p2][m];
-            f1 = Frecv[p2][m];
+            k1 = Erecv[p2][m]; /* adjacent element index */
+            f1 = Frecv[p2][m]; /* adjacent face */
             x2 = xrecv[p2][m];
             y2 = yrecv[p2][m];
 
@@ -193,8 +226,8 @@ void BuildMaps(Mesh *mesh){
                 d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))/(sJk[f1]*sJk[f1]);
 
                 if(d12<NODETOL){
-                    int fld;
                     for(fld=0;fld<p_Nfields;++fld){
+                        /* sk and node index determine the map relationship */
                         mesh->parmapOUT[sk++] = p_Nfields*(k1*p_Np+mesh->Fmask[f1][n1]) + fld;
                     }
                 }
@@ -202,17 +235,6 @@ void BuildMaps(Mesh *mesh){
         }
     }
 
-    /* deallocate mem */
-    DestroyVector(nxk);
-    DestroyVector(nyk);
-    DestroyVector(sJk);
-
-    free(xsendrequests); free(ysendrequests);
-    free(xrecvrequests); free(yrecvrequests);
-    free(Esendrequests); free(Fsendrequests);
-    free(Erecvrequests); free(Frecvrequests);
-
-    free(status);
 
     /* create incoming node map */
     int parcnt = -1;
@@ -234,5 +256,57 @@ void BuildMaps(Mesh *mesh){
     mesh->f_outQ = (float*) calloc(mesh->parNtotalout+1, sizeof(float));
     mesh->f_inQ  = (float*) calloc(mesh->parNtotalout+1, sizeof(float));
 
+
+    /* build maps between element send buffer */
+    int parEtotalout = mesh->parNtotalout/p_Nfp; /* total num of parallel faces*/
+    mesh->elemapOUT = BuildIntVector(parEtotalout);
+
+    int k;
+    sk = 0;
+    /* build map from f_inE to element */
+    for(p2=0;p2<nprocs;p2++){
+        for(m=0;m<mesh->Npar[p2];m++){
+            for(k=0;k<K;k++){
+                for(f1=0;f1<Nfaces;f1++){
+                    if(mesh->EToP[k][f1]==p2 && p2!=procid)
+                        mesh->elemapOUT[sk++] = k;
+                }
+            }
+        }
+    }
+
+    parcnt=-1;
+    for(p2=0;p2<nprocs;p2++){
+        for(k=0;k<K;k++){
+            for(f1=0;f1<Nfaces;f1++){
+                if(mesh->EToP[k][f1]==p2 && p2!=procid) {
+                    mesh->EToE[k][f1] = parcnt;
+                    --parcnt;
+                }
+            }
+        }
+    }
+
+    /* deallocate mem */
+    DestroyVector(nxk);
+    DestroyVector(nyk);
+    DestroyVector(sJk);
+    DestroyIntVector(skP);
+
+    free(xsendrequests); free(ysendrequests);
+    free(xrecvrequests); free(yrecvrequests);
+    free(Esendrequests); free(Fsendrequests);
+    free(Erecvrequests); free(Frecvrequests);
+
+    free(status);
+
+//    char funname[24] = "elepar";
+//    FILE *fig = CreateLog(funname, nprocs, procid);
+//    PrintBuilMapsLog(fig, mesh);
+//    fclose(fig);
+
+#if defined DEBUG
+    printf("Procs %d: Leaving BuildMaps\n", procid);
+#endif
 }
 

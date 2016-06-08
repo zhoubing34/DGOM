@@ -1,12 +1,18 @@
 #include "Convection2d/Convection2d.h"
 
-/*
+/**
+ * @brief
  * Set initial condition
  *
- *  1. scalar distribution
- *  2. constant velocity field
+ * @details
+ * Set initial scalar field distributino,
+ * 1. scalar distribution
+ * 2. constant velocity field
  *
- * */
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ */
 void InitData(Mesh * mesh){
     double sigma = 125*1e3/(33*33);
     double xc, yc, t;
@@ -15,17 +21,15 @@ void InitData(Mesh * mesh){
     const int K = mesh->K;
     int k, n, sk=0;
 
-    // initial position
+    int procid = mesh->procid;
+#if defined DEBUG
+    if(!procid) printf("Root: Entering InitData\n");
+#endif
+
+    /* initial position */
     xc = 0.0; yc = 0.6;
 
-    // allocate memory
-    mesh->f_Q    = (float*) calloc(mesh->K*BSIZE*p_Nfields, sizeof(float));
-    mesh->f_rhsQ = (float*) calloc(mesh->K*BSIZE*p_Nfields, sizeof(float));
-    mesh->f_resQ = (float*) calloc(mesh->K*BSIZE*p_Nfields, sizeof(float));
-
-    mesh->f_s = (float*) calloc(mesh->K*BSIZE*2, sizeof(float));
-
-    // initial scalar field
+    /* initial scalar field */
     for(k=0;k<K;++k){
         for(n=0;n<p_Np;++n){
 //            mesh->f_Q[sk++] = mesh->x[k][n];
@@ -35,16 +39,17 @@ void InitData(Mesh * mesh){
         }
     }
 
-
+    /* flow rate field */
     w = 5*M_PI/6;
     sk=0;
-    // flow rate field
     for (k=0; k<K; ++k){
         for (n=0; n<p_Np; ++n){
-//            mesh->f_s[sk++] = 1;
-//            mesh->f_s[sk++] = 0;
             mesh->f_s[sk++] = (float)(-w * mesh->y[k][n]); // flow rate at x-coordinate
             mesh->f_s[sk++] = (float)(w * mesh->x[k][n]);  // flow rate at y-coordinate
         }
     }
+
+#if defined DEBUG
+    if(!procid) printf("Root: Leaving InitData\n");
+#endif
 }

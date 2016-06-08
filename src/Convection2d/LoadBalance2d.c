@@ -28,7 +28,9 @@ void LoadBalance(Mesh *mesh){
     double **GX = mesh->GX;
     double **GY = mesh->GY;
 
+#if defined DEBUG
     if(!procid) printf("Root: Entering LoadBalance\n");
+#endif
 
     int Nverts = mesh->Nverts;
 
@@ -238,9 +240,14 @@ void LoadBalance(Mesh *mesh){
     free(xoutlist);
     free(youtlist);
 
-    free(inrequests);   free(outrequests);
-    free(xinrequests);  free(xoutrequests);
-    free(yinrequests);  free(youtrequests);
+    free(inrequests);
+    free(outrequests);
+    free(xinrequests);
+    free(xoutrequests);
+    free(yinrequests);
+    free(youtrequests);
 
+#if defined DEBUG
     if(!procid) printf("Root: Leaving LoadBalance\n");
+#endif
 }

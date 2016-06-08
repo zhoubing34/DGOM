@@ -97,61 +97,45 @@ void SaveMatrix(char *filename, double **A, int Nrows, int Ncols){
   fclose(fp);
 }
 
-/*
-int trianglebase(Mesh *mesh, int k){
+/**
+ * @brief
+ * Create log file to check function routine
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ * @param[in] funname Function name
+ * @param[in] nprocs Number of process
+ * @param[in] rank Index of local process
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * fig      | FILE*    | file handle
+ *
+ * @attention
+ * Remember to close file with file handle
+ *
+ * @note
+ * Use user spicific write routine to print log file
+ */
+FILE* CreateLog(char *funname, int nprocs, int rank){
 
-  double x1 = mesh->GX[k][0];
-  double x2 = mesh->GX[k][1];
-  double x3 = mesh->GX[k][2];
+#ifndef DSET_NAME_LEN
+#define DSET_NAME_LEN 1024
+#endif
 
-  double y1 = mesh->GY[k][0];
-  double y2 = mesh->GY[k][1];
-  double y3 = mesh->GY[k][2];
+  int ret;
+  char filename[DSET_NAME_LEN];
 
-  double d1 = (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2);
-  double d2 = (x2-x3)*(x2-x3) + (y2-y3)*(y2-y3);
-  double d3 = (x3-x1)*(x3-x1) + (y3-y1)*(y3-y1);
+  ret = snprintf(filename, DSET_NAME_LEN, "%s%d-%d.txt", funname, rank, nprocs);
+  if (ret >= DSET_NAME_LEN) {
+    fprintf(stderr, "name too long \n");
+    exit(-1);
+  }
 
-  // find maximum length face
-  if(d1>=d2 && d1>=d3)
-    return 0;
-  else if(d2>=d3)
-    return 1;
-  
-  return 2;
+  FILE *fig = fopen(filename, "w");
+
+  return fig;
 }
-
-
-int tetbase(Mesh *mesh, int k){
-
-  double x1 = mesh->GX[k][0];
-  double x2 = mesh->GX[k][1];
-  double x3 = mesh->GX[k][2];
-  double x4 = mesh->GX[k][3];
-
-  double y1 = mesh->GY[k][0];
-  double y2 = mesh->GY[k][1];
-  double y3 = mesh->GY[k][2];
-  double y4 = mesh->GY[k][3];
-
-  double z1 = mesh->GZ[k][0];
-  double z2 = mesh->GZ[k][1];
-  double z3 = mesh->GZ[k][2];
-  double z4 = mesh->GZ[k][3];
-
-  double d1 = (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2);
-  double d2 = (x2-x3)*(x2-x3) + (y2-y3)*(y2-y3) + (z2-z3)*(z2-z3);
-  double d3 = (x3-x4)*(x3-x4) + (y3-y4)*(y3-y4) + (z3-z4)*(z3-z4);
-  double d4 = (x4-x1)*(x4-x1) + (y4-y1)*(y4-y1) + (z4-z1)*(z4-z1);
-
-  // find maximum length face
-  if(d1>=d2 && d1>=d3 && d1>=d4)
-    return 0;
-  else if(d2>=d3 && d2>=d4)
-    return 1;
-  else if(d3>=d4)
-    return 2;
-  
-  return 3;
-}
-*/
