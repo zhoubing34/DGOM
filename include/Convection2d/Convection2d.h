@@ -8,11 +8,12 @@
 #include <stdio.h>
 #include <math.h>
 
-#define DEBUG
+/* print log file */
+//#define DEBUG
 
 /** element shape */
-//#define TRI
-#define QUAD
+#define TRI
+//#define QUAD
 
 /** number of unknown variables */
 #define p_Nfields 1
@@ -69,6 +70,9 @@ void ConvectionFinish(Mesh *, Ncfile *);
 
 /* DsiDetector.c */
 void DisDetector(Mesh *);
+
+/* LimiterBJ2d.c */
+void LimiterBJ2d(Mesh *);
 
 /* Utils.c */
 FILE* CreateLog(char *, int, int);

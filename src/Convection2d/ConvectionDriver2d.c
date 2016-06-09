@@ -85,8 +85,9 @@ int main(int argc, char **argv){
     /* set node connection */
     BuildMaps(mesh);
 
-#if 0 /* check mesh */
-    PrintMesh(mesh);
+#if defined DEBUG /* check mesh */
+
+    PrintMeshConnection(mesh);
 #endif
 
     /* init mesh coeff */

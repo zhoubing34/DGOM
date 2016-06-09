@@ -15,16 +15,23 @@ void PrintBuilMapsLog(FILE *fig, Mesh *mesh){
 
     int parEtotalout = mesh->parNtotalout/p_Nfp;
     int n, f;
+
+    fprintf(fig, "Npar = \n");
+    for(n=0;n<mesh->nprocs;n++){
+        fprintf(fig, "%d, ", mesh->Npar[n]);
+    }
+    fprintf(fig, "\n\n");
+
+    fprintf(fig, "elemapOUT = \n");
     for(n=0;n<parEtotalout;n++){
         fprintf(fig, "%d, ", mesh->elemapOUT[n]);
     }
-    fprintf(fig, "\n");
+    fprintf(fig, "\n\n");
 
     fprintf(fig, "EToE = \n");
     for(n=0;n<mesh->K;n++){
         for(f=0;f<p_Nfaces;f++)
             fprintf(fig, "%d, ", mesh->EToE[n][f]);
-
         fprintf(fig, "\n");
     }
 }
@@ -260,14 +267,17 @@ void BuildMaps(Mesh *mesh){
     /* build maps between element send buffer */
     int parEtotalout = mesh->parNtotalout/p_Nfp; /* total num of parallel faces*/
     mesh->elemapOUT = BuildIntVector(parEtotalout);
+    mesh->parFtotalout = parEtotalout;
 
     int k;
     sk = 0;
     /* build map from f_inE to element */
     for(p2=0;p2<nprocs;p2++){
-        for(m=0;m<mesh->Npar[p2];m++){
+//        if(procid) printf("Npar[%d] = %d\n", mesh->Npar[p2]);
+        if(mesh->Npar[p2]){
             for(k=0;k<K;k++){
                 for(f1=0;f1<Nfaces;f1++){
+//                    if(!procid) printf("EToP[%d][%d] = %d\n", k, f1, mesh->EToP[k][f1]);
                     if(mesh->EToP[k][f1]==p2 && p2!=procid)
                         mesh->elemapOUT[sk++] = k;
                 }
@@ -287,6 +297,10 @@ void BuildMaps(Mesh *mesh){
         }
     }
 
+    /* MPI buffers for element info */
+    mesh->f_inE = (float*) calloc(parEtotalout, sizeof(float));
+    mesh->f_outE = (float*) calloc(parEtotalout, sizeof(float));
+
     /* deallocate mem */
     DestroyVector(nxk);
     DestroyVector(nyk);
@@ -300,10 +314,12 @@ void BuildMaps(Mesh *mesh){
 
     free(status);
 
-//    char funname[24] = "elepar";
-//    FILE *fig = CreateLog(funname, nprocs, procid);
-//    PrintBuilMapsLog(fig, mesh);
-//    fclose(fig);
+#if defined DEBUG
+    char funname[24]="BuildMaps";
+    FILE *fig = CreateLog(funname, mesh->nprocs, mesh->procid);
+    PrintBuilMapsLog(fig, mesh);
+    fclose(fig);
+#endif
 
 #if defined DEBUG
     printf("Procs %d: Leaving BuildMaps\n", procid);

@@ -46,9 +46,9 @@ void DisDetector(Mesh *mesh){
 
     double inlen, maxQ;
     /* radius of the circumscribed circle */
-    float  *f_Q    = mesh->f_Q;
-    float  *f_s    = mesh->f_s;
-    float  *surfinfo = mesh->surfinfo;
+    const float  *f_Q    = mesh->f_Q;
+    const float  *f_s    = mesh->f_s;
+    const float  *surfinfo = mesh->surfinfo;
     float  dC;
 
     float *f_inQ  = mesh->f_inQ;
@@ -126,7 +126,7 @@ void DisDetector(Mesh *mesh){
         }
 
         /* NOTE: buffer element k into local storage */
-        float *qpt = f_Q + p_Nfields*p_Np*k;
+        const float *qpt = f_Q + p_Nfields*p_Np*k;
 
         maxQ = 0;
         for(n=0;n<p_Nfields*p_Np;n++){
@@ -136,7 +136,7 @@ void DisDetector(Mesh *mesh){
 //        double disQ = I;
 //        double mQ = maxQ;
 
-        maxQ *= mesh->ciradius[k];
+        maxQ *= powf(mesh->ciradius[k], (float)(p_N+1)/2 );
         maxQ *= inlen;
 
         /* check if denominator greater than 0 */
@@ -146,14 +146,19 @@ void DisDetector(Mesh *mesh){
             I = 0;
         }
 
-        if (I > DETECTOR)
-            mesh->tcflag[k] = I;
+        /* assignment */
+        mesh->tcflag[k] = I;
 
         /* Print log information */
 //        PrintDisDetectorLog(fig, k, inlen, disQ, mQ, I, mesh->tcflag[k]);
     }
 
 //    CloseLog(fig);
+
+    /* make sure all messages went out */
+    MPI_Status *outstatus  = (MPI_Status*) calloc(mesh->nprocs, sizeof(MPI_Status));
+    MPI_Waitall(Nmess, mpi_out_requests, outstatus);
+    free(outstatus);
 
     free(mpi_out_requests);
     free(mpi_in_requests);

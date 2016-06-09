@@ -22,6 +22,7 @@
 double InitMeshInfo(Mesh * mesh, int Nfields){
 
     int procid = mesh->procid;
+    int K = mesh->K;
 
 #if defined DEBUG
     printf("Procs %d: Entering InitMeshInfo\n", procid);
@@ -31,14 +32,15 @@ double InitMeshInfo(Mesh * mesh, int Nfields){
 
 
     /* allocate memory for variables */
-    mesh->f_Q    = (float*) calloc(mesh->K*BSIZE*p_Nfields, sizeof(float));
-    mesh->f_rhsQ = (float*) calloc(mesh->K*BSIZE*p_Nfields, sizeof(float));
-    mesh->f_resQ = (float*) calloc(mesh->K*BSIZE*p_Nfields, sizeof(float));
+    mesh->f_Q    = (float*) calloc(K*BSIZE*p_Nfields, sizeof(float));
+    mesh->f_rhsQ = (float*) calloc(K*BSIZE*p_Nfields, sizeof(float));
+    mesh->f_resQ = (float*) calloc(K*BSIZE*p_Nfields, sizeof(float));
 
-    mesh->f_s = (float*) calloc(mesh->K*BSIZE*2, sizeof(float));
+    mesh->f_s = (float*) calloc(K*BSIZE*2, sizeof(float));
 
-    mesh->tcflag = (float *) calloc(mesh->K, sizeof(float));
-    mesh->ciradius = (double*) calloc(mesh->K, sizeof(double));
+    mesh->tcflag    = (float *) calloc(K, sizeof(float));
+    mesh->area      = (float *) calloc(K, sizeof(float));
+    mesh->ciradius  = (float*) calloc(K, sizeof(float));
 
     /*  float LIFT  */
     int sz = p_Np*(p_Nfp)*(p_Nfaces)*sizeof(float);
@@ -76,20 +78,23 @@ double InitMeshInfo(Mesh * mesh, int Nfields){
     dsdy = (double*) malloc(sz);
     J    = (double*) malloc(sz);
 
-    mesh->vgeo = (float*) calloc(5*mesh->K*p_Np, sizeof(float));
+    mesh->vgeo = (float*) calloc(4*mesh->K*p_Np, sizeof(float));
+    mesh->J    = (float*) calloc(K*p_Np, sizeof(float));
+    int sj = 0;
     sk = 0;
     for(k=0;k<mesh->K;++k){
         GeometricFactors(mesh, k, drdx, dsdx, drdy, dsdy, J);
         for(n=0;n<p_Np;n++){
-            mesh->vgeo[sk++] = drdx[n];
-            mesh->vgeo[sk++] = drdy[n];
-            mesh->vgeo[sk++] = dsdx[n];
-            mesh->vgeo[sk++] = dsdy[n];
-            mesh->vgeo[sk++] = J[n];
+            mesh->vgeo[sk++] = (float) drdx[n];
+            mesh->vgeo[sk++] = (float) drdy[n];
+            mesh->vgeo[sk++] = (float) dsdx[n];
+            mesh->vgeo[sk++] = (float) dsdy[n];
+//            mesh->vgeo[sk++] = J[n];
+            mesh->J[sj++] = (float) J[n];
 
-            mesh->ciradius[k] += J[n]*mesh->wv[n];
+            mesh->area[k] += (float) J[n]*mesh->wv[n];
         }
-        mesh->ciradius[k] = sqrt(mesh->ciradius[k]/M_PI);
+        mesh->ciradius[k] = sqrt(mesh->area[k]/M_PI);
     }
 
     /* surfinfo (vmapM, vmapP, Fscale, Bscale, nx, ny, nz, 0) */

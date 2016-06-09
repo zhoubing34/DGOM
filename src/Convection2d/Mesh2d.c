@@ -483,13 +483,6 @@ void PrintMesh ( Mesh *mesh ){
         fprintf(fig, "\n");
     }
 
-    fprintf(fig, "\n Element to vertex connectivity = \n");
-    for(n=0;n<mesh->K;++n){
-        for( m = 0; m < mesh->Nverts; m++)
-            fprintf(fig, "%d,\t", mesh->EToV[n][m]);
-        fprintf(fig, "\n");
-    }
-
 #if 0
     fprintf(fig, "\n Node coordinate = \n");
     for (n = 0; n < mesh->K; n ++){

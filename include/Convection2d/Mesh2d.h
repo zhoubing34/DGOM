@@ -132,13 +132,20 @@ struct RKDG2d {
     /** face of parallel nodes */
     int    **parF;
 
+    /* volume jacobi at nodes */
+    float *J;
     /** radius of the circumscribed circle */
-    double *ciradius;
+    float *ciradius;
+
+    /* area of each ele */
+    float *area;
 
     /* MPI stuff */
 
     /** total number of nodes to send */
     int    parNtotalout;
+    /** total number of faces to send */
+    int    parFtotalout;
     /** list of nodes to send out */
     int   *parmapOUT;
     /** device list */
@@ -146,6 +153,9 @@ struct RKDG2d {
 
     /** list of element to send out */
     int   *elemapOUT;
+
+    /* MPI data buffers for element info */
+    float *f_outE, *f_inE;
 
     /* MPI data buffers */
     float *f_outQ, *f_inQ;

@@ -8,6 +8,9 @@ void ConvectionRun2d(Mesh *mesh, Ncfile * outfile, double FinalTime, double dt){
 
     double mpitime0 = MPI_Wtime();
 
+    PutVar(outfile, counter, time, mesh);
+    counter += 1;
+
     /* outer time step loop  */
     while (time<FinalTime){
 
@@ -22,15 +25,17 @@ void ConvectionRun2d(Mesh *mesh, Ncfile * outfile, double FinalTime, double dt){
             const float fb = (float)mesh->rk4b[INTRK-1];
 
             ConvectionRHS2d(mesh, fa, fb, fdt);
-        }
 
-        DisDetector(mesh); /* discontinuity detector */
+            DisDetector(mesh); /* discontinuity detector */
+            LimiterBJ2d(mesh);
+        }
 
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
 
         PutVar(outfile, counter, time, mesh);
         counter += 1;
+
     }
 
     double mpitime1 = MPI_Wtime();

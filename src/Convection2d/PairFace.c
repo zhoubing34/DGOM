@@ -222,6 +222,14 @@ void PrintMeshConnection(Mesh* mesh){
     fprintf(fig, "\n K = %d\n", mesh->K);
     fprintf(fig, "\n Nv = %d\n", mesh->Nv);
     fprintf(fig, "\n Nverts = %d\n", mesh->Nverts);
+
+    fprintf(fig, "\n Element to vertex connectivity = \n");
+    for(n=0;n<mesh->K;++n){
+        for( m = 0; m < mesh->Nverts; m++)
+            fprintf(fig, "%d,\t", mesh->EToV[n][m]);
+        fprintf(fig, "\n");
+    }
+
     fprintf(fig, "\n Element to element connectivity: \n");
     for (n = 0; n < mesh->K; n ++){
         for( m = 0; m < mesh->Nfaces; m++)

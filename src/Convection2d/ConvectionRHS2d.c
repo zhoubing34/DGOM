@@ -79,7 +79,6 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
 
             const float drdx = vgeo[geoid++], drdy = vgeo[geoid++];
             const float dsdx = vgeo[geoid++], dsdy = vgeo[geoid++];
-            geoid++; /* volume Jaocbi */
 
             float rhs = 0;
 
