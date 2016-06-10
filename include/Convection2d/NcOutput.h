@@ -20,6 +20,8 @@ static void handle_error(int status, int lineno)
     MPI_Abort(MPI_COMM_WORLD, 1);
 }
 
+/* check if it returns error */
+#define NC_ERROR if(ret != NC_NOERR) handle_error(ret, __LINE__);
 
 typedef struct Ncfile {
     /** nc file handle */
@@ -30,9 +32,8 @@ typedef struct Ncfile {
     char * filename;
 }Ncfile;
 
-
+/* NcOutput.c */
 Ncfile* SetupOutput(Mesh *, char* );
-
 void PutVar(Ncfile * , int , double , Mesh * );
 
 #endif

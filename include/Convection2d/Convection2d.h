@@ -11,7 +11,7 @@
 /* print log file */
 //#define DEBUG
 
-/** element shape */
+/* element shape */
 #define TRI
 //#define QUAD
 

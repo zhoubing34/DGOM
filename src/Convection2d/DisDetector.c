@@ -1,6 +1,13 @@
 #include "Convection2d/Convection2d.h"
 
-
+/**
+ * @brief
+ * Check calculation with writing to log file
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ */
 void PrintDisDetectorLog(FILE *fig, int k,
                          double len, double disQ,
                          double maxQ, float I, float flag){
@@ -16,27 +23,27 @@ void PrintDisDetectorLog(FILE *fig, int k,
  * The discontinuity detector \f$I_j\f$ of jth cell is obtained from
  * Krivodonova et. al (2003) and giving as
  * \f[ I_j = \frac{ \left| \int_{\partial \Omega_j^-} \left( Q_j - Q_{nb_j}
- * \right) ds \right| }{ r \left| \partial \Omega_j^- \right| \left\|Q_j \right\| } \f]
+ * \right) ds \right| }{ r \left| \partial \Omega_j \right| \left\|Q_j \right\| } \f]
  *
  * where \f$ r \f$ is the radius of the circumscribed circle of jth cell and
- * \f$ \partial \Omega_j^- \f$ is the inflow boundary with \f$ \vec{u} \cdot \vec{n} <0 \f$.
+ * \f$ \partial \Omega_j \f$ is the total boundary length.
  *
  * @attention
- * The radius \f$r \f$ is not powered by \f$(p+1)/2\f$, which is different with
- * original formular of Krivodonova et. al (2003).
+ * The radius \f$r \f$ is not powered by \f$(p+1)/2\f$ and the
+ * \f$ \left| \partial \Omega_j \right| \f$ in the denominator is the total length
+ * of all boundaries, which is different with original formular of Krivodonova et. al (2003).
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
  */
-
 void DisDetector(Mesh *mesh){
-//    /* log */
-//    FILE *fig;
-//    char name[24] = "DisDetectorLog";
-//
-//    /* create log file */
-//    fig = CreateLogFile(mesh, name);
+
+#if defined(DEBUG)
+    char name[24] = "DisDetector";
+    /* create log file */
+    FILE *fig = CreateLog(name, mesh->nprocs, mesh->procid);
+#endif
 
     /* discontinuity indicator */
     float I;
@@ -109,7 +116,7 @@ void DisDetector(Mesh *mesh){
                 const float vM = f_s[idM * 2 + 1];
                 const float un = (NXf * uM + NYf * vM);
 
-                if (un < 0){
+//                if (un < 0){
                     if (idP < 0) {
                         idP = p_Nfields * (-1 - idP);
                         dC = fabsf(f_inQ[idP] - f_Q[idM]);
@@ -120,7 +127,7 @@ void DisDetector(Mesh *mesh){
                     /* difference and edge length */
                     I     += mesh->w[m]*dC*SJc;
                     inlen += mesh->w[m]*SJc;
-                }
+//                }
             }
 
         }
@@ -133,10 +140,13 @@ void DisDetector(Mesh *mesh){
             maxQ = max(maxQ, fabsf(qpt[n]) );
         }
 
-//        double disQ = I;
-//        double mQ = maxQ;
+#if defined DEBUG
+        double disQ = I;
+        double mQ = maxQ;
+#endif
 
-        maxQ *= powf(mesh->ciradius[k], (float)(p_N+1)/2 );
+//        maxQ *= powf(mesh->ciradius[k], (float)(p_N+1)/2 );
+        maxQ *= mesh->ciradius[k];
         maxQ *= inlen;
 
         /* check if denominator greater than 0 */
@@ -149,11 +159,15 @@ void DisDetector(Mesh *mesh){
         /* assignment */
         mesh->tcflag[k] = I;
 
+#if defined(DEBUG)
         /* Print log information */
-//        PrintDisDetectorLog(fig, k, inlen, disQ, mQ, I, mesh->tcflag[k]);
+        PrintDisDetectorLog(fig, k, inlen, disQ, mQ, I, mesh->tcflag[k]);
+#endif
     }
 
-//    CloseLog(fig);
+#if defined(DEBUG)
+    fclose(fig);
+#endif
 
     /* make sure all messages went out */
     MPI_Status *outstatus  = (MPI_Status*) calloc(mesh->nprocs, sizeof(MPI_Status));

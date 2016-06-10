@@ -5,7 +5,7 @@
  * Set initial condition
  *
  * @details
- * Set initial scalar field distributino,
+ * Set initial scalar field distribution and the constant flow field
  * 1. scalar distribution
  * 2. constant velocity field
  *
@@ -21,8 +21,8 @@ void InitData(Mesh * mesh){
     const int K = mesh->K;
     int k, n, sk=0;
 
-    int procid = mesh->procid;
 #if defined DEBUG
+    int procid = mesh->procid;
     if(!procid) printf("Root: Entering InitData\n");
 #endif
 
@@ -32,7 +32,7 @@ void InitData(Mesh * mesh){
     /* initial scalar field */
     for(k=0;k<K;++k){
         for(n=0;n<p_Np;++n){
-//            mesh->f_Q[sk++] = mesh->x[k][n];
+
             t = -sigma * ( ( mesh->x[k][n] - xc )*( mesh->x[k][n] - xc )
                            + ( mesh->y[k][n] - yc )*( mesh->y[k][n] - yc ) );
             mesh->f_Q[sk++] = (float) exp(t);

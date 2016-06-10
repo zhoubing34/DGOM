@@ -3,7 +3,7 @@
 
 
 void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
-/* registers and temporary */
+    /* registers and temporary */
     register unsigned int k, n, geoid=0;
 
     /* mesh parameters */
@@ -107,7 +107,7 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
     MPI_Waitall(Nmess, mpi_in_requests, instatus);
     free(instatus);
 
-    // surface integral
+    /* surface integral */
     for(k=0;k<K;++k){
 
         /* NOTE: once k is known, all other indexing variables etc are derived */
@@ -179,6 +179,7 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
     MPI_Waitall(Nmess, mpi_out_requests, outstatus);
     free(outstatus);
 
+    /* deallocate mem */
     free(mpi_out_requests);
     free(mpi_in_requests);
 }

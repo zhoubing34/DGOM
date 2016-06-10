@@ -12,7 +12,7 @@
 /* default degree */
 #ifndef p_N
 /** default order */
-#define p_N 2
+#define p_N 3
 #endif
 
 /* default element number in mesh */
@@ -21,7 +21,7 @@
 #endif
 
 #define NODETOL   1e-4f
-#define DETECTOR  5.0f
+#define DETECTOR  1.0f
 
 /* element shape constant for triangle */
 #ifdef TRI
