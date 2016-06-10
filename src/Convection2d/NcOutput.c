@@ -13,14 +13,12 @@
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
- * @param[in] beginPos
- * @param[in] order order>0: year/month/date;order=0: date/month/year
- *
  * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * outfile  | Ncfile*  | pointer of output file
+ * Ncfile* outfile
+ * fields   | type      | description of value
+ * -------- |---------- |----------------------
+ * ncfile   | int       | netcdf file handle
+ * varid    | int*      | variable ids
  *
  * @warning
  * @attention
@@ -113,6 +111,7 @@ Ncfile* SetupOutput(Mesh *mesh, char* casename){
     return outfile;
 }
 
+
 void PutVar(Ncfile * outfile, int outStep, double time, Mesh* mesh){
     int ret;
     MPI_Offset start_f[2], count_f[2];
@@ -139,8 +138,6 @@ void PutVar(Ncfile * outfile, int outStep, double time, Mesh* mesh){
     count_f[0] = 1;
     count_f[1] = mesh->K;
     ret = ncmpi_put_vara_float_all(outfile->ncfile, outfile->varid[2], start_v, count_v, mesh->tcflag); NC_ERROR
-//    ret = ncmpi_put_vara_double_all(outfile->ncfile, outfile->varid[2], start_v, count_v, mesh->ciradius);
-
 
 }
 

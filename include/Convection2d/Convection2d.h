@@ -8,12 +8,15 @@
 #include <stdio.h>
 #include <math.h>
 
+/* apply slope limit */
+//#define LIMIT
+
 /* print log file */
 //#define DEBUG
 
 /* element shape */
-#define TRI
-//#define QUAD
+//#define TRI
+#define QUAD
 
 /** number of unknown variables */
 #define p_Nfields 1
@@ -76,6 +79,9 @@ void LimiterBJ2d(Mesh *);
 
 /* Utils.c */
 FILE* CreateLog(char *, int, int);
+
+/* Postprocess.c */
+void Postprocess(Mesh *);
 
 /* prototypes for storage functions */
 double **BuildMatrix(int Nrows, int Ncols);

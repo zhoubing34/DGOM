@@ -27,9 +27,8 @@ typedef struct Ncfile {
     /** nc file handle */
     int ncfile;
     /** array of variable id */
-    int * varid;
-    /** nc file name */
-    char * filename;
+    int *varid;
+
 }Ncfile;
 
 /* NcOutput.c */

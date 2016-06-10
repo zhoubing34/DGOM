@@ -3,11 +3,10 @@
  * ConvectionDriver2d.c
  *
  * @brief
- * 2d scalar convection problem
+ * 2D scalar convection problem main function
  */
 
 #include <Convection2d/Convection2d.h>
-#include <mpi.h>
 
 /**
  * @brief
@@ -26,7 +25,7 @@
  * In the future, these matrix will be generate from library.
  *
  * @todo
- * 1. slope limiter for high order shapes
+ * 1. add boundary conditions
  */
 int main(int argc, char **argv){
 
@@ -103,6 +102,9 @@ int main(int argc, char **argv){
     /* solve */
     ConvectionRun2d(mesh, outfile ,FinalTime, dt);
 
+    /* post process */
+    Postprocess(mesh);
+
     /* finish */
     ConvectionFinish(mesh, outfile);
 
@@ -110,6 +112,21 @@ int main(int argc, char **argv){
 }
 
 
+/**
+ * @brief
+ * Program Finalize
+ *
+ * @details
+ * Deallocate all the mem and close the NetCDF file
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ *
+ * @warning
+ * @attention
+ * @note
+ * @todo
+ */
 void ConvectionFinish(Mesh * mesh, Ncfile * outfile){
 
     int ret;

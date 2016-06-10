@@ -12,15 +12,16 @@
 /* default degree */
 #ifndef p_N
 /** default order */
-#define p_N 3
+#define p_N 1
 #endif
 
 /* default element number in mesh */
 #ifndef Ne
-#define Ne 30
+#define Ne 20
 #endif
 
 #define NODETOL   1e-4f
+/* threadhold for discontinuity detector */
 #define DETECTOR  1.0f
 
 /* element shape constant for triangle */
