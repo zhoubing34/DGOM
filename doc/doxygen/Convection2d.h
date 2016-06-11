@@ -95,8 +95,28 @@
  * 4 | 60x60 | 90000 | 1.488359e-07 | 2.51 | 1.949072e-05 | 2.75 | 9.490330 | 156.578000 |
  * 4 | 80x80 | 160000 | 5.845488e-08 | 1.62 | 8.404255e-06 | 1.46 | 9.315910 | 373.678400 |
  *
- * table 3. The numerical error and accuracy of triangle elements with
- * slope limiter
+ * table 3. The numerical error and accuracy of triangle elements without slope limiter
+ *
+ * N | Grid | dofs | L2 | order | Linf | order | GFLOPS | time |
+ * --- | ---  | --- | ---  | ---  | --- | --- | ---- | --- |
+ * 1 | 20x20 | 2400 | 2.197997e-02 | 0.00 | 6.835139e-01 | 0.00 | 5.533340 | 0.154251 |
+ * 1 | 40x40 | 9600 | 1.013364e-02 | 0.56 | 3.856273e-01 | 0.41 | 5.575930 | 1.266590 |
+ * 1 | 60x60 | 21600 | 5.099316e-03 | 0.85 | 2.140000e-01 | 0.73 | 5.875230 | 3.998704 |
+ * 1 | 80x80 | 38400 | 2.778181e-03 | 1.06 | 1.241815e-01 | 0.95 | 5.511430 | 9.925678 |
+ * 2 | 20x20 | 4800 | 5.870871e-03 | 0.00 | 2.599863e-01 | 0.00 | 4.725050 | 1.197041 |
+ * 2 | 40x40 | 19200 | 5.057946e-04 | 1.77 | 3.597915e-02 | 1.43 | 6.920860 | 5.958858 |
+ * 2 | 60x60 | 43200 | 1.243913e-04 | 1.73 | 9.185493e-03 | 1.68 | 7.127310 | 19.608140 |
+ * 2 | 80x80 | 76800 | 5.471704e-05 | 1.43 | 4.456997e-03 | 1.26 | 7.037860 | 47.465320 |
+ * 3 | 20x20 | 8000 | 9.543859e-04 | 0.00 | 5.721039e-02 | 0.00 | 5.657270 | 3.679106 |
+ * 3 | 40x40 | 32000 | 4.048853e-05 | 2.28 | 4.290283e-03 | 1.87 | 5.882620 | 28.744380 |
+ * 3 | 60x60 | 72000 | 7.808962e-06 | 2.03 | 9.234548e-04 | 1.89 | 5.797470 | 95.787140 |
+ * 3 | 80x80 | 128000 | 2.431368e-06 | 2.03 | 3.027320e-04 | 1.94 | 5.632380 | 228.853400 |
+ * 4 | 20x20 | 12000 | 9.432340e-05 | 0.00 | 1.385123e-02 | 0.00 | 5.578670 | 11.590100 |
+ * 4 | 40x40 | 48000 | 3.958856e-06 | 2.29 | 4.211664e-04 | 2.52 | 5.687350 | 87.792680 |
+ * 4 | 60x60 | 108000 | 7.109361e-07 | 2.12 | 7.760525e-05 | 2.09 | 5.686540 | 305.143800 |
+ * 4 | 80x80 | 192000 | 2.157609e-07 | 2.07 | 2.700090e-05 | 1.83 | 5.721570 | 715.588600 |
+ *
+ * table 4. The numerical error and accuracy of triangle elements with slope limiter
  *
  * N | Grid | dofs | L2 | order | Linf | order | GFLOPS | time |
  * --- | ---  | --- | ---  | ---  | --- | --- | ---- | --- |
@@ -119,9 +139,9 @@
  *
  * ### Numerical accuracy
  *
- * \image html Convect2d_errLimiterCompare1.png "Fig 3. The effect of slope limiter on numerical error and accuracy on different meshes (quadrilateral elements)."
+ * \image html Convect2d_errLimiterCompare1.png "Fig 3. Comparison of numerical accuracy on different meshes: (a). quadrilateral; (b). triangle."
  *
- * \image html Convec2d_errShapeCompare1.png "Fig 4. Comparison of the numerical error and accuracy of triangle and quadrilateral elements on different meshes with slope limiter."
+ * \image html Convec2d_errShapeCompare1.png "Fig 4. Comparison of numerical accuracy on different elements."
  *
  * ### Computation efficiency
  *

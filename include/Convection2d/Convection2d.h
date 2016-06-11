@@ -9,7 +9,7 @@
 #include <math.h>
 
 /* apply slope limit */
-#define LIMIT
+//#define LIMIT
 
 /* print log file */
 //#define DEBUG

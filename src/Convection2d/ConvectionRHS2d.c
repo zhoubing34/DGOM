@@ -135,7 +135,9 @@ void ConvectionRHS2d(Mesh *mesh, float frka, float frkb, float fdt){
                 idP = p_Nfields*(-1-idP);
                 dC = (f_inQ[idP] - f_Q[idM]);
             }
-            else{
+            else if(idM == idP){
+                dC =  0.0f - f_Q[idM];
+            }else{
                 dC = ( f_Q[idP] - f_Q[idM] );
             }
 
