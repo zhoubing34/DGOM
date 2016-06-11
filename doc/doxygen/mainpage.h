@@ -1,12 +1,10 @@
 /** \mainpage DGOM
 
- 
-# Discontinuous Galerkin Ocean Model of Tianjin University
+ # Discontinuous Galerkin Ocean Model of Tianjin University
 
+ \image html icon_s.png "TOM ICON"
 
-\image html icon_s.png "TOM ICON"
-
-What is it about
+ What is it about
 ----
 
 Implement the DGM (Discontinuous Galerkin Method) in various applications, including

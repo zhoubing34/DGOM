@@ -116,7 +116,7 @@ void DisDetector(Mesh *mesh){
                 const float vM = f_s[idM * 2 + 1];
                 const float un = (NXf * uM + NYf * vM);
 
-//                if (un < 0){
+                if (un < 0){
                     if (idP < 0) {
                         idP = p_Nfields * (-1 - idP);
                         dC = fabsf(f_inQ[idP] - f_Q[idM]);
@@ -127,7 +127,7 @@ void DisDetector(Mesh *mesh){
                     /* difference and edge length */
                     I     += mesh->w[m]*dC*SJc;
                     inlen += mesh->w[m]*SJc;
-//                }
+                }
             }
 
         }
@@ -153,7 +153,7 @@ void DisDetector(Mesh *mesh){
         if( maxQ > NODETOL ){
             I /= maxQ;
         }else{
-            I = 0;
+            I = DETECTOR + 1.0f;
         }
 
         /* assignment */

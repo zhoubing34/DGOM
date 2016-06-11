@@ -159,7 +159,7 @@ void LimiterBJ2d(Mesh *mesh){
     for(k1=0;k1<K;k1++){
 
         /* check if k1 is trouble ele */
-        if(mesh->tcflag[k1]>DETECTOR) {
+        if(mesh->tcflag[k1]>=DETECTOR) {
 
             const float Cm = Cmean[k1];
             maxQ = Cm, minQ = Cm;

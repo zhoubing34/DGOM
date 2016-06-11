@@ -12,15 +12,15 @@
 /* default degree */
 #ifndef p_N
 /** default order */
-#define p_N 1
+#define p_N 2
 #endif
 
 /* default element number in mesh */
 #ifndef Ne
-#define Ne 80
+#define Ne 40
 #endif
 
-#define NODETOL   1e-4f
+#define NODETOL   1e-6f
 /* threadhold for discontinuity detector */
 #define DETECTOR  1.0f
 

@@ -9,14 +9,14 @@
 #include <math.h>
 
 /* apply slope limit */
-//#define LIMIT
+#define LIMIT
 
 /* print log file */
 //#define DEBUG
 
 /* element shape */
-//#define TRI
-#define QUAD
+#define TRI
+//#define QUAD
 
 /** number of unknown variables */
 #define p_Nfields 1
