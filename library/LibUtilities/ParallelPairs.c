@@ -1,12 +1,4 @@
-#include <strings.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
-#include "mpi.h"
-
-#define max(a,b)  ( (a>b)?a:b )
-#define min(a,b)  ( (a<b)?a:b )
+#include "LibUtilities.h"
 
 void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
 		   int  (*numget)(const void *),

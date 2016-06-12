@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
+#include "LibUtilities.h"
 
 /* some very basic memory allocation routines */
 

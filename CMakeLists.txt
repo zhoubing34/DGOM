@@ -28,7 +28,7 @@ include_directories("${CMAKE_SOURCE_DIR}/include"   # source include
 LINK_DIRECTORIES("${NETCDF_PATH}/lib/" "${METIS_PATH}/lib")
 
 # source file
-add_subdirectory(src)
+SUBDIRS(src library)
 
 # add docs
 add_subdirectory(doc)
