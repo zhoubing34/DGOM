@@ -4,7 +4,7 @@
 
 #include "test.h"
 
-#define N 3
+#define N 5
 #define Np (N+1)*(N+2)/2
 int main(int argc, char **argv){
 
@@ -17,8 +17,14 @@ int main(int argc, char **argv){
 void GetTriCoordTest(void){
     double *r = BuildVector(Np);
     double *s = BuildVector(Np);
+    int i;
 
     GetTriCoord(N, r, s);
+
+    for(i=0;i<Np;i++){
+        printf("r[%d]=%12.4f, s[%d]=%12.4f\n", i,r[i],i,s[i]);
+    }
+
     DestroyVector(r);
     DestroyVector(s);
 

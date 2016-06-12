@@ -14,6 +14,9 @@
 
 #include "StdRegions.h"
 
+/* local functions */
+void xytors(int Np, double *x, double *y, double *r, double *s);
+
 /**
  * @brief
  * Generation of standard triangle element
@@ -45,6 +48,7 @@ StdRegions2d* GenStdTriEle(int N){
 
     return tri;
 }
+
 
 void FreeStdTriEle(StdRegions2d * triangle){
     /* coordinate */
@@ -88,7 +92,8 @@ void GetTriCoord(int N, double *r, double *s){
     L2 = BuildVector(Np);
     L3 = BuildVector(Np);
     dL = BuildVector(Np);
-    x = BuildVector(Np); y = BuildVector(Np);
+    x  = BuildVector(Np);
+    y  = BuildVector(Np);
 
     warpf1 = BuildVector(Np);
 
@@ -101,13 +106,9 @@ void GetTriCoord(int N, double *r, double *s){
 
             x[sk] = -L2[sk] + L3[sk];
             y[sk] = (-L2[sk] - L3[sk] + 2.0*L1[sk])/sqrt(3.0);
-//            printf("L1[%d]=%lg, \tL2[%d]=%lg, \tL3[%d]=%lg, "
-//                           "\tx[%d]=%lg, \ty[%d]=%lg\n",sk, L1[sk],
-//            sk, L2[sk], sk, L3[sk], sk, x[sk], sk, y[sk]);
             sk++;
         }
     }
-    printf("sk = %d\n", sk);
 
     /* warp1 */
     for(i=0;i<Np;i++){
@@ -115,15 +116,10 @@ void GetTriCoord(int N, double *r, double *s){
     }
     Warpfactor(N, dL, Np, warpf1);
 
-    printf("\nwarpf1\n");
     for(i=0;i<Np;i++){
-        printf("L3[%d]-L2[%d]=%12.4f, warpf[%d]=%12.4f\n",i, i, dL[i], i, warpf1[i]);
-    }
-
-    for(i=0;i<Np;i++){
-        temp = alpha*L1[sk];
-        warpf1[sk] *= 4.0*L2[i]*L3[i]*(1.0 + temp*temp);
-        x[sk] += 1.0*warpf1[sk];
+        temp = alpha*L1[i];
+        warpf1[i] *= 4.0*L2[i]*L3[i]*(1.0 + temp*temp);
+        x[i] += 1.0*warpf1[i];
 //        y[sk] += 0.0;
     }
 
@@ -133,16 +129,11 @@ void GetTriCoord(int N, double *r, double *s){
     }
     Warpfactor(N, dL, Np, warpf1);
 
-    printf("\nwarpf2\n");
     for(i=0;i<Np;i++){
-        printf("L1[%d]-L3[%d]=%12.4f, warpf[%d]=%12.4f\n",i, i, dL[i], i, warpf1[i]);
-    }
-
-    for(i=0;i<Np;i++){
-        temp = alpha*L2[sk];
-        warpf1[sk] *= 4.0*L1[i]*L3[i]*(1.0 + temp*temp);
-        x[sk] += cos(2.0*M_PI/3.0)*warpf1[sk];
-        y[sk] += sin(2.0*M_PI/3.0)*warpf1[sk];
+        temp = alpha*L2[i];
+        warpf1[i] *= 4.0*L1[i]*L3[i]*(1.0 + temp*temp);
+        x[i] += cos(2.0*M_PI/3.0)*warpf1[i];
+        y[i] += sin(2.0*M_PI/3.0)*warpf1[i];
     }
 
     /* warp3 */
@@ -151,23 +142,16 @@ void GetTriCoord(int N, double *r, double *s){
     }
     Warpfactor(N, dL, Np, warpf1);
 
-    printf("\nwarpf3\n");
     for(i=0;i<Np;i++){
-        printf("L2[%d]-L1[%d]=%12.4f, warpf[%d]=%12.4f\n",i, i, dL[i], i, warpf1[i]);
+        temp = alpha*L3[i];
+        warpf1[i] *= 4.0*L1[i]*L2[i]*(1.0 + temp*temp);
+        x[i] += cos(4.0*M_PI/3.0)*warpf1[i];
+        y[i] += sin(4.0*M_PI/3.0)*warpf1[i];
     }
 
-    for(i=0;i<Np;i++){
-        temp = alpha*L3[sk];
-        warpf1[sk] *= 4.0*L1[i]*L2[i]*(1.0 + temp*temp);
-        x[sk] += cos(4.0*M_PI/3.0)*warpf1[sk];
-        y[sk] += sin(4.0*M_PI/3.0)*warpf1[sk];
-    }
+    /* coordinate transfer */
+    xytors(Np, x, y, r, s);
 
-    for(i=0;i<Np;i++){
-        printf("x[%d]=%12.4f, \ty[%d] = %12.4f\n", i, x[i], i, y[i]);
-    }
-
-    printf("\nleaving GetTriCoord\n");
     /* deallocate mem */
     DestroyVector(L1); DestroyVector(L2); DestroyVector(L3);
     DestroyVector(x);
@@ -234,17 +218,50 @@ void Warpfactor(int N, double *r, int Nr, double *w){
     }
 
     for(i=0;i<Nr;i++){
-        printf("w[%d] = %12.4f\n", i, w[i]);
         temp = (1.0 - r[i]*r[i]);
         if(temp > 1.0e-10){
             w[i] /= temp;
         }
     }
 
-    /**/
+    /* deallocate mem */
     DestroyVector(ye);
     DestroyVector(l);
     DestroyVector(re);
     DestroyVector(rlgl);
     DestroyVector(wlgl);
+}
+
+/**
+ * @brief
+ *
+ *
+ * @details
+ * transfer coordinate (x,y) on equilateral triangle to natural coordinate (r,s)
+ * on right triangle
+ *
+ * @param[in] Np number of points
+ * @param[in] x coordinate
+ * @param[in] y coordinate
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * r | double[Np] |
+ * s | double[Np] |
+ *
+ */
+void xytors(int Np, double *x, double *y, double *r, double *s){
+    double L1, L2, L3;
+    int i;
+
+    for(i=0;i<Np;i++){
+        L1 = (sqrt(3.0)*y[i] + 1)/3.0;
+        L2 = (-3.0*x[i] - sqrt(3.0)*y[i] + 2.0)/6.0;
+        L3 = ( 3.0*x[i] - sqrt(3.0)*y[i] + 2.0)/6.0;
+
+        r[i] = -L2+L3-L1;
+        s[i] = -L2-L3+L1;
+    }
 }
