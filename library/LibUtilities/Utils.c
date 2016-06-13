@@ -1,26 +1,100 @@
 #include "LibUtilities.h"
 
-/* some very basic memory allocation routines */
 
+/* matrix operations */
+
+/**
+ * @brief
+ * Inverse of square matrix A
+ *
+ * @param[in] N order of square matrix
+ * @param[in] matrix M reshape as a vector A
+ *
+ * @note
+ * Row counts first to generalize the vector A, which means that
+ * A[i][j] = A[i*N+j]
+ */
+void invM(doublereal* A, int N){
+    integer     W   = N;
+    integer     LDA = N;
+    integer     *IPIV;
+    integer     ERR_INFO;
+    integer     LWORK = N * N;
+    doublereal*  Workspace;
+
+    Workspace = (doublereal*) malloc(sizeof(doublereal)*N*N);
+    IPIV = (integer*) malloc(sizeof(integer)*N);
+
+    // - Compute the LU factorization of a M by N matrix A
+    dgetrf_(&W, &W, A, &LDA, IPIV, &ERR_INFO);
+
+    // - Generate inverse of the matrix given its LU decompsotion
+    dgetri_(&W, A, &LDA, IPIV, Workspace, &LWORK, &ERR_INFO);
+
+    free(IPIV);
+    free(Workspace);
+}
+
+
+/**
+ * @brief
+ * Matrix Multiply
+ *
+ * @details
+ * \f[ \mathbf{A}* \mathbf{B} = \mathbf{C} \f]
+ *
+ * @param[in] lda the leading dimension of the matrix
+ * @param[in] A is M-by-K matrix
+ * @param[in] B is K-by-N matrix
+ * @param[inout] C is M-by-N matrix
+ *
+ * @note
+ * Row counts first to generalize the vector A, B and C, which means that
+ * A[i][j] = A[i*N+j]
+ */
+
+void dgemm_(const unsigned lda,
+             const unsigned M, const unsigned N, const unsigned K,
+             const double *A, const double *B, double *C) {
+    unsigned i, j, k;
+
+    for (i = 0; i < M; ++i) {
+        const double *Ai_ = A + i*lda;
+        for (j = 0; j < N; ++j) {
+            const double *B_j = B + j;
+
+            double cij = *(C + j + i*lda);
+
+            for (k = 0; k < K; ++k) {
+                cij += *(Ai_ + k) * *(B_j + k*lda);
+            }
+
+            *(C + j + i*lda) = cij;
+        }
+    }
+}
+
+
+/* some very basic memory allocation routines */
 /* row major storage for a 2D matrix array */
 double **BuildMatrix(int Nrows, int Ncols){
-  int n;
-  double **A = (double**) calloc(Nrows, sizeof(double*));
+    int n;
+    double **A = (double**) calloc(Nrows, sizeof(double*));
 
-  A[0] = (double*) calloc(Nrows*Ncols, sizeof(double));
+    A[0] = (double*) calloc(Nrows*Ncols, sizeof(double));
 
-  for(n=1;n<Nrows;++n){
-    A[n] = A[n-1]+ Ncols;
-  }
+    for(n=1;n<Nrows;++n){
+        A[n] = A[n-1]+ Ncols;
+    }
 
-  return A;
+    return A;
 }
     
 double *BuildVector(int Nrows){
 
-  double *A = (double*) calloc(Nrows, sizeof(double));
+    double *A = (double*) calloc(Nrows, sizeof(double));
 
-  return A;
+    return A;
 }
 
 /* row major storage for a 2D matrix array */
@@ -74,7 +148,7 @@ void PrintMatrix(char *message, double **A, int Nrows, int Ncols){
   printf("%s\n", message);
   for(n=0;n<Nrows;++n){
     for(m=0;m<Ncols;++m){
-      printf(" %g ", A[n][m]);
+      printf(" %20.16e ", A[n][m]);
     }
     printf(" \n");
   }

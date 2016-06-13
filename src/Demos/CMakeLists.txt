@@ -1,5 +1,5 @@
 # set source file
-set(DEMOS_SOURCE test.c test.h)
+set(DEMOS_SOURCE test.c)
 
 include_directories(${CMAKE_SOURCE_DIR}/library)
 

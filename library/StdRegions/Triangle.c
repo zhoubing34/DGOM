@@ -1,5 +1,4 @@
 #include <stdlib.h>
-
 /**
  * @file
  * Triangle.c
@@ -11,11 +10,25 @@
  * li12242, Tianjin University, li12242@tju.edu.cn
  */
 
-
 #include "StdRegions.h"
 
-/* local functions */
+/* private functions */
 void xytors(int Np, double *x, double *y, double *r, double *s);
+void rstoad(int Np, double *r, double *s, double *a, double *b);
+
+/**
+ * @brief
+ * Free variables fields in StdRegions2d
+ */
+void FreeStdRegions2d(StdRegions2d *triangle){
+    /* coordinate */
+    DestroyVector(triangle->r);
+    DestroyVector(triangle->s);
+    /* vandermonde matrix */
+    DestroyMatrix(triangle->V);
+    /* mass matrix */
+    DestroyMatrix(triangle->M);
+}
 
 /**
  * @brief
@@ -32,7 +45,7 @@ void xytors(int Np, double *x, double *y, double *r, double *s);
  * tri | StdRegions2d* |
  *
  */
-StdRegions2d* GenStdTriEle(int N){
+StdRegions2d* GenStdTriEle(const unsigned N){
     StdRegions2d *tri = (StdRegions2d *) calloc(1, sizeof(StdRegions2d));
 
     /* basic info */
@@ -46,15 +59,146 @@ StdRegions2d* GenStdTriEle(int N){
     tri->r = BuildVector(tri->Np);
     tri->s = BuildVector(tri->Np);
 
+    GetTriCoord(N, tri->r, tri->s);
+
+    /* vandermonde matrix */
+    tri->V = BuildMatrix(tri->Np, tri->Np);
+    GetTriV(N, tri->Np, tri->r, tri->s, tri->V);
+
+    /* mass matrix */
+    tri->M = BuildMatrix(tri->Np, tri->Np);
+    GetTriM(tri->Np, tri->V, tri->M);
+
+    /* Derivative Matrix */
+
     return tri;
 }
 
+/**
+ * @brief
+ * Generate the mass matrix
+ * @details
+ * The mass matrix is calculated with
+ * \f[ \mathbf{M} = (\mathbf{V}^T)^{-1} \cdot \mathbf{V}^{-1} \f]
+ *
+ * @param[in] Np
+ * @param[in] V Vandermonde matrix
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * M   | double[Np][Np] | Mass Matrix
+ */
+void GetTriM(unsigned Np, double **V, double **M){
+    doublereal *temp = BuildVector(Np*Np);
+    doublereal *invt = BuildVector(Np*Np);
+    double *Mv = BuildVector(Np*Np);
+    const unsigned n = Np;
 
-void FreeStdTriEle(StdRegions2d * triangle){
-    /* coordinate */
-    free(triangle->r);
-    free(triangle->s);
+    int i,j,sk=0;
+
+    for(i=0;i<Np;i++){
+        for(j=0;j<Np;j++){
+            /* row counts first */
+            temp[sk++] = V[i][j];
+        }
+    }
+
+    invM(temp, Np);
+
+    for(i=0;i<Np;i++){
+        for(j=0;j<Np;j++){
+            invt[j*Np + i] = temp[i*Np + j];
+        }
+    }
+
+    dgemm_(n, n, n, n, invt, temp, Mv);
+
+    for(i=0;i<Np;i++){
+        for(j=0;j<Np;j++){
+            M[i][j] = Mv[i*Np + j];
+        }
+    }
 }
+
+/**
+ * @brief
+ * Evaluate 2D orthonormal polynomial on simplex at (a,b) of order (i,j).
+ *
+ * @details
+ *
+ * @param[in] Np number of points
+ * @param[in] a coordinate
+ * @param[in] b coordinate
+ * @param[in] i order
+ * @param[in] j order
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * poly   | double[Np] |
+ *
+ */
+void Simplex2dP(int Np, double *a, double *b, int i, int j, double *poly){
+    double *h1 = BuildVector(Np);
+    double *h2 = BuildVector(Np);
+    int n;
+
+    jacobiP(Np, a, h1, i, 0.0, 0.0);
+    jacobiP(Np, b, h2, j, 2*i+1, 0.0);
+
+    for(n=0;n<Np;n++){
+        poly[n] = sqrt(2.0)*h1[n]*h2[n]*pow(1-b[n], i);
+    }
+
+    DestroyVector(h1);
+    DestroyVector(h2);
+}
+
+/**
+ * @brief
+ * Generate the Vandermonde matrix of triangle
+ *
+ * @details
+ *
+ * @param[in] r
+ * @param[in] s
+ * @param[in] Nr number of r
+ * @param[in] N order
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * V  | double[Np][Np] |
+ *
+ */
+void GetTriV(int N, int Nr, double *r, double *s, double **V){
+    int i,j,k,sk=0;
+
+    double *temp = BuildVector(Nr);
+    double *a=BuildVector(Nr);
+    double *b=BuildVector(Nr);
+
+    rstoad(Nr, r, s, a, b);
+
+    for(i=0;i<N+1;i++){
+        for(j=0;j<N-i+1;j++){
+            Simplex2dP(Nr, a, b, i, j, temp);
+            for(k=0;k<Nr;k++){
+                V[k][sk] = temp[k];
+            }
+            sk++;
+        }
+    }
+
+    DestroyVector(a);
+    DestroyVector(b);
+    DestroyVector(temp);
+}
+
 
 /**
  * @brief
@@ -71,6 +215,9 @@ void FreeStdTriEle(StdRegions2d * triangle){
  * r | double[Np] | coordinate r
  * s | double[Np] | coordinate s
  * where Np = (N+1)(N+2)/2
+ *
+ * @note
+ * r and s shuold be allocated before calling GetTriCoord
  *
  */
 void GetTriCoord(int N, double *r, double *s){
@@ -181,6 +328,8 @@ void GetTriCoord(int N, double *r, double *s){
  * -------- |----------|----------------------
  * w | double[Nr]  | waper factor
  *
+ * @note
+ * w shuold be allocated before calling Warpfactor
  */
 void Warpfactor(int N, double *r, int Nr, double *w){
     int i, j, Np = N+1;
@@ -235,7 +384,6 @@ void Warpfactor(int N, double *r, int Nr, double *w){
 /**
  * @brief
  *
- *
  * @details
  * transfer coordinate (x,y) on equilateral triangle to natural coordinate (r,s)
  * on right triangle
@@ -251,6 +399,8 @@ void Warpfactor(int N, double *r, int Nr, double *w){
  * r | double[Np] |
  * s | double[Np] |
  *
+ * @note
+ * x,y,r and s shuold be allocated before calling xytors
  */
 void xytors(int Np, double *x, double *y, double *r, double *s){
     double L1, L2, L3;
@@ -263,5 +413,38 @@ void xytors(int Np, double *x, double *y, double *r, double *s){
 
         r[i] = -L2+L3-L1;
         s[i] = -L2-L3+L1;
+    }
+}
+
+/**
+ * @brief
+ *
+ * @details 详细说明
+ *
+ *
+ * @param[in] r
+ * @param[in] s
+ * @param[in] Np
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * a | int      |
+ * b | object   |
+ *
+ * @note
+ * r,s,a and b shuold be allocated before calling rstoad
+ */
+
+void rstoad(int Np, double *r, double *s, double *a, double *b){
+    int i;
+    for(i=0;i<Np;i++){
+        if( fabs(s[i] - 1.0) > 1.0e-10){
+            a[i] = 2.0*(1.0+r[i])/(1.0-s[i])-1;
+        }else{
+            a[i] = -1.0;
+        }
+        b[i] = s[i];
     }
 }

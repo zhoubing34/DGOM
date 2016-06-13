@@ -12,19 +12,20 @@
 
 #include "LibUtilities/LibUtilities.h"
 #include "Polylib/polylib.h"
+#include <stdio.h>
 #include <math.h>
 
 struct StdReg2d{
     /** Polynomial order */
-    int N;
+    unsigned N;
     /** number of points */
-    int Np;
+    unsigned Np;
     /** number of vertex */
-    int Nv;
+    unsigned Nv;
     /** number of faces */
-    int Nfaces;
+    unsigned Nfaces;
     /** number of points per face */
-    int Nfp;
+    unsigned Nfp;
 
     /** index of node at faces */
     int **Fmask;
@@ -46,13 +47,20 @@ struct StdReg2d{
     /** local lift matrix */
     double **LIFT;
 };
-
 typedef struct StdReg2d StdRegions2d;
 
+/* Quadrilateral.c */
 
 /* Triangle.c */
+/* public functions */
 
+
+StdRegions2d* GenStdTriEle(const unsigned N);
 void Warpfactor(int, double *, int, double *);
 void GetTriCoord(int, double*, double*);
+void GetTriV(int N, int Nr, double *r, double *s, double **V);
+void GetTriM(unsigned Np, double **V, double **M);
+
+void FreeStdRegions2d(StdRegions2d * );
 
 #endif

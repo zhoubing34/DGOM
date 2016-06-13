@@ -1,5 +1,8 @@
 #include "LibUtilities.h"
 
+//#define max(a,b)  ( (a>b)?a:b )
+//#define min(a,b)  ( (a<b)?a:b )
+
 void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
 		   int  (*numget)(const void *),
 		   void (*numset)(const void *, int ),
