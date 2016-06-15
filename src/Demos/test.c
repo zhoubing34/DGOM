@@ -14,6 +14,11 @@ int main(int argc, char **argv) {
     tri = GenStdTriEle(Deg);
 
     PrintMatrix("Mass matrix", tri->M, tri->Np, tri->Np);
+    printf("\n\n");
+    PrintMatrix("Dr", tri->Dr, tri->Np, tri->Np);
+    printf("\n\n");
+    PrintMatrix("Ds", tri->Ds, tri->Np, tri->Np);
+
     FreeStdRegions2d(tri);
 
     return 0;

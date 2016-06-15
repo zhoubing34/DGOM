@@ -7,8 +7,8 @@
  * @brief
  * Inverse of square matrix A
  *
- * @param[in] N order of square matrix
- * @param[in] matrix M reshape as a vector A
+ * @param[int]          N row of square matrix
+ * @param[doublereal]   A[N*N] reshape matrix M
  *
  * @note
  * Row counts first to generalize the vector A, which means that
@@ -41,7 +41,7 @@ void invM(doublereal* A, int N){
  * Matrix Multiply
  *
  * @details
- * \f[ \mathbf{A}* \mathbf{B} = \mathbf{C} \f]
+ * \f[ \mathbf{C} = \mathbf{A}* \mathbf{B} \f]
  *
  * @param[in] lda the leading dimension of the matrix
  * @param[in] A is M-by-K matrix
@@ -63,7 +63,7 @@ void dgemm_(const unsigned lda,
         for (j = 0; j < N; ++j) {
             const double *B_j = B + j;
 
-            double cij = *(C + j + i*lda);
+            double cij = 0.0;
 
             for (k = 0; k < K; ++k) {
                 cij += *(Ai_ + k) * *(B_j + k*lda);

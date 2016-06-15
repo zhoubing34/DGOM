@@ -1,8 +1,9 @@
 /** \mainpage DGOM
 
- # Discontinuous Galerkin Ocean Model of Tianjin University
+ # Discontinuous Galerkin Ocean Model
+ subpart of Tianjin University Ocean Model
 
- \image html icon_s.png "TOM ICON"
+ \image html icon_s.png
 
  What is it about
 ----

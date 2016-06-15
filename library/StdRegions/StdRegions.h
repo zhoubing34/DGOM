@@ -12,8 +12,6 @@
 
 #include "LibUtilities/LibUtilities.h"
 #include "Polylib/polylib.h"
-#include <stdio.h>
-#include <math.h>
 
 struct StdReg2d{
     /** Polynomial order */
@@ -52,9 +50,8 @@ typedef struct StdReg2d StdRegions2d;
 /* Quadrilateral.c */
 
 /* Triangle.c */
+
 /* public functions */
-
-
 StdRegions2d* GenStdTriEle(const unsigned N);
 void Warpfactor(int, double *, int, double *);
 void GetTriCoord(int, double*, double*);
