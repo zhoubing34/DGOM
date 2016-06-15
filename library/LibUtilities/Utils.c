@@ -14,25 +14,21 @@
  * Row counts first to generalize the vector A, which means that
  * A[i][j] = A[i*N+j]
  */
-void invM(doublereal* A, int N){
-    integer     W   = N;
-    integer     LDA = N;
-    integer     *IPIV;
-    integer     ERR_INFO;
-    integer     LWORK = N * N;
-    doublereal*  Workspace;
+void invM(double* A, int N){
 
-    Workspace = (doublereal*) malloc(sizeof(doublereal)*N*N);
-    IPIV = (integer*) malloc(sizeof(integer)*N);
-
-    // - Compute the LU factorization of a M by N matrix A
-    dgetrf_(&W, &W, A, &LDA, IPIV, &ERR_INFO);
-
-    // - Generate inverse of the matrix given its LU decompsotion
-    dgetri_(&W, A, &LDA, IPIV, Workspace, &LWORK, &ERR_INFO);
-
-    free(IPIV);
-    free(Workspace);
+    int lda = N;
+    int ipiv[N];
+    int info;
+    info = LAPACKE_dgetrf(LAPACK_ROW_MAJOR,N,N,A,lda,ipiv);
+    if( info > 0 ) {
+        printf( "The algorithm failed to compute LU decomposition.\n" );
+        exit( 1 );
+    }
+    info = LAPACKE_dgetri(LAPACK_ROW_MAJOR,N,A,lda,ipiv);
+    if( info > 0 ) {
+        printf( "The algorithm failed to compute matrix inverse.\n" );
+        exit( 1 );
+    }
 }
 
 
@@ -66,10 +62,10 @@ void dgemm_(const unsigned lda,
             double cij = 0.0;
 
             for (k = 0; k < K; ++k) {
-                cij += *(Ai_ + k) * *(B_j + k*lda);
+                cij += *(Ai_ + k) * *(B_j + k*N);
             }
 
-            *(C + j + i*lda) = cij;
+            *(C + j + i*N) = cij;
         }
     }
 }

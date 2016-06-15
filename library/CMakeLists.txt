@@ -9,7 +9,8 @@ set(LIBUTILITIES_HEADER
 set(LIBUTILITIES_SOURCE LibUtilities/Utils.c
         LibUtilities/ParallelPairs.c)
 add_library(LibUtilities STATIC ${LIBUTILITIES_SOURCE})
-TARGET_LINK_LIBRARIES(LibUtilities blas f2c lapack) # extern library -lblas -lf2c -llapack
+TARGET_LINK_LIBRARIES(LibUtilities
+        iomp5 pthread m dl mkl_core mkl_intel_lp64 mkl_intel_thread) # extern MKL library
 
 # polylib
 set(POLYLIB_HEADER Polylib/polylib.h)

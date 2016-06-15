@@ -18,7 +18,9 @@ void rstoad(int Np, double *r, double *s, double *a, double *b);
 void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds);
 void GetTriDeriV2d(unsigned N, int Np, double *r, double *s, double **Vr, double **Vs);
 void GetTriDeriM(unsigned N, unsigned Np, double *r, double *s, double **V, double **Dr, double **Ds);
-
+void BuildFmask(int N, int **Fmask);
+void GetTriSurfM(int N, int **Fmask, double **Mes);
+void GetTriLIFT(int N, double **V, double **Mes, double **LIFT);
 
 /**
  * @brief
@@ -63,7 +65,7 @@ StdRegions2d* GenStdTriEle(const unsigned N){
 
     /* nodes at faces */
     tri->Fmask = BuildIntMatrix(tri->Nfaces, tri->Nfp);
-
+    BuildFmask(tri->N, tri->Fmask);
 
     /* coordinate */
     tri->r = BuildVector(tri->Np);
@@ -84,9 +86,125 @@ StdRegions2d* GenStdTriEle(const unsigned N){
     tri->Ds = BuildMatrix(tri->Np, tri->Np);
     GetTriDeriM(tri->N, tri->Np, tri->r, tri->s, tri->V, tri->Dr, tri->Ds);
 
+    /* suface LIFT matrix */
+//    double **Mes = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
+    tri->Mes = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
+    tri->LIFT = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
+    GetTriSurfM(tri->N, tri->Fmask, tri->Mes);
+    GetTriLIFT(tri->N, tri->V, tri->Mes, tri->LIFT);
+
+    /* deallocate mem */
+//    DestroyMatrix(Mes);
+
     return tri;
 }
 
+void GetTriLIFT(int N, double **V, double **Mes, double **LIFT){
+    unsigned Np = (unsigned)((N+1)*(N+2)/2);
+    int Nfp = N+1, Nfaces=3;
+    double *vc = BuildVector(Np*Np);
+    double *vct = BuildVector(Np*Np);
+    double *temp1 = BuildVector(Np*Np);
+    double *me = BuildVector(Np*Nfp*Nfaces);
+    double *temp2 = BuildVector(Np*Nfp*Nfaces);
+
+    int i,j,sk=0;
+    /* assignment */
+    for(i=0;i<Np;i++){
+        for(j=0;j<Np;j++){
+            /* row counts first */
+            vc[sk] = V[i][j];
+            vct[sk++] = V[j][i];
+        }
+    }
+
+
+    sk = 0;
+    for(i=0;i<Np;i++){
+        for(j=0;j<Nfp*Nfaces;j++) {
+            me[sk++] = Mes[i][j];
+        }
+    }
+
+    /* get the inverse mass matrix M^{-1} = V*V' */
+    dgemm_(Np, Np, Np, Np,  vc, vct, temp1);
+    dgemm_(Np, Np, (unsigned)Nfp*Nfaces, Np, temp1, me, temp2);
+
+    sk = 0;
+    for(i=0;i<Np;i++){
+        for(j=0;j<Nfp*Nfaces;j++)
+            LIFT[i][j] = temp2[sk++];
+    }
+
+    free(vc); free(vct); free(temp1); free(temp2);
+}
+
+/**
+ * @brief
+ * Get surface mass matrix
+ * @details
+ * @param [int] N order
+ * @param [int] Fmask[Nfaces][Nfp] nodes list at faces
+ * @return
+ * name  | type     | description of value
+ * ----- |----------|----------------------
+ * Mes   | double[Np][Nfaces*Nfp] | surface mass matrix
+ *
+ */
+void GetTriSurfM(int N, int **Fmask, double **Mes){
+    int Nfaces=3;
+    unsigned Nfp=(unsigned)N+1;
+    double *r=BuildVector(Nfp);
+    double *w=BuildVector(Nfp);
+
+    double *invt =   BuildVector(Nfp*Nfp);
+    double *inv = BuildVector(Nfp*Nfp);
+    double *m =   BuildVector(Nfp*Nfp);
+    /* get surface mass matrix */
+    zwglj(r, w, Nfp, 0, 0); /* get coordinate */
+    int i,j;
+    for(i=0;i<Nfp;i++){
+        /* get vandermonde matrix */
+        jacobiP(Nfp, r, w, i, 0, 0);
+        for(j=0;j<Nfp;j++){
+            inv[j*Nfp+i] = w[j];
+        }
+    }
+    invM(inv, Nfp);
+    /* transform of vandermonde matrix */
+    for(i=0;i<Nfp;i++){
+        for(j=0;j<Nfp;j++)
+            invt[j+Nfp*i] = inv[j*Nfp+i];
+    }
+    /* get M = inv(V)'*inv(V) */
+    dgemm_(Nfp, Nfp, Nfp, Nfp, invt, inv, m);
+
+//    printf("Line mass matrix = \n");
+//    for(i=0;i<Nfp;i++){
+//        for(j=0;j<Nfp;j++){
+//            printf("%20.16e, ", m[i*Nfp+j]);
+//        }
+//        printf("\n");
+//    }
+//    printf("\n\n");
+
+    int k, sr, sk;
+    for(i=0;i<Nfaces;i++){
+        for(j=0;j<Nfp;j++){ /* row index of M */
+            for(k=0;k<Nfp;k++){ /* column index of M */
+                sr = Fmask[i][j]; /* row index of Mes */
+                sk = i*Nfp + k; /* columns index of Mes */
+                Mes[sr][sk] = m[j*Nfp + k];
+            }
+        }
+    }
+
+    DestroyVector(invt);
+    DestroyVector(inv);
+    DestroyVector(m);
+    DestroyVector(r);
+    DestroyVector(w);
+}
 
 /**
  * @brief
@@ -320,8 +438,8 @@ void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmoded
  * M   | double[Np][Np] | Mass Matrix
  */
 void GetTriM(unsigned Np, double **V, double **M){
-    doublereal *temp = BuildVector(Np*Np);
-    doublereal *invt = BuildVector(Np*Np);
+    double *temp = BuildVector(Np*Np);
+    double *invt = BuildVector(Np*Np);
     double *Mv = BuildVector(Np*Np);
     const unsigned n = Np;
 
@@ -625,6 +743,8 @@ void Warpfactor(int N, double *r, int Nr, double *w){
  * @brief
  * Build the index matrix of nodes on faces
  * @details
+ * Three faces of the standard triangle element is
+ * \f[ s=-1, \quad r+s=0, \quad r=-1 \f]
  *
  * @param [int] N order
  *
@@ -635,7 +755,38 @@ void Warpfactor(int N, double *r, int Nr, double *w){
  *
  */
 void BuildFmask(int N, int **Fmask){
+    int Nfp = N+1;
+    int *temp = BuildIntVector(Nfp);
+    int *nrp = BuildIntVector(Nfp); /* # of nodes from s=-1 to s=1 */
+    int i;
 
+    /* face 1, s=-1 */
+    for(i=0;i<Nfp;i++)
+        Fmask[0][i] = i;
+
+    /* face 3, r=-1 */
+    for(i=0;i<Nfp;i++)
+        nrp[i] = Nfp - i;
+
+    temp[0] = 1; /* node index on r=-1 from s=-1 to s=1 */
+    for(i=1;i<Nfp;i++){
+        temp[i] = temp[i-1] + nrp[i-1];
+    }
+    for(i=0;i<Nfp;i++){
+        /* node index on r=-1 from s=1 to s=-1 */
+        Fmask[2][i] = temp[Nfp-1-i] - 1;
+    }
+    /* face 2, r+s=0 */
+    nrp[0] = Nfp;
+    for(i=1;i<Nfp-1;i++)
+        nrp[i] = temp[i+1]-1;
+    nrp[Nfp-1] = temp[Nfp-1];
+    for(i=0;i<Nfp;i++){
+        Fmask[1][i] = nrp[i] - 1;
+    }
+
+    DestroyIntVector(temp);
+    DestroyIntVector(nrp);
 }
 
 

@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "f2c.h"
-#include "clapack.h"
+#include "mkl_lapacke.h"
+//#include "f2c.h"
+//#include "clapack.h"
 
 #include "mpi.h"
 /* matrix operation */

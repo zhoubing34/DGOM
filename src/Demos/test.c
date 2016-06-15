@@ -6,9 +6,18 @@
 #include "LibUtilities/LibUtilities.h"
 #include "StdRegions/StdRegions.h"
 
-#define Deg 3
+#define Deg 2
 
 int main(int argc, char **argv) {
+
+    void TriEleTest(void);
+    TriEleTest();
+
+    return 0;
+}
+
+
+void TriEleTest(void){
 
     StdRegions2d *tri;
     tri = GenStdTriEle(Deg);
@@ -18,18 +27,32 @@ int main(int argc, char **argv) {
     PrintMatrix("Dr", tri->Dr, tri->Np, tri->Np);
     printf("\n\n");
     PrintMatrix("Ds", tri->Ds, tri->Np, tri->Np);
+    printf("\n\n");
+
+    int i,j;
+    printf("Fmask = \n");
+    for(i=0;i<tri->Nfaces;i++){
+        for(j=0;j<tri->Nfp;j++){
+            printf("%d,", tri->Fmask[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n\n");
+
+    PrintMatrix("Mes", tri->Mes, tri->Np, tri->Nfp*tri->Nfaces);
+    printf("\n\n");
+    PrintMatrix("LIFT", tri->LIFT, tri->Np, tri->Nfp*tri->Nfaces);
 
     FreeStdRegions2d(tri);
-
-    return 0;
 }
+
 void MatrixMuti(void){
     int i,j,sk=0;
     const int M=Deg;
     double *A, *B, *C;
-    A = (doublereal*) malloc(sizeof(double)*Deg*Deg);
-    B = (doublereal*) malloc(sizeof(double)*Deg*Deg);
-    C = (doublereal*) malloc(sizeof(double)*Deg*Deg);
+    A = (double*) malloc(sizeof(double)*Deg*Deg);
+    B = (double*) malloc(sizeof(double)*Deg*Deg);
+    C = (double*) malloc(sizeof(double)*Deg*Deg);
 
     sk = 0;
     for(i=0;i<Deg;i++){
@@ -77,9 +100,9 @@ void MatrixMuti(void){
 }
 
 void inverseMatrix(void){
-    doublereal *Matrix;
+    double *Matrix;
     int i,j, sk=0;
-    Matrix = (doublereal*) malloc(sizeof(doublereal)*Deg*Deg);
+    Matrix = (double*) malloc(sizeof(double)*Deg*Deg);
 
     for(i=0;i<Deg;i++){
         for(j=0;j<Deg;j++){

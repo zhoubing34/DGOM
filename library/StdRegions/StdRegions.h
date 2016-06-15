@@ -44,6 +44,7 @@ struct StdReg2d{
     double **Dr, **Ds;
     /** local lift matrix */
     double **LIFT;
+    double **Mes;
 };
 typedef struct StdReg2d StdRegions2d;
 
@@ -57,6 +58,7 @@ void Warpfactor(int, double *, int, double *);
 void GetTriCoord(int, double*, double*);
 void GetTriV(int N, int Nr, double *r, double *s, double **V);
 void GetTriM(unsigned Np, double **V, double **M);
+
 
 void FreeStdRegions2d(StdRegions2d * );
 

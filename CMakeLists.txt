@@ -10,6 +10,7 @@ set(CMAKE_C_FLAGS "-Wall")
 set(MPI_PATH $ENV{MPI_DIR})                      # use environmental variable MPI_DIR
 set(MPI_C_COMPILER "${MPI_PATH}/bin/mpicc")      # set mpicc before find mpi package
 set(MPI_CXX_COMPILER "${MPI_PATH}/bin/mpicxx")   # set mpicxx before find mpi package
+set(MKLROOT "/opt/intel/composer_xe_2015.5.222/mkl")
 
 find_package(MPI REQUIRED)
 if(NOT MPI_FOUND)
@@ -22,10 +23,12 @@ set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
 # add header path
 include_directories("${CMAKE_SOURCE_DIR}/include"   # source include
         "${MPI_INCLUDE_PATH}"                       # mpi include
-        "${THIRD_LIBRARY_PATH}/include/")           # Third library include
+        "${THIRD_LIBRARY_PATH}/include/"            # Third library include
+        ${MKLROOT}/include)
 
 # add static library path
-LINK_DIRECTORIES("${THIRD_LIBRARY_PATH}/lib/")
+LINK_DIRECTORIES("${THIRD_LIBRARY_PATH}/lib/"
+        "${MKLROOT}/lib/")
 
 # source file
 SUBDIRS(src library)
