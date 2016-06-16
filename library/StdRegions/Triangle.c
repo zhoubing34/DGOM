@@ -27,6 +27,8 @@ void GetTriLIFT(int N, double **V, double **Mes, double **LIFT);
  * Free variables fields in StdRegions2d
  */
 void FreeStdRegions2d(StdRegions2d *triangle){
+    /* fmaks */
+    DestroyIntMatrix(triangle->Fmask);
     /* coordinate */
     DestroyVector(triangle->r);
     DestroyVector(triangle->s);
@@ -37,6 +39,10 @@ void FreeStdRegions2d(StdRegions2d *triangle){
     /* Derivative Matrix */
     DestroyMatrix(triangle->Dr);
     DestroyMatrix(triangle->Ds);
+
+    /* LIFT */
+    DestroyMatrix(triangle->LIFT);
+
 }
 
 /**
@@ -50,7 +56,7 @@ void FreeStdRegions2d(StdRegions2d *triangle){
  * @return
  * name     | type     | description of value
  * -------- |----------|----------------------
- * tri | StdRegions2d* |
+ * tri | StdRegions2d* | structure of standard triangle element
  *
  */
 StdRegions2d* GenStdTriEle(const unsigned N){
@@ -87,25 +93,23 @@ StdRegions2d* GenStdTriEle(const unsigned N){
     GetTriDeriM(tri->N, tri->Np, tri->r, tri->s, tri->V, tri->Dr, tri->Ds);
 
     /* suface LIFT matrix */
-//    double **Mes = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
-    tri->Mes = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
+    double **Mes = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
     tri->LIFT = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
-    GetTriSurfM(tri->N, tri->Fmask, tri->Mes);
-    GetTriLIFT(tri->N, tri->V, tri->Mes, tri->LIFT);
+    GetTriSurfM(tri->N, tri->Fmask, Mes);
+    GetTriLIFT(tri->N, tri->V, Mes, tri->LIFT);
 
     /* deallocate mem */
-//    DestroyMatrix(Mes);
-
+    DestroyMatrix(Mes);
     return tri;
 }
 
 void GetTriLIFT(int N, double **V, double **Mes, double **LIFT){
     unsigned Np = (unsigned)((N+1)*(N+2)/2);
     int Nfp = N+1, Nfaces=3;
-    double *vc = BuildVector(Np*Np);
-    double *vct = BuildVector(Np*Np);
-    double *temp1 = BuildVector(Np*Np);
+    double *vc = BuildVector(Np*Np); /* vandermonde matrix */
+    double *vct = BuildVector(Np*Np); /* transform of vandermonde matrix */
     double *me = BuildVector(Np*Nfp*Nfaces);
+    double *temp1 = BuildVector(Np*Np); /* inverse of mass matrix */
     double *temp2 = BuildVector(Np*Nfp*Nfaces);
 
     int i,j,sk=0;
@@ -128,6 +132,7 @@ void GetTriLIFT(int N, double **V, double **Mes, double **LIFT){
 
     /* get the inverse mass matrix M^{-1} = V*V' */
     dgemm_(Np, Np, Np, Np,  vc, vct, temp1);
+    /* LIFT = M^{-1}*Mes */
     dgemm_(Np, Np, (unsigned)Nfp*Nfaces, Np, temp1, me, temp2);
 
     sk = 0;

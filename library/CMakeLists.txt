@@ -1,6 +1,4 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
-#set(THIRD_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/3rdParty/install/lib/")
-#LINK_DIRECTORIES(${THIRD_LIBRARY_PATH})
 
 # LibUtilities
 set(LIBUTILITIES_HEADER
@@ -27,16 +25,12 @@ set(STDREGIONS_SOURCE
         StdRegions/Quadrilateral.c)
 
 add_library(StdRegions STATIC ${STDREGIONS_SOURCE})
-#add_dependencies(StdRegions LibUtilities Polylib)
-##TARGET_LINK_LIBRARIES(StdRegions blas f2c lapack) # extern library -lblas -lf2c -lapack
+add_dependencies(StdRegions LibUtilities Polylib)
 target_link_libraries(StdRegions LibUtilities Polylib)
-#
-## LocalRegions
-#set(LOCAL_REGIONS_SOURCE LocalRegions/TriMapping.c)
-#
-#add_library(LocalRegions STATIC ${LOCAL_REGIONS_SOURCE})
-#add_dependencies(LocalRegions LibUtilities Polylib)
-#target_link_libraries(LocalRegions Polylib)
 
+# LocalRegions
+set(LOCAL_REGIONS_SOURCE LocalRegions/Mapping.c)
 
-#
+add_library(LocalRegions STATIC ${LOCAL_REGIONS_SOURCE})
+add_dependencies(LocalRegions LibUtilities Polylib)
+target_link_libraries(LocalRegions LibUtilities Polylib)

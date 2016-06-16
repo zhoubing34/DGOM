@@ -1,3 +1,12 @@
+/**
+ * @file
+ * Basic polynomial functions
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ */
+
+
 #include <stdlib.h>
 #include <sys/types.h>
 #include <stdio.h>

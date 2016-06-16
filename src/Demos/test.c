@@ -39,7 +39,6 @@ void TriEleTest(void){
     }
     printf("\n\n");
 
-    PrintMatrix("Mes", tri->Mes, tri->Np, tri->Nfp*tri->Nfaces);
     printf("\n\n");
     PrintMatrix("LIFT", tri->LIFT, tri->Np, tri->Nfp*tri->Nfaces);
 

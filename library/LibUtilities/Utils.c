@@ -1,5 +1,12 @@
-#include "LibUtilities.h"
+/**
+ * @file
+ * @brief
+ *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
+ */
 
+#include "LibUtilities.h"
 
 /* matrix operations */
 
@@ -15,10 +22,10 @@
  * A[i][j] = A[i*N+j]
  */
 void invM(double* A, int N){
-
     int lda = N;
     int ipiv[N];
     int info;
+
     info = LAPACKE_dgetrf(LAPACK_ROW_MAJOR,N,N,A,lda,ipiv);
     if( info > 0 ) {
         printf( "The algorithm failed to compute LU decomposition.\n" );

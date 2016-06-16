@@ -44,7 +44,7 @@ struct StdReg2d{
     double **Dr, **Ds;
     /** local lift matrix */
     double **LIFT;
-    double **Mes;
+
 };
 typedef struct StdReg2d StdRegions2d;
 
