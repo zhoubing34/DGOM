@@ -1,7 +1,7 @@
 #include <stdlib.h>
 /**
  * @file
- * Triangle.c
+ * Standard triangle element
  *
  * @brief
  * Functions related with standard triangle elements
@@ -12,7 +12,7 @@
 
 #include "StdRegions.h"
 
-/* private functions */
+/* private functions of triangle element */
 void xytors(int Np, double *x, double *y, double *r, double *s);
 void rstoad(int Np, double *r, double *s, double *a, double *b);
 void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds);
@@ -21,6 +21,10 @@ void GetTriDeriM(unsigned N, unsigned Np, double *r, double *s, double **V, doub
 void BuildFmask(int N, int **Fmask);
 void GetTriSurfM(int N, int **Fmask, double **Mes);
 void GetTriLIFT(int N, double **V, double **Mes, double **LIFT);
+void Warpfactor(int, double *, int, double *);
+void GetTriCoord(int, double*, double*);
+void GetTriV(int N, int Nr, double *r, double *s, double **V);
+void GetTriM(unsigned Np, double **V, double **M);
 
 /**
  * @brief
@@ -98,8 +102,21 @@ StdRegions2d* GenStdTriEle(const unsigned N){
     GetTriSurfM(tri->N, tri->Fmask, Mes);
     GetTriLIFT(tri->N, tri->V, Mes, tri->LIFT);
 
-    /* deallocate mem */
     DestroyMatrix(Mes);
+
+    /* integration coeff */
+    tri->ws = BuildVector(tri->Nfp);
+    double *r = BuildVector(tri->Nfp);
+    zwglj(r, tri->ws, tri->Nfp, 0, 0);
+    DestroyVector(r);
+
+    tri->wv = BuildVector(tri->Np);
+    int i,j;
+    for(i=0;i<tri->Np;i++){
+        for(j=0;j<tri->Np;j++){
+            tri->wv[j] += tri->M[i][j];
+        }
+    }
     return tri;
 }
 

@@ -1,10 +1,12 @@
 /**
  * @file
- * StdRegions.h
+ * Public function from standard element library
  *
  * @brief
  * Basic element structure definition
  *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
  */
 
 #ifndef STDREGION_H
@@ -29,7 +31,7 @@ struct StdReg2d{
     int **Fmask;
 
     /** face integration coeff */
-    double *wj;
+    double *ws;
     /** volume integration coeff */
     double *wv;
 
@@ -50,16 +52,8 @@ typedef struct StdReg2d StdRegions2d;
 
 /* Quadrilateral.c */
 
-/* Triangle.c */
-
-/* public functions */
+/* Triangle.c - public functions */
 StdRegions2d* GenStdTriEle(const unsigned N);
-void Warpfactor(int, double *, int, double *);
-void GetTriCoord(int, double*, double*);
-void GetTriV(int N, int Nr, double *r, double *s, double **V);
-void GetTriM(unsigned Np, double **V, double **M);
-
-
 void FreeStdRegions2d(StdRegions2d * );
 
 #endif

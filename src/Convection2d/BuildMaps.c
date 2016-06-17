@@ -7,8 +7,6 @@
  *
  * @details
  *
- * @author
- * li12242, Tianjin University, li12242@tju.edu.cn
  *
  */
 void PrintBuilMapsLog(FILE *fig, Mesh *mesh){

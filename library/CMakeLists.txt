@@ -4,8 +4,10 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
 set(LIBUTILITIES_HEADER
         LibUtilities/LibUtilities.h)
 
-set(LIBUTILITIES_SOURCE LibUtilities/Utils.c
-        LibUtilities/ParallelPairs.c)
+set(LIBUTILITIES_SOURCE
+        LibUtilities/Utils.c
+        LibUtilities/ParallelPairs.c
+        LibUtilities/UTest.c)
 add_library(LibUtilities STATIC ${LIBUTILITIES_SOURCE})
 TARGET_LINK_LIBRARIES(LibUtilities
         iomp5 pthread m dl mkl_core mkl_intel_lp64 mkl_intel_thread) # extern MKL library
@@ -34,3 +36,11 @@ set(LOCAL_REGIONS_SOURCE LocalRegions/Mapping.c)
 add_library(LocalRegions STATIC ${LOCAL_REGIONS_SOURCE})
 add_dependencies(LocalRegions LibUtilities Polylib)
 target_link_libraries(LocalRegions LibUtilities Polylib)
+
+
+# UnitTest, configure with `-DUnitTest=1`
+#set(UnitTest 1)
+if(DEFINED UnitTest)
+    add_subdirectory(UnitTest)
+endif()
+

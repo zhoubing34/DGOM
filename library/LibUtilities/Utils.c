@@ -1,5 +1,7 @@
 /**
  * @file
+ * Matrix and vector operation functions
+ *
  * @brief
  *
  * @author
@@ -143,75 +145,4 @@ int **DestroyIntMatrix(int **A){
   free(A);
 
   return NULL;
-}
-
-void PrintMatrix(char *message, double **A, int Nrows, int Ncols){
-  int n,m;
-
-  printf("%s\n", message);
-  for(n=0;n<Nrows;++n){
-    for(m=0;m<Ncols;++m){
-      printf(" %20.16e ", A[n][m]);
-    }
-    printf(" \n");
-  }
-}
-
-
-void SaveMatrix(char *filename, double **A, int Nrows, int Ncols){
-  int n,m;
-
-  FILE *fp = fopen(filename, "w");
-
-  for(n=0;n<Nrows;++n){
-    for(m=0;m<Ncols;++m){
-      fprintf(fp, " %g ", A[n][m]);
-    }
-    fprintf(fp, " \n");
-  }
-  
-  fclose(fp);
-}
-
-/**
- * @brief
- * Create log file to check function routine
- *
- * @author
- * li12242, Tianjin University, li12242@tju.edu.cn
- *
- * @param[in] funname Function name
- * @param[in] nprocs Number of process
- * @param[in] rank Index of local process
- *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * fig      | FILE*    | file handle
- *
- * @attention
- * Remember to close file with file handle
- *
- * @note
- * Use user spicific write routine to print log file
- */
-FILE* CreateLog(char *funname, int nprocs, int rank){
-
-#ifndef DSET_NAME_LEN
-#define DSET_NAME_LEN 1024
-#endif
-
-  int ret;
-  char filename[DSET_NAME_LEN];
-
-  ret = snprintf(filename, DSET_NAME_LEN, "%s%d-%d.txt", funname, rank, nprocs);
-  if (ret >= DSET_NAME_LEN) {
-    fprintf(stderr, "name too long \n");
-    exit(-1);
-  }
-
-  FILE *fig = fopen(filename, "w");
-
-  return fig;
 }

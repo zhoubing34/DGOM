@@ -1,9 +1,10 @@
 /**
  * @file
- * SetUp.c
  *
  * @brief
  *
+ * @author
+ * li12242, Tianjin University, li12242@tju.edu.cn
  */
 
 #include "Convection2d/Convection2d.h"

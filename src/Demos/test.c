@@ -1,6 +1,3 @@
-//
-// Created by li12242 on 16/6/12.
-//
 
 #include <stdio.h>
 #include "LibUtilities/LibUtilities.h"
@@ -138,40 +135,40 @@ void inverseMatrix(void){
 
 #define Np (Deg+1)*(Deg+2)/2
 
-void GetTriCoordTest(void){
-//    int N = 5;
-    double *r = BuildVector(Np);
-    double *s = BuildVector(Np);
-    int i;
-
-
-    GetTriCoord(Deg, r, s);
-
-    for(i=0;i<Np;i++){
-        printf("r[%d]=%12.4f, s[%d]=%12.4f\n", i,r[i],i,s[i]);
-    }
-
-    DestroyVector(r);
-    DestroyVector(s);
-
-}
-
-void WarpfactorTest(void){
-    int i;
-    double *v = BuildVector(Np);
-    double *w = BuildVector(Np);
-
-    for(i=0;i<Np;i++){
-        v[i] = i/(Np-1.0)*2.0 - 1.0;
-        printf("v[%d] = %lg,\t w[%d] = %lg\n", i, v[i], i, w[i]);
-    }
-
-    Warpfactor(Deg, v, Np, w);
-
-    for(i=0;i<Np;i++){
-        printf("v[%d] = %lg,\t w[%d] = %e\n", i, v[i], i, w[i]);
-    }
-
-    DestroyVector(v);
-    DestroyVector(w);
-}
+//void GetTriCoordTest(void){
+////    int N = 5;
+//    double *r = BuildVector(Np);
+//    double *s = BuildVector(Np);
+//    int i;
+//
+//
+//    GetTriCoord(Deg, r, s);
+//
+//    for(i=0;i<Np;i++){
+//        printf("r[%d]=%12.4f, s[%d]=%12.4f\n", i,r[i],i,s[i]);
+//    }
+//
+//    DestroyVector(r);
+//    DestroyVector(s);
+//
+//}
+//
+//void WarpfactorTest(void){
+//    int i;
+//    double *v = BuildVector(Np);
+//    double *w = BuildVector(Np);
+//
+//    for(i=0;i<Np;i++){
+//        v[i] = i/(Np-1.0)*2.0 - 1.0;
+//        printf("v[%d] = %lg,\t w[%d] = %lg\n", i, v[i], i, w[i]);
+//    }
+//
+//    Warpfactor(Deg, v, Np, w);
+//
+//    for(i=0;i<Np;i++){
+//        printf("v[%d] = %lg,\t w[%d] = %e\n", i, v[i], i, w[i]);
+//    }
+//
+//    DestroyVector(v);
+//    DestroyVector(w);
+//}
