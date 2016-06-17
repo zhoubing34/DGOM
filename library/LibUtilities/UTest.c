@@ -37,6 +37,7 @@ int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int 
     }
     relativeErr = error/total;
     printf("Total    Err = %f\n", error);
+    printf("Total        = %f\n", total);
     printf("Relative Err = %e\n", relativeErr);
     if(error > TOTALERR | relativeErr > RELATIVEERROR) {
         success = 1; // error flag
@@ -79,11 +80,13 @@ int CreateVectorTest(char *message, double *A, double *ExactA, int Ncols){
     }
     relativeErr = error/total;
     printf("Total    Err = %f\n", error);
+    printf("Total        = %f\n", total);
     printf("Relative Err = %e\n", relativeErr);
     if(error > TOTALERR | relativeErr > RELATIVEERROR) {
         success = 1; // error flag
         printf("fatal error in %s\n", message);
-        PrintVector("The error Vector", errorVector, Ncols);
+        PrintVector("The input Vector =", A, Ncols);
+        PrintVector("The exact Vector =", ExactA, Ncols);
     }else{
         printf("test in %s success!\n", message);
     }

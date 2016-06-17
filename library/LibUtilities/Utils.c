@@ -64,7 +64,7 @@ void dgemm_(const unsigned lda,
     unsigned i, j, k;
 
     for (i = 0; i < M; ++i) {
-        const double *Ai_ = A + i*lda;
+        const double *Ai_ = A + i*K;
         for (j = 0; j < N; ++j) {
             const double *B_j = B + j;
 

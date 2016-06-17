@@ -39,7 +39,7 @@ target_link_libraries(LocalRegions LibUtilities Polylib)
 
 
 # UnitTest, configure with `-DUnitTest=1`
-#set(UnitTest 1)
+set(UnitTest 1)
 if(DEFINED UnitTest)
     add_subdirectory(UnitTest)
 endif()
