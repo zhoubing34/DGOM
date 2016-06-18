@@ -138,9 +138,9 @@ void SaveMatrix(char *filename, double **A, int Nrows, int Ncols){
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
- * @param[in] funname Function name
- * @param[in] nprocs Number of process
- * @param[in] rank Index of local process
+ * @param [char*] funname   Function name
+ * @param [int]   rank      Index of local process
+ * @param [int]   nprocs    Number of process
  *
  * @return
  * return values:
@@ -151,10 +151,8 @@ void SaveMatrix(char *filename, double **A, int Nrows, int Ncols){
  * @attention
  * Remember to close file with file handle
  *
- * @note
- * Use user spicific write routine to print log file
  */
-FILE* CreateLog(char *funname, int nprocs, int rank){
+FILE* CreateLog(char *funname, int rank, int nprocs){
 
 #ifndef DSET_NAME_LEN
 #define DSET_NAME_LEN 1024

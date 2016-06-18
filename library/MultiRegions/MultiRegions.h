@@ -15,6 +15,7 @@
 #include "StdRegions/StdRegions.h"
 #include "LocalRegions/LocalRegions.h"
 #include <mpi.h>
+#include <parmetisbin.h>
 
 typedef struct MultiReg2d{
 
@@ -76,8 +77,10 @@ typedef struct MultiReg2d{
 }MultiReg2d;
 
 /* public function */
-MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv,
-                          int **EToV, double *VX, double *VY);
+MultiReg2d* GenMultiReg2d
+        (StdRegions2d *shape, int K, int Nv, int **EToV, double *VX, double *VY);
 
+void FreeMultiReg2d(MultiReg2d *mesh);
+void LoadBalance(MultiReg2d *mesh);
 
 #endif //DGOM_MULTIREGIONS_H
