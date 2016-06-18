@@ -624,7 +624,6 @@ void GetTriCoord(int N, double *r, double *s){
 
     warpf1 = BuildVector(Np);
 
-    printf("Np = %d\n", Np);
     for(i=0;i<N+1;i++){
         for(j=0;j<(N-i)+1;j++){
             L1[sk] = (double)i/N;

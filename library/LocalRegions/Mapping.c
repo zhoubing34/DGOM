@@ -22,9 +22,7 @@
  * fulfill the Lagrange intepolation property
  * \f$ l_i( \mathbf{r}_j ) = \delta_{ij} \f$ in standard element.
  *
- * @param [int]     Np number of points
- * @param [double]  r[Np] coordinate in standard element
- * @param [double]  s[Np] coordinate in standard element
+ * @param [StdRegions2d*] shape standard triangle element
  * @param [double]  GX[3] vertex coordinate
  * @param [double]  GY[3] vertex coordinate
  * @return
@@ -35,13 +33,13 @@
  *
  */
 
-void MapTriCoor(int Np, double *r, double *s,
+void MapTriCoor(StdRegions2d *shape,
                 double *GX, double *GY,
                 double *x, double *y){
     int n;
     double ri, si;
-    for (n = 0; n < Np; ++n) {
-        ri = r[n]; si = s[n];
+    for (n = 0; n < shape->Np; ++n) {
+        ri = shape->r[n]; si = shape->s[n];
         x[n] = 0.5 * (-GX[0] * (ri + si) + GX[1] * (1. + ri) + GX[2] * (1. + si));
         y[n] = 0.5 * (-GY[0] * (ri + si) + GY[1] * (1. + ri) + GY[2] * (1. + si));
     }
@@ -63,9 +61,7 @@ void MapTriCoor(int Np, double *r, double *s,
  * linear Lagrangian functions, which fulfill the Lagrange intepolation property
  * \f$ l_i( \mathbf{r}_j ) = \delta_{ij} \f$ in standard element.
  *
- * @param [int]     Np number of points
- * @param [double]  r[Np] coordinate in standard element
- * @param [double]  s[Np] coordinate in standard element
+ * @param [StdRegions2d*] shape standard quadrilateral element
  * @param [double]  GX[3] vertex coordinate
  * @param [double]  GY[3] vertex coordinate
  * @return
@@ -75,14 +71,13 @@ void MapTriCoor(int Np, double *r, double *s,
  * y | double[Np]   |  coordinate in physical element
  *
  */
-void MapQuadCoor(int Np, double *r, double *s,
+void MapQuadCoor(StdRegions2d *shape,
                  double *GX, double *GY,
                  double *x, double *y){
     int n;
     double ri, si;
-    for (n = 0; n < Np; ++n) {
-        ri = r[n];
-        si = s[n];
+    for (n = 0; n < shape->Np; ++n) {
+        ri = shape->r[n]; si = shape->s[n];
         x[n] = 0.25 * (GX[0] * (1. - ri) * (1. - si) + GX[1] * (1. + ri) * (1. - si)
                        + GX[2] * (1. + ri) * (1. + si) + GX[3] * (1. - ri)*(1. + si));
         y[n] = 0.25 * (GY[0] * (1. - ri) * (1. - si) + GY[1] * (1. + ri) * (1. - si)

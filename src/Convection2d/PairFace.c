@@ -84,9 +84,6 @@ void pairmarry(const void *obj1, const void *obj2){
  * @details
  * @date
  *
- * @author
- * li12242, Tianjin University, li12242@tju.edu.cn
- *
  * @return
  * return values：
  * name     | type     | description of value

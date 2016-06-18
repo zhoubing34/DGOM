@@ -37,9 +37,15 @@ add_library(LocalRegions STATIC ${LOCAL_REGIONS_SOURCE})
 add_dependencies(LocalRegions LibUtilities Polylib)
 target_link_libraries(LocalRegions LibUtilities Polylib)
 
+# MultiRegions
+set(MULTI_REGIONS_SOURCE
+        MultiRegions/MultiRegions.c MultiRegions/MultiRegions.h)
+add_library(MultiRegions STATIC ${MULTI_REGIONS_SOURCE})
+add_dependencies(MultiRegions LocalRegions)
+target_link_libraries(MultiRegions LibUtilities LocalRegions StdRegions)
 
 # UnitTest, configure with `-DUnitTest=1`
-set(UnitTest 1)
+#set(UnitTest 1)
 if(DEFINED UnitTest)
     add_subdirectory(UnitTest)
 endif()

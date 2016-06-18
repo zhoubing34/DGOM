@@ -70,13 +70,6 @@ Mesh* ReadTriMesh(){
     for(p=0;p<procid;++p)
         Kstart += Kprocs[p];
 
-    /* # of all vertex */
-    mesh->Nv = (Ne + 1)*(Ne + 1);
-
-    /* allocate coordinate of all vertex */
-    double *VX = BuildVector(mesh->Nv);
-    double *VY = BuildVector(mesh->Nv);
-
     /* element to vertex list for all elements */
     int **newEToV = BuildIntMatrix(K, mesh->Nverts);
     /* EToV of local mesh */
@@ -111,6 +104,13 @@ Mesh* ReadTriMesh(){
 #endif
         }
     }
+
+    /* # of all vertex */
+    mesh->Nv = (Ne + 1)*(Ne + 1);
+
+    /* allocate coordinate of all vertex */
+    double *VX = BuildVector(mesh->Nv);
+    double *VY = BuildVector(mesh->Nv);
 
     /* Assignment of coordinate for vertex */
     int index; /* vertex index */

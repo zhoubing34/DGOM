@@ -126,11 +126,11 @@ struct RKDG2d {
     int     *vmapM;
     /** volume id of +ve trace of face node */
     int     *vmapP;
-    /** # of faces to send recv to each proc */
+    /** number of faces to send recv to each proc */
     int     *Npar;
-    /** element of parallel nodes */
+    /** local element of parallel nodes */
     int    **parK;
-    /** face of parallel nodes */
+    /** local face of parallel nodes */
     int    **parF;
 
     /* volume jacobi at nodes */
