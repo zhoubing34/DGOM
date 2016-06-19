@@ -45,7 +45,10 @@ typedef struct MultiReg2d{
     /* mesh and nodes info */
 
     /* element connection info */
-    int **EToE, **EToV, **EToP;
+    int **EToV;
+    int **EToE;
+    int **EToF;
+    int **EToP;
 
     /** number of faces to send recv to each proc */
     int *Npar;
@@ -73,14 +76,23 @@ typedef struct MultiReg2d{
     /* area of each ele */
     float *area;
 
-
 }MultiReg2d;
+
+typedef struct face {
+    int p1, k1, f1;
+    int p2, k2, f2;
+    /** max index of vertex on face */
+    int va;
+    /** min index of vertex on face */
+    int vb;
+    /** max index of vertex */
+    int g;
+}face;
 
 /* public function */
 MultiReg2d* GenMultiReg2d
         (StdRegions2d *shape, int K, int Nv, int **EToV, double *VX, double *VY);
 
 void FreeMultiReg2d(MultiReg2d *mesh);
-void LoadBalance(MultiReg2d *mesh);
 
 #endif //DGOM_MULTIREGIONS_H

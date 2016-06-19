@@ -8,3 +8,7 @@ target_link_libraries(SetCoordTest LibUtilities MultiRegions StdRegions)
 add_executable(LoadBalanceTest LoadBalanceTest.c)
 target_link_libraries(LoadBalanceTest LibUtilities MultiRegions)
 
+
+add_executable(SetFacePairTest SetFacePairTest.c)
+target_link_libraries(SetFacePairTest LibUtilities MultiRegions)
+

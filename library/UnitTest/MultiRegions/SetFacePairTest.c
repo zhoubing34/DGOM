@@ -55,7 +55,7 @@ int main(int argc, char **argv){
     printf("procid:%d, K = %d\n", mesh->procid, mesh->K);
 
     /* gen log filename */
-    char casename[18] = "LoadBalanceTest";
+    char casename[18] = "SetFacePairTest";
     FILE *fp = CreateLog(casename, mesh->procid, mesh->nprocs);
 
     int n,m;
@@ -67,19 +67,28 @@ int main(int argc, char **argv){
         }
         fprintf(fp, " \n");
     }
-    /* write GX */
-    fprintf(fp, "GX = \n");
+    /* write EToE */
+    fprintf(fp, "EToE = \n");
     for(n=0;n<mesh->K;++n){
         for(m=0;m<Nvert;++m){
-            fprintf(fp, " %f, ", mesh->GX[n][m]);
+            fprintf(fp, " %d, ", mesh->EToE[n][m]);
         }
         fprintf(fp, " \n");
     }
-    /* write GY */
-    fprintf(fp, "GY = \n");
+    /* write EToF */
+    fprintf(fp, "EToF = \n");
     for(n=0;n<mesh->K;++n){
         for(m=0;m<Nvert;++m){
-            fprintf(fp, " %f, ", mesh->GY[n][m]);
+            fprintf(fp, " %d, ", mesh->EToF[n][m]);
+        }
+        fprintf(fp, " \n");
+    }
+
+    /* write EToP */
+    fprintf(fp, "EToP = \n");
+    for(n=0;n<mesh->K;++n){
+        for(m=0;m<Nvert;++m){
+            fprintf(fp, " %d, ", mesh->EToP[n][m]);
         }
         fprintf(fp, " \n");
     }

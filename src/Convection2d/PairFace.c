@@ -84,12 +84,6 @@ void pairmarry(const void *obj1, const void *obj2){
  * @details
  * @date
  *
- * @return
- * return values：
- * name     | type     | description of value
- * -------- |----------|----------------------
- * car_id   | int      |
- * car_info | object   |
  *
  */
 void FacePair(Mesh *mesh) {
