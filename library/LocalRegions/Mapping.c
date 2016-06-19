@@ -201,9 +201,9 @@ void Normals(int Nv, double *GX, double *GY, double *nx, double *ny, double *sJ)
  *
  */
 void GeometricFactors(int Np, const double *x, const double *y,
-                      double **Dr, double **Ds,
-                      double *drdx, double *dsdx,
-                      double *drdy, double *dsdy, double *J){
+                                                                                   double **Dr, double **Ds,
+                                                                                   double *drdx, double *dsdx,
+                                                                                   double *drdy, double *dsdy, double *J){
 
     double *dxdr, *dxds;
     double *dydr, *dyds;

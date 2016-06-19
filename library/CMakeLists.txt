@@ -50,7 +50,12 @@ target_link_libraries(LocalRegions LibUtilities Polylib)
 # MultiRegions
 # =======================================================================================
 set(MULTI_REGIONS_SOURCE
-        MultiRegions/MultiRegions.c MultiRegions/MultiRegions.h)
+        MultiRegions/MultiRegions.c
+        MultiRegions/MultiRegions.h
+        MultiRegions/SetFacePair.c
+        MultiRegions/SetNodePair.c
+        MultiRegions/LoadBalance.c)
+
 add_library(MultiRegions STATIC ${MULTI_REGIONS_SOURCE})
 add_dependencies(MultiRegions LocalRegions)
 target_link_libraries(MultiRegions LibUtilities

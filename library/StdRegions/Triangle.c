@@ -73,30 +73,30 @@ StdRegions2d* GenStdTriEle(const unsigned N){
     tri->Nfaces = 3;
     tri->Nfp = N+1;
 
-    /* nodes at faces */
+    /* nodes at faces, Fmask */
     tri->Fmask = BuildIntMatrix(tri->Nfaces, tri->Nfp);
     BuildFmask(tri->N, tri->Fmask);
 
-    /* coordinate */
+    /* coordinate, r and s */
     tri->r = BuildVector(tri->Np);
     tri->s = BuildVector(tri->Np);
 
     GetTriCoord(N, tri->r, tri->s);
 
-    /* vandermonde matrix */
+    /* vandermonde matrix, V */
     tri->V = BuildMatrix(tri->Np, tri->Np);
     GetTriV(N, tri->Np, tri->r, tri->s, tri->V);
 
-    /* mass matrix */
+    /* mass matrix, M */
     tri->M = BuildMatrix(tri->Np, tri->Np);
     GetTriM(tri->Np, tri->V, tri->M);
 
-    /* Derivative Matrix */
+    /* Derivative Matrix, Dr and Ds */
     tri->Dr = BuildMatrix(tri->Np, tri->Np);
     tri->Ds = BuildMatrix(tri->Np, tri->Np);
     GetTriDeriM(tri->N, tri->Np, tri->r, tri->s, tri->V, tri->Dr, tri->Ds);
 
-    /* suface LIFT matrix */
+    /* suface LIFT matrix, LIFT */
     double **Mes = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
     tri->LIFT = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
     GetTriSurfM(tri->N, tri->Fmask, Mes);
@@ -104,7 +104,7 @@ StdRegions2d* GenStdTriEle(const unsigned N){
 
     DestroyMatrix(Mes);
 
-    /* integration coeff */
+    /* integration coeff, ws and wv */
     tri->ws = BuildVector(tri->Nfp);
     double *r = BuildVector(tri->Nfp);
     zwglj(r, tri->ws, tri->Nfp, 0, 0);

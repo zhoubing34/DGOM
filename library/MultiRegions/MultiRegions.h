@@ -17,6 +17,8 @@
 #include <mpi.h>
 #include <parmetisbin.h>
 
+#define NODETOL  1e-6f
+
 typedef struct MultiReg2d{
 
     /** index of local process */
@@ -75,19 +77,12 @@ typedef struct MultiReg2d{
     float *ciradius;
     /* area of each ele */
     float *area;
+    /* volume geometric factors */
+    float *vgeo;
 
 }MultiReg2d;
 
-typedef struct face {
-    int p1, k1, f1;
-    int p2, k2, f2;
-    /** max index of vertex on face */
-    int va;
-    /** min index of vertex on face */
-    int vb;
-    /** max index of vertex */
-    int g;
-}face;
+
 
 /* public function */
 MultiReg2d* GenMultiReg2d

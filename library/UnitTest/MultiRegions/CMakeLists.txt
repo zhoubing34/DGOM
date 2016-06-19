@@ -12,3 +12,7 @@ target_link_libraries(LoadBalanceTest LibUtilities MultiRegions)
 add_executable(SetFacePairTest SetFacePairTest.c)
 target_link_libraries(SetFacePairTest LibUtilities MultiRegions)
 
+
+add_executable(SetNodePairTest SetNodePairTest.c)
+target_link_libraries(SetNodePairTest LibUtilities MultiRegions)
+
