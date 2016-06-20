@@ -66,10 +66,10 @@ target_link_libraries(MultiRegions LibUtilities
 # MultiRegions
 # =======================================================================================
 set(PHYSDOMAIN_SOURCE
-        PhysDomain/PhysDomain.h
-        PhysDomain/PhysDomain.c)
+        PhysDomain/PhysDomain.c
+        PhysDomain/PhysDomain.h)
 
-add_library(PhysDomain STATIC ${MULTI_REGIONS_SOURCE})
+add_library(PhysDomain STATIC ${PHYSDOMAIN_SOURCE})
 add_dependencies(PhysDomain MultiRegions)
 target_link_libraries(PhysDomain MultiRegions LibUtilities)
 

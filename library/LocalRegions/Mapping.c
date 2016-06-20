@@ -115,8 +115,8 @@ void MapQuadCoor(StdRegions2d *shape,
  * is inward and the Jacobi coefficient will be negative.
  *
  */
-void Normals(int Nv, double *GX, double *GY, double *nx, double *ny, double *sJ){
-    int f, Nfaces = Nv;
+void Normals(int Nfaces, double *GX, double *GY, double *nx, double *ny, double *sJ){
+    int f;
     double x1, x2, y1, y2;
 
     /* outward vector on each faces */
