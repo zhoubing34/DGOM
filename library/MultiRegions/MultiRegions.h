@@ -74,9 +74,9 @@ typedef struct MultiReg2d{
     /** jacobi on each nodes */
     double *J;
     /** radius of the circumscribed circle */
-    float *ciradius;
+    double *ciradius;
     /* area of each ele */
-    float *area;
+    double *area;
     /* volume geometric factors */
     float *vgeo;
 
@@ -85,8 +85,7 @@ typedef struct MultiReg2d{
 
 
 /* public function */
-MultiReg2d* GenMultiReg2d
-        (StdRegions2d *shape, int K, int Nv, int **EToV, double *VX, double *VY);
+MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv, int **EToV, double *VX, double *VY);
 
 void FreeMultiReg2d(MultiReg2d *mesh);
 

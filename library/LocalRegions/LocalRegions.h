@@ -7,7 +7,7 @@
 
 /* public functions */
 void Normals(int Nv, double *GX, double *GY, double *nx, double *ny, double *sJ);
-void GeometricFactors(int Np, const double *x, const double *y,
+void GeometricFactors(int Np, double *x, double *y,
                       double **Dr, double **Ds,
                       double *drdx, double *dsdx,
                       double *drdy, double *dsdy, double *J);

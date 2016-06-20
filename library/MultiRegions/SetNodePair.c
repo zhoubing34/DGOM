@@ -29,7 +29,7 @@
  * EToE is modified inside the function. EToE/vmapP contains the mapping from
  * elements/nodes to outgoing/ingoing elements/nodes, which is marked as negative.
  */
-void SetNodePair(StdRegions2d *shape, int K, double **GX, double **GY,
+void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
                  int **EToE, int **EToF, int **EToP, double **x, double **y,
                  int *Npar, int *Ntotalout, int **mapOUT,
                  int *vmapM, int *vmapP){

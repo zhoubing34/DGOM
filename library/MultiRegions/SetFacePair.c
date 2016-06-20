@@ -97,7 +97,7 @@ void pairmarry(const void *obj1, const void *obj2){
  * newParK and newParF is allocated inside of the function. Send the address of the
  * matrix pointer as parameters.
  */
-void SetFacePair(StdRegions2d *shape, int Klocal,
+void SetFacePair2d(StdRegions2d *shape, int Klocal,
                  int **EToV, int **EToE, int **EToF, int **EToP,
                  int *Npar, int ***newParK, int ***newParF){
 
