@@ -63,6 +63,17 @@ target_link_libraries(MultiRegions LibUtilities
         parmetis metis)
 
 # =======================================================================================
+# MultiRegions
+# =======================================================================================
+set(PHYSDOMAIN_SOURCE
+        PhysDomain/PhysDomain.h
+        PhysDomain/PhysDomain.c)
+
+add_library(PhysDomain STATIC ${MULTI_REGIONS_SOURCE})
+add_dependencies(PhysDomain MultiRegions)
+target_link_libraries(PhysDomain MultiRegions LibUtilities)
+
+# =======================================================================================
 # UnitTest, configure with `-DUnitTest=1`
 # =======================================================================================
 #set(UnitTest 1) # turn on the model
