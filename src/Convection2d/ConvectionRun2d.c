@@ -1,11 +1,22 @@
-#include "Convection2d/Convection2d.h"
+#include "ConvectionDriver2d.h"
 
-void ConvectionRun2d(Mesh *mesh, Ncfile * outfile, double FinalTime, double dt){
+void ConvectionRun2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
+                     Ncfile * outfile, double FinalTime, double dt){
     double time = 0;
     int    INTRK, tstep=0;
     int    counter = 0;
+    double *rk4a, *rk4b, *rk4c;
 
-    PutVar(outfile, counter++, time, mesh);
+    /* Runge-Kutta time evaluation coefficient */
+    void RK45_Coeff(double *, double *, double *);
+    rk4a = BuildVector(5);
+    rk4b = BuildVector(5);
+    rk4c = BuildVector(6);
+    RK45_Coeff(rk4a, rk4b, rk4c);
+
+
+    /* store initial condition */
+    PutVar(outfile, counter++, time, phys);
 
     double mpitime0 = MPI_Wtime();
 
@@ -18,35 +29,62 @@ void ConvectionRun2d(Mesh *mesh, Ncfile * outfile, double FinalTime, double dt){
         for (INTRK=1; INTRK<=5; ++INTRK) {
 
             /* compute rhs of equations */
-            const float fdt = dt;
-            const float fa = (float)mesh->rk4a[INTRK-1];
-            const float fb = (float)mesh->rk4b[INTRK-1];
+            const float fdt = (float)dt;
+            const float fa = (float)rk4a[INTRK-1];
+            const float fb = (float)rk4b[INTRK-1];
 
-            ConvectionRHS2d(mesh, fa, fb, fdt);
+            ConvectionRHS2d(phys, flowRate, fa, fb, fdt);
 
-#ifdef LIMIT
-            DisDetector(mesh); /* discontinuity detector */
-            LimiterBJ2d(mesh);
-#endif
         }
 
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
+        PutVar(outfile, counter++, time, phys);
 
     }
 
     double mpitime1 = MPI_Wtime();
     double time_total = mpitime1 - mpitime0;
 
-    PutVar(outfile, counter++, time, mesh);
+//    PutVar(outfile, counter++, time, phys);
 
-    double flopsV = p_Np*p_Np*12 + p_Np*13; /* V3 */
-    double flopsS = p_Nfp*p_Nfaces*21 + p_Np*(p_Nfaces*p_Nfp*6 + 3);
-    double flopsR = p_Np*p_Nfields*4;
+    MultiReg2d *mesh = phys->mesh;
+    StdRegions2d *shape = mesh->stdcell;
+
+    int Np      = shape->Np;
+    int Nfaces  = shape->Nfaces;
+    int Nfp     = shape->Nfp;
+    int Nfields = phys->Nfields;
+    int N       = shape->N;
+
+    double flopsV = Np*Np*12 + Np*13; /* V3 */
+    double flopsS = Nfp*Nfaces*21 + Np*(Nfaces*Nfp*6 + 3);
+    double flopsR = Np*Nfields*4;
     int Kloc = mesh->K;
 
     MPI_Barrier(MPI_COMM_WORLD);
     printf("proc: %d,\t order: %d,\t time taken: %lg,\t MNUPS: %lg,\t GFLOPS: %lg\n",
-           mesh->procid, p_N, time_total, p_N*mesh->K*5*(tstep-1)/time_total*1e-6,
+           mesh->procid, N, time_total, N*mesh->K*5*(tstep-1)/time_total*1e-6,
            5*(tstep-1)*( (flopsV+flopsS+flopsR)*((double)Kloc/(1.e9*time_total))));
+}
+
+
+void RK45_Coeff(double *rk4a, double *rk4b, double *rk4c){
+    /* low storage RK coefficients */
+    rk4a[0] =              0.0;
+    rk4a[1] =  -567301805773.0 / 1357537059087.0;
+    rk4a[2] = -2404267990393.0 / 2016746695238.0;
+    rk4a[3] = -3550918686646.0 / 2091501179385.0;
+    rk4a[4] = -1275806237668.0 /  842570457699.0;
+    rk4b[0] =  1432997174477.0 /  9575080441755.0;
+    rk4b[1] =  5161836677717.0 / 13612068292357.0;
+    rk4b[2] =  1720146321549.0 /  2090206949498.0;
+    rk4b[3] =  3134564353537.0 /  4481467310338.0;
+    rk4b[4] =  2277821191437.0 / 14882151754819.0;
+    rk4c[0] =              0.0;
+    rk4c[1] =  1432997174477.0 / 9575080441755.0;
+    rk4c[2] =  2526269341429.0 / 6820363962896.0;
+    rk4c[3] =  2006345519317.0 / 3224310063776.0;
+    rk4c[4] =  2802321613138.0 / 2924317926251.0;
+    rk4c[5] =              1.0;
 }

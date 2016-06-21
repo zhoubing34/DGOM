@@ -21,7 +21,8 @@ set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
 set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
 
 # add header path
-include_directories("${CMAKE_SOURCE_DIR}/include"   # source include
+include_directories("${CMAKE_SOURCE_DIR}/library"   # source library
+        "${CMAKE_SOURCE_DIR}/include"               # source include
         "${MPI_INCLUDE_PATH}"                       # mpi include
         "${THIRD_LIBRARY_PATH}/include/"            # Third library include
         ${MKLROOT}/include)

@@ -17,15 +17,15 @@
 
 struct StdReg2d{
     /** Polynomial order */
-    unsigned N;
+    int N;
     /** number of points */
-    unsigned Np;
+    int Np;
     /** number of vertex */
-    unsigned Nv;
+    int Nv;
     /** number of faces */
-    unsigned Nfaces;
+    int Nfaces;
     /** number of points per face */
-    unsigned Nfp;
+    int Nfp;
 
     /** index of node at faces */
     int **Fmask;
@@ -47,13 +47,17 @@ struct StdReg2d{
     /** local lift matrix */
     double **LIFT;
 
+    /* float version coefficient */
+    float *f_Dr, *f_Ds;
+    float *f_LIFT;
+
 };
 typedef struct StdReg2d StdRegions2d;
 
 /* Quadrilateral.c */
 
 /* Triangle.c - public functions */
-StdRegions2d* GenStdTriEle(const unsigned N);
+StdRegions2d* GenStdTriEle(int N);
 void FreeStdRegions2d(StdRegions2d * );
 
 #endif

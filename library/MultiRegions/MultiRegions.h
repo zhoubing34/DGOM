@@ -27,7 +27,7 @@ typedef struct MultiReg2d{
     int nprocs;
 
     /** standard element */
-    StdRegions2d *StdElement;
+    StdRegions2d *stdcell;
     /** total number of vertex */
     int Nv;
     /** total number of elements */

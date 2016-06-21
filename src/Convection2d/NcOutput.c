@@ -1,4 +1,5 @@
-#include "Convection2d/Convection2d.h"
+#include "ConvectionDriver2d.h"
+#include "NcOutput.h"
 
 #ifndef DSET_NAME_LEN
 #define DSET_NAME_LEN 1024
@@ -25,12 +26,13 @@
  * @note
  * @todo
  */
-Ncfile* SetupOutput(Mesh *mesh, char* casename){
+Ncfile* SetupOutput(MultiReg2d *mesh, char* casename){
 
     /* return file structure */
     Ncfile * outfile = (Ncfile *) calloc(1, sizeof(Ncfile));
 
     int ret, ncfile, ndims;
+    StdRegions2d *shape = mesh->stdcell;
 
     /* dimension ids */
     int point_dimid, ele_dimid, time_dimid;
@@ -62,7 +64,7 @@ Ncfile* SetupOutput(Mesh *mesh, char* casename){
     /* define dimensions */
     ret = ncmpi_def_dim(ncfile, "ele", mesh->K, &ele_dimid); NC_ERROR
 
-    ret = ncmpi_def_dim(ncfile, "point", p_Np, &point_dimid); NC_ERROR
+    ret = ncmpi_def_dim(ncfile, "point", shape->Np, &point_dimid); NC_ERROR
 
     ret = ncmpi_def_dim(ncfile, "time", NC_UNLIMITED, &time_dimid); NC_ERROR
 
@@ -112,11 +114,13 @@ Ncfile* SetupOutput(Mesh *mesh, char* casename){
 }
 
 
-void PutVar(Ncfile * outfile, int outStep, double time, Mesh* mesh){
+void PutVar(Ncfile * outfile, int outStep, double time, PhysDomain2d* phys){
     int ret;
     MPI_Offset start_f[2], count_f[2];
     MPI_Offset start_v[3], count_v[3];
     MPI_Offset start_t, count_t;
+    MultiReg2d *mesh = phys->mesh;
+    StdRegions2d *shape = mesh->stdcell;
 
     /* put time */
     start_t = outStep; // start index
@@ -129,15 +133,15 @@ void PutVar(Ncfile * outfile, int outStep, double time, Mesh* mesh){
     start_v[2] = 0;
     count_v[0] = 1;
     count_v[1] = mesh->K;
-    count_v[2] = p_Np;
-    ret = ncmpi_put_vara_float_all(outfile->ncfile, outfile->varid[1], start_v, count_v, mesh->f_Q); NC_ERROR
+    count_v[2] = shape->Np;
+    ret = ncmpi_put_vara_float_all(outfile->ncfile, outfile->varid[1], start_v, count_v, phys->f_Q); NC_ERROR
 
-    /* put trouble cell flag */
-    start_f[0] = outStep;
-    start_f[1] = 0;
-    count_f[0] = 1;
-    count_f[1] = mesh->K;
-    ret = ncmpi_put_vara_float_all(outfile->ncfile, outfile->varid[2], start_v, count_v, mesh->tcflag); NC_ERROR
+//    /* put trouble cell flag */
+//    start_f[0] = outStep;
+//    start_f[1] = 0;
+//    count_f[0] = 1;
+//    count_f[1] = mesh->K;
+//    ret = ncmpi_put_vara_float_all(outfile->ncfile, outfile->varid[2], start_v, count_v, mesh->tcflag); NC_ERROR
 
 }
 

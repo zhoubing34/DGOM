@@ -32,7 +32,7 @@ typedef struct Ncfile {
 }Ncfile;
 
 /* NcOutput.c */
-Ncfile* SetupOutput(Mesh *, char* );
-void PutVar(Ncfile * , int , double , Mesh * );
+Ncfile* SetupOutput(MultiReg2d *mesh, char* casename);
+void PutVar(Ncfile * outfile, int outStep, double time, PhysDomain2d* phys);
 
 #endif

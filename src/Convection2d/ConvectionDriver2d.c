@@ -6,184 +6,112 @@
  * 2D scalar convection problem main function
  */
 
-#include <Convection2d/Convection2d.h>
+#include "ConvectionDriver2d.h"
 
 /**
  * @brief
- * main function for 2d convection problem
+ * Main function for 2d convection problem
  *
  * @details
- * 2d scalar convection problem
+ * Two dimensional scalar convection problem
  * \f[ \frac{\partial C}{\partial t} + \frac{\partial uC}{\partial x}
  * + \frac{\partial vC}{\partial y} = 0 \f]
+ *
+ * Usages:
+ * Use the 2 order basis with uniform mesh of 80 elements on each edge:
+ *
+ *     mpirun -n 2 ./Convection2d 2 80
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
- * @note
- * The Mass, Derivative and LIFT matrix for each order is include from the header files.
- * In the future, these matrix will be generate from library.
- *
  * @todo
- * 1. add boundary conditions
+ * 1.
+ * 1. Add slope limiter
+ * 2. Add boundary conditions
  */
 int main(int argc, char **argv){
 
-    /* read mesh */
-    Mesh * mesh;
-    Ncfile * outfile;
-    int procid, nprocs;
-    double dt, FinalTime = 2.4;
-    char casename[16] = "Convection2d";
 
-    /* initialize MPI */
-    MPI_Init(&argc, &argv);
+    unsigned int N, Ne;     /* parameters */
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    double dt, FinalTime = 2.4;         /* time */
+    char casename[16] = "Convection2d"; /* output filename */
+
+    int procid, nprocs; /* process number */
+
+    MPI_Init(&argc, &argv);                 /* initialize MPI */
+    MPI_Comm_rank(MPI_COMM_WORLD, &procid); /* read process id */
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs); /* read process num */
+
+    int info;
+
+
+    /* get degree and element number */
+    info = sscanf(argv[1],"%d",&N);
+    if (info!=1) {
+        fprintf(stderr, "Wrong degree number input:%s \n", argv[1]);
+        exit(-1);
+    }
+    info = sscanf(argv[2],"%d",&Ne);
+    if (info!=1) {
+        fprintf(stderr, "Wrong element number input:%s \n", argv[2]);
+        exit(-1);
+    }
 
     if(!procid) {
         printf("--------------------------------\n");
         printf("          Convection2d\n");
         printf("--------------------------------\n");
         printf("\n    2d Convection Test Case\n");
-        printf("\n        Deg = %d \n", p_N);
-#ifdef TRI
+        printf("\n        Deg = %d \n", N);
         printf("\n    Tri Ele = %d \n", Ne);
-#else
         printf("\n   Quad Ele = %d \n", Ne);
-#endif
         printf("\n");
         printf("--------------------------------\n");
     }
 
-#if defined TRI
+    StdRegions2d *shape = GenStdTriEle(N);
+    MultiReg2d *mesh = ReadMesh(shape, Ne);
+    /* physics */
+    PhysDomain2d *phys = GetPhysDomain2d(mesh, 1);
+    PhysDomain2d *flowRate = GetPhysDomain2d(mesh, 2);
 
-    mesh = ReadTriMesh();
-#elif defined QUAD
+    /* init phys */
+    dt = InitCondition(phys, flowRate);
 
-    mesh = ReadQuadMesh();
+#if 0
+    char *sname = "scalar";
+    PrintPhys(phys, sname);
+    char *fname = "flowRate";
+    PrintPhys(flowRate, fname)
+    if(!procid) {
+        printf("\ntime step = %f\n", dt);
+    }
 #endif
 
-    /* redistribute element */
-    LoadBalance(mesh);
-
-    /* find element connections */
-    FacePair(mesh);
-
-    /* setup mesh */
-#if defined TRI
-
-    SetupTriCoeff(mesh);
-
-#elif defined QUAD
-
-    SetupQuadCoeff(mesh);
-#endif
-
-    /* set node connection */
-    BuildMaps(mesh);
-
-#if defined DEBUG /* check mesh */
-
-    PrintMeshConnection(mesh);
-#endif
-
-    /* init mesh coeff */
-    dt = InitMeshInfo(mesh, p_Nfields);
-    dt = .5*dt/((p_N+1)*(p_N+1)); // CFL
-
-    /* initial conditions */
-    InitData(mesh);
-
+    Ncfile * outfile;
     /* setup output file */
     outfile = SetupOutput(mesh, casename);
 
     /* solve */
-    ConvectionRun2d(mesh, outfile ,FinalTime, dt);
+    ConvectionRun2d(phys, flowRate, outfile ,FinalTime, dt);
 
     /* post process */
-    Postprocess(mesh);
+    Postprocess(phys);
 
     /* finish */
-    ConvectionFinish(mesh, outfile);
-
-    return 0;
-}
-
-
-/**
- * @brief
- * Program Finalize
- *
- * @details
- * Deallocate all the mem and close the NetCDF file
- *
- * @author
- * li12242, Tianjin University, li12242@tju.edu.cn
- *
- * @warning
- * @attention
- * @note
- * @todo
- */
-void ConvectionFinish(Mesh * mesh, Ncfile * outfile){
-
     int ret;
-    /* close NetCDF output file */
     ret = ncmpi_close(outfile->ncfile);
     if (ret != NC_NOERR) handle_error(ret, __LINE__);
 
-    /* NcOutput.c */
     free(outfile->varid);
-
-    /* Mesh2d.c */
-    DestroyMatrix(mesh->GX);
-    DestroyMatrix(mesh->GY);
-    DestroyIntMatrix(mesh->EToV);
-
-    /* PairFace */
-    DestroyIntVector(mesh->Npar);
-    DestroyIntMatrix(mesh->EToE);
-    DestroyIntMatrix(mesh->EToF);
-    DestroyIntMatrix(mesh->EToP);
-    free(mesh->parK);
-    free(mesh->parF);
-
-    /* SetUp.c */
-    DestroyVector(mesh->r);
-    DestroyVector(mesh->s);
-    DestroyVector(mesh->w);
-    DestroyVector(mesh->wv);
-    DestroyMatrix(mesh->Dr);
-    DestroyMatrix(mesh->Ds);
-    DestroyMatrix(mesh->LIFT);
-    DestroyIntMatrix(mesh->Fmask);
-    DestroyVector(mesh->rk4a);
-    DestroyVector(mesh->rk4b);
-    DestroyVector(mesh->rk4c);
-
-    /* BuildMaps.c */
-    DestroyIntVector(mesh->vmapM);
-    DestroyIntVector(mesh->vmapP);
-    DestroyIntVector(mesh->parmapOUT);
-    free(mesh->f_outQ);
-    free(mesh->f_inQ);
-
-    /* InitialCondition.c */
-    free(mesh->f_Q);
-    free(mesh->f_rhsQ);
-    free(mesh->f_resQ);
-    free(mesh->f_s);
-
-    /* InitMeshInfo.c */
-    free(mesh->f_LIFT);
-    free(mesh->f_Dr);
-    free(mesh->f_Ds);
-    free(mesh->vgeo);
-    free(mesh->surfinfo);
-    free(mesh->ciradius);
-
+    FreeStdRegions2d(shape);
+    FreeMultiReg2d(mesh);
+    FreePhysDomain2d(phys);
+    FreePhysDomain2d(flowRate);
 
     MPI_Finalize();
+
+    return 0;
 }

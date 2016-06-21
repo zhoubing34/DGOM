@@ -18,18 +18,23 @@ void SetMapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT);
 PhysDomain2d* GetPhysDomain2d(MultiReg2d *mesh, int Nfields){
 
     PhysDomain2d *phys = (PhysDomain2d *) calloc(1, sizeof(PhysDomain2d));
-    StdRegions2d *shape = mesh->StdElement;
+    StdRegions2d *shape = mesh->stdcell;
 
-    int K  = mesh->K;
-    int Np = shape->Np;
-    int Nfaces = shape->Nfaces;
+    int K  = mesh->K;   /* number of elements */
+    int Np = shape->Np; /* number of nodes in each element */
+
     int Nfp = shape->Nfp;
+    int Nfaces = shape->Nfaces;
 
     /* number of variables */
     phys->Nfields = Nfields;
 
     /* mesh */
     phys->mesh = mesh;
+
+    /* volume info */
+    phys->vgeo = mesh->vgeo;
+
     /* data array */
     phys->f_Q    = (float *) calloc(K*Np*Nfields, sizeof(float));
     phys->f_rhsQ = (float *) calloc(K*Np*Nfields, sizeof(float));
@@ -66,7 +71,7 @@ void SetMapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT){
     int p2, n1, m, fld;
     int nprocs = mesh->nprocs;
     int procid = mesh->procid;
-    StdRegions2d *shape = mesh->StdElement;
+    StdRegions2d *shape = mesh->stdcell;
     int Nfp = shape->Nfp;
     int Np  = shape->Np;
 
@@ -90,7 +95,7 @@ void SetMapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT){
 void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, float *surfinfo){
 
     int k,f,m,sk = 0;
-    StdRegions2d *shape = mesh->StdElement;
+    StdRegions2d *shape = mesh->stdcell;
 
     int K  = mesh->K;
     int Np = shape->Np;

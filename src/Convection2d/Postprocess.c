@@ -1,4 +1,4 @@
-#include "Convection2d/Convection2d.h"
+#include "ConvectionDriver2d.h"
 
 /**
  * @brief
@@ -17,60 +17,64 @@
  * @note
  * @todo
  */
-void Postprocess(Mesh *mesh){
-    double L2 = 0.0, Linf = 0.0;
-    double gL2 = 0.0, gLinf = 0.0;
+void Postprocess(PhysDomain2d *phys){
+
+    double L2   = 0.0, Linf  = 0.0;
+    double gL2  = 0.0, gLinf = 0.0;
     float *Qe, locerr, dis;
     int k, n;
+
+    MultiReg2d *mesh = phys->mesh;
+    StdRegions2d *shape = mesh->stdcell;
 
     const int K      = mesh->K;
     const int procid = mesh->procid;
 //    const int nprocs = mesh->nprocs;
-    float *f_Q = mesh->f_Q;
+    float *f_Q = phys->f_Q;
 
-    Qe = (float*) calloc(mesh->K*p_Np, sizeof(float));
+    Qe = (float*) calloc(mesh->K*shape->Np, sizeof(float));
     /* get the exact solution */
-    void GenExactSolution(Mesh *, float *);
+    void GenExactSolution(MultiReg2d *, float *);
     GenExactSolution(mesh, Qe);
 
     /* calculate the L2 and Linf error */
     for(k=0;k<K;k++){
         locerr = 0.0f;
-        float *qpt = f_Q + p_Nfields*p_Np*k;
-        float *qet = Qe + p_Nfields*p_Np*k;
-        for(n=0;n<p_Np;n++){
+        float *qpt = f_Q + phys->Nfields*shape->Np*k;
+        float *qet = Qe + phys->Nfields*shape->Np*k;
+        for(n=0;n<shape->Np;n++){
             dis = qpt[n] - qet[n];
-//            locerr += (float) (mesh->J[sj++]*mesh->wv[n]*dis*dis);
             locerr = (dis*dis);
             Linf = max(Linf, fabsf(dis));
         }
         L2 += locerr;
     }
-    L2 = sqrt( L2/(K*p_Np) );
+    L2 = sqrt( L2/(K*shape->Np) );
 
     /* collect all process */
     MPI_Allreduce(&Linf, &gLinf, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
     MPI_Allreduce(&L2, &gL2, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
     /* print output */
-    if(!procid) printf("L2 = %le,\t Linf = %le\n", gL2, gLinf);
+    if(!procid) printf("L2:%le, Linf:%le\n", gL2, gLinf);
 
     /* finish */
     free(Qe);
 }
 
 
-void GenExactSolution(Mesh *mesh, float *Qe){
+void GenExactSolution(MultiReg2d *mesh, float *Qe){
     int k, n, sk=0;
     int K = mesh->K;
     double t, sigma = 125*1e3/(33*33);
     /* initial position */
     double xc = 0.0, yc = 0.6;
 
+    StdRegions2d *shape = mesh->stdcell;
+
     /* initial scalar field */
     for(k=0;k<K;++k){
-        for(n=0;n<p_Np;++n){
-
+        for(n=0;n<shape->Np;++n){
             t = -sigma * ( ( mesh->x[k][n] - xc )*( mesh->x[k][n] - xc )
                            + ( mesh->y[k][n] - yc )*( mesh->y[k][n] - yc ) );
             Qe[sk++] = (float) exp(t);

@@ -47,6 +47,11 @@ void FreeStdRegions2d(StdRegions2d *triangle){
     /* LIFT */
     DestroyMatrix(triangle->LIFT);
 
+    /* float version */
+    free(triangle->f_LIFT);
+    free(triangle->f_Dr);
+    free(triangle->f_Ds);
+
 }
 
 /**
@@ -63,7 +68,7 @@ void FreeStdRegions2d(StdRegions2d *triangle){
  * tri | StdRegions2d* | structure of standard triangle element
  *
  */
-StdRegions2d* GenStdTriEle(const unsigned N){
+StdRegions2d* GenStdTriEle(int N){
     StdRegions2d *tri = (StdRegions2d *) calloc(1, sizeof(StdRegions2d));
 
     /* basic info */
@@ -117,6 +122,30 @@ StdRegions2d* GenStdTriEle(const unsigned N){
             tri->wv[j] += tri->M[i][j];
         }
     }
+
+    /* float version */
+    int sz = tri->Np*(tri->Nfp)*(tri->Nfaces)*sizeof(float);
+    tri->f_LIFT = (float *) malloc(sz);
+    sz = tri->Np*tri->Np*sizeof(float);
+    tri->f_Dr = (float*) malloc(sz);
+    tri->f_Ds = (float*) malloc(sz);
+
+    int sk = 0, n, m;
+    for(n=0;n<tri->Np;++n){
+        for(m=0;m<tri->Nfp*tri->Nfaces;++m){
+            tri->f_LIFT[sk++] = (float) tri->LIFT[n][m];
+        }
+    }
+
+    sk = 0;
+    for(n=0;n<tri->Np;++n){
+        for(m=0;m<tri->Np;++m){
+            tri->f_Dr[sk] = tri->Dr[n][m];
+            tri->f_Ds[sk] = tri->Ds[n][m];
+            ++sk;
+        }
+    }
+
     return tri;
 }
 

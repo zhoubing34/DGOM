@@ -43,7 +43,7 @@ MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv,
     MPI_Comm_size(MPI_COMM_WORLD, &mesh->nprocs);
 
     /* standard element */
-    mesh->StdElement = shape;
+    mesh->stdcell = shape;
     mesh->Nv = Nv;
 
     double **GX = BuildMatrix(K, shape->Nv);

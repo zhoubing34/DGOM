@@ -11,6 +11,9 @@ typedef struct PhysDomain2d{
     /** surf infomation */
     float *surfinfo;
 
+    /** volume info */
+    float *vgeo;
+
     /** number of variables to send/recv */
     int parNtotalout;
     /** map from send/recv array to variables */
@@ -23,5 +26,6 @@ typedef struct PhysDomain2d{
 }PhysDomain2d;
 
 PhysDomain2d* GetPhysDomain2d(MultiReg2d *mesh, int Nfields);
+void FreePhysDomain2d(PhysDomain2d *phys);
 
 #endif //DGOM_PHYSDOMAIN_H
