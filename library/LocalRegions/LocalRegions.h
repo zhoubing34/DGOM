@@ -6,11 +6,11 @@
 
 
 /* public functions */
-void Normals(int Nv, double *GX, double *GY, double *nx, double *ny, double *sJ);
-void GeometricFactors(int Np, double *x, double *y,
-                      double **Dr, double **Ds,
-                      double *drdx, double *dsdx,
-                      double *drdy, double *dsdy, double *J);
+void Normals2d(int Nv, double *GX, double *GY, double *nx, double *ny, double *sJ);
+void GeoFactor2d(int Np, double *x, double *y,
+                 double **Dr, double **Ds,
+                 double *drdx, double *dsdx,
+                 double *drdy, double *dsdy, double *J);
 
 void MapTriCoor(StdRegions2d *shape,
                 double *GX, double *GY,

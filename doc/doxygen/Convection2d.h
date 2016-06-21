@@ -42,6 +42,32 @@
  *
  * \section Discretization
  *
+ * The governing equation is
+ * \f[\begin{equation} \frac{\partial u}{\partial t} + \frac{\partial F(u)}{\partial x} = S(U)\end{equation}\f]
+ *
+ * \f[\begin{equation}U = \begin{bmatrix}\eta \cr q_x \end{bmatrix} \quad
+ * F = \begin{bmatrix}q_x \cr \frac{q_x^2}{h} + \frac{1}{2}g(\eta^2 - 2\eta z) \end{bmatrix} \quad
+ * S = \begin{bmatrix}0 \cr -g\eta\frac{\partial z}{\partial x} \end{bmatrix}\end{equation}\f]
+ *
+ * \f[\begin{equation} U_h = \sum{l_j U_j} \quad F_h(U) = \sum{l_j F(U_j)} \end{equation}\f]
+ *
+ * \f[\begin{equation}\int_{\Omega} l_i l_j \frac{\partial U_j}{\partial t} dx
+ * +\int_{\Omega} l_i \frac{\partial l_j}{\partial x} F(U_j) dx= 0 \end{equation}\f]
+ *
+ * \f[\begin{equation} \int_{\Omega} l_i l_j \frac{\partial U_j}{\partial t} dx +
+ * \int_{\Omega} l_i \frac{\partial l_j}{\partial x} F(U_j) dx+
+ * \oint_{\partial \Omega} l_i l_j (F^* - F)\cdot \vec{n} ds = 0  \end{equation}\f]
+ *
+ * \f[\begin{equation} JM \frac{\partial U}{\partial t} + JMD_x F(U) + J_E M_E (F^* - F)\cdot \vec{n} = 0 \end{equation}\f]
+ *
+ * ODE:
+ *
+ * \f[\begin{equation} \frac{\partial U}{\partial t} = -\frac{\partial r}{\partial x}D_r F(U) +
+ * \frac{J_E}{J}M^{-1} M_E (F^* - F)\cdot \vec{n}=L(U(t)) \end{equation}\f]
+ *
+ * \f[\begin{equation}rhs = -\frac{\partial r}{\partial x}D_r F(U) +
+ * \frac{J_E}{J}M^{-1} M_E (F - F^*)\cdot \vec{n}\end{equation}\f]
+ *
  * To allow information transfer between cells, the Lax-Friedrichs flux is applied
  * in the surface integration as the numerical flux.
  *

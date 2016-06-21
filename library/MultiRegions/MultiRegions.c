@@ -83,7 +83,8 @@ MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv,
                 mesh->vmapM, mesh->vmapP);
 
     /* mesh geo */
-    mesh->vgeo = (float*) calloc(4*mesh->K*shape->Np, sizeof(float));
+    int Nfactor = 4;
+    mesh->vgeo = (float*) calloc(Nfactor*mesh->K*shape->Np, sizeof(float));
     mesh->J    = BuildVector(mesh->K*shape->Np);
     mesh->area = BuildVector(mesh->K);
     mesh->ciradius = BuildVector(mesh->K);
@@ -131,8 +132,8 @@ void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
 
     int sj = 0, sk = 0;
     for(k=0;k<K;++k){
-        GeometricFactors(shape->Np, x[k], y[k], shape->Dr, shape->Ds,
-                         drdx, dsdx, drdy, dsdy, eJ);
+        GeoFactor2d(shape->Np, x[k], y[k], shape->Dr, shape->Ds,
+                    drdx, dsdx, drdy, dsdy, eJ);
         for(n=0;n<shape->Np;n++){
             vgeo[sk++] = (float) drdx[n];
             vgeo[sk++] = (float) drdy[n];

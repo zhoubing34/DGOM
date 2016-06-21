@@ -56,7 +56,7 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
     for(k1=0;k1<K;++k1){
 
         /* get some information about the face geometries */
-        Normals(shape->Nv, GX[k1], GY[k1], nxk, nyk, sJk);
+        Normals2d(shape->Nv, GX[k1], GY[k1], nxk, nyk, sJk);
 
         for(f1=0;f1<Nfaces;++f1){
 
@@ -222,7 +222,7 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
             f1 = Frecv[p2][m]; /* adjacent face */
             x2 = xrecv[p2][m];
             y2 = yrecv[p2][m];
-            Normals(shape->Nv, GX[k1], GY[k1], nxk, nyk, sJk);
+            Normals2d(shape->Nv, GX[k1], GY[k1], nxk, nyk, sJk);
 
             for(n1=0;n1<Nfp;++n1){
 

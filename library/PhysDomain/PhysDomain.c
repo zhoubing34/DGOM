@@ -117,10 +117,10 @@ void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, float *surfinfo){
     double *sJk = BuildVector(Nfaces);
 
     for(k=0;k<mesh->K;++k){
-        GeometricFactors(shape->Np, mesh->x[k], mesh->y[k],
-                         shape->Dr, shape->Ds,
-                         drdx, dsdx, drdy, dsdy, J);
-        Normals(Nfaces, mesh->GX[k], mesh->GY[k], nxk, nyk, sJk);
+        GeoFactor2d(shape->Np, mesh->x[k], mesh->y[k],
+                    shape->Dr, shape->Ds,
+                    drdx, dsdx, drdy, dsdy, J);
+        Normals2d(Nfaces, mesh->GX[k], mesh->GY[k], nxk, nyk, sJk);
 
         for(f=0;f<Nfaces;++f){
 

@@ -1,21 +1,10 @@
 /**
- * @file
- * ConvectionDriver2d.c
- *
  * @brief
- * 2D scalar convection problem main function
- */
-
-#include "ConvectionDriver2d.h"
-
-/**
- * @brief
- * Main function for 2d convection problem
+ * Two dimensional convection problem
  *
  * @details
  * Two dimensional scalar convection problem
- * \f[ \frac{\partial C}{\partial t} + \frac{\partial uC}{\partial x}
- * + \frac{\partial vC}{\partial y} = 0 \f]
+ * \f[\frac{\partial C}{\partial t}+\frac{\partial uC}{\partial x}+\frac{\partial vC}{\partial y}=0\f]
  *
  * Usages:
  * Use the 2 order basis with uniform mesh of 80 elements on each edge:
@@ -26,10 +15,13 @@
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
  * @todo
- * 1.
- * 1. Add slope limiter
- * 2. Add boundary conditions
+ * 1. Determining time step in convection problem
+ * 2. Add slope limiter
+ * 3. Add boundary conditions
  */
+
+#include "ConvectionDriver2d.h"
+
 int main(int argc, char **argv){
 
 
