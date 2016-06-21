@@ -22,3 +22,7 @@ add_executable(Convection2d ${SRC_LIST})
 target_link_libraries(Convection2d pnetcdf)
 target_link_libraries(Convection2d parmetis)
 target_link_libraries(Convection2d metis LibUtilities)
+
+# install command
+install(TARGETS Convection2d
+        RUNTIME DESTINATION bin)

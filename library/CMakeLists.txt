@@ -82,3 +82,11 @@ if(DEFINED UnitTest)
     add_subdirectory(UnitTest)
 endif()
 
+# =======================================================================================
+# install command
+# =======================================================================================
+install(TARGETS
+        LibUtilities Polylib StdRegions
+        LocalRegions MultiRegions PhysDomain
+        ARCHIVE DESTINATION lib)
+
