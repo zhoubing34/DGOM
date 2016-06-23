@@ -48,7 +48,6 @@ void invM(double* A, int N){
  * @details
  * \f[ \mathbf{C} = \mathbf{A}* \mathbf{B} \f]
  *
- * @param[in] lda the leading dimension of the matrix
  * @param[in] A is M-by-K matrix
  * @param[in] B is K-by-N matrix
  * @param[inout] C is M-by-N matrix
@@ -58,9 +57,8 @@ void invM(double* A, int N){
  * A[i][j] = A[i*N+j]
  */
 
-void dgemm_(const unsigned lda,
-             const unsigned M, const unsigned N, const unsigned K,
-             const double *A, const double *B, double *C) {
+void dgemm_(const unsigned M, const unsigned K, const unsigned N,
+            const double *A, const double *B, double *C) {
     unsigned i, j, k;
 
     for (i = 0; i < M; ++i) {

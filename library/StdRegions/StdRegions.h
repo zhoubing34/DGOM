@@ -48,8 +48,8 @@ struct StdReg2d{
     double **LIFT;
 
     /* float version coefficient */
-    float *f_Dr, *f_Ds;
-    float *f_LIFT;
+    real *f_Dr, *f_Ds;
+    real *f_LIFT;
 
 };
 typedef struct StdReg2d StdRegions2d;
@@ -59,5 +59,6 @@ typedef struct StdReg2d StdRegions2d;
 /* Triangle.c - public functions */
 StdRegions2d* GenStdTriEle(int N);
 void FreeStdRegions2d(StdRegions2d * );
+void GetLIFT(StdRegions2d *shape, double **Mes, double **LIFT);
 
 #endif

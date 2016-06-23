@@ -13,7 +13,7 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
                  int *Npar, int *Ntotalout, int **mapOUT,
                  int *vmapM, int *vmapP);
 void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
-                  double *J, double *area, double *ciradius, float *vgeo);
+                  double *J, double *area, double *ciradius, real *vgeo);
 
 /**
  * @brief
@@ -84,7 +84,7 @@ MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv,
 
     /* mesh geo */
     int Nfactor = 4;
-    mesh->vgeo = (float*) calloc(Nfactor*mesh->K*shape->Np, sizeof(float));
+    mesh->vgeo = (real*) calloc(Nfactor*mesh->K*shape->Np, sizeof(real));
     mesh->J    = BuildVector(mesh->K*shape->Np);
     mesh->area = BuildVector(mesh->K);
     mesh->ciradius = BuildVector(mesh->K);
@@ -118,7 +118,7 @@ void FreeMultiReg2d(MultiReg2d *mesh){
 }
 
 void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
-                  double *J, double *area, double *ciradius, float *vgeo){
+                  double *J, double *area, double *ciradius, real *vgeo){
 
     int k,n;
     double *drdx, *dsdx, *drdy, *dsdy, *eJ;
@@ -135,10 +135,10 @@ void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
         GeoFactor2d(shape->Np, x[k], y[k], shape->Dr, shape->Ds,
                     drdx, dsdx, drdy, dsdy, eJ);
         for(n=0;n<shape->Np;n++){
-            vgeo[sk++] = (float) drdx[n];
-            vgeo[sk++] = (float) drdy[n];
-            vgeo[sk++] = (float) dsdx[n];
-            vgeo[sk++] = (float) dsdy[n];
+            vgeo[sk++] = (real) drdx[n];
+            vgeo[sk++] = (real) drdy[n];
+            vgeo[sk++] = (real) dsdx[n];
+            vgeo[sk++] = (real) dsdy[n];
             J[sj++] = eJ[n];
 
             area[k] += eJ[n]*shape->wv[n];

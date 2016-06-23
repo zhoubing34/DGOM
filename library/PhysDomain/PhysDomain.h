@@ -9,20 +9,20 @@ typedef struct PhysDomain2d{
     /** mesh */
     MultiReg2d* mesh;
     /** surf infomation */
-    float *surfinfo;
+    real *surfinfo;
 
     /** volume info */
-    float *vgeo;
+    real *vgeo;
 
     /** number of variables to send/recv */
     int parNtotalout;
     /** map from send/recv array to variables */
     int *parmapOUT;
     /** variable array */
-    float *f_Q, *f_rhsQ, *f_resQ;
+    real *f_Q, *f_rhsQ, *f_resQ;
 
     /** send/recv data */
-    float *f_inQ, *f_outQ;
+    real *f_inQ, *f_outQ;
 }PhysDomain2d;
 
 PhysDomain2d* GetPhysDomain2d(MultiReg2d *mesh, int Nfields);

@@ -12,19 +12,19 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
     /* mesh parameters */
     const int K = mesh->K;
 
-    float *vgeo     = phys->vgeo;
-    float *surfinfo = phys->surfinfo;
-    float *f_Dr    = shape->f_Dr;
-    float *f_Ds    = shape->f_Ds;
-    float *f_LIFT  = shape->f_LIFT;
+    real *vgeo     = phys->vgeo;
+    real *surfinfo = phys->surfinfo;
+    real *f_Dr    = shape->f_Dr;
+    real *f_Ds    = shape->f_Ds;
+    real *f_LIFT  = shape->f_LIFT;
 
-    float *f_Q     = phys->f_Q;
-    float *f_rhsQ  = phys->f_rhsQ;
-    float *f_resQ  = phys->f_resQ;
-    float *f_s     = flowRate->f_Q; /* flow rate */
+    real *f_Q     = phys->f_Q;
+    real *f_rhsQ  = phys->f_rhsQ;
+    real *f_resQ  = phys->f_resQ;
+    real *f_s     = flowRate->f_Q; /* flow rate */
 
-    float *f_inQ   = phys->f_inQ;
-    float *f_outQ  = phys->f_outQ;
+    real *f_inQ   = phys->f_inQ;
+    real *f_outQ  = phys->f_outQ;
 
     int p, Nout;
 

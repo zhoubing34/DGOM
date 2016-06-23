@@ -78,7 +78,7 @@ typedef struct MultiReg2d{
     /* area of each ele */
     double *area;
     /* volume geometric factors */
-    float *vgeo;
+    real *vgeo;
 
 }MultiReg2d;
 

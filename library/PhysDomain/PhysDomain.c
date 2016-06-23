@@ -11,7 +11,7 @@
 #include "PhysDomain.h"
 
 /* public variables */
-void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, float *surfinfo);
+void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo);
 void SetMapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT);
 
 
@@ -36,21 +36,21 @@ PhysDomain2d* GetPhysDomain2d(MultiReg2d *mesh, int Nfields){
     phys->vgeo = mesh->vgeo;
 
     /* data array */
-    phys->f_Q    = (float *) calloc(K*Np*Nfields, sizeof(float));
-    phys->f_rhsQ = (float *) calloc(K*Np*Nfields, sizeof(float));
-    phys->f_resQ = (float *) calloc(K*Np*Nfields, sizeof(float));
+    phys->f_Q    = (real *) calloc(K*Np*Nfields, sizeof(real));
+    phys->f_rhsQ = (real *) calloc(K*Np*Nfields, sizeof(real));
+    phys->f_resQ = (real *) calloc(K*Np*Nfields, sizeof(real));
 
     /* MPI send/recv buffer */
-    phys->f_inQ  = (float *) calloc(mesh->parNtotalout*Nfields, sizeof(float));
-    phys->f_outQ = (float *) calloc(mesh->parNtotalout*Nfields, sizeof(float));
+    phys->f_inQ  = (real *) calloc(mesh->parNtotalout*Nfields, sizeof(real));
+    phys->f_outQ = (real *) calloc(mesh->parNtotalout*Nfields, sizeof(real));
 
     phys->parNtotalout = mesh->parNtotalout*Nfields;
     phys->parmapOUT = BuildIntVector(phys->parNtotalout);
     SetMapOut2d(mesh, Nfields, phys->parmapOUT);
 
     /* surface info */
-    int sz = K*Nfp*Nfaces*6*sizeof(float);
-    phys->surfinfo = (float*) malloc(sz);
+    int sz = K*Nfp*Nfaces*6*sizeof(real);
+    phys->surfinfo = (real*) malloc(sz);
     SetSurfInfo2d(mesh, Nfields, phys->surfinfo);
 
     return phys;
@@ -92,7 +92,7 @@ void SetMapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT){
     }
 }
 
-void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, float *surfinfo){
+void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo){
 
     int k,f,m,sk = 0;
     StdRegions2d *shape = mesh->stdcell;
@@ -144,10 +144,10 @@ void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, float *surfinfo){
 
                 surfinfo[sk++] = idM;
                 surfinfo[sk++] = idP;
-                surfinfo[sk++] = (float)( sJk[f]/( 2.0*J[shape->Fmask[f][m]] ) );
-                surfinfo[sk++] = (float)sJk[f];
-                surfinfo[sk++] = (float)nxk[f];
-                surfinfo[sk++] = (float)nyk[f];
+                surfinfo[sk++] = (real)( sJk[f]/( 2.0*J[shape->Fmask[f][m]] ) );
+                surfinfo[sk++] = (real)sJk[f];
+                surfinfo[sk++] = (real)nxk[f];
+                surfinfo[sk++] = (real)nyk[f];
             }
         }
     }

@@ -79,7 +79,7 @@ void MatrixMuti(void){
     }
 
 
-    dgemm_(Deg, Deg, Deg, Deg, A, B, C);
+    dgemm_(Deg, Deg, Deg, A, B, C);
 
     sk=0;
     printf("\nC=\n");

@@ -8,6 +8,7 @@
 
 #include <pnetcdf.h>
 
+
 /**
  * @brief pnetcdf error handle function
  * @details
@@ -30,6 +31,8 @@ typedef struct Ncfile {
     int *varid;
 
 }Ncfile;
+
+
 
 /* NcOutput.c */
 Ncfile* SetupOutput(MultiReg2d *mesh, char* casename);

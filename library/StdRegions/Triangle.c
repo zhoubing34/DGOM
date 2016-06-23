@@ -16,15 +16,14 @@
 void xytors(int Np, double *x, double *y, double *r, double *s);
 void rstoad(int Np, double *r, double *s, double *a, double *b);
 void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds);
-void GetTriDeriV2d(unsigned N, int Np, double *r, double *s, double **Vr, double **Vs);
-void GetTriDeriM(unsigned N, unsigned Np, double *r, double *s, double **V, double **Dr, double **Ds);
+void GetTriDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs);
+void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, double **Ds);
 void BuildFmask(int N, int **Fmask);
 void GetTriSurfM(int N, int **Fmask, double **Mes);
-void GetTriLIFT(int N, double **V, double **Mes, double **LIFT);
 void Warpfactor(int, double *, int, double *);
 void GetTriCoord(int, double*, double*);
 void GetTriV(int N, int Nr, double *r, double *s, double **V);
-void GetTriM(unsigned Np, double **V, double **M);
+void GetTriM(int Np, double **V, double **M);
 
 /**
  * @brief
@@ -105,7 +104,7 @@ StdRegions2d* GenStdTriEle(int N){
     double **Mes = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
     tri->LIFT = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
     GetTriSurfM(tri->N, tri->Fmask, Mes);
-    GetTriLIFT(tri->N, tri->V, Mes, tri->LIFT);
+    GetLIFT(tri, Mes, tri->LIFT);
 
     DestroyMatrix(Mes);
 
@@ -124,24 +123,24 @@ StdRegions2d* GenStdTriEle(int N){
     }
 
     /* float version */
-    int sz = tri->Np*(tri->Nfp)*(tri->Nfaces)*sizeof(float);
-    tri->f_LIFT = (float *) malloc(sz);
-    sz = tri->Np*tri->Np*sizeof(float);
-    tri->f_Dr = (float*) malloc(sz);
-    tri->f_Ds = (float*) malloc(sz);
+    size_t sz = tri->Np*(tri->Nfp)*(tri->Nfaces)*sizeof(real);
+    tri->f_LIFT = (real *) malloc(sz);
+    sz = tri->Np*tri->Np*sizeof(real);
+    tri->f_Dr = (real*) malloc(sz);
+    tri->f_Ds = (real*) malloc(sz);
 
     int sk = 0, n, m;
     for(n=0;n<tri->Np;++n){
         for(m=0;m<tri->Nfp*tri->Nfaces;++m){
-            tri->f_LIFT[sk++] = (float) tri->LIFT[n][m];
+            tri->f_LIFT[sk++] = (real) tri->LIFT[n][m];
         }
     }
 
     sk = 0;
     for(n=0;n<tri->Np;++n){
         for(m=0;m<tri->Np;++m){
-            tri->f_Dr[sk] = tri->Dr[n][m];
-            tri->f_Ds[sk] = tri->Ds[n][m];
+            tri->f_Dr[sk] = (real) tri->Dr[n][m];
+            tri->f_Ds[sk] = (real) tri->Ds[n][m];
             ++sk;
         }
     }
@@ -149,9 +148,23 @@ StdRegions2d* GenStdTriEle(int N){
     return tri;
 }
 
-void GetTriLIFT(int N, double **V, double **Mes, double **LIFT){
-    unsigned Np = (unsigned)((N+1)*(N+2)/2);
-    int Nfp = N+1, Nfaces=3;
+/**
+ * @brief
+ * Get LIFT matrix
+ *
+ * @param [StdRegions2d] shape               standard element
+ * @param [double]       Mes[Np][Nfp*Nfaces] mass matrix of surface integral
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * LIFT   | double[Np][Nfp*Nfaces] | LIFT = M^{-1}*Mes
+ *
+ */
+void GetLIFT(StdRegions2d *shape, double **Mes, double **LIFT){
+    unsigned int Np = (unsigned)(shape->N+1)*(shape->N+2)/2;
+    int Nfp = shape->Nfp, Nfaces=shape->Nfaces;
     double *vc = BuildVector(Np*Np); /* vandermonde matrix */
     double *vct = BuildVector(Np*Np); /* transform of vandermonde matrix */
     double *me = BuildVector(Np*Nfp*Nfaces);
@@ -163,11 +176,10 @@ void GetTriLIFT(int N, double **V, double **Mes, double **LIFT){
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
             /* row counts first */
-            vc[sk] = V[i][j];
-            vct[sk++] = V[j][i];
+            vc[sk] = shape->V[i][j];
+            vct[sk++] = shape->V[j][i];
         }
     }
-
 
     sk = 0;
     for(i=0;i<Np;i++){
@@ -177,9 +189,9 @@ void GetTriLIFT(int N, double **V, double **Mes, double **LIFT){
     }
 
     /* get the inverse mass matrix M^{-1} = V*V' */
-    dgemm_(Np, Np, Np, Np,  vc, vct, temp1);
+    dgemm_(Np, Np, Np,  vc, vct, temp1);
     /* LIFT = M^{-1}*Mes */
-    dgemm_(Np, Np, (unsigned)Nfp*Nfaces, Np, temp1, me, temp2);
+    dgemm_(Np, Np, (unsigned)Nfp*Nfaces, temp1, me, temp2);
 
     sk = 0;
     for(i=0;i<Np;i++){
@@ -187,7 +199,11 @@ void GetTriLIFT(int N, double **V, double **Mes, double **LIFT){
             LIFT[i][j] = temp2[sk++];
     }
 
-    free(vc); free(vct); free(temp1); free(temp2);
+    DestroyVector(vc);
+    DestroyVector(vct);
+    DestroyVector(me);
+    DestroyVector(temp1);
+    DestroyVector(temp2);
 }
 
 /**
@@ -228,16 +244,7 @@ void GetTriSurfM(int N, int **Fmask, double **Mes){
             invt[j+Nfp*i] = inv[j*Nfp+i];
     }
     /* get M = inv(V)'*inv(V) */
-    dgemm_(Nfp, Nfp, Nfp, Nfp, invt, inv, m);
-
-//    printf("Line mass matrix = \n");
-//    for(i=0;i<Nfp;i++){
-//        for(j=0;j<Nfp;j++){
-//            printf("%20.16e, ", m[i*Nfp+j]);
-//        }
-//        printf("\n");
-//    }
-//    printf("\n\n");
+    dgemm_(Nfp, Nfp, Nfp, invt, inv, m);
 
     int k, sr, sk;
     for(i=0;i<Nfaces;i++){
@@ -280,7 +287,7 @@ void GetTriSurfM(int N, int **Fmask, double **Mes){
  * Dr | double[Np][Np]   |
  * Ds | object[Np][Np]   |
  */
-void GetTriDeriM(unsigned N, unsigned Np, double *r, double *s, double **V, double **Dr, double **Ds){
+void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, double **Ds){
     double **Vr = BuildMatrix(Np, Np);
     double **Vs = BuildMatrix(Np, Np);
     double *temp = BuildVector(Np*Np);
@@ -302,7 +309,7 @@ void GetTriDeriM(unsigned N, unsigned Np, double *r, double *s, double **V, doub
     GetTriDeriV2d(N, Np, r, s, Vr, Vs);
 
     /* matrix multiply */
-    const unsigned n = Np;
+    unsigned n = (unsigned)Np;
     sk = 0;
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
@@ -311,7 +318,7 @@ void GetTriDeriM(unsigned N, unsigned Np, double *r, double *s, double **V, doub
         }
     }
     /* \f$ \mathbf{Dr} = \mathbf{Vr}*\mathbf{V}^{-1} \f$ */
-    dgemm_(n, n, n, n, vtemp, temp, dtemp);
+    dgemm_(n, n, n, vtemp, temp, dtemp);
     sk = 0;
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
@@ -328,7 +335,7 @@ void GetTriDeriM(unsigned N, unsigned Np, double *r, double *s, double **V, doub
         }
     }
     /* \f$ \mathbf{Ds} = \mathbf{Vs}*\mathbf{V}^{-1} \f$ */
-    dgemm_(n, n, n, n, vtemp, temp, dtemp);
+    dgemm_(n, n, n, vtemp, temp, dtemp);
     sk = 0;
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
@@ -362,7 +369,7 @@ void GetTriDeriM(unsigned N, unsigned Np, double *r, double *s, double **V, doub
  * Vs | double[Np][Np] | gradient matrix of s
  *
  */
-void GetTriDeriV2d(unsigned N, int Np, double *r, double *s, double **Vr, double **Vs){
+void GetTriDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs){
     double *a = BuildVector(Np);
     double *b = BuildVector(Np);
     double *dpdr, *dpds;
@@ -488,11 +495,11 @@ void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmoded
  * -------- |----------|----------------------
  * M   | double[Np][Np] | Mass Matrix
  */
-void GetTriM(unsigned Np, double **V, double **M){
+void GetTriM(int Np, double **V, double **M){
     double *temp = BuildVector(Np*Np);
     double *invt = BuildVector(Np*Np);
     double *Mv = BuildVector(Np*Np);
-    const unsigned n = Np;
+    const unsigned n = (unsigned)Np;
 
     int i,j,sk=0;
 
@@ -511,7 +518,7 @@ void GetTriM(unsigned Np, double **V, double **M){
         }
     }
 
-    dgemm_(n, n, n, n, invt, temp, Mv);
+    dgemm_(n, n, n, invt, temp, Mv);
 
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){

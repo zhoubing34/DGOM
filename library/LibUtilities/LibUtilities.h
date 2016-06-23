@@ -11,6 +11,9 @@
 
 #include "mpi.h"
 
+/* variable type */
+#define real float
+
 #define max(a,b)  ( (a>b)?a:b )
 #define min(a,b)  ( (a<b)?a:b )
 
@@ -19,8 +22,7 @@
 
 /* matrix operation */
 void invM(double* A, int N);
-void dgemm_(const unsigned lda,
-            const unsigned M, const unsigned N, const unsigned K,
+void dgemm_(const unsigned M, const unsigned K, const unsigned N,
             const double *A, const double *B, double *C);
 
 /* allocate mem */
