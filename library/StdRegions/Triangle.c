@@ -18,8 +18,7 @@ void rstoad(int Np, double *r, double *s, double *a, double *b);
 void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds);
 void GetTriDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs);
 void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, double **Ds);
-void BuildFmask(int N, int **Fmask);
-void GetTriSurfM(int N, int **Fmask, double **Mes);
+void BuildTriFmask(int N, int **Fmask);
 void Warpfactor(int, double *, int, double *);
 void GetTriCoord(int, double*, double*);
 void GetTriV(int N, int Nr, double *r, double *s, double **V);
@@ -71,15 +70,15 @@ StdRegions2d* GenStdTriEle(int N){
     StdRegions2d *tri = (StdRegions2d *) calloc(1, sizeof(StdRegions2d));
 
     /* basic info */
-    tri->N = N;
-    tri->Np = ((N+1)*(N+2)/2);
-    tri->Nv = 3;
+    tri->N      = N;
+    tri->Np     = ((N+1)*(N+2)/2);
+    tri->Nv     = 3;
     tri->Nfaces = 3;
-    tri->Nfp = N+1;
+    tri->Nfp    = N+1;
 
     /* nodes at faces, Fmask */
     tri->Fmask = BuildIntMatrix(tri->Nfaces, tri->Nfp);
-    BuildFmask(tri->N, tri->Fmask);
+    BuildTriFmask(tri->N, tri->Fmask);
 
     /* coordinate, r and s */
     tri->r = BuildVector(tri->Np);
@@ -103,8 +102,8 @@ StdRegions2d* GenStdTriEle(int N){
     /* suface LIFT matrix, LIFT */
     double **Mes = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
     tri->LIFT = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
-    GetTriSurfM(tri->N, tri->Fmask, Mes);
-    GetLIFT(tri, Mes, tri->LIFT);
+    GetSurfLinM(tri->N, tri->Nfaces, tri->Fmask, Mes);
+    GetLIFT2d(tri, Mes, tri->LIFT);
 
     DestroyMatrix(Mes);
 
@@ -162,8 +161,8 @@ StdRegions2d* GenStdTriEle(int N){
  * LIFT   | double[Np][Nfp*Nfaces] | LIFT = M^{-1}*Mes
  *
  */
-void GetLIFT(StdRegions2d *shape, double **Mes, double **LIFT){
-    unsigned int Np = (unsigned)(shape->N+1)*(shape->N+2)/2;
+void GetLIFT2d(StdRegions2d *shape, double **Mes, double **LIFT){
+    unsigned int Np = (unsigned)shape->Np;
     int Nfp = shape->Nfp, Nfaces=shape->Nfaces;
     double *vc = BuildVector(Np*Np); /* vandermonde matrix */
     double *vct = BuildVector(Np*Np); /* transform of vandermonde matrix */
@@ -218,13 +217,13 @@ void GetLIFT(StdRegions2d *shape, double **Mes, double **LIFT){
  * Mes   | double[Np][Nfaces*Nfp] | surface mass matrix
  *
  */
-void GetTriSurfM(int N, int **Fmask, double **Mes){
-    int Nfaces=3;
+void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes){
+
     unsigned Nfp=(unsigned)N+1;
     double *r=BuildVector(Nfp);
     double *w=BuildVector(Nfp);
 
-    double *invt =   BuildVector(Nfp*Nfp);
+    double *invt = BuildVector(Nfp*Nfp);
     double *inv = BuildVector(Nfp*Nfp);
     double *m =   BuildVector(Nfp*Nfp);
     /* get surface mass matrix */
@@ -811,7 +810,7 @@ void Warpfactor(int N, double *r, int Nr, double *w){
  * Fmask   | int[Nfaces][Nfp] |
  *
  */
-void BuildFmask(int N, int **Fmask){
+void BuildTriFmask(int N, int **Fmask){
     int Nfp = N+1;
     int *temp = BuildIntVector(Nfp);
     int *nrp = BuildIntVector(Nfp); /* # of nodes from s=-1 to s=1 */

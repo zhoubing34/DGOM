@@ -55,10 +55,12 @@ struct StdReg2d{
 typedef struct StdReg2d StdRegions2d;
 
 /* Quadrilateral.c */
+StdRegions2d* GenStdQuadEle(int N);
 
 /* Triangle.c - public functions */
 StdRegions2d* GenStdTriEle(int N);
 void FreeStdRegions2d(StdRegions2d * );
-void GetLIFT(StdRegions2d *shape, double **Mes, double **LIFT);
+void GetLIFT2d(StdRegions2d *shape, double **Mes, double **LIFT);
+void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes);
 
 #endif

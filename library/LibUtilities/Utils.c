@@ -17,7 +17,7 @@
  * Inverse of square matrix A
  *
  * @param[int]          N row of square matrix
- * @param[doublereal]   A[N*N] reshape matrix M
+ * @param[double]       A[N*N] reshape matrix M
  *
  * @note
  * Row counts first to generalize the vector A, which means that

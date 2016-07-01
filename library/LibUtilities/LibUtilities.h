@@ -53,4 +53,6 @@ int CreateVectorTest(char *message, double *A, double *ExactA, int Ncols);
 int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int Ncols);
 FILE* CreateLog(char *funname, int nprocs, int rank);
 
+int CreateIntMatrixTest(char *message, int **A, int **ExactA, int Nrows, int Ncols);
+
 #endif

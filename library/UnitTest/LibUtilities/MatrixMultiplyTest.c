@@ -40,7 +40,7 @@ int main(void){
         }
     }
 
-    dgemm_(M, M, K, N, A, B, C);
+    dgemm_(M, N, K, A, B, C);
 
     info = CreateVectorTest("Matrix Inverse", C, exctC, M*K);
 

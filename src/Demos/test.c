@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include "LibUtilities/LibUtilities.h"
 #include "StdRegions/StdRegions.h"
@@ -7,12 +6,29 @@
 
 int main(int argc, char **argv) {
 
-    void TriEleTest(void);
-    TriEleTest();
+    void QuadEleTest(void);
+    QuadEleTest();
 
     return 0;
 }
 
+void QuadEleTest(void){
+    StdRegions2d *quad;
+    quad = GenStdQuadEle(Deg);
+
+    /* Fmask */
+    int i,j;
+    printf("Fmask = \n");
+    for(i=0;i<quad->Nfaces;i++){
+        for(j=0;j<quad->Nfp;j++){
+            printf("%d,", quad->Fmask[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n\n");
+
+    FreeStdRegions2d(quad);
+}
 
 void TriEleTest(void){
 
@@ -132,43 +148,3 @@ void inverseMatrix(void){
     free(Matrix);
 
 }
-
-#define Np (Deg+1)*(Deg+2)/2
-
-//void GetTriCoordTest(void){
-////    int N = 5;
-//    double *r = BuildVector(Np);
-//    double *s = BuildVector(Np);
-//    int i;
-//
-//
-//    GetTriCoord(Deg, r, s);
-//
-//    for(i=0;i<Np;i++){
-//        printf("r[%d]=%12.4f, s[%d]=%12.4f\n", i,r[i],i,s[i]);
-//    }
-//
-//    DestroyVector(r);
-//    DestroyVector(s);
-//
-//}
-//
-//void WarpfactorTest(void){
-//    int i;
-//    double *v = BuildVector(Np);
-//    double *w = BuildVector(Np);
-//
-//    for(i=0;i<Np;i++){
-//        v[i] = i/(Np-1.0)*2.0 - 1.0;
-//        printf("v[%d] = %lg,\t w[%d] = %lg\n", i, v[i], i, w[i]);
-//    }
-//
-//    Warpfactor(Deg, v, Np, w);
-//
-//    for(i=0;i<Np;i++){
-//        printf("v[%d] = %lg,\t w[%d] = %e\n", i, v[i], i, w[i]);
-//    }
-//
-//    DestroyVector(v);
-//    DestroyVector(w);
-//}

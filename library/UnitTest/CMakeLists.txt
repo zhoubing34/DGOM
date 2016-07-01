@@ -1,3 +1,4 @@
 add_subdirectory(LibUtilities)
 add_subdirectory(MultiRegions)
 add_subdirectory(PhysDomain)
+add_subdirectory(StdRegions)

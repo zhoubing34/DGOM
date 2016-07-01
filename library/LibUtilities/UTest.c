@@ -22,6 +22,50 @@
  * -------- |----------|----------------------
  * success  | int      | 0 - success; 1 - fail
  */
+int CreateIntMatrixTest(char *message, int **A, int **ExactA, int Nrows, int Ncols){
+    double error=0.0, relativeErr;
+    double total=0.0;
+    int success=0, i, j;
+    double **errorMatrix = BuildMatrix(Nrows, Ncols);
+    printf("------------Creating %s Test------------\n", message);
+    for(i=0;i<Nrows;i++){
+        for(j=0;j<Ncols;j++){
+            errorMatrix[i][j] = A[i][j] - ExactA[i][j];
+            error += fabs( errorMatrix[i][j] );
+            total += fabs( ExactA[i][j] );
+        }
+    }
+    relativeErr = error/total;
+    printf("Total    Err = %f\n", error);
+    printf("Total        = %f\n", total);
+    printf("Relative Err = %e\n", relativeErr);
+    if(error > TOTALERR | relativeErr > RELATIVEERROR) {
+        success = 1; // error flag
+        printf("fatal error in %s\n", message);
+        PrintMatrix("The error Matrix", errorMatrix, Nrows, Ncols);
+    }else{
+        printf("test in %s success!\n", message);
+    }
+    printf("-------------Finish %s Test-------------\n", message);
+    DestroyMatrix(errorMatrix);
+    return success;
+}
+
+
+/**
+ * @brief
+ * Compare Matrix variable with exact solution
+ *
+ * @param [char*]   message
+ * @param [double]  A
+ * @param [double]  ExactA
+ * @param [int]
+ * @param [int]
+ * @return
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * success  | int      | 0 - success; 1 - fail
+ */
 int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int Ncols){
     double error=0.0, relativeErr;
     double total=0.0;
@@ -100,7 +144,7 @@ void PrintVector(char *message, double *A, int Ncols){
     int m;
     printf("%s\n", message);
     for(m=0;m<Ncols;++m){
-        printf(" %lf ", A[m]);
+        printf(" %e ", A[m]);
     }
     printf(" \n");
 }
@@ -111,7 +155,7 @@ void PrintMatrix(char *message, double **A, int Nrows, int Ncols){
     printf("%s\n", message);
     for(n=0;n<Nrows;++n){
         for(m=0;m<Ncols;++m){
-            printf(" %lf ", A[n][m]);
+            printf(" %e ", A[n][m]);
         }
         printf(" \n");
     }
