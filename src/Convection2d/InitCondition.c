@@ -15,9 +15,9 @@ double InitCondition(PhysDomain2d * phys, PhysDomain2d *flowRate){
     double xc, yc, t;
     double w, dt = 1e6;
 
-    MultiReg2d *mesh = phys->mesh;
+    MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
-    const int K = mesh->K;
+    const int K         = mesh->K;
     int k, n, f, sk=0;
 
 
@@ -39,54 +39,27 @@ double InitCondition(PhysDomain2d * phys, PhysDomain2d *flowRate){
     for (k=0; k<K; ++k){
         for (n=0;n<shape->Np; ++n){
             flowRate->f_Q[sk++] = (float)(-w * mesh->y[k][n]); // flow rate at x-coordinate
-            flowRate->f_Q[sk++] = (float)(w * mesh->x[k][n]);  // flow rate at y-coordinate
+            flowRate->f_Q[sk++] = (float)( w * mesh->x[k][n]); // flow rate at y-coordinate
         }
     }
 
     /* time step */
-    double ri, dscal, cfl = 0.5;
-    int Nfp = shape->Nfp;
-    int Nfaces = shape->Nfaces;
+    double cfl  = 0.3;
 
     for(k=0;k<mesh->K;++k){
-        for(f=0;f<Nfaces;++f){
-            for(n=0;n<Nfp;n++) {
-                int surfid = k*shape->Np + shape->Fmask[f][n];
-                double J = mesh->J[surfid];
-                int index = n * 6 + f * Nfp * 6 + k * Nfp * Nfaces * 6;
-                double sJ = phys->surfinfo[index + 3]; /* edge length */
-                dt = min(dt, J/sJ);
-            }
+        double r = mesh->ciradius[k];
+        for(n=0;n<shape->Np;n++){
+            sk = k*shape->Np + n;
+            int id1 = sk*2, id2 = sk*2 + 1;
+            double spe = sqrt(flowRate->f_Q[id1]*flowRate->f_Q[id1]
+                              + flowRate->f_Q[id2]*flowRate->f_Q[id2] );
+            dt = min(dt, r/spe/(shape->N+1));
         }
     }
 
     double gdt;
     MPI_Allreduce(&dt, &gdt, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
-
-    dt = cfl*gdt/((shape->N+1)*(shape->N+1));
-
-//    sk = 0;
-//    for(k=0;k<mesh->K;++k){
-//        ri = 1.e6; dscal=1e6;
-//        for(f=0;f<Nfaces;++f){
-//            for(n=0;n<Nfp;n++) {
-//                int index = n * 6 + f * Nfp * 6 + k * Nfp * Nfaces * 6;
-//                double sJ = phys->surfinfo[index + 3]; /* edge length */
-//                ri = min(ri, sJ * 2 / shape->Nfp);
-//
-//            }
-//        }
-//
-//        for(n=0;n<shape->Np;n++){
-//            double u = flowRate->f_Q[sk++];
-//            double v = flowRate->f_Q[sk++];
-//            double flows = sqrt(u*u + v*v);
-//            dscal = min(mesh->ciradius[k]/flows, dscal);
-//
-//        }
-//
-//        dt = min(dt, 2.0/3.0*cfl*dscal*ri);
-//    }
+    dt = cfl*gdt;
 
     return dt;
 }

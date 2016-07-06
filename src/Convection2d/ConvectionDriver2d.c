@@ -15,9 +15,8 @@
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
  * @todo
- * 1. Determining time step in convection problem
- * 2. Add slope limiter
- * 3. Add boundary conditions
+ * 1. Add slope limiter
+ * 2. Add boundary conditions
  */
 
 #include "ConvectionDriver2d.h"
@@ -63,10 +62,13 @@ int main(int argc, char **argv){
         printf("--------------------------------\n");
     }
 
-    StdRegions2d *shape = GenStdTriEle(N);
-    MultiReg2d *mesh = ReadMesh(shape, Ne);
+//    StdRegions2d *shape = GenStdTriEle(N);
+    StdRegions2d *shape = GenStdQuadEle(N);
+    MultiReg2d *mesh    = ReadMesh(shape, Ne);
+
+
     /* physics */
-    PhysDomain2d *phys = GetPhysDomain2d(mesh, 1);
+    PhysDomain2d *phys     = GetPhysDomain2d(mesh, 1);
     PhysDomain2d *flowRate = GetPhysDomain2d(mesh, 2);
 
     /* init phys */

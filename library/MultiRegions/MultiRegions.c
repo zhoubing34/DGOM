@@ -72,6 +72,9 @@ MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv,
     mesh->x  = BuildMatrix(mesh->K, shape->Np);
     mesh->y  = BuildMatrix(mesh->K, shape->Np);
     SetNodeCoord2d(shape, mesh->K, mesh->GX, mesh->GY, mesh->x, mesh->y);
+
+//    PrintMatrix("x", mesh->x, mesh->K, shape->Np);
+//    PrintMatrix("y", mesh->y, mesh->K, shape->Np);
 //    printf("procid:%d, finish SetNodeCoor\n", mesh->procid);
 
     /* Setup boundary nodes connection */

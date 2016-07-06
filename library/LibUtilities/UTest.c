@@ -80,13 +80,14 @@ int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int 
         }
     }
     relativeErr = error/total;
-    printf("Total    Err = %f\n", error);
+    printf("Total    Err = %e\n", error);
     printf("Total        = %f\n", total);
     printf("Relative Err = %e\n", relativeErr);
     if(error > TOTALERR | relativeErr > RELATIVEERROR) {
         success = 1; // error flag
         printf("fatal error in %s\n", message);
-        PrintMatrix("The error Matrix", errorMatrix, Nrows, Ncols);
+        PrintMatrix("The input Matrix", A, Nrows, Ncols);
+        PrintMatrix("The exact Matrix", ExactA, Nrows, Ncols);
     }else{
         printf("test in %s success!\n", message);
     }
@@ -156,6 +157,18 @@ void PrintMatrix(char *message, double **A, int Nrows, int Ncols){
     for(n=0;n<Nrows;++n){
         for(m=0;m<Ncols;++m){
             printf(" %e ", A[n][m]);
+        }
+        printf(" \n");
+    }
+}
+
+void PrintIntMatrix(char *message, int **A, int Nrows, int Ncols){
+    int n,m;
+
+    printf("%s\n", message);
+    for(n=0;n<Nrows;++n){
+        for(m=0;m<Ncols;++m){
+            printf(" %d ", A[n][m]);
         }
         printf(" \n");
     }

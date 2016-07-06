@@ -73,7 +73,7 @@ StdRegions2d* GenStdQuadEle(int N){
     GetSurfLinM(quad->N, quad->Nfaces, quad->Fmask, Mes);
     GetLIFT2d(quad, Mes, quad->LIFT);
 
-    PrintMatrix("Mes", Mes, quad->Np, quad->Nfaces*quad->Nfp);
+//    PrintMatrix("Mes", Mes, quad->Np, quad->Nfaces*quad->Nfp);
     DestroyMatrix(Mes);
 
     /* integration coeff, ws and wv */

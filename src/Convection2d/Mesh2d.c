@@ -64,7 +64,7 @@ MultiReg2d* ReadTriMesh(StdRegions2d *shape, int Ne){
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
     Kprocs = (int *) calloc(nprocs, sizeof(int));
-    K = Ne* Ne *2; /* total # of elements */
+    K      = Ne* Ne *2; /* total # of elements */
     Klocal = (int)( (double)K/ (double)nprocs );
 
     /* number of elements in each process */

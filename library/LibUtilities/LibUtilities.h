@@ -17,8 +17,8 @@
 #define max(a,b)  ( (a>b)?a:b )
 #define min(a,b)  ( (a<b)?a:b )
 
-#define TOTALERR 1.0e-8
-#define RELATIVEERROR 1.0e-10
+#define TOTALERR 1.0e-6
+#define RELATIVEERROR 1.0e-8
 
 /* matrix operation */
 void invM(double* A, int N);
@@ -47,6 +47,7 @@ void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
 /* UTest.c */
 void PrintVector(char *message, double *A, int Ncols);
 void PrintMatrix(char *message, double **A, int Nrows, int Ncols);
+void PrintIntMatrix(char *message, int **A, int Nrows, int Ncols);
 void SaveMatrix(char *filename, double **A, int Nrows, int Ncols);
 
 int CreateVectorTest(char *message, double *A, double *ExactA, int Ncols);

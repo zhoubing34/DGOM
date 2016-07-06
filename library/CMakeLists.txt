@@ -76,7 +76,7 @@ target_link_libraries(PhysDomain MultiRegions LibUtilities)
 # =======================================================================================
 # UnitTest, configure with `-DUnitTest=1`
 # =======================================================================================
-#set(UnitTest 1) # turn on the model
+set(UnitTest 1) # turn on the model
 
 if(DEFINED UnitTest)
     add_subdirectory(UnitTest)

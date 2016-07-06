@@ -24,7 +24,6 @@
  * @warning
  * @attention
  * @note
- * @todo
  */
 Ncfile* SetupOutput(MultiReg2d *mesh, char* casename){
 
