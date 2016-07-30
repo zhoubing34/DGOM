@@ -137,7 +137,7 @@ void LimiterBJ2d(Mesh *mesh){
             Nout = mesh->Npar[p]; // # of variables send to process p
             if(Nout){
                 /* symmetric communications (different ordering) */
-                MPI_Isend(f_outE+sk, Nout, MPI_FLOAT, p, 6666+p,            MPI_COMM_WORLD, mpi_out_requests +Nmess);
+                MPI_Isend(f_outE+sk, Nout, MPI_FLOAT, p, 6666+p,      MPI_COMM_WORLD, mpi_out_requests +Nmess);
                 MPI_Irecv(f_inE+sk,  Nout, MPI_FLOAT, p, 6666+procid, MPI_COMM_WORLD,  mpi_in_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;
@@ -180,9 +180,6 @@ void LimiterBJ2d(Mesh *mesh){
             /* init slope limiter */
             alpha = 1.0f;
 
-#if defined DEBUG
-            PrintCalculationLog(fig, k1, minQ, maxQ, Cm ,alpha, qpt);
-#endif
             /* calculate slope limit */
             for (n = 0; n < p_Np; n++) {
                 if (qpt[n] > Cm) {
@@ -199,10 +196,6 @@ void LimiterBJ2d(Mesh *mesh){
 
 
         }
-#if defined DEBUG
-        PrintCalculationLog(fig, k1, minQ, maxQ, Cm, alpha, qpt);
-        fprintf(fig, "\n");
-#endif
     }
 
     /* make sure all messages went out */

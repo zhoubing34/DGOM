@@ -19,3 +19,7 @@ target_link_libraries(SetNodePairTest LibUtilities MultiRegions)
 add_executable(SetVolumeGeoTest SetVolumeGeoTest.c)
 target_link_libraries(SetVolumeGeoTest LibUtilities MultiRegions)
 
+
+add_executable(SetElementPairTest SetElementPairTest.c)
+target_link_libraries(SetElementPairTest LibUtilities MultiRegions)
+

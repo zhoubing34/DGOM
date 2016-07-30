@@ -62,8 +62,8 @@ int main(int argc, char **argv){
         printf("--------------------------------\n");
     }
 
-//    StdRegions2d *shape = GenStdTriEle(N);
-    StdRegions2d *shape = GenStdQuadEle(N);
+    StdRegions2d *shape = GenStdTriEle(N);
+//    StdRegions2d *shape = GenStdQuadEle(N);
     MultiReg2d *mesh    = ReadMesh(shape, Ne);
 
 

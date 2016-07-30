@@ -1,3 +1,7 @@
+//
+// Created by li12242 on 16/7/30.
+//
+
 #include "MultiRegionsTest.h"
 
 void TriTest(void);
@@ -26,15 +30,11 @@ void QuadTest(void){
     printf("procid:%d, K = %d\n", mesh->procid, mesh->K);
 
     /* gen log filename */
-    char casename[24] = "SetQuadNodePairTest";
+    char casename[24] = "SetQuadElementPairTest";
     FILE *fp = CreateLog(casename, mesh->procid, mesh->nprocs);
 
-    /* write vmapM */
-    PrintIntVector2File(fp, "vmapM", mesh->vmapM, mesh->K*quad->Nfp * quad->Nfaces);
-    /* write vmapP */
-    PrintIntVector2File(fp, "vmapP", mesh->vmapP, mesh->K*quad->Nfp * quad->Nfaces);
-    fprintf(fp, "parNtotalout = %d\n", mesh->parNtotalout);
-    PrintIntVector2File(fp, "parmapOut", mesh->parmapOUT, mesh->parNtotalout);
+    fprintf(fp, "parEtotalout = %d\n", mesh->parEtotalout);
+    PrintIntVector2File(fp, "elemapOUT", mesh->elemapOut, mesh->parEtotalout);
 
     fclose(fp);
     FreeMultiReg2d(mesh);
@@ -52,17 +52,15 @@ void TriTest(void){
     printf("procid:%d, K = %d\n", mesh->procid, mesh->K);
 
     /* gen log filename */
-    char casename[24] = "SetTriNodePairTest";
+    char casename[24] = "SetTriElementPairTest";
     FILE *fp = CreateLog(casename, mesh->procid, mesh->nprocs);
 
-    /* write vmapM */
-    PrintIntVector2File(fp, "vmapM", mesh->vmapM, mesh->K*tri->Nfp * tri->Nfaces);
-    /* write vmapP */
-    PrintIntVector2File(fp, "vmapP", mesh->vmapP, mesh->K*tri->Nfp * tri->Nfaces);
-    fprintf(fp, "parNtotalout = %d\n", mesh->parNtotalout);
-    PrintIntVector2File(fp, "parmapOut", mesh->parmapOUT, mesh->parNtotalout);
+    fprintf(fp, "parEtotalout = %d\n", mesh->parEtotalout);
+    PrintIntVector2File(fp, "elemapOUT", mesh->elemapOut, mesh->parEtotalout);
+
     fclose(fp);
 
     FreeMultiReg2d(mesh);
     FreeStdRegions2d(tri);
 }
+

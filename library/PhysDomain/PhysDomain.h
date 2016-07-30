@@ -10,7 +10,6 @@ typedef struct PhysDomain2d{
     MultiReg2d* mesh;
     /** surf infomation */
     real *surfinfo;
-
     /** volume info */
     real *vgeo;
 
@@ -27,5 +26,16 @@ typedef struct PhysDomain2d{
 
 PhysDomain2d* GetPhysDomain2d(MultiReg2d *mesh, int Nfields);
 void FreePhysDomain2d(PhysDomain2d *phys);
+
+void FetchParmapNode2d(PhysDomain2d *phys,
+                       MPI_Request *mpi_send_requests,
+                       MPI_Request *mpi_recv_requests,
+                       int *Nmessage);
+
+void FetchParmapEle2d(PhysDomain2d *phys, float *f_E,
+                      float *f_inE, float *f_outE,
+                      MPI_Request *mpi_send_requests,
+                      MPI_Request *mpi_recv_requests,
+                      int *Nmessage);
 
 #endif //DGOM_PHYSDOMAIN_H

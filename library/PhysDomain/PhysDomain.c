@@ -12,7 +12,7 @@
 
 /* public variables */
 void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo);
-void SetMapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT);
+void SetParmapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT);
 
 
 PhysDomain2d* GetPhysDomain2d(MultiReg2d *mesh, int Nfields){
@@ -46,7 +46,7 @@ PhysDomain2d* GetPhysDomain2d(MultiReg2d *mesh, int Nfields){
 
     phys->parNtotalout = mesh->parNtotalout*Nfields;
     phys->parmapOUT = BuildIntVector(phys->parNtotalout);
-    SetMapOut2d(mesh, Nfields, phys->parmapOUT);
+    SetParmapOut2d(mesh, Nfields, phys->parmapOUT);
 
     /* surface info */
     int sz = K*Nfp*Nfaces*6*sizeof(real);
@@ -67,13 +67,98 @@ void FreePhysDomain2d(PhysDomain2d *phys){
     free(phys->surfinfo);
 }
 
-void SetMapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT){
+/**
+ * @brief
+ * Send and receive variables `f_Q` on boundaries on each processes.
+ *
+ * @details
+ * The boundary values of `f_Q` on local process is arranged into `f_outQ` to send to other processes.
+ * While `mpi_send_requests` get the request of each MPI_Isend function. The incoming boundary values
+ * is stored into `f_inQ` and the request are stored in `mpi_recv_requests`.
+ * `Nmess` gets the number of send and receive requests.
+ *
+ * @param[in]       phys    PhysDomain2d pointer
+ * @param[inout]    mpi_send_requests  MPI_Request pointer
+ * @param[inout]    mpi_send_requests  MPI_Request pointer
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * Nmessage | int      | number of messages stored in mpi_send_requests and mpi_send_requests
+ *
+ * Usages:
+ *
+ *     MPI_Request *mpi_out_requests = (MPI_Request*) calloc(mesh->nprocs, sizeof(MPI_Request));
+ *     MPI_Request *mpi_in_requests  = (MPI_Request*) calloc(mesh->nprocs, sizeof(MPI_Request));
+ *     int Nmess;
+ *     FetchParmapNode2d(phys, mpi_out_requests, mpi_in_requests, &Nmess);
+ *
+ */
+void FetchParmapNode2d(PhysDomain2d *phys, MPI_Request *mpi_send_requests, MPI_Request *mpi_recv_requests, int *Nmessage){
+    int t;
+    /* buffer outgoing node data */
+    for(t=0;t<phys->parNtotalout;++t)
+        phys->f_outQ[t] = phys->f_Q[phys->parmapOUT[t]];
+
+    MultiReg2d *mesh = phys->mesh;
+    StdRegions2d *shape = mesh->stdcell;
+
+    /* do sends */
+    int sk = 0, Nmess = 0;
+    int p, Nout;
+    for(p=0;p<mesh->nprocs;++p){
+        if(p!=mesh->procid){
+            Nout = mesh->Npar[p]*phys->Nfields*shape->Nfp; // # of variables send to process p
+            if(Nout){
+                /* symmetric communications (different ordering) */
+                MPI_Isend(phys->f_outQ+sk, Nout, MPI_FLOAT, p, 6666+p,            MPI_COMM_WORLD, mpi_send_requests +Nmess);
+                MPI_Irecv(phys->f_inQ+sk,  Nout, MPI_FLOAT, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
+                sk+=Nout;
+                ++Nmess;
+            }
+        }
+    }
+    *Nmessage = Nmess; /* number of messages */
+}
+
+
+void FetchParmapEle2d(PhysDomain2d *phys, float *f_E,
+                      float *f_inE, float *f_outE,
+                      MPI_Request *mpi_send_requests,
+                      MPI_Request *mpi_recv_requests,
+                      int *Nmessage){
+
+    MultiReg2d *mesh = phys->mesh;
+
+    /* buffer outgoing node data */
+    int n;
+    for(n=0;n<mesh->parEtotalout;++n)
+        f_outE[n] = f_E[mesh->elemapOut[n]];
+
+    /* do sends */
+    int sk = 0, Nmess = 0, p;
+    for(p=0;p<mesh->nprocs;++p){
+        if(p!=mesh->procid){
+            int Nout = mesh->Npar[p]; // # of variables send to process p
+            if(Nout){
+                /* symmetric communications (different ordering) */
+                MPI_Isend(f_outE+sk, Nout, MPI_FLOAT, p, 6666+p,      MPI_COMM_WORLD, mpi_send_requests +Nmess);
+                MPI_Irecv(f_inE+sk,  Nout, MPI_FLOAT, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
+                sk+=Nout;
+                ++Nmess;
+            }
+        }
+    }
+    *Nmessage = Nmess;
+}
+
+void SetParmapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT){
     int p2, n1, m, fld;
     int nprocs = mesh->nprocs;
     int procid = mesh->procid;
     StdRegions2d *shape = mesh->stdcell;
     int Nfp = shape->Nfp;
-    int Np  = shape->Np;
 
     int sp=0, sk=0;
     for(p2=0;p2<nprocs;++p2){
@@ -91,6 +176,7 @@ void SetMapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT){
         }
     }
 }
+
 
 void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo){
 

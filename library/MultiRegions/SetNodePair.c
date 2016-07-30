@@ -26,8 +26,7 @@
  * vmapP | int[K*Nfp*Nfaces] | adjacent node list of each face
  *
  * @note
- * EToE is modified inside the function. EToE/vmapP contains the mapping from
- * elements/nodes to outgoing/ingoing elements/nodes, which is marked as negative.
+ * vmapP contains the mapping from nodes to incoming nodes, which is marked as negative.
  */
 void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
                  int **EToE, int **EToF, int **EToP, double **x, double **y,
@@ -206,8 +205,9 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
 
     /* add up the total number of outgoing/ingoing nodes */
     int parNtotalout = 0;
-    for(p2=0;p2<nprocs;++p2)
+    for(p2=0;p2<nprocs;++p2) {
         parNtotalout += skP[p2];
+    }
 
     *Ntotalout = parNtotalout;
 
@@ -239,20 +239,6 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
 
     *mapOUT = parmapOUT;
 
-    /*  */
-    int k;
-    parcnt=-1;
-    for(p2=0;p2<nprocs;p2++){
-        for(k=0;k<K;k++){
-            for(f1=0;f1<Nfaces;f1++){
-                if(EToP[k][f1]==p2 && p2!=procid) {
-                    EToE[k][f1] = parcnt;
-                    --parcnt;
-                }
-            }
-        }
-    }
-
     /* deallocate mem */
     DestroyVector(nxk);
     DestroyVector(nyk);
@@ -266,3 +252,4 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
 
     free(status);
 }
+

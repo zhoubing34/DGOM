@@ -54,6 +54,7 @@ set(MULTI_REGIONS_SOURCE
         MultiRegions/MultiRegions.h
         MultiRegions/SetFacePair.c
         MultiRegions/SetNodePair.c
+        MultiRegions/SetElemetPair.c
         MultiRegions/LoadBalance.c)
 
 add_library(MultiRegions STATIC ${MULTI_REGIONS_SOURCE})

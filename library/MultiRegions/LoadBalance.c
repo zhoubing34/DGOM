@@ -28,14 +28,9 @@ void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double *
     int n,p,k,v;
 
     int nprocs, procid;
-//    int **EToV = mesh->EToV;
-//    double **GX = mesh->GX;
-//    double **GY = mesh->GY;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-
-//    printf("Entering LoadBlance\n");
 
     /* number of vertex in each element */
     int Nverts = shape->Nv;
@@ -228,9 +223,6 @@ void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double *
     *newK  = totalinK;
 
     /* deallocate mem */
-
     free(inrequests);  free(xinrequests);  free(yinrequests);
     free(outrequests); free(xoutrequests); free(youtrequests);
-
-//    printf("Finishing LoadBlance\n");
 }

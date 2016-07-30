@@ -32,24 +32,9 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
     MPI_Request *mpi_out_requests = (MPI_Request*) calloc(mesh->nprocs, sizeof(MPI_Request));
     MPI_Request *mpi_in_requests  = (MPI_Request*) calloc(mesh->nprocs, sizeof(MPI_Request));
 
-    /* buffer outgoing node data */
-    for(t=0;t<phys->parNtotalout;++t)
-        phys->f_outQ[t] = f_Q[phys->parmapOUT[t]];
+    int Nmess;
 
-    /* do sends */
-    int sk = 0, Nmess = 0, uk;
-    for(p=0;p<mesh->nprocs;++p){
-        if(p!=mesh->procid){
-            Nout = mesh->Npar[p]*phys->Nfields*shape->Nfp; // # of variables send to process p
-            if(Nout){
-                /* symmetric communications (different ordering) */
-                MPI_Isend(f_outQ+sk, Nout, MPI_FLOAT, p, 6666+p,            MPI_COMM_WORLD, mpi_out_requests +Nmess);
-                MPI_Irecv(f_inQ+sk,  Nout, MPI_FLOAT, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_in_requests +Nmess);
-                sk+=Nout;
-                ++Nmess;
-            }
-        }
-    }
+    FetchParmapNode2d(phys, mpi_out_requests, mpi_in_requests, &Nmess);
 
     /* NOTE: should be local memory */
     float  Qk[shape->Np*phys->Nfields];     /* scalar field */
@@ -65,7 +50,7 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
         float *qpt = f_Q + phys->Nfields*shape->Np*k;
         float *upt = f_s + flowRate->Nfields*shape->Np*k;
 
-        uk = 0;
+        int uk = 0;
         for(m=0;m<flowRate->Nfields*shape->Np;++m){
             Uf[uk++] = upt[uk];
         }
@@ -84,7 +69,7 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
 
             float rhs = 0;
 
-            sk = 0; uk = 0;
+            int sk = 0; uk = 0;
             for(m=0;m<shape->Np;++m){
                 const float dr = ptDr[m];
                 const float ds = ptDs[m];
@@ -122,7 +107,7 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
         int surfid=k*6*shape->Nfp*shape->Nfaces;
 
         /* Lax-Friedrichs flux */
-        sk = 0;
+        int sk = 0;
         for(m=0;m<shape->Nfp*shape->Nfaces;++m){
 
             int   idM       = surfinfo[surfid++];

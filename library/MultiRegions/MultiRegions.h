@@ -64,6 +64,11 @@ typedef struct MultiReg2d{
     /** index list of nodes to send out */
     int *parmapOUT;
 
+    /* total number of element's value to send and recv */
+    int parEtotalout;
+    /* index list of elements to send out */
+    int *elemapOut;
+
     /** volume id of -ve trace of face node */
     int *vmapM;
     /** volume id of +ve trace of face node */

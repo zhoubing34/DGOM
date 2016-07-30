@@ -15,16 +15,17 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
 void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
                   double *J, double *area, double *ciradius, real *vgeo);
 
+void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *parEtotalout, int **mapOUT);
 /**
  * @brief
  * Generation of two dimension mesh
  *
- * @param [StdRegions2d*] shape standard element
- * @param [int]           K     number of element
- * @param [int]           Nv    number of vertex
- * @param [int**]         EToV  element to vertex list
- * @param [double*]       VX    vertex coordinate
- * @param [double*]       VY    vertex coordinate
+ * @param [in] shape StdRegions2d pointer: standard element
+ * @param [in] K     number of element
+ * @param [in] Nv    number of vertex
+ * @param [in] EToV  element to vertex list
+ * @param [in] VX    vertex coordinate
+ * @param [in] VY    vertex coordinate
  *
  * @return
  * name     | type     | description of value
@@ -66,16 +67,10 @@ MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv,
 
     SetFacePair2d(shape, mesh->K, mesh->EToV, mesh->EToE, mesh->EToF, mesh->EToP,
                 mesh->Npar, &mesh->parK, &mesh->parF);
-
-//    printf("procid:%d, finish SetFacePair\n", mesh->procid);
     /* Setup nodes coordinate */
     mesh->x  = BuildMatrix(mesh->K, shape->Np);
     mesh->y  = BuildMatrix(mesh->K, shape->Np);
     SetNodeCoord2d(shape, mesh->K, mesh->GX, mesh->GY, mesh->x, mesh->y);
-
-//    PrintMatrix("x", mesh->x, mesh->K, shape->Np);
-//    PrintMatrix("y", mesh->y, mesh->K, shape->Np);
-//    printf("procid:%d, finish SetNodeCoor\n", mesh->procid);
 
     /* Setup boundary nodes connection */
     mesh->vmapM = BuildIntVector(shape->Nfp*shape->Nfaces*mesh->K);
@@ -85,6 +80,7 @@ MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv,
                 mesh->Npar, &(mesh->parNtotalout), &(mesh->parmapOUT),
                 mesh->vmapM, mesh->vmapP);
 
+    SetElementPair(shape, mesh, &(mesh->parEtotalout), &(mesh->elemapOut));
     /* mesh geo */
     int Nfactor = 4;
     mesh->vgeo = (real*) calloc(Nfactor*mesh->K*shape->Np, sizeof(real));
@@ -95,7 +91,6 @@ MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv,
 
     return mesh;
 };
-
 
 void FreeMultiReg2d(MultiReg2d *mesh){
     /* mesh info */
@@ -122,7 +117,6 @@ void FreeMultiReg2d(MultiReg2d *mesh){
 
 void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
                   double *J, double *area, double *ciradius, real *vgeo){
-
     int k,n;
     double *drdx, *dsdx, *drdy, *dsdy, *eJ;
 
@@ -154,10 +148,10 @@ void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
  * @brief
  * Set the vertex coordinate based on EToV
  *
- * @param [StdRegions2d*]   shape standard element object
- * @param [int]             K     number of elements
- * @param [double**]        GX    input coordinate of vertex in each element
- * @param [double**]        GY    input coordinate of vertex in each element
+ * @param [in]   shape StdRegions2d pointer: standard element object
+ * @param [in]   K     number of elements
+ * @param [in]   GX    input coordinate of vertex in each element
+ * @param [in]   GY    input coordinate of vertex in each element
  *
  * @return
  * return values:
@@ -185,11 +179,11 @@ void SetNodeCoord2d(StdRegions2d *shape, int K, double **GX, double **GY, double
  * @brief
  * Set the vertex coordinate based on EToV
  *
- * @param [StdRegions2d*]   shape standard element object
- * @param [int]             K     number of elements
- * @param [double*]         VX    input coordinate of vertex
- * @param [double*]         VY    input coordinate of vertex
- * @param [int**]           EToV  element to vertex list
+ * @param [in]   shape StdRegions2d pointer: standard element object
+ * @param [in]   K     number of elements
+ * @param [in]   VX    input coordinate of vertex
+ * @param [in]   VY    input coordinate of vertex
+ * @param [in]   EToV  element to vertex list
  *
  * @return
  * return values:
