@@ -225,7 +225,7 @@ void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double *
     *nEToV = newEToV;
     *newGX = newx;
     *newGY = newy;
-    *newK = totalinK;
+    *newK  = totalinK;
 
     /* deallocate mem */
 

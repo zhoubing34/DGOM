@@ -49,6 +49,10 @@ void PrintVector(char *message, double *A, int Ncols);
 void PrintMatrix(char *message, double **A, int Nrows, int Ncols);
 void PrintIntMatrix(char *message, int **A, int Nrows, int Ncols);
 void SaveMatrix(char *filename, double **A, int Nrows, int Ncols);
+void PrintIntMatrix2File(FILE *fp, char *message, int **Mat, int row, int col);
+void PrintMatrix2File(FILE *fp, char *message, double **Mat, int row, int col);
+void PrintIntVector2File(FILE *fp, char *message, int *Mat, int len);
+void PrintVector2File(FILE *fp, char *message, double *Mat, int len);
 
 int CreateVectorTest(char *message, double *A, double *ExactA, int Ncols);
 int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int Ncols);

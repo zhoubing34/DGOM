@@ -247,10 +247,10 @@ void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes){
 
     int k, sr, sk;
     for(i=0;i<Nfaces;i++){
-        for(j=0;j<Nfp;j++){ /* row index of M */
-            for(k=0;k<Nfp;k++){ /* column index of M */
-                sr = Fmask[i][j]; /* row index of Mes */
-                sk = i*Nfp + k; /* columns index of Mes */
+        for(j=0;j<Nfp;j++){         /* row index of M */
+            for(k=0;k<Nfp;k++){     /* column index of M */
+                sr = Fmask[i][j];   /* row index of Mes */
+                sk = i*Nfp + k;     /* columns index of Mes */
                 Mes[sr][sk] = m[j*Nfp + k];
             }
         }

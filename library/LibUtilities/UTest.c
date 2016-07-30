@@ -174,6 +174,45 @@ void PrintIntMatrix(char *message, int **A, int Nrows, int Ncols){
     }
 }
 
+void PrintIntMatrix2File(FILE *fp, char *message, int **Mat, int row, int col){
+    fprintf(fp, "%s = \n", message);
+    int n,m;
+    for(n=0;n<row;++n){
+        for(m=0;m<col;++m){
+            fprintf(fp, " %d, ", Mat[n][m]);
+        }
+        fprintf(fp, " \n");
+    }
+}
+
+void PrintIntVector2File(FILE *fp, char *message, int *Mat, int len){
+    fprintf(fp, "%s = \n", message);
+    int n;
+    for(n=0;n<len;++n){
+        fprintf(fp, " %d, ", Mat[n]);
+    }
+    fprintf(fp, "\n");
+}
+
+void PrintVector2File(FILE *fp, char *message, double *Mat, int len){
+    fprintf(fp, "%s = \n", message);
+    int n;
+    for(n=0;n<len;++n){
+        fprintf(fp, " %f, ", Mat[n]);
+    }
+    fprintf(fp, "\n");
+}
+
+void PrintMatrix2File(FILE *fp, char *message, double **Mat, int row, int col){
+    fprintf(fp, "%s = \n", message);
+    int n,m;
+    for(n=0;n<row;++n){
+        for(m=0;m<col;++m){
+            fprintf(fp, " %f, ", Mat[n][m]);
+        }
+        fprintf(fp, " \n");
+    }
+}
 
 void SaveMatrix(char *filename, double **A, int Nrows, int Ncols){
     int n,m;

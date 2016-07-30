@@ -30,7 +30,7 @@ typedef struct MultiReg2d{
     StdRegions2d *stdcell;
     /** total number of vertex */
     int Nv;
-    /** total number of elements */
+    /** local number of elements */
     int K;
 
     /* coordinate */
