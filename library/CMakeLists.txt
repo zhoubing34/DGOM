@@ -7,7 +7,8 @@ set(LIBUTILITIES_SOURCE
         LibUtilities/LibUtilities.h
         LibUtilities/Utils.c
         LibUtilities/ParallelPairs.c
-        LibUtilities/UTest.c)
+        LibUtilities/UTest.c
+        LibUtilities/GenUniformMesh.c)
 add_library(LibUtilities STATIC ${LIBUTILITIES_SOURCE})
 TARGET_LINK_LIBRARIES(LibUtilities
         iomp5 pthread m dl mkl_core mkl_intel_lp64 mkl_intel_thread) # extern MKL library

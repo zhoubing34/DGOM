@@ -12,13 +12,44 @@
 #include "mpi.h"
 
 /* variable type */
+#ifdef DOUBLE_PRECISION
+#define real double
+#else
 #define real float
+#endif
 
 #define max(a,b)  ( (a>b)?a:b )
 #define min(a,b)  ( (a<b)?a:b )
 
 #define TOTALERR 1.0e-6
 #define RELATIVEERROR 1.0e-8
+
+/* GenUniformMesh */
+void GenUniformTriMesh(int Mx, int My,
+                       double xmin, double xmax,
+                       double ymin, double ymax, int type,
+                       int *Ne, int *Nv,
+                       int ***newEToV, double **newVX, double **newVY);
+
+void GenUniformQuadMesh(int Mx, int My,
+                        double xmin, double xmax,
+                        double ymin, double ymax,
+                        int *Ne, int *Nv,
+                        int ***newEToV, double **newVX, double **newVY);
+
+void GenParallelUniformTriMesh(int Mx, int My,
+                               double xmin, double xmax,
+                               double ymin, double ymax, int type,
+                               int procid, int nprocs,
+                               int *parK, int *newNv,
+                               int ***parEToV, double **VX, double **VY);
+
+void GenParallelUniformQuadMesh(int Mx, int My,
+                                double xmin, double xmax,
+                                double ymin, double ymax,
+                                int procid, int nprocs,
+                                int *parK, int *newNv,
+                                int ***parEToV, double **VX, double **VY);
 
 /* matrix operation */
 void invM(double* A, int N);

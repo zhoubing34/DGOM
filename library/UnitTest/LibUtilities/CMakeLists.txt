@@ -5,3 +5,9 @@ target_link_libraries(MatrixInverseTest LibUtilities)
 
 add_executable(MatrixMultiplyTest MatrixMultiplyTest.c)
 target_link_libraries(MatrixMultiplyTest LibUtilities)
+
+add_executable(GenUniformMeshTest GenUniformMeshTest.c)
+target_link_libraries(GenUniformMeshTest LibUtilities)
+
+add_executable(GenParallelUniformMeshTest GenParallelUniformMeshTest.c)
+target_link_libraries(GenParallelUniformMeshTest LibUtilities)

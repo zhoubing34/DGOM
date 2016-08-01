@@ -94,7 +94,7 @@ MultiReg2d* ReadTriMesh(StdRegions2d *shape, int Ne){
             lowerNode[1] = upperNode[1] + Ne + 1;
 
             /* Assignment of EToV */
-#ifdef UP_RIGHT
+#ifdef UP_RIGHT /* for '/' division */
             newEToV[irow * Ne * 2 + ie][0] = lowerNode[0];
             newEToV[irow * Ne * 2 + ie][1] = upperNode[1];
             newEToV[irow * Ne * 2 + ie][2] = upperNode[0];
@@ -102,7 +102,7 @@ MultiReg2d* ReadTriMesh(StdRegions2d *shape, int Ne){
             newEToV[irow * Ne * 2 + Ne + ie][0] = lowerNode[0];
             newEToV[irow * Ne * 2 + Ne + ie][1] = lowerNode[1];
             newEToV[irow * Ne * 2 + Ne + ie][2] = upperNode[1];
-#else // up-left
+#else /* for '\' division */
             newEToV[irow * Ne * 2 + ie][0] = lowerNode[1];
             newEToV[irow * Ne * 2 + ie][1] = upperNode[1];
             newEToV[irow * Ne * 2 + ie][2] = upperNode[0];

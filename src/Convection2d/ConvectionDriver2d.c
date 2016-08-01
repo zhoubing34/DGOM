@@ -21,10 +21,10 @@
 
 #include "ConvectionDriver2d.h"
 
+void str2int(char *str, int *N, char* errmessage);
+
 int main(int argc, char **argv){
-
-
-    unsigned int N, Ne;     /* parameters */
+    int N, Ne;     /* parameters */
 
     double dt, FinalTime = 2.4;         /* time */
     char casename[16] = "Convection2d"; /* output filename */
@@ -35,20 +35,9 @@ int main(int argc, char **argv){
     MPI_Comm_rank(MPI_COMM_WORLD, &procid); /* read process id */
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs); /* read process num */
 
-    int info;
-
-
     /* get degree and element number */
-    info = sscanf(argv[1],"%d",&N);
-    if (info!=1) {
-        fprintf(stderr, "Wrong degree number input:%s \n", argv[1]);
-        exit(-1);
-    }
-    info = sscanf(argv[2],"%d",&Ne);
-    if (info!=1) {
-        fprintf(stderr, "Wrong element number input:%s \n", argv[2]);
-        exit(-1);
-    }
+    str2int(argv[1], &N, "Wrong degree input");
+    str2int(argv[2], &Ne, "Wrong element number input");
 
     if(!procid) {
         printf("--------------------------------\n");
@@ -108,4 +97,12 @@ int main(int argc, char **argv){
     MPI_Finalize();
 
     return 0;
+}
+
+void str2int(char *str, int *N, char* errmessage){
+    int info = sscanf(str,"%d",N);
+    if (info!=1) {
+        fprintf(stderr, "%s:%s \n", errmessage, str);
+        exit(-1);
+    }
 }
