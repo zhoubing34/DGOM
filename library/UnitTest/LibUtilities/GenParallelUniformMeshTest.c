@@ -45,6 +45,8 @@ int main(int argc, char **argv){
     DestroyVector(VX);
     DestroyVector(VY);
 
+    MPI_Finalize();
+
     return 0;
 }
 

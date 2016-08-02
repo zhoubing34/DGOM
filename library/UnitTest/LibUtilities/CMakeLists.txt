@@ -11,3 +11,6 @@ target_link_libraries(GenUniformMeshTest LibUtilities)
 
 add_executable(GenParallelUniformMeshTest GenParallelUniformMeshTest.c)
 target_link_libraries(GenParallelUniformMeshTest LibUtilities)
+
+add_executable(NetcdfLibraryTest NetcdfLibraryTest.c)
+target_link_libraries(NetcdfLibraryTest LibUtilities)

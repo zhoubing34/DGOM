@@ -15,7 +15,7 @@
  * Usages:
  * Use the 2 order basis with uniform mesh of 80 and 60 elements on x and y coordinate for test case ParabolicBowl :
  *
- *     mpirun -n 2 ./SWE2D 2 80 60 tri ParabolicBowl
+ *     mpirun -n 2 -host localhost ./SWE2D 2 80 60 tri ParabolicBowl
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
@@ -30,7 +30,7 @@ void str2int(char *str, int *N, char* errmessage);
 
 int main(int argc, char **argv){
 
-    Solver *SWE2D = (Solver *)malloc(sizeof(Solver));
+    SWESolver *solver = (SWESolver *)malloc(sizeof(SWESolver));
 
     int procid, nprocs; /* process number */
 
@@ -43,7 +43,6 @@ int main(int argc, char **argv){
     str2int(argv[1], &N, "Wrong degree input");
     str2int(argv[2], &Mx, "Wrong element number of x coordinate");
     str2int(argv[3], &My, "Wrong element number of y coordinate");
-//    printf("N = %d, Mx = %d, My = %d\n", N, Mx, My);
 
     /* set stand element */
     StdRegions2d *shape;
@@ -58,12 +57,19 @@ int main(int argc, char **argv){
     }
 
     /* get mesh and physdomain */
-    MultiReg2d   *mesh = SWEMesh2d(argv[5], shape, Mx, My);
-    PhysDomain2d *phys = SWEInit2d(argv[5], mesh);
+    MultiReg2d   *mesh = SWEMesh2d(argv[5], solver, shape, Mx, My);
+    PhysDomain2d *phys = SWEInit2d(argv[5], solver, mesh);
 
+    /* set output file */
+    NcFile *outfile = SWEOutput(phys, solver);
+
+    StoreVar(outfile, phys, 0, 0.0);
 
     FreeStdRegions2d(shape);
     FreeMultiReg2d(mesh);
+
+    CloseNcFile(outfile);
+    FreeNcFile(outfile);
 
     MPI_Finalize();
     return 0;
