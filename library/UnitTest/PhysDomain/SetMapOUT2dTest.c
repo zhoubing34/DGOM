@@ -24,7 +24,7 @@ void QuadDomainTest(void){
     StdRegions2d *quad = GenStdQuadEle(N);
     MultiReg2d *mesh;
     SetTestQuadMesh(quad, mesh);
-    PhysDomain2d *phys = GetPhysDomain2d(mesh, Nfields);
+    PhysDomain2d *phys = GenPhysDomain2d(mesh, Nfields);
 
     printf("procid:%d, K = %d\n", mesh->procid, mesh->K);
     /* gen log filename */
@@ -49,7 +49,7 @@ void TriDomainTest(void){
     StdRegions2d *tri = GenStdTriEle(N);
     MultiReg2d *mesh;
     SetTestTriMesh(tri, mesh);
-    PhysDomain2d *phys = GetPhysDomain2d(mesh, Nfields);
+    PhysDomain2d *phys = GenPhysDomain2d(mesh, Nfields);
 
     printf("procid:%d, K = %d\n", mesh->procid, mesh->K);
 

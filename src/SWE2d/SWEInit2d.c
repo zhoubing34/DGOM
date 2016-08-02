@@ -23,7 +23,7 @@ void DamBreakWetInit  (SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, 
  *
  */
 PhysDomain2d* SWEInit2d(char *casename, SWESolver *solver, MultiReg2d *mesh){
-    PhysDomain2d *phys = GetPhysDomain2d(mesh, 3); /* 3 variables */
+    PhysDomain2d *phys = GenPhysDomain2d(mesh, 3); /* 3 variables */
 
     double hmin = 1.0e-4; /* minimum depth */
     /* initialize variables and parameters for various tests */

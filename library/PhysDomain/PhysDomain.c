@@ -15,7 +15,7 @@ void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo);
 void SetParmapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT);
 
 
-PhysDomain2d* GetPhysDomain2d(MultiReg2d *mesh, int Nfields){
+PhysDomain2d* GenPhysDomain2d(MultiReg2d *mesh, int Nfields){
 
     PhysDomain2d *phys = (PhysDomain2d *) calloc(1, sizeof(PhysDomain2d));
     StdRegions2d *shape = mesh->stdcell;

@@ -24,7 +24,7 @@ typedef struct PhysDomain2d{
     real *f_inQ, *f_outQ;
 }PhysDomain2d;
 
-PhysDomain2d* GetPhysDomain2d(MultiReg2d *mesh, int Nfields);
+PhysDomain2d* GenPhysDomain2d(MultiReg2d *mesh, int Nfields);
 void FreePhysDomain2d(PhysDomain2d *phys);
 
 void FetchParmapNode2d(PhysDomain2d *phys,

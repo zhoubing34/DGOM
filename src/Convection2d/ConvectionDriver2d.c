@@ -57,8 +57,8 @@ int main(int argc, char **argv){
 
 
     /* physics */
-    PhysDomain2d *phys     = GetPhysDomain2d(mesh, 1);
-    PhysDomain2d *flowRate = GetPhysDomain2d(mesh, 2);
+    PhysDomain2d *phys     = GenPhysDomain2d(mesh, 1);
+    PhysDomain2d *flowRate = GenPhysDomain2d(mesh, 2);
 
     /* init phys */
     dt = InitCondition(phys, flowRate);
