@@ -79,7 +79,10 @@ void StoreVar(NcFile *file, PhysDomain2d *phys, int outStep, double time){
     /* put time */
     start_t = outStep; // start index
     count_t = 1;       // length
-    ret = ncmpi_put_vara_double_all(file->id, file->vararray[2]->id, &start_t, &count_t, &time); NC_ERROR;
+    ret = ncmpi_put_vara_double_all(
+            file->id, file->vararray[2]->id,
+            &start_t, &count_t, &time);
+    NC_ERROR;
 
     /* put var h */
     start_v[0] = outStep;
@@ -98,7 +101,10 @@ void StoreVar(NcFile *file, PhysDomain2d *phys, int outStep, double time){
             var[sk++] = phys->f_Q[ind];
         }
     }
-    ret = ncmpi_put_vara_float_all(file->id, file->vararray[3]->id, start_v, count_v, var); NC_ERROR;
+    ret = ncmpi_put_vara_float_all(
+            file->id, file->vararray[3]->id,
+            start_v, count_v, var);
+    NC_ERROR;
 
     /* put var qx */
     sk = 0;
@@ -108,7 +114,10 @@ void StoreVar(NcFile *file, PhysDomain2d *phys, int outStep, double time){
             var[sk++] = phys->f_Q[ind];
         }
     }
-    ret = ncmpi_put_vara_float_all(file->id, file->vararray[4]->id, start_v, count_v, var); NC_ERROR;
+    ret = ncmpi_put_vara_float_all(
+            file->id, file->vararray[4]->id,
+            start_v, count_v, var);
+    NC_ERROR;
 
     /* put var qy */
     sk = 0;
@@ -118,7 +127,10 @@ void StoreVar(NcFile *file, PhysDomain2d *phys, int outStep, double time){
             var[sk++] = phys->f_Q[ind];
         }
     }
-    ret = ncmpi_put_vara_float_all(file->id, file->vararray[5]->id, start_v, count_v, var); NC_ERROR;
+    ret = ncmpi_put_vara_float_all(
+            file->id, file->vararray[5]->id,
+            start_v, count_v, var);
+    NC_ERROR;
 
 }
 

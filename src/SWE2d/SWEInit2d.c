@@ -1,16 +1,15 @@
 #include "SWEDriver2d.h"
 
-void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh);
-void DamBreakDryInit  (SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh);
-void DamBreakWetInit  (SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh);
+void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);
+void DamBreakDryInit  (SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);
+void DamBreakWetInit  (SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);
 
 /**
  * @brief
- * Initialize the variables and parameters for test cases.
+ * Initialize the variables and parameters for different test cases.
  *
  * @details
- * Initialize the variables and set the final time for the simulation.
- *
+ * Initialize the variables and set the parameters for the simulation, including
  *
  * @param[in] casename
  * @param[in] solver
@@ -26,13 +25,14 @@ void DamBreakWetInit  (SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh);
 PhysDomain2d* SWEInit2d(char *casename, SWESolver *solver, MultiReg2d *mesh){
     PhysDomain2d *phys = GetPhysDomain2d(mesh, 3); /* 3 variables */
 
-    /* initialize variables for various tests */
+    double hmin = 1.0e-4; /* minimum depth */
+    /* initialize variables and parameters for various tests */
     if      ( !(memcmp(casename, "ParabolicBowl", 13)) ){
-        ParabolicBowlInit(solver, phys, mesh);
+        ParabolicBowlInit(solver, phys, mesh, hmin);
     }else if( !(memcmp(casename, "DamBreakDry"  , 11)) ){
-        DamBreakDryInit(solver, phys, mesh);
+        DamBreakDryInit(solver, phys, mesh, hmin);
     }else if( !(memcmp(casename, "DamBreakWet"  , 11)) ){
-        DamBreakWetInit(solver, phys, mesh);
+        DamBreakWetInit(solver, phys, mesh, hmin);
     }else{
         printf("Wrong name of test case: %s\n", casename);
         MPI_Finalize(); exit(1);
@@ -41,7 +41,7 @@ PhysDomain2d* SWEInit2d(char *casename, SWESolver *solver, MultiReg2d *mesh){
     return phys;
 }
 
-void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh){
+void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin){
     double alpha = 1.6e-7;
     double w     = sqrt(8.0*solver->gra*alpha);
     double T     = 2*M_PI/w;
@@ -52,9 +52,11 @@ void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh){
 
     /* finial time */
     solver->FinalTime = T;
+    /* minimum depth */
+    solver->hcrit = hmin;
 
-    /* initialization */
-    int k, i, ind, Nfields = 3;
+    /* initialization of the variables */
+    int k, i, ind, Nfields = phys->Nfields;
     double r2, x2, y2;
     for (k=0; k<mesh->K; k++){
         for (i=0; i<shape->Np; i++){
@@ -75,17 +77,19 @@ void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh){
     }
 }
 
-void DamBreakDryInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh){
+void DamBreakDryInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin){
     StdRegions2d *shape = mesh->stdcell;
     double damPosition  = 500.0;
 
     /* finial time */
     solver->FinalTime = 20.0;
+    /* minimum depth */
+    solver->hcrit = hmin;
 
     /* initialization */
     int i,k,j,ind;
-    int Nfields = 3;
-    double xc = 0.0;
+    int Nfields = phys->Nfields;
+    double xc;
     for (k=0; k<mesh->K; k++){
         /* element centre */
         xc = 0;
@@ -110,17 +114,19 @@ void DamBreakDryInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh){
 }
 
 
-void DamBreakWetInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh){
+void DamBreakWetInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin){
     StdRegions2d *shape = mesh->stdcell;
     double damPosition  = 500.0;
 
     /* finial time */
     solver->FinalTime = 20.0;
+    /* minimum depth */
+    solver->hcrit = hmin;
 
     /* initialization */
     int i,k,j,ind;
-    int Nfields = 3;
-    double xc = 0;
+    int Nfields = phys->Nfields;
+    double xc;
     for (k=0; k<mesh->K; k++){
 
         /* element centre */

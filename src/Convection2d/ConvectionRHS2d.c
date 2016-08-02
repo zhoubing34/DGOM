@@ -24,9 +24,6 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
     real *f_s     = flowRate->f_Q; /* flow rate */
 
     real *f_inQ   = phys->f_inQ;
-    real *f_outQ  = phys->f_outQ;
-
-    int p, Nout;
 
     /* mpi request buffer */
     MPI_Request *mpi_out_requests = (MPI_Request*) calloc(mesh->nprocs, sizeof(MPI_Request));

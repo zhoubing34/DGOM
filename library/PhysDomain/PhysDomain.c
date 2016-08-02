@@ -230,7 +230,7 @@ void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo){
 
                 surfinfo[sk++] = idM;
                 surfinfo[sk++] = idP;
-                surfinfo[sk++] = (real)( sJk[f]/( 2.0*J[shape->Fmask[f][m]] ) );
+                surfinfo[sk++] = (real)(sJk[f]/(2.0*J[shape->Fmask[f][m]]));
                 surfinfo[sk++] = (real)sJk[f];
                 surfinfo[sk++] = (real)nxk[f];
                 surfinfo[sk++] = (real)nyk[f];

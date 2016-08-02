@@ -3,7 +3,7 @@ set(SRC_LIST
         SWEDriver2d.h
         SWEMesh2d.c
         SWEInit2d.c
-        SWEOutput2d.c)
+        SWEOutput2d.c SWERun2d.c SWERHS2d.c SWEUtilities.c)
 
 add_executable(SWE2d ${SRC_LIST})
 
