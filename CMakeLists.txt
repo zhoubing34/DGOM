@@ -8,7 +8,7 @@ set(THIRD_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/3rdParty/install")
 # set mpi compilers
 set(CMAKE_C_FLAGS "-Wall")
 set(MPI_PATH $ENV{MPI_DIR})                      # use environmental variable MPI_DIR
-set(MPI_C_COMPILER "${MPI_PATH}/bin/mpicc")      # set mpicc before find mpi package
+set(MPI_C_COMPILER   "${MPI_PATH}/bin/mpicc")    # set mpicc before find mpi package
 set(MPI_CXX_COMPILER "${MPI_PATH}/bin/mpicxx")   # set mpicxx before find mpi package
 set(MKLROOT "/opt/intel/composer_xe_2015.5.222/mkl")
 
@@ -17,7 +17,7 @@ if(NOT MPI_FOUND)
     message(FATAL_ERROR "MPI is not found")
 endif()
 
-set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+set(CMAKE_C_COMPILER   ${MPI_C_COMPILER})
 set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
 
 # add header path

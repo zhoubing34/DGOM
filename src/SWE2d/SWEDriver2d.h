@@ -7,7 +7,7 @@
 
 #include "PhysDomain/PhysDomain.h"
 #include "LibUtilities/NetcdfLibrary.h"
-
+#include "LibUtilities/SlopeLimiter.h"
 
 typedef struct foo{
     double gra;         /* gravity acceleration */
@@ -15,6 +15,7 @@ typedef struct foo{
     double **bot;       /* bottom topography */
     double FinalTime;   /* final time */
     double hcrit;       /* minimum water depth */
+    double dtmin;       /* minimum time step */
     char   *casename;   /* casename */
 } SWESolver;
 
@@ -31,10 +32,14 @@ void          SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
 double        SWEPredictDt(PhysDomain2d *phys, SWESolver *solver, double CFL);
 void          SWEFlux2d(PhysDomain2d *phys, SWESolver *solver,
                         real *Qk, real *Eflx, real *Gflx);
+void          SWEFlux(SWESolver *solver,
+                      real h,   real qx,   real qy,
+                      real *Eh, real *Eqx, real *Eqy,
+                      real *Gh, real *Gqx, real *Gqy);
 void          SWESource(PhysDomain2d *phys, SWESolver *solver,
                         int k, real *vgeo, real *Qk, real *Sour);
-void          SWENumFlux2d(SWESolver *solver, real nx, real ny,
+int           SWENumFlux2d(SWESolver *solver, real nx, real ny,
                            real hM, real hP, real qxM, real qxP, real qyM, real qyP,
                            real *Fhs, real *Fqxs, real *Fqys);
-
+void          PositivePreserving(PhysDomain2d *phys, SWESolver *solver);
 #endif //DGOM_SWEDRIVER2D_H

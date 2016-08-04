@@ -95,7 +95,11 @@ void FreePhysDomain2d(PhysDomain2d *phys){
  *     FetchParmapNode2d(phys, mpi_out_requests, mpi_in_requests, &Nmess);
  *
  */
-void FetchParmapNode2d(PhysDomain2d *phys, MPI_Request *mpi_send_requests, MPI_Request *mpi_recv_requests, int *Nmessage){
+void FetchParmapNode2d(PhysDomain2d *phys,
+                       MPI_Request *mpi_send_requests,
+                       MPI_Request *mpi_recv_requests,
+                       int *Nmessage)
+{
     int t;
     /* buffer outgoing node data */
     for(t=0;t<phys->parNtotalout;++t)
@@ -153,6 +157,25 @@ void FetchParmapEle2d(PhysDomain2d *phys, float *f_E,
     *Nmessage = Nmess;
 }
 
+/**
+ * @brief
+ * Set the `parmapOUT` field for PhysDomain2d structure.
+ *
+ * @details
+ *
+ *
+ * @param[in] beginPos
+ * @param[in] order order>0: year/month/date;order=0: date/month/year
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * car_id   | int      |
+ * car_info | object   |
+ *
+ *
+ */
 void SetParmapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT){
     int p2, n1, m, fld;
     int nprocs = mesh->nprocs;

@@ -1,4 +1,5 @@
-set(SRC_LIST SWE2d_Test.c)
+set(SRC_LIST SWE2d_Test.c
+        ../../../../src/SWE2d/SWEUtilities.c)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)

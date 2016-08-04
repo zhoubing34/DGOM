@@ -14,3 +14,7 @@ target_link_libraries(GenParallelUniformMeshTest LibUtilities)
 
 add_executable(NetcdfLibraryTest NetcdfLibraryTest.c)
 target_link_libraries(NetcdfLibraryTest LibUtilities)
+
+
+add_executable(SLLoc2dTest SLLoc2dTest.c)
+target_link_libraries(SLLoc2dTest LibUtilities PhysDomain)

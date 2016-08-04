@@ -19,6 +19,7 @@ double SWERun2d(PhysDomain2d *phys, SWESolver *solver, NcFile *outfile){
     double  time    = 0.0;
     double  ftime   = solver->FinalTime;
     double  dt;  /* delta time */
+    double  dtmin = solver->dtmin;
     StoreVar(outfile, phys, outstep++, time);
 
     double mpitime0 = MPI_Wtime();
@@ -26,6 +27,7 @@ double SWERun2d(PhysDomain2d *phys, SWESolver *solver, NcFile *outfile){
     /* time step loop  */
     while (time<ftime){
         dt = SWEPredictDt(phys, solver, 0.3);
+        if(dt<dtmin) {dt=dtmin;}
         /* adjust final step to end exactly at FinalTime */
         if (time+dt > ftime) { dt = ftime-time; }
 
@@ -36,7 +38,12 @@ double SWERun2d(PhysDomain2d *phys, SWESolver *solver, NcFile *outfile){
             const real fb = (real)rk4b[INTRK-1];
 
             SWERHS2d(phys, solver, fa, fb, fdt);
+
+            SLLoc2d(phys, 1.0);
+            PositivePreserving(phys, solver);
         }
+
+        printf("Process:%f, dt:%f\n", time/ftime, dt);
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
         StoreVar(outfile, phys, outstep++, time);

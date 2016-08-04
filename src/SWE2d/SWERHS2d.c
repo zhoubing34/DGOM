@@ -4,7 +4,7 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
               const real frka, const real frkb, const real fdt){
 
     /* registers and temporary */
-    register unsigned int k, t, geoid=0;
+    register unsigned int k, geoid=0;
 
     MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
@@ -32,7 +32,7 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
     MPI_Request *mpi_out_requests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
     MPI_Request *mpi_in_requests  = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
 
-    int Nmess;
+    int Nmess=0;
     FetchParmapNode2d(phys, mpi_out_requests, mpi_in_requests, &Nmess);
 
     /* volume integral */
@@ -55,7 +55,7 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
 
         /* flux terms */
         SWEFlux2d(phys, solver, Qk, Eflx, Gflx);
-        SWESource(phys, solver, k,  vgeo+k*4, Qk, Sour);
+        SWESource(phys, solver, k,  vgeo+k*Np*4, Qk, Sour);
 
         for(n=0;n<Np;++n){
 
@@ -74,9 +74,9 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
                 const real dx = drdx*dr+dsdx*ds;
                 const real dy = drdy*dr+dsdy*ds;
 
-                rhsH  += -dx*Eflx[sk]-dy*Gflx[sk] + Sour[sk++];
-                rhsQx += -dx*Eflx[sk]-dy*Gflx[sk] + Sour[sk++];
-                rhsQy += -dx*Eflx[sk]-dy*Gflx[sk] + Sour[sk++];
+                rhsH  += -(dx*Eflx[sk]+dy*Gflx[sk]) + Sour[sk++];
+                rhsQx += -(dx*Eflx[sk]+dy*Gflx[sk]) + Sour[sk++];
+                rhsQy += -(dx*Eflx[sk]+dy*Gflx[sk]) + Sour[sk++];
             }
 
             int id = Nfields*(k*Np + n);
@@ -123,17 +123,26 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
                 idP = Nfields*(-1-idP);
                 hM  = f_Q[idM++]; hP  = f_inQ[idP++];
                 qxM = f_Q[idM++]; qxP = f_inQ[idP++];
-                qyM = f_Q[idM++]; qyP = f_inQ[idP++];
+                qyM = f_Q[idM  ]; qyP = f_inQ[idP  ];
             }else{
                 hM  = f_Q[idM++]; hP  = f_Q[idP++];
                 qxM = f_Q[idM++]; qxP = f_Q[idP++];
-                qyM = f_Q[idM++]; qyP = f_Q[idP++];
+                qyM = f_Q[idM  ]; qyP = f_Q[idP  ];
             }
 
-            printf("k=%d, Nfp=%d,hM=%f, hP=%f\n",k,m,hM,hP);
-            SWENumFlux2d(solver, NXf, NYf,
-                         hM, hP, qxM, qxP, qyM, qyP,
-                         &Fhs, &Fqxs, &Fqys);
+            real EhM,EqxM,EqyM;
+            real GhM,GqxM,GqyM;
+
+            SWEFlux(solver, hM, qxM, qyM, &EhM, &EqxM, &EqyM, &GhM, &GqxM, &GqyM);
+
+            int info = SWENumFlux2d(solver, NXf, NYf,
+                                    hM, hP, qxM, qxP, qyM, qyP,
+                                    &Fhs, &Fqxs, &Fqys);
+            if(info<0) exit(-2);
+
+            Fhs  = EhM*NXf  + GhM*NYf  - Fhs;
+            Fqxs = EqxM*NXf + GqxM*NYf - Fqxs;
+            Fqys = EqyM*NXf + GqyM*NYf - Fqys;
 
             fluxQ[sk++] = FSc*Fhs;
             fluxQ[sk++] = FSc*Fqxs;

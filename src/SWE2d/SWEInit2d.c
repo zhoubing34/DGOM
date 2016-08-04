@@ -54,6 +54,8 @@ void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, 
     solver->FinalTime = T;
     /* minimum depth */
     solver->hcrit = hmin;
+    /* minimum time step */
+    solver->dtmin = 1.0e-4;
 
     /* initialization of the variables */
     int k, i, ind, Nfields = phys->Nfields;
@@ -66,7 +68,7 @@ void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, 
             ind = (k*shape->Np + i)*Nfields;
             // printf("k = %d, i = %d, ind = %d\n", k, i, ind);
             if( (x2 + y2) > r2 ){
-                phys->f_Q[ind++] = 0;
+                phys->f_Q[ind++] = 1e-6;
             }else{
                 phys->f_Q[ind++] = (real)( 1.0/(X+Y) + alpha*(Y*Y - X*X)*(x2 + y2)/(X+Y)/(X+Y) );
             }
@@ -85,6 +87,8 @@ void DamBreakDryInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, do
     solver->FinalTime = 20.0;
     /* minimum depth */
     solver->hcrit = hmin;
+    /* minimum time step */
+    solver->dtmin = 1.0e-2;
 
     /* initialization */
     int i,k,j,ind;
@@ -122,6 +126,8 @@ void DamBreakWetInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, do
     solver->FinalTime = 20.0;
     /* minimum depth */
     solver->hcrit = hmin;
+    /* minimum time step */
+    solver->dtmin = 1.0e-2;
 
     /* initialization */
     int i,k,j,ind;

@@ -1,10 +1,6 @@
 #include "SWEDriver2d.h"
 
-/* private function */
-void SWEFlux(SWESolver *solver, real h,   real qx,   real qy,
-             real *Eh, real *Eqx, real *Eqy, real *Gh, real *Gqx, real *Gqy);
-
-void SWENumFlux2d(SWESolver *solver, real nx, real ny,
+int SWENumFlux2d(SWESolver *solver, real nx, real ny,
                   real hM, real hP, real qxM, real qxP, real qyM, real qyP,
                   real *Fhs, real *Fqxs, real *Fqys){
     /* rotation */
@@ -23,48 +19,59 @@ void SWENumFlux2d(SWESolver *solver, real nx, real ny,
     real sM, sP;
     real gra  = (real) solver->gra;
     real hmin = (real) solver->hcrit;
-
+    real us, cs;
+    real unM,unP;
     if( (hM>hmin) & (hP>hmin) ){
-        real us, cs;
-        real unM=qnM/hM,unP=qnP/hP;
+        unM=qnM/hM;
+        unP=qnP/hP;
         us = (real)(0.5*(unM + unP) + sqrt(gra*hM) - sqrt(gra*hP));
         cs = (real)(0.5*(sqrt(gra*hM) + sqrt(gra*hP) ) + 0.25*(unM - unP));
 
         sM = (real)min(unM-sqrt(gra*hM), us-cs);
-        sP = (real)min(unM+sqrt(gra*hM), us+cs);
+        sP = (real)max(unP+sqrt(gra*hP), us+cs);
     }else if ( (hM>hmin) & (hP<=hmin) ){
-        real unM=qnM/hM;
+        unM=qnM/hM;
         sM = (real)(unM -  sqrt(gra*hM) );
         sP = (real)(unM +2*sqrt(gra*hM) );
     }else if ( (hM<=hmin) & (hP>hmin) ){
-        real unP=qnP/hP;
+        unP=qnP/hP;
         sM = (real)(unP -2*sqrt(gra*hP) );
         sP = (real)(unP +  sqrt(gra*hP) );
     }else{ /* both dry element */
         sM = 0; sP = 0;
     }
 
+//    printf("SM=%f, SP=%f\n", sM, sP);
+
     /* HLL function */
     real Fhn,Fqxn,Fqyn;
-    if (sM>0){
+    if ( (sM>=0) & (sP>0) ){
         Fhn = EhM; Fqxn = EqxM; Fqyn = EqyM;
-    }else if((sM<=0) & (sP>=0)){
-        Fhn  = sP*EhM  - sM*EhP  + sM*sP*(hP  - hM );
-        Fqxn = sP*EqxM - sM*EqxP + sM*sP*(qxP - qxM);
-        Fqyn = sP*EqyM - sM*EqyP + sM*sP*(qyP - qyM);
-    }else if(sP<0){
+    }else if((sM<0) & (sP>0)){
+        Fhn  = (sP*EhM  - sM*EhP  + sM*sP*(hP  - hM ))/(sP - sM);
+        Fqxn = (sP*EqxM - sM*EqxP + sM*sP*(qxP - qxM))/(sP - sM);
+        Fqyn = (sP*EqyM - sM*EqyP + sM*sP*(qyP - qyM))/(sP - sM);
+    }else if( (sM<0)&(sP<=0) ){
         Fhn = EhP; Fqxn = EqxP; Fqyn = EqyP;
+    }else if( (sM==0) & (sP==0) ){
+        Fhn = 0; Fqxn = 0; Fqyn = 0;
     }else{
         printf("Wrong status of numerical wave speed!\n");
-        printf("hM = %f, hP = %f\n", hM, hP);
-        printf("sM = %f, sP = %f\n", sM, sP);
-        exit(-2);
+        printf("hM  = %f, hP  = %f, hmin = %f\n", hM, hP, hmin);
+        printf("qnM = %f, qnP = %f\n", qnM, qnP);
+        printf("sM  = %f, sP  = %f\n", sM, sP);
+        printf("unM = %f, unP = %f\n", unM, unP);
+        printf("us  = %f, cs  = %f\n", us, cs);
+        printf("qxP = %f, qyP = %f\n", qxP, qyP);
+        return -2;
     }
 
     /* inverse rotation */
     *Fhs  = Fhn;
     *Fqxs = nx*Fqxn - ny*Fqyn;
     *Fqys = ny*Fqxn + nx*Fqyn;
+
+    return 0;
 }
 
 /**
@@ -95,66 +102,65 @@ void SWESource(PhysDomain2d *phys, SWESolver *solver,
 
     MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
-    real gra = (real)solver->gra;
 
-    real *f_Dr    = shape->f_Dr;
-    real *f_Ds    = shape->f_Ds;
-    double *bot   = solver->bot[k];
-    double hmin   = solver->hcrit;
+    const real gra   = (real)solver->gra;
+    const real *f_Dr = shape->f_Dr;
+    const real *f_Ds = shape->f_Ds;
+    const double *bot  = solver->bot[k];
+    const double hcrit = solver->hcrit;
+
+    const int Np      = shape->Np;
+    const int Nfields = phys->Nfields;
 
     int n,m,geoid=0,isdry=0;
-    real Sh=0, Sqx=0, Sqy=0;
-    int Nfields  = phys->Nfields;
 
-
-    for(n=0;n<shape->Np;n++){
+    for(n=0;n<Np;n++){
         const real h = Qk[n*Nfields];
-        if (h<hmin) {isdry = 1;}
+        if (h<hcrit) {isdry = 1;}
     }
 
     if(!isdry) { /* wet element */
-        for (n = 0; n < shape->Np; ++n) {
+        for (n=0;n<Np;++n) {
 
-            const real *ptDr = f_Dr + n * shape->Np;
-            const real *ptDs = f_Ds + n * shape->Np;
+            const real *ptDr = f_Dr + n*Np;
+            const real *ptDs = f_Ds + n*Np;
+            const real drdx  = vgeo[geoid++], drdy = vgeo[geoid++];
+            const real dsdx  = vgeo[geoid++], dsdy = vgeo[geoid++];
+            const real h = Qk[n*Nfields];
 
-            const real drdx = vgeo[geoid++], drdy = vgeo[geoid++];
-            const real dsdx = vgeo[geoid++], dsdy = vgeo[geoid++];
+            int  sk=0;
+            real Sh=0, Sqx=0, Sqy=0;
 
-            const real h = Qk[n * Nfields];
-            if (h < hmin) { isdry = 1; }
-
-            int sk = 0;
-            for (m = 0; m < shape->Np; ++m) {
+            for (m=0;m<Np;++m) {
                 const real dr = ptDr[m];
                 const real ds = ptDs[m];
-                const real dx = drdx * dr + dsdx * ds;
-                const real dy = drdy * dr + dsdy * ds;
+                const real dx = drdx*dr + dsdx*ds;
+                const real dy = drdy*dr + dsdy*ds;
 
-                const real z = (real) bot[sk++];
+                const real z = (real)bot[sk++];
 
-                Sqx += -gra * h * dx * z;
-                Sqy += -gra * h * dy * z;
+                Sqx += -gra*h*dx*z;
+                Sqy += -gra*h*dy*z;
             }
 
             int ind = n * Nfields;
             Sour[ind++] = Sh;
             Sour[ind++] = Sqx;
-            Sour[ind++] = Sqy;
+            Sour[ind  ] = Sqy;
         }
     }else{  /* dry element */
-        for (n = 0; n < shape->Np; ++n) {
-            int ind = n * Nfields;
+        for (n=0;n<Np;++n) {
+            int ind = n*Nfields;
             Sour[ind++] = 0;
             Sour[ind++] = 0;
-            Sour[ind++] = 0;
+            Sour[ind  ] = 0;
         }
     }
 }
 
 /**
  * @brief
- * Calculation of flux terms.
+ * Calculation of flux terms for element.
  *
  * @details
  * The flux term
@@ -165,8 +171,7 @@ void SWESource(PhysDomain2d *phys, SWESolver *solver,
  *
  * @param[in] phys
  * @param[in] solver
- * @param[in] Np        number of points
- * @param[in] Qk        variables
+ * @param[in] Qk        variables in element
  *
  * @return
  * return values:
@@ -210,10 +215,10 @@ void SWEFlux(SWESolver *solver,
              real *Eh, real *Eqx, real *Eqy,
              real *Gh, real *Gqx, real *Gqy){
 
-    real hmin = (real)solver->hcrit;
+    real hcrit = (real)solver->hcrit;
     real gra  = (real)solver->gra;
 
-    if(h>hmin){
+    if(h>hcrit){
         *Eh  = qx;
         *Eqx = (real)(qx*qx/h + 0.5*gra*h*h);
         *Eqy = qx*qy/h;
@@ -286,3 +291,68 @@ double SWEPredictDt(PhysDomain2d *phys, SWESolver *solver, double CFL){
     return gdt;
 }
 
+
+void PositivePreserving(PhysDomain2d *phys, SWESolver *solver){
+
+    MultiReg2d   *mesh  = phys->mesh;
+    StdRegions2d *shape = mesh->stdcell;
+
+    const int Nfields   = phys->Nfields;
+    const int Np        = shape->Np;
+    const int K         = mesh->K;
+    double hcrit = solver->hcrit;
+
+    int i,k,ind,sj=0;
+
+    for(k=0;k<K;k++){
+        real hmean=0.0, hsi=0.0, qxmean=0.0, qymean=0.0;
+        real hmin =phys->f_Q[(k*Np)*Nfields]; /* depth of first node */
+        /* compute mean water depth */
+        for(i=0;i<Np;i++){
+            ind    = (k*Np + i)*Nfields;
+            hmin   = min(hmin, phys->f_Q[ind]);
+
+            hmean += shape->wv[i]*mesh->J[sj  ]*phys->f_Q[ind++];
+            qxmean+= shape->wv[i]*mesh->J[sj  ]*phys->f_Q[ind++];
+            qymean+= shape->wv[i]*mesh->J[sj++]*phys->f_Q[ind  ];
+
+        }
+        hmean  /= mesh->area[k];
+        qxmean /= mesh->area[k];
+        qymean /= mesh->area[k];
+        /* correct negative water depth */
+        if (hmean<hsi){
+            for(i=0;i<Np;i++) {
+                ind = (k*Np + i)*Nfields;
+                phys->f_Q[ind++] += (hsi - hmean);
+                phys->f_Q[ind++]  = 0.0;
+                phys->f_Q[ind  ]  = 0.0;
+            }
+            hmean=0.0; qxmean=0.0; qymean=0.0;
+        }
+        /* positive operator */
+        real theta;
+        if(hmean > hmin){ /* in case for `hmean = hmin` */
+            theta = min(1, (hmean-hsi)/(hmean-hmin));
+        }else{
+            theta = 1.0;
+        }
+        /* reconstruction */
+        for(i=0;i<Np;i++){
+            ind    = (k*Np + i)*Nfields;
+            phys->f_Q[ind  ] = (phys->f_Q[ind  ] - hmean )*theta + hmean;
+            phys->f_Q[ind+1] = (phys->f_Q[ind+1] - qxmean)*theta + qxmean;
+            phys->f_Q[ind+2] = (phys->f_Q[ind+2] - qymean)*theta + qymean;
+        }
+
+        /* eliminate fluxes in dry cell */
+        for(i=0;i<Np;i++) {
+            ind    = (k*Np + i)*Nfields;
+            real h = phys->f_Q[ind++];
+            if (h <= hcrit){
+                phys->f_Q[ind++]= 0.0;
+                phys->f_Q[ind  ]= 0.0;
+            }
+        }
+    }
+}
