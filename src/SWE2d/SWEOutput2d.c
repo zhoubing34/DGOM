@@ -50,7 +50,7 @@ NcFile* SWEOutput(PhysDomain2d *phys, SWESolver *solver){
     vararray[2] = time; vararray[3] = h;
     vararray[4] = qx;   vararray[5] = qy;
     vararray[6] = bot;
-    NcFile *file = DefineNcFile("SWE2d", mesh->procid, mesh->nprocs, ndim, dimarray, nvar, vararray);
+    NcFile *file = DefineNcFile("SWE2d.", mesh->procid, mesh->nprocs, ndim, dimarray, nvar, vararray);
     free(dimarray);
     free(vararray);
 

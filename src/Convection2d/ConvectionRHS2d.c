@@ -107,8 +107,8 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
         int sk = 0;
         for(m=0;m<shape->Nfp*shape->Nfaces;++m){
 
-            int   idM       = surfinfo[surfid++];
-            int   idP       = surfinfo[surfid++];
+            int   idM       = (int)surfinfo[surfid++];
+            int   idP       = (int)surfinfo[surfid++];
             const float FSc = surfinfo[surfid++];
             const float BSc = surfinfo[surfid++];
             const float NXf = surfinfo[surfid++];
@@ -132,7 +132,7 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
             dG = vM*dC;
 
             const float un = fabsf(NXf*uM + NYf*vM);
-            fluxQ[sk++] = FSc*( - NXf*dF - NYf*dG + un*dC);
+            fluxQ[sk++] = FSc*( - NXf*dF - NYf*dG + un*dC)*(real)0.5;
 
         }
 

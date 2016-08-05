@@ -1,6 +1,6 @@
 #include "SWEDriver2d.h"
 
-int SWENumFlux2d(SWESolver *solver, real nx, real ny,
+void SWENumFlux2d(SWESolver *solver, real nx, real ny,
                   real hM, real hP, real qxM, real qxP, real qyM, real qyP,
                   real *Fhs, real *Fqxs, real *Fqys){
     /* rotation */
@@ -63,7 +63,7 @@ int SWENumFlux2d(SWESolver *solver, real nx, real ny,
         printf("unM = %f, unP = %f\n", unM, unP);
         printf("us  = %f, cs  = %f\n", us, cs);
         printf("qxP = %f, qyP = %f\n", qxP, qyP);
-        return -2;
+        exit(-2);
     }
 
     /* inverse rotation */
@@ -71,7 +71,7 @@ int SWENumFlux2d(SWESolver *solver, real nx, real ny,
     *Fqxs = nx*Fqxn - ny*Fqyn;
     *Fqys = ny*Fqxn + nx*Fqyn;
 
-    return 0;
+//    return 0;
 }
 
 /**

@@ -206,7 +206,6 @@ void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo){
     int k,f,m,sk = 0;
     StdRegions2d *shape = mesh->stdcell;
 
-    int K  = mesh->K;
     int Np = shape->Np;
     int Nfaces = shape->Nfaces;
     int Nfp = shape->Nfp;
@@ -232,7 +231,6 @@ void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo){
         Normals2d(Nfaces, mesh->GX[k], mesh->GY[k], nxk, nyk, sJk);
 
         for(f=0;f<Nfaces;++f){
-
             for(m=0;m<Nfp;++m){
 
                 int id  = m + f*Nfp + Nfp*Nfaces*k;
@@ -253,7 +251,7 @@ void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo){
 
                 surfinfo[sk++] = idM;
                 surfinfo[sk++] = idP;
-                surfinfo[sk++] = (real)(sJk[f]/(2.0*J[shape->Fmask[f][m]]));
+                surfinfo[sk++] = (real)(sJk[f]/(J[shape->Fmask[f][m]]));
                 surfinfo[sk++] = (real)sJk[f];
                 surfinfo[sk++] = (real)nxk[f];
                 surfinfo[sk++] = (real)nyk[f];

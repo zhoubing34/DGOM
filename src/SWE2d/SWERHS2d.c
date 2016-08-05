@@ -1,7 +1,6 @@
 #include "SWEDriver2d.h"
 
-void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
-              const real frka, const real frkb, const real fdt){
+void SWERHS2d(PhysDomain2d *phys, SWESolver *solver, const real frka, const real frkb, const real fdt){
 
     /* registers and temporary */
     register unsigned int k, geoid=0;
@@ -83,6 +82,7 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
             f_rhsQ[id++] = rhsH;
             f_rhsQ[id++] = rhsQx;
             f_rhsQ[id]   = rhsQy;
+
         }
     }
 
@@ -101,7 +101,7 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
         /* NOTE: once k is known, all other indexing variables etc are derived */
         register unsigned int n, m;
         /* NOTE: should be local memory */
-        float fluxQ[Nfaces*Nfp*Nfields];
+        real fluxQ[Nfaces*Nfp*Nfields];
 
         /* NOTE: index into geometric factors */
         int surfid=k*6*Nfp*Nfaces;
@@ -129,24 +129,22 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
                 qxM = f_Q[idM++]; qxP = f_Q[idP++];
                 qyM = f_Q[idM  ]; qyP = f_Q[idP  ];
             }
-
             real EhM,EqxM,EqyM;
             real GhM,GqxM,GqyM;
 
             SWEFlux(solver, hM, qxM, qyM, &EhM, &EqxM, &EqyM, &GhM, &GqxM, &GqyM);
-
-            int info = SWENumFlux2d(solver, NXf, NYf,
-                                    hM, hP, qxM, qxP, qyM, qyP,
-                                    &Fhs, &Fqxs, &Fqys);
-            if(info<0) exit(-2);
+            SWENumFlux2d(solver, NXf, NYf, hM, hP, qxM, qxP, qyM, qyP, &Fhs, &Fqxs, &Fqys);
 
             Fhs  = EhM*NXf  + GhM*NYf  - Fhs;
             Fqxs = EqxM*NXf + GqxM*NYf - Fqxs;
             Fqys = EqyM*NXf + GqyM*NYf - Fqys;
 
+//            printf("Nfp=%2d, Fhs=%f, Fqxs=%f, Fqys=%f\n", k*Nfp*Nfaces+m, Fhs, Fqxs, Fqys);
+
             fluxQ[sk++] = FSc*Fhs;
             fluxQ[sk++] = FSc*Fqxs;
             fluxQ[sk++] = FSc*Fqys;
+
         }
 
         for(n=0;n<Np;++n){
@@ -155,7 +153,7 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
             sk = 0;
             for(m=0;m<Nfp*Nfaces;++m){
                 const float L = ptLIFT[m];
-                rhsH += L*fluxQ[sk++];
+                rhsH  += L*fluxQ[sk++];
                 rhsQx += L*fluxQ[sk++];
                 rhsQy += L*fluxQ[sk++];
             }
@@ -164,14 +162,23 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver,
             f_rhsQ[id++] += rhsH;
             f_rhsQ[id++] += rhsQx;
             f_rhsQ[id]   += rhsQy;
+
+//            printf("Np=%2d, rhsH=%f, rhsQx=%f, rhsQy=%f\n", n+k*Np, rhsH, rhsQx, rhsQy);
         }
     }
 
     int n;
-    for(n=0;n<mesh->K*shape->Np*phys->Nfields;++n){
+    for(n=0;n<K*Np*Nfields;++n){
         f_resQ[n] = frka*f_resQ[n]+fdt*f_rhsQ[n];
         f_Q[n]   += frkb*f_resQ[n];
     }
+
+//    for(k=0;k<K;k++){
+//        for(n=0;n<Np;n++){
+//            int id = Nfields*(n+k*Np);
+//            printf("Np=%2d, h=%f, qx=%f, qy=%f\n", n+k*Np, f_Q[id++], f_Q[id++], f_Q[id]);
+//        }
+//    }
 
     /* make sure all messages went out */
     MPI_Status *outstatus  = (MPI_Status*) calloc(mesh->nprocs, sizeof(MPI_Status));

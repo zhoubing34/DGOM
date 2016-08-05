@@ -145,11 +145,7 @@ void SurfIntegralTest(PhysDomain2d *phys, SWESolver *solver){
             real GhM,GqxM,GqyM;
 
             SWEFlux(solver, hM, qxM, qyM, &EhM, &EqxM, &EqyM, &GhM, &GqxM, &GqyM);
-
-            int info = SWENumFlux2d(solver, NXf, NYf,
-                                    hM, hP, qxM, qxP, qyM, qyP,
-                                    &Fhs, &Fqxs, &Fqys);
-            if(info<0) exit(-2);
+            SWENumFlux2d(solver, NXf, NYf, hM, hP, qxM, qxP, qyM, qyP, &Fhs, &Fqxs, &Fqys);
 
             Fhs  = EhM*NXf  + GhM*NYf  - Fhs;
             Fqxs = EqxM*NXf + GqxM*NYf - Fqxs;

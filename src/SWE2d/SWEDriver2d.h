@@ -38,7 +38,7 @@ void          SWEFlux(SWESolver *solver,
                       real *Gh, real *Gqx, real *Gqy);
 void          SWESource(PhysDomain2d *phys, SWESolver *solver,
                         int k, real *vgeo, real *Qk, real *Sour);
-int           SWENumFlux2d(SWESolver *solver, real nx, real ny,
+void          SWENumFlux2d(SWESolver *solver, real nx, real ny,
                            real hM, real hP, real qxM, real qxP, real qyM, real qyP,
                            real *Fhs, real *Fqxs, real *Fqys);
 void          PositivePreserving(PhysDomain2d *phys, SWESolver *solver);
