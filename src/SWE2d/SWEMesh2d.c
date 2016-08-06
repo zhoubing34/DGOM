@@ -62,17 +62,13 @@ MultiReg2d* ParabolicBowlMesh(SWESolver *solver, StdRegions2d *shape, int Mx, in
     /* generate triangle or quadrilateral mesh */
     switch (shape->Nv) {
         case 3:
-            GenParallelUniformTriMesh(Mx, My,
-                                      xmin , xmax, ymin, ymax, 1,
-                                      procid, nprocs,
-                                      &Ne, &Nv, &parEToV, &VX, &VY);
+            GenParallelUniformTriMesh(Mx, My, xmin , xmax, ymin, ymax, 1,
+                                      procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
             mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
             break;
         case 4:
-            GenParallelUniformQuadMesh(Mx, My,
-                                       xmin, xmax, ymin, ymax,
-                                       procid, nprocs,
-                                       &Ne, &Nv, &parEToV, &VX, &VY);
+            GenParallelUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax,
+                                       procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
             mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
             break;
         default:
@@ -96,7 +92,7 @@ MultiReg2d* ParabolicBowlMesh(SWESolver *solver, StdRegions2d *shape, int Mx, in
     DestroyVector(VY);
 
     /* the grid length */
-    solver->dx = min( (xmax - xmin)/Mx/shape->Nfp, (ymax - ymin)/My/shape->Nfp );
+    solver->dx = min( (xmax - xmin)/(Mx+1.0)/shape->Nfp, (ymax - ymin)/(My+1)/shape->Nfp );
 
     return mesh;
 }
@@ -119,17 +115,13 @@ MultiReg2d* DamBreakMesh(SWESolver *solver, StdRegions2d *shape, int Mx, int My)
     /* generate triangle or quadrilateral mesh */
     switch (shape->Nv) {
         case 3:
-            GenParallelUniformTriMesh(Mx, My,
-                                      xmin , xmax, ymin, ymax, 1,
-                                      procid, nprocs,
-                                      &Ne, &Nv, &parEToV, &VX, &VY);
+            GenParallelUniformTriMesh(Mx, My, xmin , xmax, ymin, ymax, 1,
+                                      procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
             mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
             break;
         case 4:
-            GenParallelUniformQuadMesh(Mx, My,
-                                       xmin, xmax, ymin, ymax,
-                                       procid, nprocs,
-                                       &Ne, &Nv, &parEToV, &VX, &VY);
+            GenParallelUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax,
+                                       procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
             mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);;
             break;
         default:
@@ -151,7 +143,7 @@ MultiReg2d* DamBreakMesh(SWESolver *solver, StdRegions2d *shape, int Mx, int My)
     DestroyVector(VY);
 
     /* the grid length */
-    solver->dx = min( (xmax - xmin)/Mx/shape->Nfp, (ymax - ymin)/My/shape->Nfp );
+    solver->dx = min( (xmax - xmin)/(Mx+1.0)/shape->Nfp, (ymax - ymin)/(My+1)/shape->Nfp );
 
     return mesh;
 }

@@ -25,7 +25,7 @@ void DamBreakWetInit  (SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, 
 PhysDomain2d* SWEInit2d(char *casename, SWESolver *solver, MultiReg2d *mesh){
     PhysDomain2d *phys = GenPhysDomain2d(mesh, 3); /* 3 variables */
 
-    double hmin = 1.0e-4; /* minimum depth */
+    double hmin = 1.0e-3; /* minimum depth */
     /* initialize variables and parameters for various tests */
     if      ( !(memcmp(casename, "ParabolicBowl", 13)) ){
         ParabolicBowlInit(solver, phys, mesh, hmin);

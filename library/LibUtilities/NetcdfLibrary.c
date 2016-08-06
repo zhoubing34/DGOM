@@ -8,7 +8,8 @@ NcDim* DefineNcDim(char *namestr, int len){
     /* check name length */
     size_t namelen = strlen(namestr);
     if (namelen > NCNAMELEN){
-        printf("The name of dimension %s is too long!\n", namestr);
+        printf("The name of dimension %s is longer than the max name length %d.\n",
+               namestr, NCNAMELEN);
         exit(-1);
     }
 

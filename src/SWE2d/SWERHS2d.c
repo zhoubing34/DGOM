@@ -82,10 +82,8 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver, const real frka, const real
             f_rhsQ[id++] = rhsH;
             f_rhsQ[id++] = rhsQx;
             f_rhsQ[id]   = rhsQy;
-
         }
     }
-
     /* DO RECV */
     MPI_Status *instatus  = (MPI_Status*) calloc(nprocs, sizeof(MPI_Status));
     MPI_Waitall(Nmess, mpi_in_requests, instatus);
@@ -139,8 +137,6 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver, const real frka, const real
             Fqxs = EqxM*NXf + GqxM*NYf - Fqxs;
             Fqys = EqyM*NXf + GqyM*NYf - Fqys;
 
-//            printf("Nfp=%2d, Fhs=%f, Fqxs=%f, Fqys=%f\n", k*Nfp*Nfaces+m, Fhs, Fqxs, Fqys);
-
             fluxQ[sk++] = FSc*Fhs;
             fluxQ[sk++] = FSc*Fqxs;
             fluxQ[sk++] = FSc*Fqys;
@@ -162,8 +158,6 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver, const real frka, const real
             f_rhsQ[id++] += rhsH;
             f_rhsQ[id++] += rhsQx;
             f_rhsQ[id]   += rhsQy;
-
-//            printf("Np=%2d, rhsH=%f, rhsQx=%f, rhsQy=%f\n", n+k*Np, rhsH, rhsQx, rhsQy);
         }
     }
 
@@ -172,13 +166,6 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver, const real frka, const real
         f_resQ[n] = frka*f_resQ[n]+fdt*f_rhsQ[n];
         f_Q[n]   += frkb*f_resQ[n];
     }
-
-//    for(k=0;k<K;k++){
-//        for(n=0;n<Np;n++){
-//            int id = Nfields*(n+k*Np);
-//            printf("Np=%2d, h=%f, qx=%f, qy=%f\n", n+k*Np, f_Q[id++], f_Q[id++], f_Q[id]);
-//        }
-//    }
 
     /* make sure all messages went out */
     MPI_Status *outstatus  = (MPI_Status*) calloc(mesh->nprocs, sizeof(MPI_Status));

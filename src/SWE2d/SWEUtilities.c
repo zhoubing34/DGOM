@@ -9,11 +9,11 @@ void SWENumFlux2d(SWESolver *solver, real nx, real ny,
     qnP =  nx*qxP + ny*qyP;
     qvM = -ny*qxM + nx*qyM;
     qvP = -ny*qxP + nx*qyP;
-    real EhM,EqxM,EqyM,EhP,EqxP,EqyP;
-    real GhM,GqxM,GqyM,GhP,GqxP,GqyP;
+    real EhM,EqnM,EqvM,EhP,EqnP,EqvP;
+    real GhM,GqnM,GqvM,GhP,GqnP,GqvP;
 
-    SWEFlux(solver, hM, qnM, qvM, &EhM, &EqxM, &EqyM, &GhM, &GqxM, &GqyM);
-    SWEFlux(solver, hP, qnP, qvP, &EhP, &EqxP, &EqyP, &GhP, &GqxP, &GqyP);
+    SWEFlux(solver, hM, qnM, qvM, &EhM, &EqnM, &EqvM, &GhM, &GqnM, &GqvM);
+    SWEFlux(solver, hP, qnP, qvP, &EhP, &EqnP, &EqvP, &GhP, &GqnP, &GqvP);
 
     /* calculation of wave speed */
     real sM, sP;
@@ -24,7 +24,7 @@ void SWENumFlux2d(SWESolver *solver, real nx, real ny,
     if( (hM>hmin) & (hP>hmin) ){
         unM=qnM/hM;
         unP=qnP/hP;
-        us = (real)(0.5*(unM + unP) + sqrt(gra*hM) - sqrt(gra*hP));
+        us = (real)(0.5*(unM + unP)   + sqrt(gra*hM)   - sqrt(gra*hP));
         cs = (real)(0.5*(sqrt(gra*hM) + sqrt(gra*hP) ) + 0.25*(unM - unP));
 
         sM = (real)min(unM-sqrt(gra*hM), us-cs);
@@ -46,13 +46,13 @@ void SWENumFlux2d(SWESolver *solver, real nx, real ny,
     /* HLL function */
     real Fhn,Fqxn,Fqyn;
     if ( (sM>=0) & (sP>0) ){
-        Fhn = EhM; Fqxn = EqxM; Fqyn = EqyM;
+        Fhn = EhM; Fqxn = EqnM; Fqyn = EqvM;
     }else if((sM<0) & (sP>0)){
         Fhn  = (sP*EhM  - sM*EhP  + sM*sP*(hP  - hM ))/(sP - sM);
-        Fqxn = (sP*EqxM - sM*EqxP + sM*sP*(qxP - qxM))/(sP - sM);
-        Fqyn = (sP*EqyM - sM*EqyP + sM*sP*(qyP - qyM))/(sP - sM);
+        Fqxn = (sP*EqnM - sM*EqnP + sM*sP*(qnP - qnM))/(sP - sM);
+        Fqyn = (sP*EqvM - sM*EqvP + sM*sP*(qvP - qvM))/(sP - sM);
     }else if( (sM<0)&(sP<=0) ){
-        Fhn = EhP; Fqxn = EqxP; Fqyn = EqyP;
+        Fhn = EhP; Fqxn = EqnP; Fqyn = EqvP;
     }else if( (sM==0) & (sP==0) ){
         Fhn = 0; Fqxn = 0; Fqyn = 0;
     }else{
@@ -70,8 +70,6 @@ void SWENumFlux2d(SWESolver *solver, real nx, real ny,
     *Fhs  = Fhn;
     *Fqxs = nx*Fqxn - ny*Fqyn;
     *Fqys = ny*Fqxn + nx*Fqyn;
-
-//    return 0;
 }
 
 /**

@@ -28,13 +28,13 @@ double SWERun2d(PhysDomain2d *phys, SWESolver *solver, NcFile *outfile){
     /* time step loop  */
     while (time<ftime){
         dt = SWEPredictDt(phys, solver, 0.3);
-//        dt = 0.1;
         if(dt<dtmin) {dt=dtmin;}
         /* adjust final step to end exactly at FinalTime */
         if (time+dt > ftime) { dt = ftime-time; }
 
-        if(!procid)
+        if(!procid){
             printf("Process:%f, dt:%f\n", time/ftime, dt);
+        }
 
         for (INTRK=1; INTRK<=5; ++INTRK) {
             /* compute rhs of equations */
@@ -44,23 +44,6 @@ double SWERun2d(PhysDomain2d *phys, SWESolver *solver, NcFile *outfile){
 
             SWERHS2d(phys, solver, fa, fb, fdt);
             SLLoc2d(phys, 1.0);
-
-//            int k,n;
-//            int K = phys->mesh->K, Nfields=phys->Nfields, Np=phys->mesh->stdcell->Np;
-//            real *f_Q  = phys->f_Q;
-//            real *f_H  = (real*) calloc(K*Np, sizeof(real));
-//            real *f_Qx = (real*) calloc(K*Np, sizeof(real));
-//            real *f_Qy = (real*) calloc(K*Np, sizeof(real));
-//
-//            printf("finish limiting\n");
-//            for(k=0;k<K;k++){
-//                for(n=0;n<Np;n++){
-//                    int id = (n+k*Np);
-//                    f_H [id] = f_Q[id*Nfields  ];
-//                    f_Qx[id] = f_Q[id*Nfields+1];
-//                    f_Qy[id] = f_Q[id*Nfields+2];
-//                }
-//            }
             PositivePreserving(phys, solver);
         }
 
@@ -75,7 +58,6 @@ double SWERun2d(PhysDomain2d *phys, SWESolver *solver, NcFile *outfile){
 
     return time_total;
 }
-
 
 void RK45_Coeff(double *rk4a, double *rk4b, double *rk4c){
     /* low storage RK coefficients */

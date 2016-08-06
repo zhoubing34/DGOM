@@ -32,11 +32,13 @@ int main(int argc, char **argv){
             /* initial value assignment */
             if(k<=1){
                 phys->f_Q[ind++] = 10.0;
+                phys->f_Q[ind++] = 2.0;
+                phys->f_Q[ind++] = 0;
             }else{
                 phys->f_Q[ind++] = 2.0;
+                phys->f_Q[ind++] = 1.0;
+                phys->f_Q[ind++] = 0;
             }
-            phys->f_Q[ind++] = 0;
-            phys->f_Q[ind++] = 0;
         }
     }
 

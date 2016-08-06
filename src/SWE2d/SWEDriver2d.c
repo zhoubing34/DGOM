@@ -14,14 +14,13 @@
  * \end{array} \end{equation} \f]
  *
  * Usages:
- * Use the 2 order basis with uniform mesh of 80 and 60 elements on x and y coordinate for test case ParabolicBowl :
+ * Use the 2 order basis with an uniform mesh of 80 and 60 elements along x and y coordinate respectively
+ * for the ParabolicBowl test case:
  *
  *     mpirun -n 2 -host localhost ./SWE2D 2 80 60 tri ParabolicBowl
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
- *
- * @todo
  *
  */
 
@@ -55,7 +54,8 @@ int main(int argc, char **argv){
     }else if( !(memcmp(argv[4], "quad", 4)) ){
         shape = GenStdQuadEle(N);
     }else{
-        printf("Wrong mesh type: %s\n", argv[4]);
+        printf("Wrong mesh type: %s.\n"
+                       "The input should be either \'tri\' or \'quad\'.\n", argv[4]);
         MPI_Finalize(); exit(1);
     }
 

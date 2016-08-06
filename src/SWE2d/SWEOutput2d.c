@@ -13,23 +13,23 @@ NcFile* SWEOutput(PhysDomain2d *phys, SWESolver *solver){
     NcDim **dimarray;
     NcVar **vararray;
 
-    int ndim = 2;
-    dimarray = (NcDim**) calloc(ndim, sizeof(NcDim*));
+    int ndim    = 2;
+    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = ne;
     dimarray[1] = np;
-    NcVar *x   = DefineNcVar("x", ndim, dimarray, "double");
-    NcVar *y   = DefineNcVar("y", ndim, dimarray, "double");
+    NcVar *x   = DefineNcVar("x",   ndim, dimarray, "double");
+    NcVar *y   = DefineNcVar("y",   ndim, dimarray, "double");
     NcVar *bot = DefineNcVar("bot", ndim, dimarray, "double");
     free(dimarray);
 
-    ndim = 1;
-    dimarray = (NcDim**) calloc(ndim, sizeof(NcDim*));
+    ndim        = 1;
+    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = t;
     NcVar *time = DefineNcVar("time", ndim, dimarray, "double");
     free(dimarray);
 
-    ndim = 3;
-    dimarray = (NcDim**) calloc(ndim, sizeof(NcDim*));
+    ndim        = 3;
+    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = t;    /* inner loop */
     dimarray[1] = ne;
     dimarray[2] = np;
@@ -39,8 +39,8 @@ NcFile* SWEOutput(PhysDomain2d *phys, SWESolver *solver){
     free(dimarray);
 
     /* define files */
-    ndim = 3;
-    dimarray = (NcDim**) calloc(ndim, sizeof(NcDim*));
+    ndim        = 3;
+    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = np;
     dimarray[1] = ne;
     dimarray[2] = t;
