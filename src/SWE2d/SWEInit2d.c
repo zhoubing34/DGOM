@@ -1,8 +1,8 @@
 #include "SWEDriver2d.h"
 
-void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);
-void DamBreakDryInit  (SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);
-void DamBreakWetInit  (SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);
+void ParabolicBowlInit2d(SWE_Solver2d *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);
+void DamBreakDryInit2d(SWE_Solver2d *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);
+void DamBreakWetInit2d(SWE_Solver2d *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);
 
 /**
  * @brief
@@ -22,17 +22,17 @@ void DamBreakWetInit  (SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, 
  * phys | PhysDomain2d |
  *
  */
-PhysDomain2d* SWEInit2d(char *casename, SWESolver *solver, MultiReg2d *mesh){
+PhysDomain2d* SWE_Init2d(char *casename, SWE_Solver2d *solver, MultiReg2d *mesh){
     PhysDomain2d *phys = GenPhysDomain2d(mesh, 3); /* 3 variables */
 
     double hmin = 1.0e-3; /* minimum depth */
     /* initialize variables and parameters for various tests */
     if      ( !(memcmp(casename, "ParabolicBowl", 13)) ){
-        ParabolicBowlInit(solver, phys, mesh, hmin);
+        ParabolicBowlInit2d(solver, phys, mesh, hmin);
     }else if( !(memcmp(casename, "DamBreakDry"  , 11)) ){
-        DamBreakDryInit(solver, phys, mesh, hmin);
+        DamBreakDryInit2d(solver, phys, mesh, hmin);
     }else if( !(memcmp(casename, "DamBreakWet"  , 11)) ){
-        DamBreakWetInit(solver, phys, mesh, hmin);
+        DamBreakWetInit2d(solver, phys, mesh, hmin);
     }else{
         printf("Wrong name of test case: %s\n", casename);
         MPI_Finalize(); exit(1);
@@ -41,7 +41,7 @@ PhysDomain2d* SWEInit2d(char *casename, SWESolver *solver, MultiReg2d *mesh){
     return phys;
 }
 
-void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin){
+void ParabolicBowlInit2d(SWE_Solver2d *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin){
     double alpha = 1.6e-7;
     double w     = sqrt(8.0*solver->gra*alpha);
     double T     = 2*M_PI/w;
@@ -79,7 +79,7 @@ void ParabolicBowlInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, 
     }
 }
 
-void DamBreakDryInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin){
+void DamBreakDryInit2d(SWE_Solver2d *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin){
     StdRegions2d *shape = mesh->stdcell;
     double damPosition  = 500.0;
 
@@ -118,7 +118,7 @@ void DamBreakDryInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, do
 }
 
 
-void DamBreakWetInit(SWESolver *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin){
+void DamBreakWetInit2d(SWE_Solver2d *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin){
     StdRegions2d *shape = mesh->stdcell;
     double damPosition  = 500.0;
 

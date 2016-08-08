@@ -1,6 +1,6 @@
 #include "SWEDriver2d.h"
 
-void SWERHS2d(PhysDomain2d *phys, SWESolver *solver, const real frka, const real frkb, const real fdt){
+void SWERHS2d(PhysDomain2d *phys, SWE_Solver2d *solver, const real frka, const real frkb, const real fdt){
 
     /* registers and temporary */
     register unsigned int k, geoid=0;
@@ -53,8 +53,8 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver, const real frka, const real
         }
 
         /* flux terms */
-        SWEFlux2d(phys, solver, Qk, Eflx, Gflx);
-        SWESource(phys, solver, k,  vgeo+k*Np*4, Qk, Sour);
+        SWE_ElementalFlux2d(phys, solver, Qk, Eflx, Gflx);
+        SWE_ElementalSource2d(phys, solver, k, vgeo + k * Np * 4, Qk, Sour);
 
         for(n=0;n<Np;++n){
 
@@ -130,8 +130,8 @@ void SWERHS2d(PhysDomain2d *phys, SWESolver *solver, const real frka, const real
             real EhM,EqxM,EqyM;
             real GhM,GqxM,GqyM;
 
-            SWEFlux(solver, hM, qxM, qyM, &EhM, &EqxM, &EqyM, &GhM, &GqxM, &GqyM);
-            SWENumFlux2d(solver, NXf, NYf, hM, hP, qxM, qxP, qyM, qyP, &Fhs, &Fqxs, &Fqys);
+            SWE_NodalFlux2d(solver, hM, qxM, qyM, &EhM, &EqxM, &EqyM, &GhM, &GqxM, &GqyM);
+            SWE_NumFlux2d(solver, NXf, NYf, hM, hP, qxM, qxP, qyM, qyP, &Fhs, &Fqxs, &Fqys);
 
             Fhs  = EhM*NXf  + GhM*NYf  - Fhs;
             Fqxs = EqxM*NXf + GqxM*NYf - Fqxs;

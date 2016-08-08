@@ -134,7 +134,7 @@ void SLLoc2d(PhysDomain2d *phys, double beta){
             qpx[k] *= psi;
             qpy[k] *= psi;
 
-            /* reconstruction */
+            /* reconstruction of each element */
             for(i=0;i<Np;i++){
                 ind = (k*Np + i)*Nfields + fld;
                 real dx = (real)(mesh->x[k][i] - xc);
@@ -144,7 +144,7 @@ void SLLoc2d(PhysDomain2d *phys, double beta){
             }
         }
     }
-
+    /* deallocation */
     free(qmean);
     free(qpx);  free(qpy);
     free(qin);  free(qout);

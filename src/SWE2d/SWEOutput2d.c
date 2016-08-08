@@ -1,6 +1,6 @@
 #include "SWEDriver2d.h"
 
-NcFile* SWEOutput(PhysDomain2d *phys, SWESolver *solver){
+NcFile* SWE_SetNcOutput2d(PhysDomain2d *phys, SWE_Solver2d *solver){
     MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
 
@@ -13,6 +13,7 @@ NcFile* SWEOutput(PhysDomain2d *phys, SWESolver *solver){
     NcDim **dimarray;
     NcVar **vararray;
 
+    /* for variables, the inner loop comes the last */
     int ndim    = 2;
     dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = ne;
@@ -68,31 +69,26 @@ NcFile* SWEOutput(PhysDomain2d *phys, SWESolver *solver){
 }
 
 
-void StoreVar(NcFile *file, PhysDomain2d *phys, int outStep, double time){
+void SWE_StoreVar2d(NcFile *file, PhysDomain2d *phys, int outStep, double time){
 
     int ret;
     MPI_Offset start_v[3], count_v[3];
     MPI_Offset start_t, count_t;
-    MultiReg2d   *mesh  = phys->mesh;
+    MultiReg2d *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
 
     /* put time */
     start_t = outStep; // start index
     count_t = 1;       // length
-    ret = ncmpi_put_vara_double_all(
-            file->id, file->vararray[2]->id,
-            &start_t, &count_t, &time);
+    ret = ncmpi_put_vara_double_all(file->id, file->vararray[2]->id, &start_t, &count_t, &time);
     NC_ERROR;
 
     /* put var h */
-    start_v[0] = outStep;
-    start_v[1] = 0;
-    start_v[2] = 0;
-    count_v[0] = 1;
-    count_v[1] = mesh->K;
-    count_v[2] = shape->Np;
+    start_v[0] = outStep;   start_v[1] = 0;         start_v[2] = 0;
+    count_v[0] = 1;         count_v[1] = mesh->K;   count_v[2] = shape->Np;
 
     real *var = (real *) malloc(mesh->K*shape->Np*sizeof(real));
+    /* put variable h */
     int k,i,ind,sk=0, Nfields=phys->Nfields;
     for (k=0;k<mesh->K;k++){
         for (i=0;i<shape->Np;i++){
@@ -101,12 +97,10 @@ void StoreVar(NcFile *file, PhysDomain2d *phys, int outStep, double time){
             var[sk++] = phys->f_Q[ind];
         }
     }
-    ret = ncmpi_put_vara_float_all(
-            file->id, file->vararray[3]->id,
-            start_v, count_v, var);
+    ret = ncmpi_put_vara_float_all(file->id, file->vararray[3]->id, start_v, count_v, var);
     NC_ERROR;
 
-    /* put var qx */
+    /* put variable qx */
     sk = 0;
     for (k=0;k<mesh->K;k++){
         for (i=0;i<shape->Np;i++){
@@ -114,12 +108,10 @@ void StoreVar(NcFile *file, PhysDomain2d *phys, int outStep, double time){
             var[sk++] = phys->f_Q[ind];
         }
     }
-    ret = ncmpi_put_vara_float_all(
-            file->id, file->vararray[4]->id,
-            start_v, count_v, var);
+    ret = ncmpi_put_vara_float_all(file->id, file->vararray[4]->id, start_v, count_v, var);
     NC_ERROR;
 
-    /* put var qy */
+    /* put variable qy */
     sk = 0;
     for (k=0;k<mesh->K;k++){
         for (i=0;i<shape->Np;i++){
@@ -127,9 +119,7 @@ void StoreVar(NcFile *file, PhysDomain2d *phys, int outStep, double time){
             var[sk++] = phys->f_Q[ind];
         }
     }
-    ret = ncmpi_put_vara_float_all(
-            file->id, file->vararray[5]->id,
-            start_v, count_v, var);
+    ret = ncmpi_put_vara_float_all(file->id, file->vararray[5]->id, start_v, count_v, var);
     NC_ERROR;
 
 }

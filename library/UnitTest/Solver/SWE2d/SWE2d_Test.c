@@ -9,10 +9,10 @@
 /* Private function */
 void PrintVec(char *message, real *vec, int n);
 void PrintVar(PhysDomain2d *phys);
-void FluxTermTest(PhysDomain2d *phys, SWESolver *solver);
-void NumFLuxTest(PhysDomain2d *phys, SWESolver *solver);
-void VolIntegralTest(PhysDomain2d *phys, SWESolver *solver);
-void SurfIntegralTest(PhysDomain2d *phys, SWESolver *solver);
+void FluxTermTest(PhysDomain2d *phys, SWE_Solver2d *solver);
+void NumFLuxTest(PhysDomain2d *phys, SWE_Solver2d *solver);
+void VolIntegralTest(PhysDomain2d *phys, SWE_Solver2d *solver);
+void SurfIntegralTest(PhysDomain2d *phys, SWE_Solver2d *solver);
 
 int main(int argc, char **argv){
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv){
     PrintVar(phys);
 
     /* solver */
-    SWESolver *solver = (SWESolver*) calloc(1, sizeof(SWESolver));
+    SWE_Solver2d *solver = (SWE_Solver2d*) calloc(1, sizeof(SWE_Solver2d));
     solver->hcrit = 1.0e-4;
     solver->gra   = 9.81;
     solver->bot   = BuildMatrix(triMesh->K, tri->Np); /* set bottom topography */
@@ -66,7 +66,7 @@ int main(int argc, char **argv){
     return 0;
 }
 
-void SurfIntegralTest(PhysDomain2d *phys, SWESolver *solver){
+void SurfIntegralTest(PhysDomain2d *phys, SWE_Solver2d *solver){
 
     register unsigned int k;
 
@@ -146,8 +146,8 @@ void SurfIntegralTest(PhysDomain2d *phys, SWESolver *solver){
             real EhM,EqxM,EqyM;
             real GhM,GqxM,GqyM;
 
-            SWEFlux(solver, hM, qxM, qyM, &EhM, &EqxM, &EqyM, &GhM, &GqxM, &GqyM);
-            SWENumFlux2d(solver, NXf, NYf, hM, hP, qxM, qxP, qyM, qyP, &Fhs, &Fqxs, &Fqys);
+            SWE_NodalFlux2d(solver, hM, qxM, qyM, &EhM, &EqxM, &EqyM, &GhM, &GqxM, &GqyM);
+            SWE_NumFlux2d(solver, NXf, NYf, hM, hP, qxM, qxP, qyM, qyP, &Fhs, &Fqxs, &Fqys);
 
             Fhs  = EhM*NXf  + GhM*NYf  - Fhs;
             Fqxs = EqxM*NXf + GqxM*NYf - Fqxs;
@@ -187,7 +187,7 @@ void SurfIntegralTest(PhysDomain2d *phys, SWESolver *solver){
     free(mpi_in_requests);
 }
 
-void VolIntegralTest(PhysDomain2d *phys, SWESolver *solver){
+void VolIntegralTest(PhysDomain2d *phys, SWE_Solver2d *solver){
 
     /* registers and temporary */
     register unsigned int k, geoid=0;
@@ -225,8 +225,8 @@ void VolIntegralTest(PhysDomain2d *phys, SWESolver *solver){
         }
 
         /* flux terms */
-        SWEFlux2d(phys, solver, Qk, Eflx, Gflx);
-        SWESource(phys, solver, k,  vgeo+k*Np*4, Qk, Sour);
+        SWE_ElementalFlux2d(phys, solver, Qk, Eflx, Gflx);
+        SWE_ElementalSource2d(phys, solver, k, vgeo + k * Np * 4, Qk, Sour);
 
         for(n=0;n<Np;++n){
 
@@ -317,7 +317,7 @@ void PrintVec(char *message, real *vec, int n){
     printf("\n");
 }
 
-void FluxTermTest(PhysDomain2d *phys, SWESolver *solver){
+void FluxTermTest(PhysDomain2d *phys, SWE_Solver2d *solver){
 
     MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
@@ -337,7 +337,7 @@ void FluxTermTest(PhysDomain2d *phys, SWESolver *solver){
             Qk[m] = qpt[m];
         }
 
-        SWEFlux2d(phys, solver, Qk, Eflx, Gflx);
+        SWE_ElementalFlux2d(phys, solver, Qk, Eflx, Gflx);
         int sk=0;
         for(m=0;m<Np;m++){
             printf("Eh=%f, Eqx=%f, Eqy=%f, Gh=%f, Gqx=%f, Gqy=%f\n",
@@ -347,7 +347,7 @@ void FluxTermTest(PhysDomain2d *phys, SWESolver *solver){
     }
 }
 
-void NumFLuxTest(PhysDomain2d *phys, SWESolver *solver){
+void NumFLuxTest(PhysDomain2d *phys, SWE_Solver2d *solver){
 
     MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
@@ -397,9 +397,9 @@ void NumFLuxTest(PhysDomain2d *phys, SWESolver *solver){
             }
 
 //            printf("ele:%d, Nfp=%d, ", k, m);
-            SWENumFlux2d(solver, NXf, NYf,
-                         hM, hP, qxM, qxP, qyM, qyP,
-                         &Fhs, &Fqxs, &Fqys);
+            SWE_NumFlux2d(solver, NXf, NYf,
+                          hM, hP, qxM, qxP, qyM, qyP,
+                          &Fhs, &Fqxs, &Fqys);
 
             fluxQ[sk++] = FSc*Fhs;
             fluxQ[sk++] = FSc*Fqxs;

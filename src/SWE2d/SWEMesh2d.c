@@ -1,7 +1,7 @@
 #include "SWEDriver2d.h"
 
-MultiReg2d* ParabolicBowlMesh(SWESolver *solver, StdRegions2d *shape, int Mx, int My);
-MultiReg2d* DamBreakMesh  (SWESolver *solver, StdRegions2d *shape, int Mx, int My);
+MultiReg2d* ParabolicBowlMesh2d(SWE_Solver2d *solver, StdRegions2d *shape, int Mx, int My);
+MultiReg2d* DamBreakMesh2d     (SWE_Solver2d *solver, StdRegions2d *shape, int Mx, int My);
 
 /**
  * @brief
@@ -22,18 +22,17 @@ MultiReg2d* DamBreakMesh  (SWESolver *solver, StdRegions2d *shape, int Mx, int M
  * -------- |----------|----------------------
  * mesh     | MultiReg2d* | mesh object
  *
- *
  */
-MultiReg2d* SWEMesh2d(char *casename, SWESolver *solver, StdRegions2d *shape, int Mx, int My){
+MultiReg2d* SWE_Mesh2d(char *casename, SWE_Solver2d *solver, StdRegions2d *shape, int Mx, int My){
     MultiReg2d *mesh;
 
     /* setup mesh for various tests */
     if      ( !(memcmp(casename, "ParabolicBowl", 13)) ){
-        mesh = ParabolicBowlMesh(solver, shape, Mx, My);
+        mesh = ParabolicBowlMesh2d(solver, shape, Mx, My);
     }else if( !(memcmp(casename, "DamBreakDry"  , 11)) ){
-        mesh = DamBreakMesh(solver, shape, Mx, My);
+        mesh = DamBreakMesh2d(solver, shape, Mx, My);
     }else if( !(memcmp(casename, "DamBreakWet"  , 11)) ){
-        mesh = DamBreakMesh(solver, shape, Mx, My);
+        mesh = DamBreakMesh2d(solver, shape, Mx, My);
     }else{
         printf("Wrong name of test case: %s\n", casename);
         MPI_Finalize(); exit(1);
@@ -42,7 +41,7 @@ MultiReg2d* SWEMesh2d(char *casename, SWESolver *solver, StdRegions2d *shape, in
     return mesh;
 }
 
-MultiReg2d* ParabolicBowlMesh(SWESolver *solver, StdRegions2d *shape, int Mx, int My){
+MultiReg2d* ParabolicBowlMesh2d(SWE_Solver2d *solver, StdRegions2d *shape, int Mx, int My){
     MultiReg2d *mesh;
 
     double xmin = -4000, xmax = 4000;
@@ -97,7 +96,7 @@ MultiReg2d* ParabolicBowlMesh(SWESolver *solver, StdRegions2d *shape, int Mx, in
     return mesh;
 }
 
-MultiReg2d* DamBreakMesh(SWESolver *solver, StdRegions2d *shape, int Mx, int My){
+MultiReg2d* DamBreakMesh2d(SWE_Solver2d *solver, StdRegions2d *shape, int Mx, int My){
     MultiReg2d *mesh;
 
     double xmin = 0,    xmax = 1000;

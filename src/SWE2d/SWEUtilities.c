@@ -1,9 +1,41 @@
 #include "SWEDriver2d.h"
 
-void SWENumFlux2d(SWESolver *solver, real nx, real ny,
-                  real hM, real hP, real qxM, real qxP, real qyM, real qyP,
-                  real *Fhs, real *Fqxs, real *Fqys){
-    /* rotation */
+/* Private function */
+void SWE_HLL2d(SWE_Solver2d *solver, real hM, real hP,
+               real qnM, real qnP, real qvM, real qvP,
+               real *Fhn, real *Fqxn, real *Fqyn);
+
+/**
+ * @brief
+ * Calculate the numerical flux.
+ *
+ * @details
+ * Calculation of the numerical flux, which is the approximation of dual flux term
+ * \f$ \mathbf{n} \cdot \mathbf{F}(U^-, u^+) \f$.
+ *
+ * @param[in] solver
+ * @param[in] nx outward vector on x coordinate
+ * @param[in] ny outward vector on y coordinate
+ * @param[in] hM
+ * @param[in] hP
+ * @param[in] qxM
+ * @param[in] qxP
+ * @param[in] qyM
+ * @param[in] qyP
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * Fhs   | int      |
+ * Fqxs  | object   |
+ * Fqys  | object   |
+ *
+ */
+void SWE_NumFlux2d(SWE_Solver2d *solver, real nx, real ny,
+                   real hM, real hP, real qxM, real qxP, real qyM, real qyP,
+                   real *Fhs, real *Fqxs, real *Fqys){
+    /* rotation of conserve variable */
     real qnM,qnP,qvM,qvP;
     qnM =  nx*qxM + ny*qyM;
     qnP =  nx*qxP + ny*qyP;
@@ -12,8 +44,52 @@ void SWENumFlux2d(SWESolver *solver, real nx, real ny,
     real EhM,EqnM,EqvM,EhP,EqnP,EqvP;
     real GhM,GqnM,GqvM,GhP,GqnP,GqvP;
 
-    SWEFlux(solver, hM, qnM, qvM, &EhM, &EqnM, &EqvM, &GhM, &GqnM, &GqvM);
-    SWEFlux(solver, hP, qnP, qvP, &EhP, &EqnP, &EqvP, &GhP, &GqnP, &GqvP);
+    SWE_NodalFlux2d(solver, hM, qnM, qvM, &EhM, &EqnM, &EqvM, &GhM, &GqnM, &GqvM);
+    SWE_NodalFlux2d(solver, hP, qnP, qvP, &EhP, &EqnP, &EqvP, &GhP, &GqnP, &GqvP);
+
+    /* HLL numerical flux */
+    real Fhn,Fqxn,Fqyn;
+    SWE_HLL2d(solver, hM, hP, qnM, qnP, qvM, qvP, &Fhn, &Fqxn, &Fqyn);
+
+    /* inverse rotation */
+    *Fhs  = Fhn;
+    *Fqxs = nx*Fqxn - ny*Fqyn;
+    *Fqys = ny*Fqxn + nx*Fqyn;
+}
+
+/**
+ * @brief
+ * Calculate the HLL flux function.
+ *
+ * @details
+ * HLL flux function is the approximation of dual flux term
+ *
+ * @param[in] solver
+ * @param[in] hM
+ * @param[in] hP
+ * @param[in] qnM
+ * @param[in] qnP
+ * @param[in] qvM
+ * @param[in] qvP
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * Fhn   | real*    | Numerical flux of variable h
+ * Fqxn  | real*    | Numerical flux of variable qx
+ * Fqyn  | real*    | Numerical flux of variable qy
+ *
+ */
+void SWE_HLL2d(SWE_Solver2d *solver, real hM, real hP,
+               real qnM, real qnP, real qvM, real qvP,
+               real *Fhn, real *Fqxn, real *Fqyn){
+
+    real EhM,EqnM,EqvM,EhP,EqnP,EqvP;
+    real GhM,GqnM,GqvM,GhP,GqnP,GqvP;
+
+    SWE_NodalFlux2d(solver, hM, qnM, qvM, &EhM, &EqnM, &EqvM, &GhM, &GqnM, &GqvM);
+    SWE_NodalFlux2d(solver, hP, qnP, qvP, &EhP, &EqnP, &EqvP, &GhP, &GqnP, &GqvP);
 
     /* calculation of wave speed */
     real sM, sP;
@@ -21,6 +97,7 @@ void SWENumFlux2d(SWESolver *solver, real nx, real ny,
     real hmin = (real) solver->hcrit;
     real us, cs;
     real unM,unP;
+
     if( (hM>hmin) & (hP>hmin) ){
         unM=qnM/hM;
         unP=qnP/hP;
@@ -41,35 +118,25 @@ void SWENumFlux2d(SWESolver *solver, real nx, real ny,
         sM = 0; sP = 0;
     }
 
-//    printf("SM=%f, SP=%f\n", sM, sP);
-
     /* HLL function */
-    real Fhn,Fqxn,Fqyn;
     if ( (sM>=0) & (sP>0) ){
-        Fhn = EhM; Fqxn = EqnM; Fqyn = EqvM;
+        *Fhn = EhM; *Fqxn = EqnM; *Fqyn = EqvM;
     }else if((sM<0) & (sP>0)){
-        Fhn  = (sP*EhM  - sM*EhP  + sM*sP*(hP  - hM ))/(sP - sM);
-        Fqxn = (sP*EqnM - sM*EqnP + sM*sP*(qnP - qnM))/(sP - sM);
-        Fqyn = (sP*EqvM - sM*EqvP + sM*sP*(qvP - qvM))/(sP - sM);
+        *Fhn  = (sP*EhM  - sM*EhP  + sM*sP*(hP  - hM ))/(sP - sM);
+        *Fqxn = (sP*EqnM - sM*EqnP + sM*sP*(qnP - qnM))/(sP - sM);
+        *Fqyn = (sP*EqvM - sM*EqvP + sM*sP*(qvP - qvM))/(sP - sM);
     }else if( (sM<0)&(sP<=0) ){
-        Fhn = EhP; Fqxn = EqnP; Fqyn = EqvP;
+        *Fhn = EhP; *Fqxn = EqnP; *Fqyn = EqvP;
     }else if( (sM==0) & (sP==0) ){
-        Fhn = 0; Fqxn = 0; Fqyn = 0;
+        *Fhn = 0; *Fqxn = 0; *Fqyn = 0;
     }else{
         printf("Wrong status of numerical wave speed!\n");
         printf("hM  = %f, hP  = %f, hmin = %f\n", hM, hP, hmin);
         printf("qnM = %f, qnP = %f\n", qnM, qnP);
         printf("sM  = %f, sP  = %f\n", sM, sP);
-        printf("unM = %f, unP = %f\n", unM, unP);
         printf("us  = %f, cs  = %f\n", us, cs);
-        printf("qxP = %f, qyP = %f\n", qxP, qyP);
         exit(-2);
     }
-
-    /* inverse rotation */
-    *Fhs  = Fhn;
-    *Fqxs = nx*Fqxn - ny*Fqyn;
-    *Fqys = ny*Fqxn + nx*Fqyn;
 }
 
 /**
@@ -82,21 +149,20 @@ void SWENumFlux2d(SWESolver *solver, real nx, real ny,
  * -gh\frac{\partial z}{\partial x} \cr
  * -gh\frac{\partial z}{\partial y} \end{bmatrix}\f]
  *
- *
  * @param[in] phys
  * @param[in] solver
- * @param[in] vgeo
- * @param[in] Qk
+ * @param[in] vgeo  volume geometric coefficients of element: drdx, drdy, dsdx, dsdy
+ * @param[in] Qk    variables in element
  *
  * @return
  * return values:
  * name     | type     | description of value
  * -------- |----------|----------------------
- * Sour   | real*  | source term
+ * soureTerm| real*    | source term
  *
  */
-void SWESource(PhysDomain2d *phys, SWESolver *solver,
-               int k, real *vgeo, real *Qk, real *Sour){
+void SWE_ElementalSource2d(PhysDomain2d *phys, SWE_Solver2d *solver,
+                           int k, real *vgeo, real *Qk, real *soureTerm){
 
     MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
@@ -142,16 +208,16 @@ void SWESource(PhysDomain2d *phys, SWESolver *solver,
             }
 
             int ind = n * Nfields;
-            Sour[ind++] = Sh;
-            Sour[ind++] = Sqx;
-            Sour[ind  ] = Sqy;
+            soureTerm[ind++] = Sh;
+            soureTerm[ind++] = Sqx;
+            soureTerm[ind  ] = Sqy;
         }
     }else{  /* dry element */
         for (n=0;n<Np;++n) {
             int ind = n*Nfields;
-            Sour[ind++] = 0;
-            Sour[ind++] = 0;
-            Sour[ind  ] = 0;
+            soureTerm[ind++] = 0;
+            soureTerm[ind++] = 0;
+            soureTerm[ind  ] = 0;
         }
     }
 }
@@ -166,7 +232,6 @@ void SWESource(PhysDomain2d *phys, SWESolver *solver,
  * \frac{q_xq_y}{h}\end{bmatrix} \quad G = \begin{bmatrix}q_y \cr \frac{q_xq_y}{h} \cr
  * \frac{q_y^2}{h} + \frac{1}{2}gh^2 \end{bmatrix} \f]
  *
- *
  * @param[in] phys
  * @param[in] solver
  * @param[in] Qk        variables in element
@@ -179,7 +244,7 @@ void SWESource(PhysDomain2d *phys, SWESolver *solver,
  * Gflx     | real*    | flux in the y direction
  *
  */
-void SWEFlux2d(PhysDomain2d *phys, SWESolver *solver, real *Qk, real *Eflx, real *Gflx){
+void SWE_ElementalFlux2d(PhysDomain2d *phys, SWE_Solver2d *solver, real *Qk, real *Eflx, real *Gflx){
 
     MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
@@ -195,7 +260,7 @@ void SWEFlux2d(PhysDomain2d *phys, SWESolver *solver, real *Qk, real *Eflx, real
         real Eh,Eqx,Eqy;
         real Gh,Gqx,Gqy;
 
-        SWEFlux(solver, h, qx, qy, &Eh, &Eqx, &Eqy, &Gh, &Gqx, &Gqy);
+        SWE_NodalFlux2d(solver, h, qx, qy, &Eh, &Eqx, &Eqy, &Gh, &Gqx, &Gqy);
 
         Eflx[xk++] = Eh;
         Eflx[xk++] = Eqx;
@@ -208,10 +273,38 @@ void SWEFlux2d(PhysDomain2d *phys, SWESolver *solver, real *Qk, real *Eflx, real
 
 }
 
-void SWEFlux(SWESolver *solver,
-             real h,   real qx,   real qy,
-             real *Eh, real *Eqx, real *Eqy,
-             real *Gh, real *Gqx, real *Gqy){
+/**
+ * @brief
+ * Calculate the flux term of each node.
+ *
+ * @details
+ * The function returns the flux term on each node with
+ * \f[ E = \begin{bmatrix} E_h \cr E_qx \cr E_qy \end{bmatrix} =
+ * \begin{bmatrix} q_x \cr \frac{q_x^2}{h}+\frac{1}{2}gh^2 \cr \frac{q_xq_y}{h} \end{bmatrix}, \quad
+ * G = \begin{bmatrix} G_h \cr G_qx \cr G_qy \end{bmatrix} =
+ * \begin{bmatrix} q_y \cr \frac{q_xq_y}{h} \cr \frac{q_y^2}{h}+\frac{1}{2}gh^2 \end{bmatrix}\f]
+ *
+ * @param[in] solver
+ * @param[in] h
+ * @param[in] qx
+ * @param[in] qy
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * Eh   | real*   | flux term of h  on x coordinate
+ * Eqx  | real*   | flux term of qx on x coordinate
+ * Eqy  | real*   | flux term of qy on x coordinate
+ * Gh   | real*   | flux term of h  on y coordinate
+ * Gqx  | real*   | flux term of qx on y coordinate
+ * Gqy  | real*   | flux term of qy on y coordinate
+ *
+ */
+void SWE_NodalFlux2d(SWE_Solver2d *solver,
+                     real h, real qx, real qy,
+                     real *Eh, real *Eqx, real *Eqy,
+                     real *Gh, real *Gqx, real *Gqy){
 
     real hcrit = (real)solver->hcrit;
     real gra  = (real)solver->gra;
@@ -245,10 +338,10 @@ void SWEFlux(SWESolver *solver,
  * return values:
  * name     | type     | description of value
  * -------- |----------|----------------------
- * dt   | double      | delta time
+ * dt   | double | delta time
  *
  */
-double SWEPredictDt(PhysDomain2d *phys, SWESolver *solver, double CFL){
+double SWE_PredictDt2d(PhysDomain2d *phys, SWE_Solver2d *solver, double CFL){
     double dt   = 1.0e4;
     double c    = 0;
     double gra  = solver->gra;
@@ -289,8 +382,25 @@ double SWEPredictDt(PhysDomain2d *phys, SWESolver *solver, double CFL){
     return gdt;
 }
 
-
-void PositivePreserving(PhysDomain2d *phys, SWESolver *solver){
+/**
+ * @brief
+ * Positive preserving operator from Xing and Shu (2010).
+ *
+ * @details
+ * The positive operator will reconstruct the conserve variables in each element
+ * to eliminate the negative water depth.
+ *
+ *
+ * @param[in] solver SWE_Solver2d pointer
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * phys   | PhysDomain2d* | physical struct pointer
+ *
+ */
+void SWE_PositivePreserving2d(PhysDomain2d *phys, SWE_Solver2d *solver){
 
     MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
@@ -298,7 +408,7 @@ void PositivePreserving(PhysDomain2d *phys, SWESolver *solver){
     const int Nfields   = phys->Nfields;
     const int Np        = shape->Np;
     const int K         = mesh->K;
-    double hcrit = solver->hcrit;
+    double    hcrit     = solver->hcrit;
 
     int i,k,ind,sj=0;
 

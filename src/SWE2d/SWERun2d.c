@@ -4,7 +4,7 @@
 void RK45_Coeff(double *, double *, double *);
 
 
-double SWERun2d(PhysDomain2d *phys, SWESolver *solver, NcFile *outfile){
+double SWERun2d(PhysDomain2d *phys, SWE_Solver2d *solver, NcFile *outfile){
 
     /* Runge-Kutta time evaluation coefficient */
     double *rk4a, *rk4b, *rk4c;
@@ -21,13 +21,13 @@ double SWERun2d(PhysDomain2d *phys, SWESolver *solver, NcFile *outfile){
     double  ftime   = solver->FinalTime;
     double  dt;  /* delta time */
     double  dtmin = solver->dtmin;
-    StoreVar(outfile, phys, outstep++, time);
+    SWE_StoreVar2d(outfile, phys, outstep++, time);
 
     double mpitime0 = MPI_Wtime();
 
     /* time step loop  */
     while (time<ftime){
-        dt = SWEPredictDt(phys, solver, 0.3);
+        dt = SWE_PredictDt2d(phys, solver, 0.3);
         if(dt<dtmin) {dt=dtmin;}
         /* adjust final step to end exactly at FinalTime */
         if (time+dt > ftime) { dt = ftime-time; }
@@ -44,12 +44,12 @@ double SWERun2d(PhysDomain2d *phys, SWESolver *solver, NcFile *outfile){
 
             SWERHS2d(phys, solver, fa, fb, fdt);
             SLLoc2d(phys, 1.0);
-            PositivePreserving(phys, solver);
+            SWE_PositivePreserving2d(phys, solver);
         }
 
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
-        StoreVar(outfile, phys, outstep++, time);
+        SWE_StoreVar2d(outfile, phys, outstep++, time);
 
     }
 

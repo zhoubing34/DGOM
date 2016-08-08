@@ -32,19 +32,17 @@ void SWEFinalize(StdRegions2d *shape, MultiReg2d *mesh, PhysDomain2d *phys, NcFi
 
 int main(int argc, char **argv){
 
-    SWESolver *solver = (SWESolver *)malloc(sizeof(SWESolver));
-
-    int procid, nprocs; /* process number */
-
-    MPI_Init(&argc, &argv);                 /* initialize MPI */
-    MPI_Comm_rank(MPI_COMM_WORLD, &procid); /* read process id */
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs); /* read process num */
-
+    SWE_Solver2d *solver = (SWE_Solver2d *)malloc(sizeof(SWE_Solver2d));
     int Mx, My, N;
-    /* get parameters */
+    /* get parameters and offer help hints */
     str2int(argv[1], &N , "Wrong degree input");
     str2int(argv[2], &Mx, "Wrong element number of x coordinate");
     str2int(argv[3], &My, "Wrong element number of y coordinate");
+
+    int procid, nprocs; /* process number */
+    MPI_Init(&argc, &argv);                 /* initialize MPI */
+    MPI_Comm_rank(MPI_COMM_WORLD, &procid); /* read process id */
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs); /* read process num */
 
     /* set stand element */
     StdRegions2d *shape;
@@ -60,11 +58,11 @@ int main(int argc, char **argv){
     }
 
     /* get mesh and physical domain */
-    MultiReg2d   *mesh = SWEMesh2d(argv[5], solver, shape, Mx, My);
-    PhysDomain2d *phys = SWEInit2d(argv[5], solver, mesh);
+    MultiReg2d   *mesh = SWE_Mesh2d(argv[5], solver, shape, Mx, My);
+    PhysDomain2d *phys = SWE_Init2d(argv[5], solver, mesh);
 
     /* set output file */
-    NcFile *outfile = SWEOutput(phys, solver);
+    NcFile *outfile = SWE_SetNcOutput2d(phys, solver);
 
     SWERun2d(phys, solver, outfile);
 
