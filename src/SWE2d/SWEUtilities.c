@@ -141,7 +141,7 @@ void SWE_HLL2d(SWE_Solver2d *solver, real hM, real hP,
 
 /**
  * @brief
- * Calculation of the source term.
+ * Calculation of the source term for element.
  *
  * @details
  * The source term

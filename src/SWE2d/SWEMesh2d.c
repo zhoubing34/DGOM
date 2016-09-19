@@ -121,7 +121,7 @@ MultiReg2d* DamBreakMesh2d(SWE_Solver2d *solver, StdRegions2d *shape, int Mx, in
         case 4:
             GenParallelUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax,
                                        procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
-            mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);;
+            mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
             break;
         default:
             printf("Mesh Generator error! Wrong number of element vertex: %d\n", shape->Nv);

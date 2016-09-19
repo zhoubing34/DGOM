@@ -62,6 +62,9 @@ void SLLoc2d(PhysDomain2d *phys, double beta){
             qmean[k] /= area[k];
         }
 
+        int Nmess;
+        FetchParmapEle2d(phys, qmean, qin, qout, mpi_out_requests, mpi_in_requests, &Nmess);
+
         /* get the unlimited gradient */
         for (k=0; k<K; k++) {
             qpx[k] = 0.0;
@@ -69,8 +72,8 @@ void SLLoc2d(PhysDomain2d *phys, double beta){
 
             for (f = 0; f < Nfaces; f++) {
                 /* vertex index */
-                int l1 = shape->Fmask[f][0];
-                int l2 = shape->Fmask[f][Nfp - 1];
+                int l1 = shape->Fmask[f][0];       /* local element indices */
+                int l2 = shape->Fmask[f][Nfp - 1]; /* local element indices */
                 int v1 = (k * Np + l1) * Nfields + fld;
                 int v2 = (k * Np + l2) * Nfields + fld;
                 /* mean value on edge */
@@ -86,8 +89,6 @@ void SLLoc2d(PhysDomain2d *phys, double beta){
             qpy[k] /= area[k];
         }
 
-        int Nmess;
-        FetchParmapEle2d(phys, qmean, qin, qout, mpi_out_requests, mpi_in_requests, &Nmess);
         MPI_Waitall(Nmess, mpi_out_requests, outstatus);
         MPI_Waitall(Nmess, mpi_in_requests, instatus);
 
