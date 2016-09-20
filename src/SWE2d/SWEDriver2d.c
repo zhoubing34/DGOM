@@ -1,6 +1,9 @@
 /**
+ * @file
+ * SWEDriver2d.c
+ *
  * @brief
- * Two dimensional shallow water equations
+ * Two dimensional shallow water equations.
  *
  * @details
  * Two dimensional shallow water equations
@@ -14,8 +17,8 @@
  * \end{array} \end{equation} \f]
  *
  * Usages:
- * Use the 2 order basis with an uniform mesh of 80 and 60 elements along x and y coordinate respectively
- * for the ParabolicBowl test case:
+ * Use the 2 order basis with an uniform mesh of 80 and 60 elements along x and y coordinate respectively.
+ * For the ParabolicBowl test case:
  *
  *     mpirun -n 2 -host localhost ./SWE2D 2 80 60 tri ParabolicBowl
  *
@@ -27,78 +30,35 @@
 #include "SWEDriver2d.h"
 
 /* private function */
-void str2int(char *str, int *N, char* errmessage);
-void SWEFinalize(StdRegions2d *shape, MultiReg2d *mesh, PhysDomain2d *phys, NcFile *file);
+void SWEFinalize(MultiReg2d *mesh, PhysDomain2d *phys, NcFile *file);
 
 int main(int argc, char **argv){
+    /* initialize MPI */
+    MPI_Init(&argc, &argv);
 
+    /* allocate solver */
     SWE_Solver2d *solver = (SWE_Solver2d *)malloc(sizeof(SWE_Solver2d));
-    int Mx, My, N;
-    /* get parameters and offer help hints */
-    str2int(argv[1], &N , "Wrong degree input");
-    str2int(argv[2], &Mx, "Wrong element number of x coordinate");
-    str2int(argv[3], &My, "Wrong element number of y coordinate");
-
-    int procid, nprocs; /* process number */
-    MPI_Init(&argc, &argv);                 /* initialize MPI */
-    MPI_Comm_rank(MPI_COMM_WORLD, &procid); /* read process id */
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs); /* read process num */
-
-    /* set stand element */
-    StdRegions2d *shape;
-
-    if ( !(memcmp(argv[4], "tri", 3)) ){
-        shape = GenStdTriEle(N);
-    }else if( !(memcmp(argv[4], "quad", 4)) ){
-        shape = GenStdQuadEle(N);
-    }else{
-        printf("Wrong mesh type: %s.\n"
-                       "The input should be either \'tri\' or \'quad\'.\n", argv[4]);
-        MPI_Finalize(); exit(1);
-    }
-
-    /* get mesh and physical domain */
-    MultiReg2d   *mesh = SWE_Mesh2d(argv[5], solver, shape, Mx, My);
-    PhysDomain2d *phys = SWE_Init2d(argv[5], solver, mesh);
+    /* allocate mesh */
+    MultiReg2d   *mesh = SWE_Mesh2d(argv, solver);
+    /* allocate physical domain */
+    PhysDomain2d *phys = SWE_Init2d(argv, solver, mesh);
 
     /* set output file */
     NcFile *outfile = SWE_SetNcOutput2d(phys, solver);
-
+    /* solve  */
     SWERun2d(phys, solver, outfile);
-
+    /* finalize */
     CloseNcFile(outfile);
-    SWEFinalize(shape, mesh, phys, outfile);
-
+    SWEFinalize(mesh, phys, outfile);
     MPI_Finalize();
+
     return 0;
 }
 
-void SWEFinalize(StdRegions2d *shape, MultiReg2d *mesh,
+void SWEFinalize(MultiReg2d *mesh,
                  PhysDomain2d *phys, NcFile *file){
-    FreeStdRegions2d(shape);
+    FreeStdRegions2d(mesh->stdcell);
     FreeMultiReg2d(mesh);
     FreePhysDomain2d(phys);
     FreeNcFile(file);
-}
-
-/**
- * @brief
- * Transfer string to integer.
- *
- * @param[in] str           the input string
- * @param[in] errmessage    error message
- *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * N        | int      | the integer result
- *
- */
-void str2int(char *str, int *N, char* errmessage){
-    int info = sscanf(str,"%d",N);
-    if (info!=1) {
-        fprintf(stderr, "%s:%s \n", errmessage, str);
-        exit(-1);
-    }
 }

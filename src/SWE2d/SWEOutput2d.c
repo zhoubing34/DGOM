@@ -1,5 +1,21 @@
 #include "SWEDriver2d.h"
 
+/**
+ * @brief
+ *
+ * @details
+ *
+ * @param[PhysDomain2d*] phys   pointer to phys structure
+ * @param[SWE_Solver2d]  solver SWE solver structure
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * file     | NcFile*  | pointer to NetCDF file structure
+ *
+ *
+ */
 NcFile* SWE_SetNcOutput2d(PhysDomain2d *phys, SWE_Solver2d *solver){
     MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
@@ -13,35 +29,35 @@ NcFile* SWE_SetNcOutput2d(PhysDomain2d *phys, SWE_Solver2d *solver){
     NcDim **dimarray;
     NcVar **vararray;
 
-    /* for variables, the inner loop comes the last */
     int ndim    = 2;
-    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
+    int maxDimNum = 3;
+    dimarray    = (NcDim**) calloc(maxDimNum, sizeof(NcDim*));
     dimarray[0] = ne;
-    dimarray[1] = np;
+    dimarray[1] = np; /* the inner loop dimension comes the last */
     NcVar *x   = DefineNcVar("x",   ndim, dimarray, "double");
     NcVar *y   = DefineNcVar("y",   ndim, dimarray, "double");
     NcVar *bot = DefineNcVar("bot", ndim, dimarray, "double");
-    free(dimarray);
+//    free(dimarray);
 
     ndim        = 1;
-    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
+//    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = t;
     NcVar *time = DefineNcVar("time", ndim, dimarray, "double");
-    free(dimarray);
+//    free(dimarray);
 
     ndim        = 3;
-    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
+//    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = t;    /* inner loop */
     dimarray[1] = ne;
     dimarray[2] = np;
     NcVar *h   = DefineNcVar("h",  ndim, dimarray, "double");
     NcVar *qx  = DefineNcVar("qx", ndim, dimarray, "double");
     NcVar *qy  = DefineNcVar("qy", ndim, dimarray, "double");
-    free(dimarray);
+//    free(dimarray);
 
     /* define files */
     ndim        = 3;
-    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
+//    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = np;
     dimarray[1] = ne;
     dimarray[2] = t;
@@ -68,7 +84,24 @@ NcFile* SWE_SetNcOutput2d(PhysDomain2d *phys, SWE_Solver2d *solver){
     return file;
 }
 
-
+/**
+ * @brief
+ * Save the results into NetCDF files.
+ *
+ * @details
+ * The results `phys->f_Q` first transfers into a float variable `var`,
+ * then var is stored with `ncmpi_put_vara_float_all` function.
+ *
+ * @param[NcFile]       file    NetCDF file structure
+ * @param[PhysDomain2d] phys    pointer to phys structure
+ * @param[int]          outStep # of output steps
+ * @param[double]       time    output time
+ *
+ * @attention
+ * All variables is transfered into `float` type and then saved, while in the
+ * calculation process the variables can be either `double` or `float`.
+ *
+ */
 void SWE_StoreVar2d(NcFile *file, PhysDomain2d *phys, int outStep, double time){
 
     int ret;
@@ -87,14 +120,14 @@ void SWE_StoreVar2d(NcFile *file, PhysDomain2d *phys, int outStep, double time){
     start_v[0] = outStep;   start_v[1] = 0;         start_v[2] = 0;
     count_v[0] = 1;         count_v[1] = mesh->K;   count_v[2] = shape->Np;
 
-    real *var = (real *) malloc(mesh->K*shape->Np*sizeof(real));
+    float *var = (float *) malloc(mesh->K*shape->Np*sizeof(float));
     /* put variable h */
     int k,i,ind,sk=0, Nfields=phys->Nfields;
     for (k=0;k<mesh->K;k++){
         for (i=0;i<shape->Np;i++){
             ind = (k*shape->Np + i)*Nfields;
             // printf("k = %d, i = %d, ind = %d\n", k, i, ind);
-            var[sk++] = phys->f_Q[ind];
+            var[sk++] = (float) phys->f_Q[ind];
         }
     }
     ret = ncmpi_put_vara_float_all(file->id, file->vararray[3]->id, start_v, count_v, var);
@@ -105,7 +138,7 @@ void SWE_StoreVar2d(NcFile *file, PhysDomain2d *phys, int outStep, double time){
     for (k=0;k<mesh->K;k++){
         for (i=0;i<shape->Np;i++){
             ind = (k*shape->Np + i)*Nfields+1;
-            var[sk++] = phys->f_Q[ind];
+            var[sk++] = (float) phys->f_Q[ind];
         }
     }
     ret = ncmpi_put_vara_float_all(file->id, file->vararray[4]->id, start_v, count_v, var);
@@ -116,7 +149,7 @@ void SWE_StoreVar2d(NcFile *file, PhysDomain2d *phys, int outStep, double time){
     for (k=0;k<mesh->K;k++){
         for (i=0;i<shape->Np;i++){
             ind = (k*shape->Np + i)*Nfields+2;
-            var[sk++] = phys->f_Q[ind];
+            var[sk++] = (float) phys->f_Q[ind];
         }
     }
     ret = ncmpi_put_vara_float_all(file->id, file->vararray[5]->id, start_v, count_v, var);

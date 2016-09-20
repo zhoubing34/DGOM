@@ -13,9 +13,9 @@
 
 /* variable type */
 #ifdef DOUBLE_PRECISION
-#define real double
+typedef double real;
 #else
-#define real float
+typedef float real;
 #endif
 
 #define max(a,b)  ( (a>b)?a:b )
@@ -23,6 +23,9 @@
 
 #define TOTALERR 1.0e-6
 #define RELATIVEERROR 1.0e-8
+
+/* string to int */
+void str2int(char *str, int *N, char* errmessage);
 
 /* GenUniformMesh */
 void GenUniformTriMesh(int Mx, int My, double xmin, double xmax, double ymin, double ymax, int type,

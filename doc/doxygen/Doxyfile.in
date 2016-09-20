@@ -756,6 +756,7 @@ WARN_LOGFILE           =
 INPUT                  = @CMAKE_SOURCE_DIR@/doc/doxygen/ \
                          @CMAKE_SOURCE_DIR@/src/Maxwell2d/ \
                          @CMAKE_SOURCE_DIR@/src/Convection2d/ \
+                         @CMAKE_SOURCE_DIR@/src/SWE2d/ \
                          @CMAKE_SOURCE_DIR@/library/LibUtilities/ \
                          @CMAKE_SOURCE_DIR@/library/Polylib/ \
                          @CMAKE_SOURCE_DIR@/library/StdRegions/ \

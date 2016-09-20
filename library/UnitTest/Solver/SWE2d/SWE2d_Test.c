@@ -147,7 +147,7 @@ void SurfIntegralTest(PhysDomain2d *phys, SWE_Solver2d *solver){
             real GhM,GqxM,GqyM;
 
             SWE_NodalFlux2d(solver, hM, qxM, qyM, &EhM, &EqxM, &EqyM, &GhM, &GqxM, &GqyM);
-            SWE_NumFlux2d(solver, NXf, NYf, hM, hP, qxM, qxP, qyM, qyP, &Fhs, &Fqxs, &Fqys);
+            SWE_NodalNumFlux2d(solver, NXf, NYf, hM, hP, qxM, qxP, qyM, qyP, &Fhs, &Fqxs, &Fqys);
 
             Fhs  = EhM*NXf  + GhM*NYf  - Fhs;
             Fqxs = EqxM*NXf + GqxM*NYf - Fqxs;
@@ -397,9 +397,9 @@ void NumFLuxTest(PhysDomain2d *phys, SWE_Solver2d *solver){
             }
 
 //            printf("ele:%d, Nfp=%d, ", k, m);
-            SWE_NumFlux2d(solver, NXf, NYf,
-                          hM, hP, qxM, qxP, qyM, qyP,
-                          &Fhs, &Fqxs, &Fqys);
+            SWE_NodalNumFlux2d(solver, NXf, NYf,
+                               hM, hP, qxM, qxP, qyM, qyP,
+                               &Fhs, &Fqxs, &Fqys);
 
             fluxQ[sk++] = FSc*Fhs;
             fluxQ[sk++] = FSc*Fqxs;

@@ -40,8 +40,8 @@ do{ \
 
 /* public function */
 void handle_error(int status, int lineno);
-NcDim* DefineNcDim(char *namestr, int len);
-NcVar* DefineNcVar(char *namestr, int ndim, NcDim **dimArray, char *typestr);
+NcDim*  DefineNcDim(char *namestr, int len);
+NcVar*  DefineNcVar(char *namestr, int ndim, NcDim **dimArray, char *typestr);
 NcFile* DefineNcFile(char *namestr, int procid, int nprocs,
                      int ndim, NcDim **dimArray,
                      int nvar, NcVar **varArray);

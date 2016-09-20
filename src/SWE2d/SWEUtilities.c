@@ -1,55 +1,50 @@
 #include "SWEDriver2d.h"
 
 /* Private function */
-void SWE_HLL2d(SWE_Solver2d *solver, real hM, real hP,
-               real qnM, real qnP, real qvM, real qvP,
-               real *Fhn, real *Fqxn, real *Fqyn);
+void SWE_NodalHLL2d(SWE_Solver2d *solver, real hM, real hP,
+                    real qnM, real qnP, real qvM, real qvP,
+                    real *Fhn, real *Fqxn, real *Fqyn);
 
 /**
  * @brief
- * Calculate the numerical flux.
+ * Calculate the numerical flux for each node.
  *
  * @details
  * Calculation of the numerical flux, which is the approximation of dual flux term
  * \f$ \mathbf{n} \cdot \mathbf{F}(U^-, u^+) \f$.
  *
- * @param[in] solver
- * @param[in] nx outward vector on x coordinate
- * @param[in] ny outward vector on y coordinate
- * @param[in] hM
- * @param[in] hP
- * @param[in] qxM
- * @param[in] qxP
- * @param[in] qyM
- * @param[in] qyP
+ * @param[SWE_Solver2d*] solver
+ * @param[real] nx outward vector of x component
+ * @param[real] ny outward vector of y component
+ * @param[real] hM
+ * @param[real] hP
+ * @param[real] qxM
+ * @param[real] qxP
+ * @param[real] qyM
+ * @param[real] qyP
  *
  * @return
  * return values:
  * name     | type     | description of value
  * -------- |----------|----------------------
- * Fhs   | int      |
- * Fqxs  | object   |
- * Fqys  | object   |
+ * Fhs   | real*    | numerical flux of h function
+ * Fqxs  | real*    | numerical flux of qx function
+ * Fqys  | real*    | numerical flux of qy function
  *
  */
-void SWE_NumFlux2d(SWE_Solver2d *solver, real nx, real ny,
-                   real hM, real hP, real qxM, real qxP, real qyM, real qyP,
-                   real *Fhs, real *Fqxs, real *Fqys){
+void SWE_NodalNumFlux2d(SWE_Solver2d *solver, real nx, real ny,
+                        real hM, real hP, real qxM, real qxP, real qyM, real qyP,
+                        real *Fhs, real *Fqxs, real *Fqys){
     /* rotation of conserve variable */
     real qnM,qnP,qvM,qvP;
     qnM =  nx*qxM + ny*qyM;
     qnP =  nx*qxP + ny*qyP;
     qvM = -ny*qxM + nx*qyM;
     qvP = -ny*qxP + nx*qyP;
-    real EhM,EqnM,EqvM,EhP,EqnP,EqvP;
-    real GhM,GqnM,GqvM,GhP,GqnP,GqvP;
-
-    SWE_NodalFlux2d(solver, hM, qnM, qvM, &EhM, &EqnM, &EqvM, &GhM, &GqnM, &GqvM);
-    SWE_NodalFlux2d(solver, hP, qnP, qvP, &EhP, &EqnP, &EqvP, &GhP, &GqnP, &GqvP);
 
     /* HLL numerical flux */
     real Fhn,Fqxn,Fqyn;
-    SWE_HLL2d(solver, hM, hP, qnM, qnP, qvM, qvP, &Fhn, &Fqxn, &Fqyn);
+    SWE_NodalHLL2d(solver, hM, hP, qnM, qnP, qvM, qvP, &Fhn, &Fqxn, &Fqyn);
 
     /* inverse rotation */
     *Fhs  = Fhn;
@@ -59,18 +54,18 @@ void SWE_NumFlux2d(SWE_Solver2d *solver, real nx, real ny,
 
 /**
  * @brief
- * Calculate the HLL flux function.
+ * Calculate the HLL flux function for each point.
  *
  * @details
  * HLL flux function is the approximation of dual flux term
  *
- * @param[in] solver
- * @param[in] hM
- * @param[in] hP
- * @param[in] qnM
- * @param[in] qnP
- * @param[in] qvM
- * @param[in] qvP
+ * @param[SWE_Solver2d*] solver
+ * @param[real] hM
+ * @param[real] hP
+ * @param[real] qnM
+ * @param[real] qnP
+ * @param[real] qvM
+ * @param[real] qvP
  *
  * @return
  * return values:
@@ -81,9 +76,9 @@ void SWE_NumFlux2d(SWE_Solver2d *solver, real nx, real ny,
  * Fqyn  | real*    | Numerical flux of variable qy
  *
  */
-void SWE_HLL2d(SWE_Solver2d *solver, real hM, real hP,
-               real qnM, real qnP, real qvM, real qvP,
-               real *Fhn, real *Fqxn, real *Fqyn){
+void SWE_NodalHLL2d(SWE_Solver2d *solver, real hM, real hP,
+                    real qnM, real qnP, real qvM, real qvP,
+                    real *Fhn, real *Fqxn, real *Fqyn){
 
     real EhM,EqnM,EqvM,EhP,EqnP,EqvP;
     real GhM,GqnM,GqvM,GhP,GqnP,GqvP;
@@ -284,10 +279,10 @@ void SWE_ElementalFlux2d(PhysDomain2d *phys, SWE_Solver2d *solver, real *Qk, rea
  * G = \begin{bmatrix} G_h \cr G_qx \cr G_qy \end{bmatrix} =
  * \begin{bmatrix} q_y \cr \frac{q_xq_y}{h} \cr \frac{q_y^2}{h}+\frac{1}{2}gh^2 \end{bmatrix}\f]
  *
- * @param[in] solver
- * @param[in] h
- * @param[in] qx
- * @param[in] qy
+ * @param[SWE_Solver2d] solver
+ * @param[real] h
+ * @param[real] qx
+ * @param[real] qy
  *
  * @return
  * return values:
@@ -331,8 +326,8 @@ void SWE_NodalFlux2d(SWE_Solver2d *solver,
  * and the delta time is derived \f[ dt = dx/dt \f], while \f$ dx \f$ is the
  * characteristic length.
  *
- * @param[in] phys
- * @param[in] solver
+ * @param[PhysDomain2d*] phys
+ * @param[SWE_Solver2d*] solver
  *
  * @return
  * return values:
@@ -390,8 +385,8 @@ double SWE_PredictDt2d(PhysDomain2d *phys, SWE_Solver2d *solver, double CFL){
  * The positive operator will reconstruct the conserve variables in each element
  * to eliminate the negative water depth.
  *
- *
- * @param[in] solver SWE_Solver2d pointer
+ * @param[PhysDomain2d*] phys
+ * @param[SWE_Solver2d*] solver SWE_Solver2d pointer
  *
  * @return
  * return values:

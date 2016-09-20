@@ -19,4 +19,5 @@ void MapTriCoor(StdRegions2d *shape,
 void MapQuadCoor(StdRegions2d *shape,
                  double *GX, double *GY,
                  double *x, double *y);
-#endif
+
+#endif // LOCAL_REGIONS_H

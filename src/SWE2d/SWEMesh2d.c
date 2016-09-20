@@ -1,20 +1,25 @@
 #include "SWEDriver2d.h"
 
-MultiReg2d* ParabolicBowlMesh2d(SWE_Solver2d *solver, StdRegions2d *shape, int Mx, int My);
-MultiReg2d* DamBreakMesh2d     (SWE_Solver2d *solver, StdRegions2d *shape, int Mx, int My);
+MultiReg2d* ParabolicBowlMesh2d(char **argv, SWE_Solver2d *solver);
+MultiReg2d* DamBreakMesh2d(char **argv, SWE_Solver2d *solver);
+void        GetCellNum(char **argv, int *Mx, int *My);
+void        GetOrder(char **argv, int *N);
+StdRegions2d* AllocateStandShape(char **argv);
+MultiReg2d*   AllocateUniformMesh(char **argv, double xmin, double xmax, double ymin, double ymax);
 
 /**
  * @brief
- * Setup mesh domain and topography for various tests.
+ * Setup mesh object and topography for various tests.
  *
  * @details
- * Setup the mesh domain for different tests. The number of elements is defined by `Mx` and `My`.
- * The bottom topography is stored in `solver` struct.
+ * Setup the mesh object for different tests. The bottom topography
+ * is stored in `solver` struct.
+ * For test cases of `ParabolicBowl`, `DamBreakDry`, `DamBreakDry` and `FlowOver3Bumps`.
+ * the mesh is uniform, and specified with # of cells on each coordinate.
+ * For test cases of `TsunamiRunup`, the mesh is specified with mesh file name.
  *
- * @param[in] casename  name of test case
- * @param[in] shape     standard element
- * @param[in] Mx        number of elements on x coordinate
- * @param[in] My        number of elements on y coordinate
+ * @param[char**]        argv   input argument.
+ * @param[SWE_Solver2d*] solver SWE solver structure.
  *
  * @return
  * return values:
@@ -22,58 +27,40 @@ MultiReg2d* DamBreakMesh2d     (SWE_Solver2d *solver, StdRegions2d *shape, int M
  * -------- |----------|----------------------
  * mesh     | MultiReg2d* | mesh object
  *
+ * @todo
+ * The user can specify either the mesh file name or the # of cell for uniform mesh.
  */
-MultiReg2d* SWE_Mesh2d(char *casename, SWE_Solver2d *solver, StdRegions2d *shape, int Mx, int My){
-    MultiReg2d *mesh;
+MultiReg2d* SWE_Mesh2d(char **argv, SWE_Solver2d *solver){
 
+    MultiReg2d *mesh;
     /* setup mesh for various tests */
-    if      ( !(memcmp(casename, "ParabolicBowl", 13)) ){
-        mesh = ParabolicBowlMesh2d(solver, shape, Mx, My);
-    }else if( !(memcmp(casename, "DamBreakDry"  , 11)) ){
-        mesh = DamBreakMesh2d(solver, shape, Mx, My);
-    }else if( !(memcmp(casename, "DamBreakWet"  , 11)) ){
-        mesh = DamBreakMesh2d(solver, shape, Mx, My);
+    if      ( !(memcmp(argv[1], "ParabolicBowl", 13)) ){
+        mesh = ParabolicBowlMesh2d(argv, solver);
+    }else if( !(memcmp(argv[1], "DamBreakDry"  , 11)) ){
+        mesh = DamBreakMesh2d(argv, solver);
+    }else if( !(memcmp(argv[1], "DamBreakWet"  , 11)) ){
+        mesh = DamBreakMesh2d(argv, solver);
     }else{
-        printf("Wrong name of test case: %s\n", casename);
+        printf("Wrong name of test case: %s\n", argv[1]);
         MPI_Finalize(); exit(1);
     }
 
     return mesh;
 }
 
-MultiReg2d* ParabolicBowlMesh2d(SWE_Solver2d *solver, StdRegions2d *shape, int Mx, int My){
-    MultiReg2d *mesh;
+/* allocate mesh for ParabolicBowl test case */
+MultiReg2d* ParabolicBowlMesh2d(char **argv, SWE_Solver2d *solver){
 
     double xmin = -4000, xmax = 4000;
     double ymin = -4000, ymax = 4000;
     solver->gra = 9.81;
     double alpha = 1.6e-7;
-    double w    = sqrt(8*solver->gra*alpha);
-
-    int procid, nprocs;
-    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-
-    int Ne, Nv;
-    int **parEToV;
-    double *VX, *VY;
-
-    /* generate triangle or quadrilateral mesh */
-    switch (shape->Nv) {
-        case 3:
-            GenParallelUniformTriMesh(Mx, My, xmin , xmax, ymin, ymax, 1,
-                                      procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
-            mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
-            break;
-        case 4:
-            GenParallelUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax,
-                                       procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
-            mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
-            break;
-        default:
-            printf("Mesh Generator error! Wrong number of element vertex: %d\n", shape->Nv);
-            MPI_Finalize(); exit(2);
-    }
+    int Mx,My;
+    /* # of cells on each coordinate */
+    GetCellNum(argv, &Mx, &My);
+    /*  */
+    MultiReg2d *mesh = AllocateUniformMesh(argv,xmin,xmax,ymin,ymax);
+    StdRegions2d *shape = mesh->stdcell;
 
     /* set bottom topography */
     int k, i;
@@ -86,47 +73,23 @@ MultiReg2d* ParabolicBowlMesh2d(SWE_Solver2d *solver, StdRegions2d *shape, int M
         }
     }
 
-    DestroyIntMatrix(parEToV);
-    DestroyVector(VX);
-    DestroyVector(VY);
-
     /* the grid length */
     solver->dx = min( (xmax - xmin)/(Mx+1.0)/shape->Nfp, (ymax - ymin)/(My+1)/shape->Nfp );
-
     return mesh;
 }
 
-MultiReg2d* DamBreakMesh2d(SWE_Solver2d *solver, StdRegions2d *shape, int Mx, int My){
-    MultiReg2d *mesh;
+/* allocate mesh for DamBreak test case */
+MultiReg2d* DamBreakMesh2d(char **argv, SWE_Solver2d *solver){
 
+    int Mx,My;
     double xmin = 0,    xmax = 1000;
     double ymin = -100, ymax = 100;
     solver->gra = 9.81;
 
-    int procid, nprocs;
-    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-
-    int Ne, Nv;
-    int **parEToV;
-    double *VX, *VY;
-
-    /* generate triangle or quadrilateral mesh */
-    switch (shape->Nv) {
-        case 3:
-            GenParallelUniformTriMesh(Mx, My, xmin , xmax, ymin, ymax, 1,
-                                      procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
-            mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
-            break;
-        case 4:
-            GenParallelUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax,
-                                       procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
-            mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
-            break;
-        default:
-            printf("Mesh Generator error! Wrong number of element vertex: %d\n", shape->Nv);
-            MPI_Finalize(); exit(2);
-    }
+    /* # of cells on each coordinate */
+    GetCellNum(argv, &Mx, &My);
+    MultiReg2d *mesh = AllocateUniformMesh(argv,xmin,xmax,ymin,ymax);
+    StdRegions2d *shape = mesh->stdcell;
 
     /* set bottom topography */
     int k, i;
@@ -136,13 +99,100 @@ MultiReg2d* DamBreakMesh2d(SWE_Solver2d *solver, StdRegions2d *shape, int Mx, in
             solver->bot[k][i] = 0.0;
         }
     }
+    /* the grid length */
+    solver->dx = min( (xmax - xmin)/(Mx+1.0)/shape->Nfp, (ymax - ymin)/(My+1)/shape->Nfp );
+    return mesh;
+}
+
+/**
+ * @brief
+ * Allocate a uniform mesh from input arguments.
+ *
+ * @param[char**] argv input arguments
+ * @param[double] xmin minimal x coordinate
+ * @param[double] xmax maximal x coordinate
+ * @param[double] ymin minimal y coordinate
+ * @param[double] ymax maximal y coordinate
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * mesh  | MultiReg2d* | pointer to the mesh structure
+ *
+ */
+MultiReg2d* AllocateUniformMesh(char **argv, double xmin, double xmax, double ymin, double ymax){
+    MultiReg2d *mesh;
+    int Ne,Nv,Mx,My;
+    int **parEToV;
+    double *VX,*VY;
+
+    GetCellNum(argv, &Mx, &My);
+    StdRegions2d *shape = AllocateStandShape(argv);
+
+    int procid, nprocs;
+    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+
+    if ( !(memcmp(argv[3], "tri", 3)) ){
+        GenParallelUniformTriMesh(Mx, My, xmin, xmax, ymin, ymax, 1,
+                                  procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
+        mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
+    }else if( !(memcmp(argv[3], "quad", 4)) ){
+        GenParallelUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax,
+                                   procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
+        mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
+    }else{
+        printf("Wrong mesh type: %s.\n"
+                       "The input should be either \'tri\' or \'quad\'.\n", argv[4]);
+        MPI_Finalize(); exit(1);
+    }
 
     DestroyIntMatrix(parEToV);
     DestroyVector(VX);
     DestroyVector(VY);
-
-    /* the grid length */
-    solver->dx = min( (xmax - xmin)/(Mx+1.0)/shape->Nfp, (ymax - ymin)/(My+1)/shape->Nfp );
-
     return mesh;
+}
+
+/**
+ * @brief
+ * Allocate the standard element.
+ *
+ * @param[char**] argv input arguments.
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * shape   | StdRegions2d* | the standard element structure
+ *
+ */
+StdRegions2d* AllocateStandShape(char **argv){
+    StdRegions2d *shape;
+    int N;
+    GetOrder(argv, &N);
+
+    if ( !(memcmp(argv[3], "tri", 3)) ){
+        shape = GenStdTriEle(N);
+    }else if( !(memcmp(argv[3], "quad", 4)) ){
+        shape = GenStdQuadEle(N);
+    }else{
+        printf("Wrong mesh type: %s.\n"
+                       "The input should be either \'tri\' or \'quad\'.\n", argv[4]);
+        MPI_Finalize(); exit(1);
+    }
+    return shape;
+}
+
+/* get the input degree */
+void GetOrder(char **argv, int *N){
+    str2int(argv[2], N, "Wrong degrees");
+    return;
+}
+
+/* the # of cell for uniform mesh grid */
+void GetCellNum(char **argv, int *Mx, int *My){
+    str2int(argv[4], Mx, "Wrong element number of x coordinate");
+    str2int(argv[5], My, "Wrong element number of y coordinate");
+    return;
 }

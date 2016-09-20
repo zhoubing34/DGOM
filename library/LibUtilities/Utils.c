@@ -77,6 +77,30 @@ void dgemm_(const unsigned M, const unsigned K, const unsigned N,
     }
 }
 
+/**
+ * @brief
+ * Transfer string to integer.
+ *
+ * @param[in] str           the input string
+ * @param[in] errmessage    error message
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * N        | int      | the integer result
+ *
+ * Usages:
+ *
+ *      str2int(argv[1], &N , "Wrong degree input");
+ */
+void str2int(char *str, int *N, char* errmessage){
+    int info = sscanf(str,"%d",N);
+    if (info!=1) {
+        fprintf(stderr, "%s:%s \n", errmessage, str);
+        exit(-1);
+    }
+}
 
 /* some very basic memory allocation routines */
 /* row major storage for a 2D matrix array */

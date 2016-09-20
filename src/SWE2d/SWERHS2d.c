@@ -12,7 +12,7 @@ void SWERHS2d(PhysDomain2d *phys, SWE_Solver2d *solver, const real frka, const r
     const int K       = mesh->K;
     const int Nfields = phys->Nfields;
     const int Np      = shape->Np;
-    const size_t nprocs  = (size_t)mesh->nprocs;
+    const int nprocs  = mesh->nprocs;
 
     real *vgeo     = phys->vgeo;
     real *surfinfo = phys->surfinfo;
@@ -131,7 +131,7 @@ void SWERHS2d(PhysDomain2d *phys, SWE_Solver2d *solver, const real frka, const r
             real GhM,GqxM,GqyM;
 
             SWE_NodalFlux2d(solver, hM, qxM, qyM, &EhM, &EqxM, &EqyM, &GhM, &GqxM, &GqyM);
-            SWE_NumFlux2d(solver, NXf, NYf, hM, hP, qxM, qxP, qyM, qyP, &Fhs, &Fqxs, &Fqys);
+            SWE_NodalNumFlux2d(solver, NXf, NYf, hM, hP, qxM, qxP, qyM, qyP, &Fhs, &Fqxs, &Fqys);
 
             Fhs  = EhM*NXf  + GhM*NYf  - Fhs;
             Fqxs = EqxM*NXf + GqxM*NYf - Fqxs;
