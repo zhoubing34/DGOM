@@ -21,8 +21,6 @@
 
 #include "ConvectionDriver2d.h"
 
-void str2int(char *str, int *N, char* errmessage);
-
 int main(int argc, char **argv){
     int N, Ne;     /* parameters */
 
@@ -97,12 +95,4 @@ int main(int argc, char **argv){
     MPI_Finalize();
 
     return 0;
-}
-
-void str2int(char *str, int *N, char* errmessage){
-    int info = sscanf(str,"%d",N);
-    if (info!=1) {
-        fprintf(stderr, "%s:%s \n", errmessage, str);
-        exit(-1);
-    }
 }

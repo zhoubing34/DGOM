@@ -158,59 +158,45 @@ void SWE_ElementalSource2d(PhysDomain2d *phys, SWE_Solver2d *solver,
     MultiReg2d   *mesh  = phys->mesh;
     StdRegions2d *shape = mesh->stdcell;
 
-    const real gra   = (real)solver->gra;
-    const real *f_Dr = shape->f_Dr;
-    const real *f_Ds = shape->f_Ds;
+    const real gra     = (real)solver->gra;
+    const real *f_Dr   = shape->f_Dr;
+    const real *f_Ds   = shape->f_Ds;
     const double *bot  = solver->bot[k];
     const double hcrit = solver->hcrit;
+    const int Np       = shape->Np;
+    const int Nfields  = phys->Nfields;
 
-    const int Np      = shape->Np;
-    const int Nfields = phys->Nfields;
+    int n,m,sk,geoid=0,ind=0;
 
-    int n,m,geoid=0,isdry=0;
+    for (n=0;n<Np;++n) {
 
-    for(n=0;n<Np;n++){
+        const real *ptDr = f_Dr + n*Np;
+        const real *ptDs = f_Ds + n*Np;
+        const real drdx  = vgeo[geoid++], drdy = vgeo[geoid++];
+        const real dsdx  = vgeo[geoid++], dsdy = vgeo[geoid++];
         const real h = Qk[n*Nfields];
-        if (h<hcrit) {isdry = 1;}
-    }
 
-    if(!isdry) { /* wet element */
-        for (n=0;n<Np;++n) {
+        real Sh = 0, Sqx = 0, Sqy = 0;
 
-            const real *ptDr = f_Dr + n*Np;
-            const real *ptDs = f_Ds + n*Np;
-            const real drdx  = vgeo[geoid++], drdy = vgeo[geoid++];
-            const real dsdx  = vgeo[geoid++], dsdy = vgeo[geoid++];
-            const real h = Qk[n*Nfields];
-
-            int  sk=0;
-            real Sh=0, Sqx=0, Sqy=0;
-
-            for (m=0;m<Np;++m) {
+        if(h>hcrit){ // for wet nodes
+            for (sk = 0, m = 0; m < Np; ++m) {
                 const real dr = ptDr[m];
                 const real ds = ptDs[m];
-                const real dx = drdx*dr + dsdx*ds;
-                const real dy = drdy*dr + dsdy*ds;
+                const real dx = drdx * dr + dsdx * ds;
+                const real dy = drdy * dr + dsdy * ds;
 
-                const real z = (real)bot[sk++];
+                const real z = (real) bot[sk++];
 
-                Sqx += -gra*h*dx*z;
-                Sqy += -gra*h*dy*z;
+                Sqx += dx * z;
+                Sqy += dy * z;
             }
+        }
 
-            int ind = n * Nfields;
-            soureTerm[ind++] = Sh;
-            soureTerm[ind++] = Sqx;
-            soureTerm[ind  ] = Sqy;
-        }
-    }else{  /* dry element */
-        for (n=0;n<Np;++n) {
-            int ind = n*Nfields;
-            soureTerm[ind++] = 0;
-            soureTerm[ind++] = 0;
-            soureTerm[ind  ] = 0;
-        }
+        soureTerm[ind++] = Sh;
+        soureTerm[ind++] = -gra*h*Sqx;
+        soureTerm[ind++] = -gra*h*Sqy;
     }
+    return;
 }
 
 /**
@@ -261,7 +247,7 @@ void SWE_ElementalFlux2d(PhysDomain2d *phys, SWE_Solver2d *solver, real *Qk, rea
         Gflx[yk++] = Gqx;
         Gflx[yk++] = Gqy;
     }
-
+    return;
 }
 
 /**
@@ -311,6 +297,7 @@ void SWE_NodalFlux2d(SWE_Solver2d *solver,
         *Eh  = 0; *Eqx = 0; *Eqy = 0;
         *Gh  = 0; *Gqx = 0; *Gqy = 0;
     }
+    return;
 }
 
 /**
@@ -454,4 +441,5 @@ void SWE_PositivePreserving2d(PhysDomain2d *phys, SWE_Solver2d *solver){
             }
         }
     }
+    return;
 }
