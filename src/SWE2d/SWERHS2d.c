@@ -1,6 +1,7 @@
 #include "SWEDriver2d.h"
 
-void SWERHS2d(PhysDomain2d *phys, SWE_Solver2d *solver, const real frka, const real frkb, const real fdt){
+void SWE_RHS2d(PhysDomain2d *phys, SWE_Solver2d *solver,
+               const real frka, const real frkb, const real fdt){
 
     /* registers and temporary */
     register unsigned int k, geoid=0;
@@ -25,7 +26,6 @@ void SWERHS2d(PhysDomain2d *phys, SWE_Solver2d *solver, const real frka, const r
     real *f_resQ  = phys->f_resQ;
 
     real *f_inQ   = phys->f_inQ;
-    real *f_outQ  = phys->f_outQ;
 
     /* fetch boundary values */
     MPI_Request *mpi_out_requests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));

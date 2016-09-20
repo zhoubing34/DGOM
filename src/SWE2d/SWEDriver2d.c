@@ -20,7 +20,7 @@
  * Use the 2 order basis with an uniform mesh of 80 and 60 elements along x and y coordinate respectively.
  * For the ParabolicBowl test case:
  *
- *     mpirun -n 2 -host localhost ./SWE2D 2 80 60 tri ParabolicBowl
+ *     mpirun -n 2 -host localhost ./SWE2D ParabolicBowl 2 tri 80 60
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
@@ -30,7 +30,7 @@
 #include "SWEDriver2d.h"
 
 /* private function */
-void SWEFinalize(MultiReg2d *mesh, PhysDomain2d *phys, NcFile *file);
+void SWE_Finalize2d(MultiReg2d *mesh, PhysDomain2d *phys, NcFile *file);
 
 int main(int argc, char **argv){
     /* initialize MPI */
@@ -42,21 +42,23 @@ int main(int argc, char **argv){
     MultiReg2d   *mesh = SWE_Mesh2d(argv, solver);
     /* allocate physical domain */
     PhysDomain2d *phys = SWE_Init2d(argv, solver, mesh);
-
     /* set output file */
     NcFile *outfile = SWE_SetNcOutput2d(phys, solver);
     /* solve  */
-    SWERun2d(phys, solver, outfile);
+    SWE_Run2d(phys, solver, outfile);
+
     /* finalize */
-    CloseNcFile(outfile);
-    SWEFinalize(mesh, phys, outfile);
+    SWE_Finalize2d(mesh, phys, outfile);
     MPI_Finalize();
 
     return 0;
 }
 
-void SWEFinalize(MultiReg2d *mesh,
-                 PhysDomain2d *phys, NcFile *file){
+/* finalize the SWE and deallocate the variable */
+void SWE_Finalize2d(MultiReg2d *mesh, PhysDomain2d *phys, NcFile *file){
+    /* close the NetCDF files */
+    CloseNcFile(file);
+    /* deallocate the variables */
     FreeStdRegions2d(mesh->stdcell);
     FreeMultiReg2d(mesh);
     FreePhysDomain2d(phys);

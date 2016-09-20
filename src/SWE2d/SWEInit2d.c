@@ -89,7 +89,7 @@ void DamBreakDryInit2d(SWE_Solver2d *solver, PhysDomain2d *phys, MultiReg2d *mes
     /* minimum depth */
     solver->hcrit = hmin;
     /* minimum time step */
-    solver->dtmin = 1.0e-2;
+    solver->dtmin = 1.0e-6;
 
     /* initialization */
     int i,k,ind;
@@ -124,7 +124,7 @@ void DamBreakWetInit2d(SWE_Solver2d *solver, PhysDomain2d *phys, MultiReg2d *mes
     /* minimum depth */
     solver->hcrit = hmin;
     /* minimum time step */
-    solver->dtmin = 1.0e-2;
+    solver->dtmin = 1.0e-4;
 
     /* initialization */
     int i,k,ind;

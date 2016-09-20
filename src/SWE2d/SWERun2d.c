@@ -4,11 +4,12 @@
 void RK45_Coeff(double *, double *, double *);
 
 
-double SWERun2d(PhysDomain2d *phys, SWE_Solver2d *solver, NcFile *outfile){
+double SWE_Run2d(PhysDomain2d *phys, SWE_Solver2d *solver, NcFile *outfile){
 
     /* Runge-Kutta time evaluation coefficient */
     double *rk4a, *rk4b, *rk4c;
-    rk4a = BuildVector(5);  /* allocation */
+    /* allocation */
+    rk4a = BuildVector(5);
     rk4b = BuildVector(5);
     rk4c = BuildVector(6);
     RK45_Coeff(rk4a, rk4b, rk4c);
@@ -42,7 +43,7 @@ double SWERun2d(PhysDomain2d *phys, SWE_Solver2d *solver, NcFile *outfile){
             const real fa = (real)rk4a[INTRK-1];
             const real fb = (real)rk4b[INTRK-1];
 
-            SWERHS2d(phys, solver, fa, fb, fdt);
+            SWE_RHS2d(phys, solver, fa, fb, fdt);
             SLLoc2d(phys, 1.0);
             SWE_PositivePreserving2d(phys, solver);
         }

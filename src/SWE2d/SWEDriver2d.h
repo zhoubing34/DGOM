@@ -26,9 +26,9 @@ PhysDomain2d* SWE_Init2d(char **argv, SWE_Solver2d *solver, MultiReg2d *mesh);
 NcFile*       SWE_SetNcOutput2d(PhysDomain2d *phys, SWE_Solver2d *solver);
 void          SWE_StoreVar2d(NcFile *file, PhysDomain2d *phys, int outStep, double time);
 
-double        SWERun2d(PhysDomain2d *phys, SWE_Solver2d *solver, NcFile *outfile);
-void          SWERHS2d(PhysDomain2d *phys, SWE_Solver2d *solver,
-                       const real fa, const real fb, const real ft);
+double        SWE_Run2d(PhysDomain2d *phys, SWE_Solver2d *solver, NcFile *outfile);
+void          SWE_RHS2d(PhysDomain2d *phys, SWE_Solver2d *solver,
+                        const real fa, const real fb, const real ft);
 
 double        SWE_PredictDt2d(PhysDomain2d *phys, SWE_Solver2d *solver, double CFL);
 void          SWE_ElementalFlux2d(PhysDomain2d *phys, SWE_Solver2d *solver,

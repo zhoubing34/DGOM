@@ -59,21 +59,17 @@ void SWE_NodalNumFlux2d(SWE_Solver2d *solver, real nx, real ny,
  * @details
  * HLL flux function is the approximation of dual flux term
  *
- * @param[SWE_Solver2d*] solver
- * @param[real] hM
- * @param[real] hP
- * @param[real] qnM
- * @param[real] qnP
- * @param[real] qvM
- * @param[real] qvP
+ * @param[in] solver SWE solver structure
+ * @param[in] hM water depth at local node
+ * @param[in] hP water depth at adjacent cell
+ * @param[in] qnM
+ * @param[in] qnP
+ * @param[in] qvM
+ * @param[in] qvP
+ * @param[inout] Fhn   Numerical flux term for function h
+ * @param[inout] Fqxn  Numerical flux term for function qx
+ * @param[inout] Fqyn  Numerical flux term for function qy
  *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * Fhn   | real*    | Numerical flux of variable h
- * Fqxn  | real*    | Numerical flux of variable qx
- * Fqyn  | real*    | Numerical flux of variable qy
  *
  */
 void SWE_NodalHLL2d(SWE_Solver2d *solver, real hM, real hP,

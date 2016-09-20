@@ -1,11 +1,12 @@
 #include "SWEDriver2d.h"
 
+/* private variables */
 MultiReg2d* ParabolicBowlMesh2d(char **argv, SWE_Solver2d *solver);
 MultiReg2d* DamBreakMesh2d(char **argv, SWE_Solver2d *solver);
-void        GetCellNum(char **argv, int *Mx, int *My);
-void        GetOrder(char **argv, int *N);
-StdRegions2d* AllocateStandShape(char **argv);
-MultiReg2d*   AllocateUniformMesh(char **argv, double xmin, double xmax, double ymin, double ymax);
+void GetCellNum_SWE2d(char **argv, int *Mx, int *My);
+void GetOrder_SWE2d(char **argv, int *N);
+StdRegions2d* AllocateStandShape_SWE2d(char **argv);
+MultiReg2d* AllocateUniformMesh_SWE2d(char **argv, double xmin, double xmax, double ymin, double ymax);
 
 /**
  * @brief
@@ -18,11 +19,10 @@ MultiReg2d*   AllocateUniformMesh(char **argv, double xmin, double xmax, double 
  * the mesh is uniform, and specified with # of cells on each coordinate.
  * For test cases of `TsunamiRunup`, the mesh is specified with mesh file name.
  *
- * @param[char**]        argv   input argument.
- * @param[SWE_Solver2d*] solver SWE solver structure.
+ * @param[in]    argv   input argument.
+ * @param[inout] solver SWE solver structure.
  *
  * @return
- * return values:
  * name     | type     | description of value
  * -------- |----------|----------------------
  * mesh     | MultiReg2d* | mesh object
@@ -57,9 +57,9 @@ MultiReg2d* ParabolicBowlMesh2d(char **argv, SWE_Solver2d *solver){
     double alpha = 1.6e-7;
     int Mx,My;
     /* # of cells on each coordinate */
-    GetCellNum(argv, &Mx, &My);
-    /*  */
-    MultiReg2d *mesh = AllocateUniformMesh(argv,xmin,xmax,ymin,ymax);
+    GetCellNum_SWE2d(argv, &Mx, &My);
+    /* allocate uniform mesh grid */
+    MultiReg2d *mesh = AllocateUniformMesh_SWE2d(argv, xmin, xmax, ymin, ymax);
     StdRegions2d *shape = mesh->stdcell;
 
     /* set bottom topography */
@@ -87,8 +87,9 @@ MultiReg2d* DamBreakMesh2d(char **argv, SWE_Solver2d *solver){
     solver->gra = 9.81;
 
     /* # of cells on each coordinate */
-    GetCellNum(argv, &Mx, &My);
-    MultiReg2d *mesh = AllocateUniformMesh(argv,xmin,xmax,ymin,ymax);
+    GetCellNum_SWE2d(argv, &Mx, &My);
+    /* allocate uniform mesh grid */
+    MultiReg2d *mesh = AllocateUniformMesh_SWE2d(argv, xmin, xmax, ymin, ymax);
     StdRegions2d *shape = mesh->stdcell;
 
     /* set bottom topography */
@@ -108,27 +109,25 @@ MultiReg2d* DamBreakMesh2d(char **argv, SWE_Solver2d *solver){
  * @brief
  * Allocate a uniform mesh from input arguments.
  *
- * @param[char**] argv input arguments
- * @param[double] xmin minimal x coordinate
- * @param[double] xmax maximal x coordinate
- * @param[double] ymin minimal y coordinate
- * @param[double] ymax maximal y coordinate
+ * @param[in] argv input arguments
+ * @param[in] xmin minimal x coordinate
+ * @param[in] xmax maximal x coordinate
+ * @param[in] ymin minimal y coordinate
+ * @param[in] ymax maximal y coordinate
  *
  * @return
- * return values:
  * name     | type     | description of value
  * -------- |----------|----------------------
  * mesh  | MultiReg2d* | pointer to the mesh structure
  *
  */
-MultiReg2d* AllocateUniformMesh(char **argv, double xmin, double xmax, double ymin, double ymax){
+MultiReg2d* AllocateUniformMesh_SWE2d(char **argv, double xmin, double xmax, double ymin, double ymax){
     MultiReg2d *mesh;
-    int Ne,Nv,Mx,My;
-    int **parEToV;
+    int Ne,Nv,Mx,My,**parEToV;
     double *VX,*VY;
 
-    GetCellNum(argv, &Mx, &My);
-    StdRegions2d *shape = AllocateStandShape(argv);
+    GetCellNum_SWE2d(argv, &Mx, &My);
+    StdRegions2d *shape = AllocateStandShape_SWE2d(argv);
 
     int procid, nprocs;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
@@ -154,44 +153,33 @@ MultiReg2d* AllocateUniformMesh(char **argv, double xmin, double xmax, double ym
     return mesh;
 }
 
-/**
- * @brief
- * Allocate the standard element.
- *
- * @param[char**] argv input arguments.
- *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * shape   | StdRegions2d* | the standard element structure
- *
- */
-StdRegions2d* AllocateStandShape(char **argv){
-    StdRegions2d *shape;
-    int N;
-    GetOrder(argv, &N);
+/* Allocate a standard element */
+StdRegions2d* AllocateStandShape_SWE2d(char **argv){
 
+    int N;
+    GetOrder_SWE2d(argv, &N);
+
+    StdRegions2d *shape;
     if ( !(memcmp(argv[3], "tri", 3)) ){
         shape = GenStdTriEle(N);
     }else if( !(memcmp(argv[3], "quad", 4)) ){
         shape = GenStdQuadEle(N);
     }else{
         printf("Wrong mesh type: %s.\n"
-                       "The input should be either \'tri\' or \'quad\'.\n", argv[4]);
+                       "The input should be either \'tri\' or \'quad\'.\n", argv[3]);
         MPI_Finalize(); exit(1);
     }
     return shape;
 }
 
 /* get the input degree */
-void GetOrder(char **argv, int *N){
+void GetOrder_SWE2d(char **argv, int *N){
     str2int(argv[2], N, "Wrong degrees");
     return;
 }
 
 /* the # of cell for uniform mesh grid */
-void GetCellNum(char **argv, int *Mx, int *My){
+void GetCellNum_SWE2d(char **argv, int *Mx, int *My){
     str2int(argv[4], Mx, "Wrong element number of x coordinate");
     str2int(argv[5], My, "Wrong element number of y coordinate");
     return;
