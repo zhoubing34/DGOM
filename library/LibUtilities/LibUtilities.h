@@ -82,4 +82,4 @@ FILE* CreateLog(char *funname, int nprocs, int rank);
 
 int CreateIntMatrixTest(char *message, int **A, int **ExactA, int Nrows, int Ncols);
 
-#endif
+#endif //LIBUTILITIES_H

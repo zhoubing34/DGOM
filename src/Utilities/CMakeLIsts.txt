@@ -1,0 +1,5 @@
+add_executable(GmshReader GmshReader.c)
+
+target_link_libraries(GmshReader LibUtilities)
+install(TARGETS GmshReader
+        RUNTIME DESTINATION bin)
