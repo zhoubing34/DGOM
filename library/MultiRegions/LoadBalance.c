@@ -23,7 +23,7 @@
  * newGY  | double*** | new vertex coordinate after mesh redistribution
  *
  */
-void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double **GY,
+void LoadBalance2d(StdRegions2d *shape, int K, const int **EToV, const double **GX, const double **GY,
                  int *newK, int ***nEToV, double ***newGX, double ***newGY){
     int n,p,k,v;
 

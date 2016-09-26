@@ -90,7 +90,7 @@ typedef struct MultiReg2d{
 
 
 /* public function */
-MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv, int **EToV, double *VX, double *VY);
+MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv, const int **EToV, const double *VX, const double *VY);
 
 void FreeMultiReg2d(MultiReg2d *mesh);
 

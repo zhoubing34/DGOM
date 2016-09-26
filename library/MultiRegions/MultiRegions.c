@@ -1,8 +1,8 @@
 #include "MultiRegions.h"
 
 /* private functions */
-void SetVetxCoord2d(StdRegions2d *shape, int K, double *VX, double *VY, int **EToV, double **GX, double **GY);
-void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double **GY,
+void SetVetxCoord2d(StdRegions2d *shape, int K, const double *VX, const double *VY, const int **EToV, double **GX, double **GY);
+void LoadBalance2d(StdRegions2d *shape, int K, const int **EToV, const double **GX, const double **GY,
                  int *newK, int ***newEToV, double ***newx, double ***newy);
 void SetFacePair2d(StdRegions2d *shape, int Klocal,
                  int **EToV, int **EToE, int **EToF, int **EToP,
@@ -33,10 +33,15 @@ void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *parEtotalout, in
  * mesh     | MultiReg2d* | mesh object
  *
  * @note
- * The vertex index in EToV is start from 0.
+ * 1. The index of vertex in EToV is start from 0;
+ * 2. The input parameter `EToV`, `VX` and `VY` are copied to the corresponding fields of mesh object,
+ * the user may deallocate them safely after calling this function.
+ * @warning
+ * This function will allocate and initialize a `MultiReg2d` type pointer, so the user should remember to
+ * call `FreeMultiReg2d` function manually to free it in case of memory leak.
  */
 MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv,
-                          int **EToV, double *VX, double *VY){
+                          const int **EToV, const double *VX, const double *VY){
 
     MultiReg2d *mesh = (MultiReg2d *)calloc(1, sizeof(MultiReg2d));
 
@@ -193,7 +198,7 @@ void SetNodeCoord2d(StdRegions2d *shape, int K, double **GX, double **GY, double
  * GX | double[K][shape->Nv]  | vertex coordinate
  *
  */
-void SetVetxCoord2d(StdRegions2d *shape, int K, double *VX, double *VY, int **EToV, double **GX, double **GY){
+void SetVetxCoord2d(StdRegions2d *shape, int K, const double *VX, const double *VY, const int **EToV, double **GX, double **GY){
     int n,k;
     /* vertex coordinate */
     for(k=0;k<K;k++){

@@ -11,21 +11,18 @@
  * Variables `EToV`, `VX` and `VY` is allocated inside of the function, therefore the pointer is
  * passed as parameters.
  *
- * @param[in] Mx    number of elements on x coordinate
- * @param[in] My    number of elements on x coordinate
- * @param[in] xmin  minimum value of x
- * @param[in] xmax  maxmum value of x
- * @param[in] ymin  minimum value of y
- * @param[in] ymax  maxmum value of y
- * @param[in] type  flag for triangle dividing, 0 for '\' and 1 for '/'
- *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * newEToV  | int      | vertex index inside of each elements
- * newVX    | double   | coordinate of vertex
- * newVY    | double   | coordinate of vertex
+ * @param[in]   Mx      number of elements on x coordinate
+ * @param[in]   My      number of elements on x coordinate
+ * @param[in]   xmin    minimum value of x
+ * @param[in]   xmax    maxmum value of x
+ * @param[in]   ymin    minimum value of y
+ * @param[in]   ymax    maxmum value of y
+ * @param[in]   type    flag for triangle dividing, 0 for '\' and 1 for '/'
+ * @param[out]  newNe   number of elements
+ * @param[out]  newNv   number of vertex
+ * @param[out]  newEToV vertex index inside of each elements
+ * @param[out]  newVX   x coordinate
+ * @param[out]  newVY   y coordinate
  *
  */
 void GenUniformTriMesh(int Mx, int My,
@@ -104,21 +101,21 @@ void GenUniformTriMesh(int Mx, int My,
  * Variables `EToV`, `VX` and `VY` is allocated inside of the function, therefore the pointer is
  * passed as parameters.
  *
- * @param[in] Mx    number of elements on x coordinate
- * @param[in] My    number of elements on x coordinate
- * @param[in] xmin  minimum value of x
- * @param[in] xmax  maxmum value of x
- * @param[in] ymin  minimum value of y
- * @param[in] ymax  maxmum value of y
+ * @param[in]   Mx      number of elements on x coordinate
+ * @param[in]   My      number of elements on x coordinate
+ * @param[in]   xmin    minimum value of x
+ * @param[in]   xmax    maxmum value of x
+ * @param[in]   ymin    minimum value of y
+ * @param[in]   ymax    maxmum value of y
+ * @param[out]  newNe   number of elements
+ * @param[out]  newNv   number of vertex
+ * @param[out]  newEToV vertex index inside of each elements
+ * @param[out]  newVX   x coordinate
+ * @param[out]  newVY   y coordinate
  *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * newEToV  | int      | vertex index inside of each elements
- * newVX    | double   | coordinate of vertex
- * newVY    | double   | coordinate of vertex
- *
+ * @note
+ * the parameter `newEToV`, `newVX` and `newVY` will be allocated inside of the function, users
+ * have to deallocate them manually after finish using them.
  */
 void GenUniformQuadMesh(int Mx, int My,
                        double xmin, double xmax,
@@ -187,24 +184,24 @@ void GenUniformQuadMesh(int Mx, int My,
  * Variables `parEToV`, `VX` and `VY` is allocated inside of the function, therefore the pointer is
  * passed as parameters.
  *
- * @param[in] Mx     number of elements on x coordinate
- * @param[in] My     number of elements on x coordinate
- * @param[in] xmin   minimum value of x
- * @param[in] xmax   maxmum value of x
- * @param[in] ymin   minimum value of y
- * @param[in] ymax   maxmum value of y
- * @param[in] type   flag for triangle dividing, 0 for '\' and 1 for '/'
- * @param[in] procid index of process
- * @param[in] nprocs number of processes
+ * @param[in]   Mx      number of elements on x coordinate
+ * @param[in]   My      number of elements on x coordinate
+ * @param[in]   xmin    minimum value of x
+ * @param[in]   xmax    maxmum value of x
+ * @param[in]   ymin    minimum value of y
+ * @param[in]   ymax    maxmum value of y
+ * @param[in]   type    flag for triangle dividing, 0 for '\' and 1 for '/'
+ * @param[in]   procid  index of local process
+ * @param[in]   nprocs  number of processes
+ * @param[out]  parK    local number of elements
+ * @param[out]  newNv   total number of vertex
+ * @param[out]  parEToV local EToV
+ * @param[out]  newVX   x coordinate of all vertex
+ * @param[out]  newVY   y coordinate of all vertex
  *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * parEToV  | int      | vertex index inside of local elements
- * VX    | double   | coordinate of vertex
- * VY    | double   | coordinate of vertex
- *
+ * @note
+ * the parameter `parEToV`, `newNV`, `newVX` and `newVY` will be allocated inside of the function, users
+ * have to deallocate them manually after finish using them.
  */
 void GenParallelUniformTriMesh(int Mx, int My,
                                double xmin, double xmax,
@@ -278,15 +275,15 @@ void GenParallelUniformTriMesh(int Mx, int My,
  * @param[in] ymax  maxmum value of y
  * @param[in] procid index of process
  * @param[in] nprocs number of processes
+ * @param[out]  parK    local number of elements
+ * @param[out]  newNv   total number of vertex
+ * @param[out]  parEToV local EToV
+ * @param[out]  newVX   x coordinate of all vertex
+ * @param[out]  newVY   y coordinate of all vertex
  *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * parEToV  | int      | vertex index inside of local elements
- * VX    | double   | coordinate of vertex
- * VY    | double   | coordinate of vertex
- *
+ * @note
+ * the parameter `parEToV`, `newNV`, `newVX` and `newVY` will be allocated inside of the function, users
+ * have to deallocate them manually after finish using them.
  */
 void GenParallelUniformQuadMesh(int Mx, int My,
                                double xmin, double xmax,
