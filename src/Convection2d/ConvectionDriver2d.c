@@ -70,7 +70,7 @@ int main(int argc, char **argv){
     dt = InitCondition(phys, flowRate);
 
     /* setup output file */
-    Ncfile *outfile = SetupOutput(mesh, casename);
+    NcFile *outfile = SetupOutput(mesh, casename);
 
     /* solve */
     ConvectionRun2d(phys, flowRate, outfile ,FinalTime, dt);
@@ -79,11 +79,7 @@ int main(int argc, char **argv){
     Postprocess(phys);
 
     /* finish */
-    int ret;
-    ret = ncmpi_close(outfile->ncfile);
-    if (ret != NC_NOERR) handle_error(ret, __LINE__);
-
-    free(outfile->varid);
+    FreeNcFile(outfile);
     FreeStdRegions2d(shape);
     FreeMultiReg2d(mesh);
     FreePhysDomain2d(phys);

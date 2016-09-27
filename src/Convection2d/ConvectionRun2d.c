@@ -1,7 +1,7 @@
 #include "ConvectionDriver2d.h"
 
 void ConvectionRun2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
-                     Ncfile * outfile, double FinalTime, double dt){
+                     NcFile * outfile, double FinalTime, double dt){
     double time = 0;
     int    INTRK, tstep=0;
     int    counter = 0;
