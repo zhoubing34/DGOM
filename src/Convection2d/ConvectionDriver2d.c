@@ -14,9 +14,6 @@
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
- * @todo
- * 1. Add slope limiter
- * 2. Add boundary conditions
  */
 
 #include "ConvectionDriver2d.h"
@@ -26,10 +23,6 @@ int main(int argc, char **argv){
 
     double dt, FinalTime = 2.4;         /* time */
     char casename[16] = "Convection2d"; /* output filename */
-
-//    if(argc>=3){
-//        printf("Wrong number of input arguments");
-//    }
 
     int procid, nprocs; /* process number */
 
@@ -49,11 +42,13 @@ int main(int argc, char **argv){
         printf("\n        Deg = %d \n", N);
         printf("\n    Tri Ele = %d \n", Ne);
         printf("\n   Quad Ele = %d \n", Ne);
+        printf("\n   Ele Type = %s \n", argv[1]);
         printf("\n");
         printf("--------------------------------\n");
     }
 
     StdRegions2d *shape;
+
     if ( !(memcmp(argv[1], "tri", 3)) ){
         shape = GenStdTriEle(N);
     }else if( !(memcmp(argv[1], "quad", 4)) ){
@@ -63,9 +58,9 @@ int main(int argc, char **argv){
                        "The input should be either \'tri\' or \'quad\'.\n", argv[1]);
         MPI_Finalize(); exit(1);
     }
+
     /* gen unifrom unsructed mesh */
     MultiReg2d *mesh    = ReadMesh(shape, Ne);
-
 
     /* physics */
     PhysDomain2d *phys     = GenPhysDomain2d(mesh, 1);
@@ -74,19 +69,8 @@ int main(int argc, char **argv){
     /* init phys */
     dt = InitCondition(phys, flowRate);
 
-#if 0
-    char *sname = "scalar";
-    PrintPhys(phys, sname);
-    char *fname = "flowRate";
-    PrintPhys(flowRate, fname)
-    if(!procid) {
-        printf("\ntime step = %f\n", dt);
-    }
-#endif
-
-    Ncfile * outfile;
     /* setup output file */
-    outfile = SetupOutput(mesh, casename);
+    Ncfile *outfile = SetupOutput(mesh, casename);
 
     /* solve */
     ConvectionRun2d(phys, flowRate, outfile ,FinalTime, dt);

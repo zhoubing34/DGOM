@@ -45,43 +45,42 @@ UnstructMesh* GenUniformTriMesh(int Mx, int My,
 
     /* vertex coordinate */
     int index; /* vertex index */
-    int ir, ic;
-    for (ir = 0; ir<My+1; ir++){
-        for (ic = 0; ic<Mx+1; ic++){
-            index = ir*(Mx+1) + ic; /* the order of vertex is from left to right, and from bottom to the top */
-            VX[index] = (double)ic/Mx * (xmax - xmin) + xmin;
-            VY[index] = (double)ir/My * (ymax - ymin) + ymin;
+    int dim1, dim2;
+    for (dim1 = 0; dim1<My+1; dim1++){
+        for (dim2 = 0; dim2<Mx+1; dim2++){
+            index = dim1*(Mx+1) + dim2; /* the order of vertex is from left to right, and from bottom to the top */
+            VX[index] = (double)dim2/Mx * (xmax - xmin) + xmin;
+            VY[index] = (double)dim1/My * (ymax - ymin) + ymin;
         }
     }
 
     /* EToV connection */
-    int ie;
     int topNode[2], botNode[2];
-    for (ir = 0; ir < My; ir++){
-        for (ie = 0; ie < Mx; ie++){
+    for (dim1 = 0; dim1 < My; dim1++){
+        for (dim2 = 0; dim2 < Mx; dim2++){
             /* Assignment of vertex index, which start from 0 */
-            botNode[0] = ir*(Mx + 1)+ie;        /* bottom left  */
-            botNode[1] = ir*(Mx + 1)+ie + 1;    /* bottom right */
+            botNode[0] = dim1*(Mx + 1)+dim2;        /* bottom left  */
+            botNode[1] = dim1*(Mx + 1)+dim2 + 1;    /* bottom right */
             topNode[0] = botNode[0] + (Mx + 1); /* top left  */
             topNode[1] = botNode[1] + (Mx + 1); /* top right */
 
             /* Assignment of EToV */
             if ( type==1 ){ /* for '/' division */
-                EToV[ir * Mx * 2 + ie][0] = botNode[0];
-                EToV[ir * Mx * 2 + ie][1] = topNode[1];
-                EToV[ir * Mx * 2 + ie][2] = topNode[0];
+                EToV[dim1 * Mx * 2 + dim2][0] = botNode[0];
+                EToV[dim1 * Mx * 2 + dim2][1] = topNode[1];
+                EToV[dim1 * Mx * 2 + dim2][2] = topNode[0];
 
-                EToV[ir * Mx * 2 + Mx + ie][0] = botNode[0];
-                EToV[ir * Mx * 2 + Mx + ie][1] = botNode[1];
-                EToV[ir * Mx * 2 + Mx + ie][2] = topNode[1];
+                EToV[dim1 * Mx * 2 + Mx + dim2][0] = botNode[0];
+                EToV[dim1 * Mx * 2 + Mx + dim2][1] = botNode[1];
+                EToV[dim1 * Mx * 2 + Mx + dim2][2] = topNode[1];
             }else if( type==0 ){ /* for '\' division */
-                EToV[ir * Mx * 2 + ie][0] = botNode[1];
-                EToV[ir * Mx * 2 + ie][1] = topNode[1];
-                EToV[ir * Mx * 2 + ie][2] = topNode[0];
+                EToV[dim1 * Mx * 2 + dim2][0] = botNode[1];
+                EToV[dim1 * Mx * 2 + dim2][1] = topNode[1];
+                EToV[dim1 * Mx * 2 + dim2][2] = topNode[0];
 
-                EToV[ir * Mx * 2 + Mx + ie][0] = botNode[0];
-                EToV[ir * Mx * 2 + Mx + ie][1] = botNode[1];
-                EToV[ir * Mx * 2 + Mx + ie][2] = topNode[0];
+                EToV[dim1 * Mx * 2 + Mx + dim2][0] = botNode[0];
+                EToV[dim1 * Mx * 2 + Mx + dim2][1] = botNode[1];
+                EToV[dim1 * Mx * 2 + Mx + dim2][2] = topNode[0];
             }
         }
     }
@@ -141,21 +140,21 @@ UnstructMesh* GenUniformQuadMesh(int Mx, int My,
     }
 
     /* EToV connection */
-    int ie, topInd[2], botInd[2];
+    int topInd[2], botInd[2];
     for (dim1 = 0; dim1 < My; dim1++){
-        for (ie = 0; ie < Mx; ie++){
+        for (dim2 = 0; dim2 < Mx; dim2++){
             /* Assignment of vertex index, which start from 0 */
-            botInd[0] = dim1*(Mx + 1)+ie;
-            botInd[1] = dim1*(Mx + 1)+ie + 1;
+            botInd[0] = dim1*(Mx + 1)+dim2;
+            botInd[1] = dim1*(Mx + 1)+dim2 + 1;
             topInd[0] = botInd[0] + Mx + 1;
             topInd[1] = botInd[1] + Mx + 1;
 
             /* Assignment of EToV,
              * each element start from the left lower vertex */
-            EToV[dim1 * Mx + ie][0] = botInd[0];
-            EToV[dim1 * Mx + ie][1] = botInd[1];
-            EToV[dim1 * Mx + ie][2] = topInd[1];
-            EToV[dim1 * Mx + ie][3] = topInd[0];
+            EToV[dim1 * Mx + dim2][0] = botInd[0];
+            EToV[dim1 * Mx + dim2][1] = botInd[1];
+            EToV[dim1 * Mx + dim2][2] = topInd[1];
+            EToV[dim1 * Mx + dim2][3] = topInd[0];
         }
     }
 
@@ -310,7 +309,7 @@ UnstructMesh* GenParallelUniformQuadMesh(int Mx, int My,
     parQuadGrid->name = "parallel uniform quadrilateral grid";
 
     /* EToV of local mesh */
-    int **newEToV = globalGrid->EToV;
+    int **newEToV = parQuadGrid->EToV;
 
     /* assignment of vertex coordinate */
     int i;
