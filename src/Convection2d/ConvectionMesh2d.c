@@ -53,14 +53,14 @@ MultiReg2d* ReadTriMesh(StdRegions2d *shape, int Ne){
 
     /* generate uniform grid */
     int type=0; // 0 for '\' and 1 for '/'
-    UnstructMesh *triGrid = GenParallelUniformTriMesh(
+    UnstructMesh *triGrid = ParallelUniformTriMesh_create(
             Ne, Ne, -1, 1, -1, 1, type, procid, nprocs);
 
     /* MultiRegions object and allocation */
-    MultiReg2d *region = GenMultiReg2d(shape, triGrid);
+    MultiReg2d *region = MultiReg2d_create(shape, triGrid);
 
     /* deallocate grid */
-    DestroyUnstructMesh(triGrid);
+    UnstructMesh_free(triGrid);
 
     return region;
 }
@@ -95,14 +95,14 @@ MultiReg2d* ReadQuadMesh(StdRegions2d *shape, int Ne){
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
     /* generate uniform grid */
-    UnstructMesh *quadGrid = GenParallelUniformQuadMesh(
+    UnstructMesh *quadGrid = ParallelUniformQuadMesh_create(
             Ne, Ne, -1, 1, -1, 1, procid, nprocs);
 
     /* MultiRegions object and allocation */
-    MultiReg2d *region = GenMultiReg2d(shape, quadGrid);
+    MultiReg2d *region = MultiReg2d_create(shape, quadGrid);
 
     /* deallocate grid */
-    DestroyUnstructMesh(quadGrid);
+    UnstructMesh_free(quadGrid);
 
     return region;
 }

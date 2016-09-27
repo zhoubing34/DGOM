@@ -7,13 +7,13 @@
 #define RETURN printf("\n");
 
 int main(void){
-    StdRegions2d *quad = GenStdQuadEle(Deg);
+    StdRegions2d *quad = StdQuadEle_create(Deg);
 
     /* parameters */
 
     /* Fmask */
     int Nfaces  = Dnfaces, Nfp = Dfp;
-    int **Fmask = BuildIntMatrix(Nfaces, Nfp);
+    int **Fmask = IntMatrix_create(Nfaces, Nfp);
 
     int i,j;
     for(i=0;i<Nfaces;i++){
@@ -21,12 +21,12 @@ int main(void){
             Fmask[i][j] = TestQuad_fmask[i][j];
     }
     CreateIntMatrixTest("Quad Fmask", quad->Fmask, Fmask, Nfaces, Nfp); RETURN
-    DestroyIntMatrix(Fmask);
+    IntMatrix_free(Fmask);
 
     /*Coordinate*/
     int    Np = (Deg+1)*(Deg+1);
-    double *r = BuildVector(Np);
-    double *s = BuildVector(Np);
+    double *r = Vector_create(Np);
+    double *s = Vector_create(Np);
 
     for(i=0;i<Np;i++) {
         r[i] = TestQuad_r[i];
@@ -34,14 +34,14 @@ int main(void){
     }
     CreateVectorTest("Coordinate r", quad->r, r, Dnp); RETURN
     CreateVectorTest("Coordinate s", quad->s, s, Dnp); RETURN
-    DestroyVector(r);
-    DestroyVector(s);
+    Vector_free(r);
+    Vector_free(s);
 
     /* matrix */
-    double **V  = BuildMatrix(Np, Np);
-    double **M  = BuildMatrix(Np, Np);
-    double **Dr = BuildMatrix(Np, Np);
-    double **Ds = BuildMatrix(Np, Np);
+    double **V  = Matrix_create(Np, Np);
+    double **M  = Matrix_create(Np, Np);
+    double **Dr = Matrix_create(Np, Np);
+    double **Ds = Matrix_create(Np, Np);
 
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
@@ -56,13 +56,13 @@ int main(void){
     CreateMatrixTest("Drivative matrix Dr", quad->Dr, Dr, Dnp, Dnp); RETURN
     CreateMatrixTest("Drivative matrix Ds", quad->Ds, Ds, Dnp, Dnp); RETURN
 
-    DestroyMatrix(V);
-    DestroyMatrix(M);
-    DestroyMatrix(Dr);
-    DestroyMatrix(Ds);
+    Matrix_free(V);
+    Matrix_free(M);
+    Matrix_free(Dr);
+    Matrix_free(Ds);
 
     /* LIFT test */
-    double **LIFT = BuildMatrix(Np, Nfp*Nfaces);
+    double **LIFT = Matrix_create(Np, Nfp * Nfaces);
 
     for(i=0;i<Np;i++){
         for(j=0;j<Nfp*Nfaces;j++){
@@ -70,10 +70,10 @@ int main(void){
         }
     }
     CreateMatrixTest("LIFT matrix", quad->LIFT, LIFT, Dnp, Dfp*Dnfaces); RETURN
-    DestroyMatrix(LIFT);
+    Matrix_free(LIFT);
 
     /* finish test */
-    FreeStdRegions2d(quad);
+    StdRegions2d_free(quad);
 
     return 0;
 }

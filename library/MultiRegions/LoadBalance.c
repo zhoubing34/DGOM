@@ -36,7 +36,7 @@ void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double *
     int Nverts = shape->Nv;
 
     /* number of elements in each process */
-    int *Kprocs = BuildIntVector(nprocs);
+    int *Kprocs = IntVector_create(nprocs);
 
     /* local number of elements */
     int Klocal = K;
@@ -51,7 +51,7 @@ void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double *
     for(p=0;p<nprocs;++p)
         elmdist[p+1] = elmdist[p] + Kprocs[p];
 
-    DestroyIntVector(Kprocs);
+    IntVector_free(Kprocs);
 
     /* list of element starts */
     idxtype *eptr = idxmalloc(Klocal+1, "eptr");
@@ -159,9 +159,9 @@ void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double *
     }
 
     /* receive the element to vertex list and vertex coordinates from each process, including itself */
-    int **newEToV = BuildIntMatrix(totalinK, Nverts);
-    double **newx = BuildMatrix(totalinK, Nverts);
-    double **newy = BuildMatrix(totalinK, Nverts);
+    int **newEToV = IntMatrix_create(totalinK, Nverts);
+    double **newx = Matrix_create(totalinK, Nverts);
+    double **newy = Matrix_create(totalinK, Nverts);
 
     int cnt = 0;
     for(p=0; p<nprocs; ++p){
@@ -178,9 +178,9 @@ void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double *
     /* send the element to vertex list and vertex coordinates to each process, including itself */
     for(p=0;p<nprocs;++p){
         int cnt = 0;
-        outlist[p]  = BuildIntVector(Nverts*outK[p]);
-        xoutlist[p]  = BuildVector(Nverts*outK[p]);
-        youtlist[p]  = BuildVector(Nverts*outK[p]);
+        outlist[p]  = IntVector_create(Nverts * outK[p]);
+        xoutlist[p]  = Vector_create(Nverts * outK[p]);
+        youtlist[p]  = Vector_create(Nverts * outK[p]);
 
         for(k=0;k<Klocal;++k)
             if(part[k]==p){
@@ -197,9 +197,9 @@ void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double *
         MPI_Isend(youtlist[p], Nverts*outK[p], MPI_DOUBLE, p, 2666+procid, MPI_COMM_WORLD, youtrequests+p);
 
         /* deallocate mem */
-        DestroyIntVector(outlist[p]);
-        DestroyVector(xoutlist[p]);
-        DestroyVector(youtlist[p]);
+        IntVector_free(outlist[p]);
+        Vector_free(xoutlist[p]);
+        Vector_free(youtlist[p]);
     }
 
     free(outlist); free(xoutlist); free(youtlist);

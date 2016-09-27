@@ -4,21 +4,21 @@
  * @brief
  * Deallocate unstructed grid structure.
  */
-void DestroyUnstructMesh(UnstructMesh *grid) {
+void UnstructMesh_free(UnstructMesh *grid) {
     free(grid->EToV[0]);
     free(grid->EToV);
     switch (grid->dim) {
         case 1:
-            DestroyVector(grid->vx);
+            Vector_free(grid->vx);
             break;
         case 2:
-            DestroyVector(grid->vx);
-            DestroyVector(grid->vy);
+            Vector_free(grid->vx);
+            Vector_free(grid->vy);
             break;
         case 3:
-            DestroyVector(grid->vx);
-            DestroyVector(grid->vy);
-            DestroyVector(grid->vz);
+            Vector_free(grid->vx);
+            Vector_free(grid->vy);
+            Vector_free(grid->vz);
             break;
         default:
             printf("Wrong dimension %d of unstructed grid %s.", grid->dim, grid->name);
@@ -31,7 +31,7 @@ void DestroyUnstructMesh(UnstructMesh *grid) {
  * @brief
  * Create and allocate an unstructed grid of single element type.
  */
-UnstructMesh* CreateUnstructMesh(int Dim, int Ne, int Nv, EleType eletype){
+UnstructMesh* UnstructMesh_create(int Dim, int Ne, int Nv, ElementType eletype){
 
     UnstructMesh *grid = (UnstructMesh*) calloc(1, sizeof(UnstructMesh));
 
@@ -57,19 +57,19 @@ UnstructMesh* CreateUnstructMesh(int Dim, int Ne, int Nv, EleType eletype){
             exit(-1);
     }
     // allocate
-    grid->EToV=BuildIntMatrix(Ne, perNv);
+    grid->EToV= IntMatrix_create(Ne, perNv);
     switch (Dim){ // allocate vertex
         case 1:
-            grid->vx  =BuildVector(Nv);
+            grid->vx  = Vector_create(Nv);
             break;
         case 2:
-            grid->vx  =BuildVector(Nv);
-            grid->vy  =BuildVector(Nv);
+            grid->vx  = Vector_create(Nv);
+            grid->vy  = Vector_create(Nv);
             break;
         case 3:
-            grid->vx  =BuildVector(Nv);
-            grid->vy  =BuildVector(Nv);
-            grid->vz  =BuildVector(Nv);
+            grid->vx  = Vector_create(Nv);
+            grid->vy  = Vector_create(Nv);
+            grid->vz  = Vector_create(Nv);
             break;
         default:
             printf("Wrong dimension %d of unstructed grid.", Dim);

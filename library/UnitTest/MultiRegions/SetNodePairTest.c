@@ -19,7 +19,7 @@ void QuadTest(void){
     int N=3;
 
     printf("init tri mesh\n");
-    StdRegions2d *quad = GenStdQuadEle(N);
+    StdRegions2d *quad = StdQuadEle_create(N);
     MultiReg2d *mesh;
     SetTestQuadMesh(quad, mesh);
 
@@ -37,15 +37,15 @@ void QuadTest(void){
     PrintIntVector2File(fp, "parmapOut", mesh->parmapOUT, mesh->parNtotalout);
 
     fclose(fp);
-    FreeMultiReg2d(mesh);
-    FreeStdRegions2d(quad);
+    MultiReg2d_free(mesh);
+    StdRegions2d_free(quad);
 }
 
 void TriTest(void){
     int N=3;
 
     printf("init quad mesh\n");
-    StdRegions2d *tri = GenStdTriEle(N);
+    StdRegions2d *tri = StdTriEle_create(N);
     MultiReg2d *mesh;
     SetTestTriMesh(tri, mesh);
 
@@ -63,6 +63,6 @@ void TriTest(void){
     PrintIntVector2File(fp, "parmapOut", mesh->parmapOUT, mesh->parNtotalout);
     fclose(fp);
 
-    FreeMultiReg2d(mesh);
-    FreeStdRegions2d(tri);
+    MultiReg2d_free(mesh);
+    StdRegions2d_free(tri);
 }

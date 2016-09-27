@@ -47,9 +47,9 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
 
     double x1, y1, x2, y2, d12;
 
-    double *nxk = BuildVector(Nfaces);
-    double *nyk = BuildVector(Nfaces);
-    double *sJk = BuildVector(Nfaces);
+    double *nxk = Vector_create(Nfaces);
+    double *nyk = Vector_create(Nfaces);
+    double *sJk = Vector_create(Nfaces);
 
     /* first build local */
     for(k1=0;k1<K;++k1){
@@ -133,20 +133,20 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
 
     for(p2=0;p2<nprocs;++p2){
         if(Npar[p2]){
-            xsend[p2] = BuildVector(Npar[p2]*Nfp);
-            ysend[p2] = BuildVector(Npar[p2]*Nfp);
-            Esend[p2] = BuildIntVector(Npar[p2]*Nfp);
-            Fsend[p2] = BuildIntVector(Npar[p2]*Nfp);
+            xsend[p2] = Vector_create(Npar[p2] * Nfp);
+            ysend[p2] = Vector_create(Npar[p2] * Nfp);
+            Esend[p2] = IntVector_create(Npar[p2] * Nfp);
+            Fsend[p2] = IntVector_create(Npar[p2] * Nfp);
 
-            xrecv[p2] = BuildVector(Npar[p2]*Nfp);
-            yrecv[p2] = BuildVector(Npar[p2]*Nfp);
-            Erecv[p2] = BuildIntVector(Npar[p2]*Nfp);
-            Frecv[p2] = BuildIntVector(Npar[p2]*Nfp);
+            xrecv[p2] = Vector_create(Npar[p2] * Nfp);
+            yrecv[p2] = Vector_create(Npar[p2] * Nfp);
+            Erecv[p2] = IntVector_create(Npar[p2] * Nfp);
+            Frecv[p2] = IntVector_create(Npar[p2] * Nfp);
         }
     }
 
     /* number of nodes adjacent to each process */
-    int *skP = BuildIntVector(nprocs);
+    int *skP = IntVector_create(nprocs);
 
     /* send coordinates in local order */
     int cnt = 0;
@@ -211,7 +211,7 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
 
     *Ntotalout = parNtotalout;
 
-    int *parmapOUT = BuildIntVector(parNtotalout);
+    int *parmapOUT = IntVector_create(parNtotalout);
 
     /* now match up local nodes with the requested (recv'ed nodes) */
     int sk = 0;
@@ -240,10 +240,10 @@ void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
     *mapOUT = parmapOUT;
 
     /* deallocate mem */
-    DestroyVector(nxk);
-    DestroyVector(nyk);
-    DestroyVector(sJk);
-    DestroyIntVector(skP);
+    Vector_free(nxk);
+    Vector_free(nyk);
+    Vector_free(sJk);
+    IntVector_free(skP);
 
     free(xsendrequests); free(ysendrequests);
     free(xrecvrequests); free(yrecvrequests);

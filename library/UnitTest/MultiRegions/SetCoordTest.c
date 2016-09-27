@@ -19,7 +19,7 @@ int QuadCoordTest(void){
     int info=0, N=1;
 
     printf("init tri mesh\n");
-    StdRegions2d *quad = GenStdQuadEle(N);
+    StdRegions2d *quad = StdQuadEle_create(N);
     MultiReg2d *mesh;
     SetTestQuadMesh(quad, mesh);
 
@@ -32,8 +32,8 @@ int QuadCoordTest(void){
     PrintMatrix2File(fp, "gy", mesh->GY, mesh->K, mesh->stdcell->Nv);
 
     fclose(fp);
-    FreeMultiReg2d(mesh);
-    FreeStdRegions2d(quad);
+    MultiReg2d_free(mesh);
+    StdRegions2d_free(quad);
     return info;
 }
 
@@ -41,7 +41,7 @@ int TriCoordTest(void){
     int info=0, N=1;
 
     printf("init tri mesh\n");
-    StdRegions2d *tri = GenStdTriEle(N);
+    StdRegions2d *tri = StdTriEle_create(N);
     MultiReg2d *mesh;
     SetTestTriMesh(tri, mesh);
 
@@ -54,7 +54,7 @@ int TriCoordTest(void){
     PrintMatrix2File(fp, "gy", mesh->GY, mesh->K, mesh->stdcell->Nv);
 
     fclose(fp);
-    FreeMultiReg2d(mesh);
-    FreeStdRegions2d(tri);
+    MultiReg2d_free(mesh);
+    StdRegions2d_free(tri);
     return info;
 }

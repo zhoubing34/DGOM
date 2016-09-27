@@ -1,7 +1,7 @@
 #include "NetcdfLibrary.h"
 #include "LibUtilities.h"
 
-NcDim* DefineNcDim(char *namestr, int len){
+NcDim* NcDim_create(char *namestr, int len){
     NcDim *dim = (NcDim*) calloc(1, sizeof(NcDim));
     dim->name  = (char *) malloc(NCNAMELEN*sizeof(char));
 
@@ -24,18 +24,18 @@ NcDim* DefineNcDim(char *namestr, int len){
     return dim;
 }
 
-void FreeNcDim(NcDim *dim){
+void NcDim_free(NcDim *dim){
     free(dim->name);
     free(dim);
 }
 
-void PrintNcDim(NcDim *dim){
+void NcDim_print(NcDim *dim){
     printf("Netcdf Dimension\n");
     printf("name: %s\n", dim->name);
     printf("length: %d\n", dim->len);
 }
 
-NcVar* DefineNcVar(char *namestr, int ndim, NcDim **dimArray, char *typestr){
+NcVar* NcVar_create(char *namestr, int ndim, NcDim **dimArray, char *typestr){
     NcVar *var = (NcVar*) calloc(1, sizeof(NcVar));
     var->name  = (char *) malloc(NCNAMELEN*sizeof(char));
 
@@ -71,7 +71,7 @@ NcVar* DefineNcVar(char *namestr, int ndim, NcDim **dimArray, char *typestr){
     return var;
 }
 
-void PrintNcVar(NcVar *var){
+void NcVar_print(NcVar *var){
     printf("NetCDF Variable\n");
     printf("name: %s\n", var->name);
     printf("ndim: %d\n", var->ndim);
@@ -80,19 +80,19 @@ void PrintNcVar(NcVar *var){
 
     int i;
     for(i=0;i<var->ndim;i++){
-        PrintNcDim(var->dimarray[i]);
+        NcDim_print(var->dimarray[i]);
     }
 }
 
-void FreeNcVar(NcVar *var){
+void NcVar_free(NcVar *var){
     free(var->name);
     free(var->dimarray);
     free(var);
 }
 
-NcFile* DefineNcFile(char *namestr, int procid, int nprocs,
-                     int ndim, NcDim **dimArray,
-                     int nvar, NcVar **varArray){
+NcFile* NcFile_create(char *namestr, int procid, int nprocs,
+                      int ndim, NcDim **dimArray,
+                      int nvar, NcVar **varArray){
 
     NcFile *file = (NcFile*) calloc(1, sizeof(NcFile));
     file->name  = (char *) malloc(NCNAMELEN*sizeof(char));
@@ -125,7 +125,7 @@ NcFile* DefineNcFile(char *namestr, int procid, int nprocs,
     return file;
 }
 
-void PrintNcFile(NcFile *file){
+void NcFile_print(NcFile *file){
     printf("NetCDF Files\n");
     printf("name: %s\n", file->name);
     printf("procid: %d\n", file->procid);
@@ -135,26 +135,27 @@ void PrintNcFile(NcFile *file){
 
     int i;
     for(i=0;i<file->nvar;i++){
-        PrintNcVar(file->vararray[i]);
+        NcVar_print(file->vararray[i]);
     }
     for(i=0;i<file->ndim;i++){
-        PrintNcDim(file->dimarray[i]);
+        NcDim_print(file->dimarray[i]);
     }
 }
 
-void FreeNcFile(NcFile *file){
+void NcFile_free(NcFile *file){
     int i;
     free(file->name);
     for (i=0;i<file->ndim;i++)
-        FreeNcDim(file->dimarray[i]);
+        NcDim_free(file->dimarray[i]);
 
     for (i=0;i<file->nvar;i++)
-        FreeNcVar(file->vararray[i]);
+        NcVar_free(file->vararray[i]);
 
     free(file);
 }
 
-void CreatNcFile(NcFile *file){
+/* Init the NetCDF files */
+void NcFile_init(NcFile *file){
 
     int ret;
     /* create output file */
@@ -189,7 +190,8 @@ void CreatNcFile(NcFile *file){
     ret = ncmpi_enddef(file->id); NC_ERROR;
 }
 
-void CloseNcFile(NcFile *file){
+/* close NetCDF file */
+void NcFile_close(NcFile *file){
     int ret;
     ret = ncmpi_close(file->id);
     NC_ERROR;

@@ -26,7 +26,7 @@ int CreateIntMatrixTest(char *message, int **A, int **ExactA, int Nrows, int Nco
     double error=0.0, relativeErr;
     double total=0.0;
     int success=0, i, j;
-    double **errorMatrix = BuildMatrix(Nrows, Ncols);
+    double **errorMatrix = Matrix_create(Nrows, Ncols);
     printf("------------Creating %s Test------------\n", message);
     for(i=0;i<Nrows;i++){
         for(j=0;j<Ncols;j++){
@@ -47,7 +47,7 @@ int CreateIntMatrixTest(char *message, int **A, int **ExactA, int Nrows, int Nco
         printf("test in %s success!\n", message);
     }
     printf("-------------Finish %s Test-------------\n", message);
-    DestroyMatrix(errorMatrix);
+    Matrix_free(errorMatrix);
     return success;
 }
 
@@ -70,7 +70,7 @@ int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int 
     double error=0.0, relativeErr;
     double total=0.0;
     int success=0, i, j;
-    double **errorMatrix = BuildMatrix(Nrows, Ncols);
+    double **errorMatrix = Matrix_create(Nrows, Ncols);
     printf("------------Creating %s Test------------\n", message);
     for(i=0;i<Nrows;i++){
         for(j=0;j<Ncols;j++){
@@ -92,7 +92,7 @@ int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int 
         printf("test in %s success!\n", message);
     }
     printf("-------------Finish %s Test-------------\n", message);
-    DestroyMatrix(errorMatrix);
+    Matrix_free(errorMatrix);
     return success;
 }
 
@@ -115,7 +115,7 @@ int CreateVectorTest(char *message, double *A, double *ExactA, int Ncols){
     double error=0.0, relativeErr;
     double total=0.0;
     int success=0, i;
-    double *errorVector = BuildVector(Ncols);
+    double *errorVector = Vector_create(Ncols);
     printf("------------Creating %s Test------------\n", message);
     for(i=0;i<Ncols;i++){
         errorVector[i] = A[i] - ExactA[i];
@@ -137,7 +137,7 @@ int CreateVectorTest(char *message, double *A, double *ExactA, int Ncols){
     }
     printf("-------------Finish %s Test-------------\n", message);
 
-    DestroyVector(errorVector);
+    Vector_free(errorVector);
     return success;
 }
 

@@ -34,7 +34,7 @@ void GetQuadDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, 
  * tri | StdRegions2d* |
  *
  */
-StdRegions2d* GenStdQuadEle(int N){
+StdRegions2d* StdQuadEle_create(int N){
     StdRegions2d *quad = (StdRegions2d *) calloc(1, sizeof(StdRegions2d));
 
     int Np = (N+1)*(N+1);
@@ -46,7 +46,7 @@ StdRegions2d* GenStdQuadEle(int N){
     quad->Nv     = 4;
 
     /* nodes at faces, Fmask */
-    quad->Fmask = BuildIntMatrix(quad->Nfaces, quad->Nfp);
+    quad->Fmask = IntMatrix_create(quad->Nfaces, quad->Nfp);
     BuildQuadFmask(quad->N, quad->Fmask);
 
     /* coordinate */
@@ -55,35 +55,35 @@ StdRegions2d* GenStdQuadEle(int N){
     GetQuadCoord(N, quad->r, quad->s);
 
     /* vandermonde matrix */
-    quad->V = BuildMatrix(Np, Np);
+    quad->V = Matrix_create(Np, Np);
     GetQuadV(N, Np, quad->r, quad->s, quad->V);
 
     /* mass matrix */
-    quad->M = BuildMatrix(Np, Np);
+    quad->M = Matrix_create(Np, Np);
     GetQuadM(Np, quad->V, quad->M);
 
     /* Derivative Matrix, Dr and Ds */
-    quad->Dr = BuildMatrix(quad->Np, quad->Np);
-    quad->Ds = BuildMatrix(quad->Np, quad->Np);
+    quad->Dr = Matrix_create(quad->Np, quad->Np);
+    quad->Ds = Matrix_create(quad->Np, quad->Np);
     GetQuadDeriM(N, Np, quad->r, quad->s, quad->V, quad->Dr, quad->Ds);
 
     /* suface LIFT matrix, LIFT */
-    double **Mes = BuildMatrix(quad->Np, quad->Nfaces*quad->Nfp);
-    quad->LIFT = BuildMatrix(quad->Np, quad->Nfaces*quad->Nfp);
+    double **Mes = Matrix_create(quad->Np, quad->Nfaces * quad->Nfp);
+    quad->LIFT = Matrix_create(quad->Np, quad->Nfaces * quad->Nfp);
     GetSurfLinM(quad->N, quad->Nfaces, quad->Fmask, Mes);
     GetLIFT2d(quad, Mes, quad->LIFT);
 
 //    PrintMatrix("Mes", Mes, quad->Np, quad->Nfaces*quad->Nfp);
-    DestroyMatrix(Mes);
+    Matrix_free(Mes);
 
     /* integration coeff, ws and wv */
     /* integration coeff, ws and wv */
-    quad->ws = BuildVector(quad->Nfp);
-    double *r = BuildVector(quad->Nfp);
+    quad->ws = Vector_create(quad->Nfp);
+    double *r = Vector_create(quad->Nfp);
     zwglj(r, quad->ws, quad->Nfp, 0, 0);
-    DestroyVector(r);
+    Vector_free(r);
 
-    quad->wv = BuildVector(quad->Np);
+    quad->wv = Vector_create(quad->Np);
     int i,j;
     for(i=0;i<quad->Np;i++){
         for(j=0;j<quad->Np;j++){
@@ -120,11 +120,11 @@ StdRegions2d* GenStdQuadEle(int N){
 
 
 void GetQuadDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, double **Ds){
-    double **Vr = BuildMatrix(Np, Np);
-    double **Vs = BuildMatrix(Np, Np);
-    double *temp = BuildVector(Np*Np);
-    double *vtemp = BuildVector(Np*Np);
-    double *dtemp = BuildVector(Np*Np);
+    double **Vr = Matrix_create(Np, Np);
+    double **Vs = Matrix_create(Np, Np);
+    double *temp = Vector_create(Np * Np);
+    double *vtemp = Vector_create(Np * Np);
+    double *dtemp = Vector_create(Np * Np);
 
     int i,j,sk=0;
 
@@ -177,16 +177,16 @@ void GetQuadDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, 
     }
 
     /* dealloc mem */
-    DestroyMatrix(Vr);
-    DestroyMatrix(Vs);
-    DestroyVector(temp);
-    DestroyVector(vtemp);
-    DestroyVector(dtemp);
+    Matrix_free(Vr);
+    Matrix_free(Vs);
+    Vector_free(temp);
+    Vector_free(vtemp);
+    Vector_free(dtemp);
 }
 
 void GetQuadDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs){
-    double *h1 = BuildVector(Np);
-    double *h2 = BuildVector(Np);
+    double *h1 = Vector_create(Np);
+    double *h2 = Vector_create(Np);
 
     int i,j,k,sk;
     for(i=0;i<(N+1);i++){
@@ -211,15 +211,15 @@ void GetQuadDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **V
         }
     }
 
-    DestroyVector(h1);
-    DestroyVector(h2);
+    Vector_free(h1);
+    Vector_free(h2);
 }
 
 
 void GetQuadM(int Np, double **V, double **M){
-    double *temp = BuildVector(Np*Np);
-    double *invt = BuildVector(Np*Np);
-    double *Mv   = BuildVector(Np*Np);
+    double *temp = Vector_create(Np * Np);
+    double *invt = Vector_create(Np * Np);
+    double *Mv   = Vector_create(Np * Np);
     const unsigned n = (unsigned)Np;
 
     int i,j,sk=0;
@@ -272,8 +272,8 @@ void GetQuadM(int Np, double **V, double **M){
  *
  */
 void GetQuadV(int N, int Np, double *r, double *s, double **V){
-    double *h1 = BuildVector(Np);
-    double *h2 = BuildVector(Np);
+    double *h1 = Vector_create(Np);
+    double *h2 = Vector_create(Np);
 
     int i,j,k,sk=0;
     for(i=0;i<(N+1);i++){
@@ -309,8 +309,8 @@ void GetQuadV(int N, int Np, double *r, double *s, double **V){
  */
 void GetQuadCoord(int N, double *r, double *s){
     int Np = (N+1);
-    double *t = BuildVector(Np);
-    double *w = BuildVector(Np);
+    double *t = Vector_create(Np);
+    double *w = Vector_create(Np);
 
     /* get Gauss-Lobatto-Jacobi zeros and weights */
     zwglj(t, w, Np, 0, 0);
@@ -323,8 +323,8 @@ void GetQuadCoord(int N, double *r, double *s){
         }
     }
 
-    DestroyVector(t);
-    DestroyVector(w);
+    Vector_free(t);
+    Vector_free(w);
 }
 
 

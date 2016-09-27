@@ -11,7 +11,7 @@ int main(int argc, char **argv){
 
     /* set mesh and physical domain */
     int N=1, Nfields=3;
-    StdRegions2d *tri = GenStdTriEle(N);
+    StdRegions2d *tri = StdTriEle_create(N);
     MultiReg2d   *mesh;
     SetTestTriMesh(tri, mesh);
     PhysDomain2d *phys = GenPhysDomain2d(mesh, Nfields);

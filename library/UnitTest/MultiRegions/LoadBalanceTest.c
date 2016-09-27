@@ -6,7 +6,7 @@ int main(int argc, char **argv){
     MPI_Init(&argc, &argv);
 
     int N=3, Nvert=3;
-    StdRegions2d *tri = GenStdTriEle(N);
+    StdRegions2d *tri = StdTriEle_create(N);
     MultiReg2d *mesh;
     SetTestTriMesh(tri, mesh);
 
@@ -24,8 +24,8 @@ int main(int argc, char **argv){
     PrintMatrix2File(fp, "GY", mesh->GY, mesh->K, Nvert);
 
     fclose(fp);
-    FreeMultiReg2d(mesh);
-    FreeStdRegions2d(tri);
+    MultiReg2d_free(mesh);
+    StdRegions2d_free(tri);
 
     MPI_Finalize();
     return 0;

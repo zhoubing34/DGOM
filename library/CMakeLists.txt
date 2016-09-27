@@ -35,6 +35,7 @@ add_library(Polylib STATIC ${POLYLIB_SOURCE})
 set(STDREGIONS_SOURCE
         StdRegions/StdRegions.h
         StdRegions/Triangle.c
+        StdRegions/StdRegions.c
         StdRegions/Quadrilateral.c)
 
 add_library(StdRegions STATIC ${STDREGIONS_SOURCE})

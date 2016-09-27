@@ -50,9 +50,9 @@ int main(int argc, char **argv){
     StdRegions2d *shape;
 
     if ( !(memcmp(argv[1], "tri", 3)) ){
-        shape = GenStdTriEle(N);
+        shape = StdTriEle_create(N);
     }else if( !(memcmp(argv[1], "quad", 4)) ){
-        shape = GenStdQuadEle(N);
+        shape = StdQuadEle_create(N);
     }else{
         printf("Wrong mesh type: %s.\n"
                        "The input should be either \'tri\' or \'quad\'.\n", argv[1]);
@@ -79,9 +79,9 @@ int main(int argc, char **argv){
     Postprocess(phys);
 
     /* finish */
-    FreeNcFile(outfile);
-    FreeStdRegions2d(shape);
-    FreeMultiReg2d(mesh);
+    NcFile_free(outfile);
+    StdRegions2d_free(shape);
+    MultiReg2d_free(mesh);
     FreePhysDomain2d(phys);
     FreePhysDomain2d(flowRate);
 

@@ -12,9 +12,9 @@ int main(void){
     double invCt[3][3] = {{-2, -2, 6},
                          {-1, 1, 1},
                          {4, 0, -4}};
-    double **C    = BuildMatrix(N, N);
-    double **invC = BuildMatrix(N, N);
-    double *temp  = BuildVector(N*N);
+    double **C    = Matrix_create(N, N);
+    double **invC = Matrix_create(N, N);
+    double *temp  = Vector_create(N * N);
 
 
 
@@ -37,9 +37,9 @@ int main(void){
 
     info = CreateMatrixTest("Matrix Inverse", C, invC, N, N);
 
-    DestroyMatrix(C);
-    DestroyMatrix(invC);
-    DestroyVector(temp);
+    Matrix_free(C);
+    Matrix_free(invC);
+    Vector_free(temp);
 
     return info;
 }

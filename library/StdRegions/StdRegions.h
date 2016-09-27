@@ -13,9 +13,10 @@
 #define STDREGION_H
 
 #include "LibUtilities/LibUtilities.h"
+#include "LibUtilities/UnstructMesh.h"
 #include "Polylib/polylib.h"
 
-struct StdReg2d{
+typedef struct {
     /** Polynomial order */
     int N;
     /** number of points */
@@ -51,15 +52,17 @@ struct StdReg2d{
     real *f_Dr, *f_Ds;
     real *f_LIFT;
 
-};
-typedef struct StdReg2d StdRegions2d;
+} StdRegions2d;
+
+/* standard element */
+StdRegions2d* StdRegions2d_create(int N, ElementType eleType);
+void StdRegions2d_free(StdRegions2d *);
 
 /* Quadrilateral.c */
-StdRegions2d* GenStdQuadEle(int N);
-
+StdRegions2d* StdQuadEle_create(int N);
 /* Triangle.c - public functions */
-StdRegions2d* GenStdTriEle(int N);
-void FreeStdRegions2d(StdRegions2d * );
+StdRegions2d* StdTriEle_create(int N);
+
 void GetLIFT2d(StdRegions2d *shape, double **Mes, double **LIFT);
 void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes);
 

@@ -21,7 +21,7 @@ void QuadDomainTest(void){
     int N=3, Nfields=3;
 
     printf("init mesh\n");
-    StdRegions2d *quad = GenStdQuadEle(N);
+    StdRegions2d *quad = StdQuadEle_create(N);
     MultiReg2d *mesh;
     SetTestQuadMesh(quad, mesh);
     PhysDomain2d *phys = GenPhysDomain2d(mesh, Nfields);
@@ -38,15 +38,15 @@ void QuadDomainTest(void){
 
     fclose(fp);
 
-    FreeMultiReg2d(mesh);
-    FreeStdRegions2d(quad);
+    MultiReg2d_free(mesh);
+    StdRegions2d_free(quad);
 }
 
 void TriDomainTest(void){
     int N=3, Nfields=3;
 
     printf("init mesh\n");
-    StdRegions2d *tri = GenStdTriEle(N);
+    StdRegions2d *tri = StdTriEle_create(N);
     MultiReg2d *mesh;
     SetTestTriMesh(tri, mesh);
     PhysDomain2d *phys = GenPhysDomain2d(mesh, Nfields);
@@ -64,8 +64,8 @@ void TriDomainTest(void){
 
     fclose(fp);
 
-    FreeMultiReg2d(mesh);
-    FreeStdRegions2d(tri);
+    MultiReg2d_free(mesh);
+    StdRegions2d_free(tri);
 }
 
 

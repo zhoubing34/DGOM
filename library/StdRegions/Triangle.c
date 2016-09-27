@@ -26,34 +26,6 @@ void GetTriM(int Np, double **V, double **M);
 
 /**
  * @brief
- * Free variables fields in StdRegions2d
- */
-void FreeStdRegions2d(StdRegions2d *triangle){
-    /* fmaks */
-    DestroyIntMatrix(triangle->Fmask);
-    /* coordinate */
-    DestroyVector(triangle->r);
-    DestroyVector(triangle->s);
-    /* vandermonde matrix */
-    DestroyMatrix(triangle->V);
-    /* mass matrix */
-    DestroyMatrix(triangle->M);
-    /* Derivative Matrix */
-    DestroyMatrix(triangle->Dr);
-    DestroyMatrix(triangle->Ds);
-
-    /* LIFT */
-    DestroyMatrix(triangle->LIFT);
-
-    /* float version */
-    free(triangle->f_LIFT);
-    free(triangle->f_Dr);
-    free(triangle->f_Ds);
-
-}
-
-/**
- * @brief
  * Generation of standard triangle element
  *
  * @details
@@ -66,7 +38,7 @@ void FreeStdRegions2d(StdRegions2d *triangle){
  * tri | StdRegions2d* | structure of standard triangle element
  *
  */
-StdRegions2d* GenStdTriEle(int N){
+StdRegions2d* StdTriEle_create(int N){
     StdRegions2d *tri = (StdRegions2d *) calloc(1, sizeof(StdRegions2d));
 
     /* basic info */
@@ -77,43 +49,43 @@ StdRegions2d* GenStdTriEle(int N){
     tri->Nfp    = N+1;
 
     /* nodes at faces, Fmask */
-    tri->Fmask = BuildIntMatrix(tri->Nfaces, tri->Nfp);
+    tri->Fmask = IntMatrix_create(tri->Nfaces, tri->Nfp);
     BuildTriFmask(tri->N, tri->Fmask);
 
     /* coordinate, r and s */
-    tri->r = BuildVector(tri->Np);
-    tri->s = BuildVector(tri->Np);
+    tri->r = Vector_create(tri->Np);
+    tri->s = Vector_create(tri->Np);
 
     GetTriCoord(N, tri->r, tri->s);
 
     /* vandermonde matrix, V */
-    tri->V = BuildMatrix(tri->Np, tri->Np);
+    tri->V = Matrix_create(tri->Np, tri->Np);
     GetTriV(N, tri->Np, tri->r, tri->s, tri->V);
 
     /* mass matrix, M */
-    tri->M = BuildMatrix(tri->Np, tri->Np);
+    tri->M = Matrix_create(tri->Np, tri->Np);
     GetTriM(tri->Np, tri->V, tri->M);
 
     /* Derivative Matrix, Dr and Ds */
-    tri->Dr = BuildMatrix(tri->Np, tri->Np);
-    tri->Ds = BuildMatrix(tri->Np, tri->Np);
+    tri->Dr = Matrix_create(tri->Np, tri->Np);
+    tri->Ds = Matrix_create(tri->Np, tri->Np);
     GetTriDeriM(tri->N, tri->Np, tri->r, tri->s, tri->V, tri->Dr, tri->Ds);
 
     /* suface LIFT matrix, LIFT */
-    double **Mes = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
-    tri->LIFT = BuildMatrix(tri->Np, tri->Nfaces*tri->Nfp);
+    double **Mes = Matrix_create(tri->Np, tri->Nfaces * tri->Nfp);
+    tri->LIFT = Matrix_create(tri->Np, tri->Nfaces * tri->Nfp);
     GetSurfLinM(tri->N, tri->Nfaces, tri->Fmask, Mes);
     GetLIFT2d(tri, Mes, tri->LIFT);
 
-    DestroyMatrix(Mes);
+    Matrix_free(Mes);
 
     /* integration coeff, ws and wv */
-    tri->ws = BuildVector(tri->Nfp);
-    double *r = BuildVector(tri->Nfp);
+    tri->ws = Vector_create(tri->Nfp);
+    double *r = Vector_create(tri->Nfp);
     zwglj(r, tri->ws, tri->Nfp, 0, 0);
-    DestroyVector(r);
+    Vector_free(r);
 
-    tri->wv = BuildVector(tri->Np);
+    tri->wv = Vector_create(tri->Np);
     int i,j;
     for(i=0;i<tri->Np;i++){
         for(j=0;j<tri->Np;j++){
@@ -164,11 +136,11 @@ StdRegions2d* GenStdTriEle(int N){
 void GetLIFT2d(StdRegions2d *shape, double **Mes, double **LIFT){
     unsigned int Np = (unsigned)shape->Np;
     int Nfp = shape->Nfp, Nfaces=shape->Nfaces;
-    double *vc = BuildVector(Np*Np); /* vandermonde matrix */
-    double *vct = BuildVector(Np*Np); /* transform of vandermonde matrix */
-    double *me = BuildVector(Np*Nfp*Nfaces);
-    double *temp1 = BuildVector(Np*Np); /* inverse of mass matrix */
-    double *temp2 = BuildVector(Np*Nfp*Nfaces);
+    double *vc = Vector_create(Np * Np); /* vandermonde matrix */
+    double *vct = Vector_create(Np * Np); /* transform of vandermonde matrix */
+    double *me = Vector_create(Np * Nfp * Nfaces);
+    double *temp1 = Vector_create(Np * Np); /* inverse of mass matrix */
+    double *temp2 = Vector_create(Np * Nfp * Nfaces);
 
     int i,j,sk=0;
     /* assignment */
@@ -198,11 +170,11 @@ void GetLIFT2d(StdRegions2d *shape, double **Mes, double **LIFT){
             LIFT[i][j] = temp2[sk++];
     }
 
-    DestroyVector(vc);
-    DestroyVector(vct);
-    DestroyVector(me);
-    DestroyVector(temp1);
-    DestroyVector(temp2);
+    Vector_free(vc);
+    Vector_free(vct);
+    Vector_free(me);
+    Vector_free(temp1);
+    Vector_free(temp2);
 }
 
 /**
@@ -220,12 +192,12 @@ void GetLIFT2d(StdRegions2d *shape, double **Mes, double **LIFT){
 void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes){
 
     unsigned Nfp=(unsigned)N+1;
-    double *r=BuildVector(Nfp);
-    double *w=BuildVector(Nfp);
+    double *r= Vector_create(Nfp);
+    double *w= Vector_create(Nfp);
 
-    double *invt = BuildVector(Nfp*Nfp);
-    double *inv = BuildVector(Nfp*Nfp);
-    double *m =   BuildVector(Nfp*Nfp);
+    double *invt = Vector_create(Nfp * Nfp);
+    double *inv = Vector_create(Nfp * Nfp);
+    double *m = Vector_create(Nfp * Nfp);
     /* get surface mass matrix */
     zwglj(r, w, Nfp, 0, 0); /* get coordinate */
     int i,j;
@@ -256,11 +228,11 @@ void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes){
         }
     }
 
-    DestroyVector(invt);
-    DestroyVector(inv);
-    DestroyVector(m);
-    DestroyVector(r);
-    DestroyVector(w);
+    Vector_free(invt);
+    Vector_free(inv);
+    Vector_free(m);
+    Vector_free(r);
+    Vector_free(w);
 }
 
 /**
@@ -287,11 +259,11 @@ void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes){
  * Ds | object[Np][Np]   |
  */
 void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, double **Ds){
-    double **Vr = BuildMatrix(Np, Np);
-    double **Vs = BuildMatrix(Np, Np);
-    double *temp = BuildVector(Np*Np);
-    double *vtemp = BuildVector(Np*Np);
-    double *dtemp = BuildVector(Np*Np);
+    double **Vr = Matrix_create(Np, Np);
+    double **Vs = Matrix_create(Np, Np);
+    double *temp = Vector_create(Np * Np);
+    double *vtemp = Vector_create(Np * Np);
+    double *dtemp = Vector_create(Np * Np);
 
     int i,j,sk=0;
 
@@ -344,11 +316,11 @@ void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, d
     }
 
     /* dealloc mem */
-    DestroyMatrix(Vr);
-    DestroyMatrix(Vs);
-    DestroyVector(temp);
-    DestroyVector(vtemp);
-    DestroyVector(dtemp);
+    Matrix_free(Vr);
+    Matrix_free(Vs);
+    Vector_free(temp);
+    Vector_free(vtemp);
+    Vector_free(dtemp);
 }
 
 /**
@@ -369,12 +341,12 @@ void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, d
  *
  */
 void GetTriDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs){
-    double *a = BuildVector(Np);
-    double *b = BuildVector(Np);
+    double *a = Vector_create(Np);
+    double *b = Vector_create(Np);
     double *dpdr, *dpds;
     int i,j,k,sk=0;
 
-    dpdr = BuildVector(Np); dpds = BuildVector(Np);
+    dpdr = Vector_create(Np); dpds = Vector_create(Np);
 
     rstoad(Np, r, s, a, b);
     for(i=0;i<N+1;i++){
@@ -388,8 +360,10 @@ void GetTriDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs
             sk++;
         }
     }
-    DestroyVector(dpdr); DestroyVector(dpds);
-    DestroyVector(a); DestroyVector(b);
+    Vector_free(dpdr);
+    Vector_free(dpds);
+    Vector_free(a);
+    Vector_free(b);
 
 }
 
@@ -423,11 +397,11 @@ void GetTriDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs
  *
  */
 void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds){
-    double *fa  = BuildVector(Np);
-    double *dfa = BuildVector(Np);
-    double *gb  = BuildVector(Np);
-    double *dgb = BuildVector(Np);
-    double *temp = BuildVector(Np);
+    double *fa  = Vector_create(Np);
+    double *dfa = Vector_create(Np);
+    double *gb  = Vector_create(Np);
+    double *dgb = Vector_create(Np);
+    double *temp = Vector_create(Np);
     int i;
 
     jacobiP(Np, a, fa, id, 0, 0);
@@ -472,9 +446,11 @@ void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmoded
         dmodeds[i] *= pow(2.0, id+0.5);
     }
 
-    DestroyVector(fa); DestroyVector(dfa);
-    DestroyVector(gb); DestroyVector(dgb);
-    DestroyVector(temp);
+    Vector_free(fa);
+    Vector_free(dfa);
+    Vector_free(gb);
+    Vector_free(dgb);
+    Vector_free(temp);
 }
 
 
@@ -495,9 +471,9 @@ void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmoded
  * M   | double[Np][Np] | Mass Matrix
  */
 void GetTriM(int Np, double **V, double **M){
-    double *temp = BuildVector(Np*Np);
-    double *invt = BuildVector(Np*Np);
-    double *Mv = BuildVector(Np*Np);
+    double *temp = Vector_create(Np * Np);
+    double *invt = Vector_create(Np * Np);
+    double *Mv = Vector_create(Np * Np);
     const unsigned n = (unsigned)Np;
 
     int i,j,sk=0;
@@ -547,8 +523,8 @@ void GetTriM(int Np, double **V, double **M){
  *
  */
 void Simplex2dP(int Np, double *a, double *b, int i, int j, double *poly){
-    double *h1 = BuildVector(Np);
-    double *h2 = BuildVector(Np);
+    double *h1 = Vector_create(Np);
+    double *h2 = Vector_create(Np);
     int n;
 
     jacobiP(Np, a, h1, i, 0.0, 0.0);
@@ -558,8 +534,8 @@ void Simplex2dP(int Np, double *a, double *b, int i, int j, double *poly){
         poly[n] = sqrt(2.0)*h1[n]*h2[n]*pow(1-b[n], i);
     }
 
-    DestroyVector(h1);
-    DestroyVector(h2);
+    Vector_free(h1);
+    Vector_free(h2);
 }
 
 /**
@@ -594,9 +570,9 @@ void Simplex2dP(int Np, double *a, double *b, int i, int j, double *poly){
 void GetTriV(int N, int Nr, double *r, double *s, double **V){
     int i,j,k,sk=0;
 
-    double *temp = BuildVector(Nr);
-    double *a=BuildVector(Nr);
-    double *b=BuildVector(Nr);
+    double *temp = Vector_create(Nr);
+    double *a= Vector_create(Nr);
+    double *b= Vector_create(Nr);
 
     rstoad(Nr, r, s, a, b);
 
@@ -610,9 +586,9 @@ void GetTriV(int N, int Nr, double *r, double *s, double **V){
         }
     }
 
-    DestroyVector(a);
-    DestroyVector(b);
-    DestroyVector(temp);
+    Vector_free(a);
+    Vector_free(b);
+    Vector_free(temp);
 }
 
 
@@ -650,14 +626,14 @@ void GetTriCoord(int N, double *r, double *s){
         alpha = 5.0/3.0;
     }
 
-    L1 = BuildVector(Np);
-    L2 = BuildVector(Np);
-    L3 = BuildVector(Np);
-    dL = BuildVector(Np);
-    x  = BuildVector(Np);
-    y  = BuildVector(Np);
+    L1 = Vector_create(Np);
+    L2 = Vector_create(Np);
+    L3 = Vector_create(Np);
+    dL = Vector_create(Np);
+    x  = Vector_create(Np);
+    y  = Vector_create(Np);
 
-    warpf1 = BuildVector(Np);
+    warpf1 = Vector_create(Np);
 
     for(i=0;i<N+1;i++){
         for(j=0;j<(N-i)+1;j++){
@@ -714,10 +690,12 @@ void GetTriCoord(int N, double *r, double *s){
     xytors(Np, x, y, r, s);
 
     /* deallocate mem */
-    DestroyVector(L1); DestroyVector(L2); DestroyVector(L3);
-    DestroyVector(x);
-    DestroyVector(y);
-    DestroyVector(warpf1);
+    Vector_free(L1);
+    Vector_free(L2);
+    Vector_free(L3);
+    Vector_free(x);
+    Vector_free(y);
+    Vector_free(warpf1);
 }
 
 /**
@@ -750,11 +728,11 @@ void Warpfactor(int N, double *r, int Nr, double *w){
     double *ye, *l, *re, *rlgl, *wlgl;
     double temp;
 
-    ye   = BuildVector(Np);
-    l    = BuildVector(Nr);
-    re   = BuildVector(Np); /* equidistant nodes */
-    rlgl = BuildVector(Np); /* Gauss-Lobatto-Jacobi nodes */
-    wlgl = BuildVector(Np); /* Gauss-Lobatto-Jacobi weights */
+    ye   = Vector_create(Np);
+    l    = Vector_create(Nr);
+    re   = Vector_create(Np); /* equidistant nodes */
+    rlgl = Vector_create(Np); /* Gauss-Lobatto-Jacobi nodes */
+    wlgl = Vector_create(Np); /* Gauss-Lobatto-Jacobi weights */
 
     /* initialization */
     for(i=0;i<Nr;i++){
@@ -788,11 +766,11 @@ void Warpfactor(int N, double *r, int Nr, double *w){
     }
 
     /* deallocate mem */
-    DestroyVector(ye);
-    DestroyVector(l);
-    DestroyVector(re);
-    DestroyVector(rlgl);
-    DestroyVector(wlgl);
+    Vector_free(ye);
+    Vector_free(l);
+    Vector_free(re);
+    Vector_free(rlgl);
+    Vector_free(wlgl);
 }
 
 /**
@@ -812,8 +790,8 @@ void Warpfactor(int N, double *r, int Nr, double *w){
  */
 void BuildTriFmask(int N, int **Fmask){
     int Nfp = N+1;
-    int *temp = BuildIntVector(Nfp);
-    int *nrp = BuildIntVector(Nfp); /* # of nodes from s=-1 to s=1 */
+    int *temp = IntVector_create(Nfp);
+    int *nrp = IntVector_create(Nfp); /* # of nodes from s=-1 to s=1 */
     int i;
 
     /* face 1, s=-1 */
@@ -841,8 +819,8 @@ void BuildTriFmask(int N, int **Fmask){
         Fmask[1][i] = nrp[i] - 1;
     }
 
-    DestroyIntVector(temp);
-    DestroyIntVector(nrp);
+    IntVector_free(temp);
+    IntVector_free(nrp);
 }
 
 

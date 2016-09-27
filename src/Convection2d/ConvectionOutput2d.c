@@ -29,9 +29,9 @@ NcFile* SetupOutput(MultiReg2d *mesh, char* casename){
     StdRegions2d *shape = mesh->stdcell;
 
     /* define dimensions */
-    NcDim *ne = DefineNcDim("ne", mesh->K);
-    NcDim *np = DefineNcDim("np", shape->Np);
-    NcDim *t  = DefineNcDim("t",  0);
+    NcDim *ne = NcDim_create("ne", mesh->K);
+    NcDim *np = NcDim_create("np", shape->Np);
+    NcDim *t  = NcDim_create("t", 0);
 
     /* define variables */
     NcDim **dimarray;
@@ -44,18 +44,18 @@ NcFile* SetupOutput(MultiReg2d *mesh, char* casename){
     dimarray    = (NcDim**) calloc(maxDimNum, sizeof(NcDim*));
     dimarray[0] = ne;
     dimarray[1] = np; /* the inner loop dimension comes the last */
-    NcVar *x   = DefineNcVar("x",   ndim, dimarray, "double");
-    NcVar *y   = DefineNcVar("y",   ndim, dimarray, "double");
+    NcVar *x   = NcVar_create("x", ndim, dimarray, "double");
+    NcVar *y   = NcVar_create("y", ndim, dimarray, "double");
 
     ndim        = 1;
     dimarray[0] = t;
-    NcVar *time = DefineNcVar("time", ndim, dimarray, "double");
+    NcVar *time = NcVar_create("time", ndim, dimarray, "double");
 
     ndim        = 3;
     dimarray[0] = t;    /* inner loop */
     dimarray[1] = ne;
     dimarray[2] = np;
-    NcVar *h   = DefineNcVar("var",  ndim, dimarray, "double");
+    NcVar *h   = NcVar_create("var", ndim, dimarray, "double");
 
     /* define files */
     ndim        = 3;
@@ -67,12 +67,12 @@ NcFile* SetupOutput(MultiReg2d *mesh, char* casename){
     vararray = (NcVar**) calloc(nvar, sizeof(NcVar*));
     vararray[0] = x;    vararray[1] = y;
     vararray[2] = time; vararray[3] = h;
-    NcFile *file = DefineNcFile("SWE2d.", mesh->procid, mesh->nprocs, ndim, dimarray, nvar, vararray);
+    NcFile *file = NcFile_create("SWE2d.", mesh->procid, mesh->nprocs, ndim, dimarray, nvar, vararray);
     free(dimarray);
     free(vararray);
 
     /* create files */
-    CreatNcFile(file);
+    NcFile_init(file);
 
     /* set coordinate */
     int ret;

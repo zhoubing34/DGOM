@@ -9,21 +9,20 @@ typedef enum {
     TETRA,    // tetrahedron
     TRIPRISM, // triangle prism
     HEXA      // hexahedron
-} EleType;
+} ElementType;
 
 typedef struct{
     int dim;                    // Dimensions
     int nv;                     // Num of vertex
     int ne;                     // Num of element
-    EleType eletype;            // type of each element
+    ElementType eletype;            // type of each element
     int **EToV;                 // vertex list in elements, the index start from 0
     double *vx, *vy, *vz;       // coordinate of vertex
     char *name;   // name string
 } UnstructMesh;
 
 
-void DestroyUnstructMesh(UnstructMesh *grid);
-UnstructMesh* CreateUnstructMesh(
-        int Dim, int Ne, int Nv, EleType eletype);
+void UnstructMesh_free(UnstructMesh *grid);
+UnstructMesh* UnstructMesh_create(int Dim, int Ne, int Nv, ElementType eletype);
 
 #endif // UNSTRCUTMESH_H

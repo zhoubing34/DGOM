@@ -57,10 +57,10 @@ int main(int argc, char **argv){
 /* finalize the SWE and deallocate the variable */
 void SWE_Finalize2d(MultiReg2d *mesh, PhysDomain2d *phys, NcFile *file){
     /* close the NetCDF files */
-    CloseNcFile(file);
+    NcFile_close(file);
     /* deallocate the variables */
-    FreeStdRegions2d(mesh->stdcell);
-    FreeMultiReg2d(mesh);
+    StdRegions2d_free(mesh->stdcell);
+    MultiReg2d_free(mesh);
     FreePhysDomain2d(phys);
-    FreeNcFile(file);
+    NcFile_free(file);
 }

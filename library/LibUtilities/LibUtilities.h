@@ -33,15 +33,15 @@ void dgemm_(const unsigned M, const unsigned K, const unsigned N,
             const double *A, const double *B, double *C);
 
 /* allocate mem */
-double **BuildMatrix(int Nrows, int Ncols);
-double  *BuildVector(int Nrows);
-int    **BuildIntMatrix(int Nrows, int Ncols);
-int     *BuildIntVector(int Nrows);
+double **Matrix_create(int Nrows, int Ncols);
+double  *Vector_create(int Nrows);
+int    **IntMatrix_create(int Nrows, int Ncols);
+int     *IntVector_create(int Nrows);
 
-double **DestroyMatrix(double **);
-double  *DestroyVector(double *);
-int    **DestroyIntMatrix(int **);
-int     *DestroyIntVector(int *);
+double **Matrix_free(double **);
+double  *Vector_free(double *);
+int    **IntMatrix_free(int **);
+int     *IntVector_free(int *);
 
 /* ParallelPairs.c */
 void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,

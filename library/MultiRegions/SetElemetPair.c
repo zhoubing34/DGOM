@@ -23,7 +23,7 @@ void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *parEtotalout, in
     int etotalout = mesh->parNtotalout/shape->Nfp; /* total num of parallel faces*/
     *parEtotalout = etotalout;
 
-    int *elemapOUT = BuildIntVector(etotalout);
+    int *elemapOUT = IntVector_create(etotalout);
     int k, sk = 0;
     int p2, f1;
     /* build map from f_inE to element */

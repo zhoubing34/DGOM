@@ -4,20 +4,20 @@
 #include "LibUtilities.h"
 #include "LibUtilities/UnstructMesh.h"
 
-UnstructMesh* GenUniformTriMesh(
+UnstructMesh* UniformTriMesh_create(
         int Mx, int My,
         double xmin, double xmax,
         double ymin, double ymax, int type);
-UnstructMesh* GenUniformQuadMesh(
+UnstructMesh* UniformQuadMesh_create(
         int Mx, int My,
         double xmin, double xmax,
         double ymin, double ymax);
-UnstructMesh* GenParallelUniformTriMesh(
+UnstructMesh* ParallelUniformTriMesh_create(
         int Mx, int My,
         double xmin, double xmax,
         double ymin, double ymax, int type,
         int procid, int nprocs);
-UnstructMesh* GenParallelUniformQuadMesh(
+UnstructMesh* ParallelUniformQuadMesh_create(
         int Mx, int My,
         double xmin, double xmax,
         double ymin, double ymax,

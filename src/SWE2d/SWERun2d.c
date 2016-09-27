@@ -9,9 +9,9 @@ double SWE_Run2d(PhysDomain2d *phys, SWE_Solver2d *solver, NcFile *outfile){
     /* Runge-Kutta time evaluation coefficient */
     double *rk4a, *rk4b, *rk4c;
     /* allocation */
-    rk4a = BuildVector(5);
-    rk4b = BuildVector(5);
-    rk4c = BuildVector(6);
+    rk4a = Vector_create(5);
+    rk4b = Vector_create(5);
+    rk4c = Vector_create(6);
     RK45_Coeff(rk4a, rk4b, rk4c);
 
     /* store initial condition */

@@ -18,32 +18,26 @@ int main(int argc, char **argv){
     double xmin = -1, xmax = 1;
     double ymin = -1, ymax = 1;
 
-    int **parEToV;
-    double *VX, *VY;
-    int Nv, Ne;
+//    int **parEToV;
+//    double *VX, *VY;
+//    int Nv, Ne;
+    UnstructMesh *grid;
 
-    GenParallelUniformTriMesh(2, 2,
-                              xmin, xmax, ymin, ymax, 1,
-                              procid, nprocs,
-                              &Ne, &Nv, &parEToV, &VX, &VY);
+    grid = ParallelUniformTriMesh_create(2, 2, xmin, xmax, ymin, ymax, 1, procid, nprocs);
 
-    PrintIntMatrix2File(fp, "EToV for tri", parEToV, Ne, 3);
-    PrintVector2File(fp, "VX for tri", VX, Nv);
-    PrintVector2File(fp, "VY for tri", VY, Nv);
+    PrintIntMatrix2File(fp, "EToV for tri", grid->EToV, grid->ne, 3);
+    PrintVector2File(fp, "VX for tri", grid->vx, grid->nv);
+    PrintVector2File(fp, "VY for tri", grid->vy, grid->nv);
 
-    DestroyIntMatrix(parEToV);
-    DestroyVector(VX);
-    DestroyVector(VY);
+    UnstructMesh_free(grid);
 
-    GenParallelUniformQuadMesh(2, 2, xmin, xmax, ymin, ymax, procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
+    grid = ParallelUniformQuadMesh_create(2, 2, xmin, xmax, ymin, ymax, procid, nprocs);
 
-    PrintIntMatrix2File(fp, "EToV for quad", parEToV, Ne, 4);
-    PrintVector2File(fp, "VX for quad", VX, Nv);
-    PrintVector2File(fp, "VY for quad", VY, Nv);
+    PrintIntMatrix2File(fp, "EToV for quad", grid->EToV, grid->ne, 4);
+    PrintVector2File(fp, "VX for quad", grid->vx, grid->nv);
+    PrintVector2File(fp, "VY for quad", grid->vy, grid->nv);
 
-    DestroyIntMatrix(parEToV);
-    DestroyVector(VX);
-    DestroyVector(VY);
+    UnstructMesh_free(grid);
 
     MPI_Finalize();
 

@@ -20,7 +20,7 @@
 
 #define NODETOL  1e-6f
 
-typedef struct MultiReg2d{
+typedef struct {
 
     /** index of local process */
     int procid;
@@ -91,7 +91,7 @@ typedef struct MultiReg2d{
 
 
 /* public function */
-MultiReg2d* GenMultiReg2d(StdRegions2d *shape, UnstructMesh *grid);
-void FreeMultiReg2d(MultiReg2d *mesh);
+MultiReg2d* MultiReg2d_create(StdRegions2d *shape, UnstructMesh *grid);
+void MultiReg2d_free(MultiReg2d *mesh);
 
 #endif //DGOM_MULTIREGIONS_H

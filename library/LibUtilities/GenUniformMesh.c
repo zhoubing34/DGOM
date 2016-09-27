@@ -22,12 +22,13 @@
  *
  * @return      triGrid unstructed uniform mesh of triangle elements
  * @note
- * Generate an uniform triangle grid, the user should call the `DestroyUnstructMesh`
+ * Generate an uniform triangle grid, the user should call the `UnstructMesh_free`
  * function to deallocate the grid after using it.
  */
-UnstructMesh* GenUniformTriMesh(int Mx, int My,
-                       double xmin, double xmax,
-                       double ymin, double ymax, int type){
+UnstructMesh* UniformTriMesh_create(
+        int Mx, int My,
+        double xmin, double xmax,
+        double ymin, double ymax, int type){
 
     /* parameter */
     int Ne = Mx*My*2;
@@ -35,7 +36,7 @@ UnstructMesh* GenUniformTriMesh(int Mx, int My,
     int Dim= 2;
 
     /* initialize */
-    UnstructMesh* grid = CreateUnstructMesh(Dim, Ne, Nv, TRIANGLE);
+    UnstructMesh* grid = UnstructMesh_create(Dim, Ne, Nv, TRIANGLE);
     grid->name = "uniform triangle grid";
 
     /* allocation */
@@ -108,18 +109,18 @@ UnstructMesh* GenUniformTriMesh(int Mx, int My,
  * @return      grid    unstructed uniform mesh of quadrilateral elements
  *
  * @note
- * Generate an uniform quadrilateral grid, the user should call the `DestroyUnstructMesh`
+ * Generate an uniform quadrilateral grid, the user should call the `UnstructMesh_free`
  * function to deallocate the grid after using it.
  */
-UnstructMesh* GenUniformQuadMesh(int Mx, int My,
-                       double xmin, double xmax,
-                       double ymin, double ymax){
+UnstructMesh* UniformQuadMesh_create(int Mx, int My,
+                                     double xmin, double xmax,
+                                     double ymin, double ymax){
     /* parameter */
     int Ne = Mx*My;
     int Nv = (Mx+1)*(My+1);
     int Dim=2;
 
-    UnstructMesh* grid = CreateUnstructMesh(Dim, Ne, Nv, QUADRIL);
+    UnstructMesh* grid = UnstructMesh_create(Dim, Ne, Nv, QUADRIL);
     grid->name = "uniform quadrilateral grid";
 
     /* allocation */
@@ -187,15 +188,16 @@ UnstructMesh* GenUniformQuadMesh(int Mx, int My,
  * @return  parTriGrid  unstructed grid
  *
  * @note
- * Generate a parallel uniform triangle grid, the user should call the `DestroyUnstructMesh`
+ * Generate a parallel uniform triangle grid, the user should call the `UnstructMesh_free`
  * function to deallocate the grid after using it.
  */
-UnstructMesh* GenParallelUniformTriMesh(int Mx, int My,
-                               double xmin, double xmax,
-                               double ymin, double ymax, int type,
-                               int procid, int nprocs){
+UnstructMesh* ParallelUniformTriMesh_create(
+        int Mx, int My,
+        double xmin, double xmax,
+        double ymin, double ymax, int type,
+        int procid, int nprocs){
 
-    UnstructMesh *globalGrid = GenUniformTriMesh(Mx, My, xmin, xmax, ymin, ymax, type);
+    UnstructMesh *globalGrid = UniformTriMesh_create(Mx, My, xmin, xmax, ymin, ymax, type);
     int K       = globalGrid->ne;
     int **EToV  = globalGrid->EToV;
 
@@ -218,7 +220,7 @@ UnstructMesh* GenParallelUniformTriMesh(int Mx, int My,
     for(p=0;p<procid;++p)
         Kstart += Kprocs[p];
 
-    UnstructMesh *parTriGrid = CreateUnstructMesh(
+    UnstructMesh *parTriGrid = UnstructMesh_create(
             globalGrid->dim, Klocal, globalGrid->nv, TRIANGLE);
     parTriGrid->name = "parallel uniform triangle grid";
 
@@ -244,7 +246,7 @@ UnstructMesh* GenParallelUniformTriMesh(int Mx, int My,
     }
 
     free(Kprocs);
-    DestroyUnstructMesh(globalGrid);
+    UnstructMesh_free(globalGrid);
 
     return parTriGrid;
 }
@@ -273,15 +275,16 @@ UnstructMesh* GenParallelUniformTriMesh(int Mx, int My,
  * @return  parQuadGrid  unstructed grid
  *
  * @note
- * Generate a parallel uniform quadrilateral grid, the user should call the `DestroyUnstructMesh`
+ * Generate a parallel uniform quadrilateral grid, the user should call the `UnstructMesh_free`
  * function to deallocate the grid after using it.
  */
-UnstructMesh* GenParallelUniformQuadMesh(int Mx, int My,
-                               double xmin, double xmax,
-                               double ymin, double ymax,
-                               int procid, int nprocs){
+UnstructMesh* ParallelUniformQuadMesh_create(
+        int Mx, int My,
+        double xmin, double xmax,
+        double ymin, double ymax,
+        int procid, int nprocs){
 
-    UnstructMesh *globalGrid = GenUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax);
+    UnstructMesh *globalGrid = UniformQuadMesh_create(Mx, My, xmin, xmax, ymin, ymax);
     int K       = globalGrid->ne;
     int **EToV  = globalGrid->EToV;
 
@@ -304,7 +307,7 @@ UnstructMesh* GenParallelUniformQuadMesh(int Mx, int My,
     for(p=0;p<procid;++p)
         Kstart += Kprocs[p];
 
-    UnstructMesh *parQuadGrid = CreateUnstructMesh(
+    UnstructMesh *parQuadGrid = UnstructMesh_create(
             globalGrid->dim, Klocal, globalGrid->nv, QUADRIL);
     parQuadGrid->name = "parallel uniform quadrilateral grid";
 
@@ -330,7 +333,7 @@ UnstructMesh* GenParallelUniformQuadMesh(int Mx, int My,
         }
     }
 
-    DestroyUnstructMesh(globalGrid);
+    UnstructMesh_free(globalGrid);
     free(Kprocs);
 
     return parQuadGrid;

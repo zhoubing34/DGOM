@@ -45,7 +45,7 @@ PhysDomain2d* GenPhysDomain2d(MultiReg2d *mesh, int Nfields){
     phys->f_outQ = (real *) calloc(mesh->parNtotalout*Nfields, sizeof(real));
 
     phys->parNtotalout = mesh->parNtotalout*Nfields;
-    phys->parmapOUT = BuildIntVector(phys->parNtotalout);
+    phys->parmapOUT = IntVector_create(phys->parNtotalout);
     SetParmapOut2d(mesh, Nfields, phys->parmapOUT);
 
     /* surface info */
@@ -63,7 +63,7 @@ void FreePhysDomain2d(PhysDomain2d *phys){
     free(phys->f_inQ);
     free(phys->f_outQ);
 
-    DestroyIntVector(phys->parmapOUT);
+    IntVector_free(phys->parmapOUT);
     free(phys->surfinfo);
 }
 
@@ -220,9 +220,9 @@ void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo){
     J    = (double*) malloc(sz);
 
     /* local-local info */
-    double *nxk = BuildVector(Nfaces);
-    double *nyk = BuildVector(Nfaces);
-    double *sJk = BuildVector(Nfaces);
+    double *nxk = Vector_create(Nfaces);
+    double *nyk = Vector_create(Nfaces);
+    double *sJk = Vector_create(Nfaces);
 
     for(k=0;k<mesh->K;++k){
         GeoFactor2d(shape->Np, mesh->x[k], mesh->y[k],
@@ -266,8 +266,8 @@ void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo){
     free(dsdy);
     free(J);
 
-    DestroyVector(nxk);
-    DestroyVector(nyk);
-    DestroyVector(sJk);
+    Vector_free(nxk);
+    Vector_free(nyk);
+    Vector_free(sJk);
 
 }

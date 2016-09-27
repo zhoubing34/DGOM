@@ -21,7 +21,7 @@ int main(int argc, char **argv){
 
     /* set mesh and physical domain */
     int N=1, Nfields=3;
-    StdRegions2d *tri = GenStdTriEle(N);
+    StdRegions2d *tri = StdTriEle_create(N);
     MultiReg2d   *triMesh;
     SetTestTriMesh(tri, triMesh);
     PhysDomain2d *phys = GenPhysDomain2d(triMesh, Nfields);
@@ -49,7 +49,7 @@ int main(int argc, char **argv){
     SWE_Solver2d *solver = (SWE_Solver2d*) calloc(1, sizeof(SWE_Solver2d));
     solver->hcrit = 1.0e-4;
     solver->gra   = 9.81;
-    solver->bot   = BuildMatrix(triMesh->K, tri->Np); /* set bottom topography */
+    solver->bot   = Matrix_create(triMesh->K, tri->Np); /* set bottom topography */
 
     for(k=0;k<triMesh->K;k++){
         for(i=0;i<tri->Np;i++)

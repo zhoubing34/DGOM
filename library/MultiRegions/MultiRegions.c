@@ -31,9 +31,9 @@ void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *parEtotalout, in
  * the user may deallocate them safely after calling this function.
  * @warning
  * This function will allocate and initialize a `MultiReg2d` type pointer, so the user should remember to
- * call `FreeMultiReg2d` function manually to free it in case of memory leak.
+ * call `MultiReg2d_free` function manually to free it in case of memory leak.
  */
-MultiReg2d* GenMultiReg2d(StdRegions2d *shape, UnstructMesh *grid){
+MultiReg2d* MultiReg2d_create(StdRegions2d *shape, UnstructMesh *grid){
 
     /* assignment */
     int K      = grid->ne;
@@ -51,34 +51,34 @@ MultiReg2d* GenMultiReg2d(StdRegions2d *shape, UnstructMesh *grid){
     mesh->stdcell = shape;
     mesh->Nv = Nv;
 
-    double **GX = BuildMatrix(K, shape->Nv);
-    double **GY = BuildMatrix(K, shape->Nv);
+    double **GX = Matrix_create(K, shape->Nv);
+    double **GY = Matrix_create(K, shape->Nv);
 
     SetVetxCoord2d(shape, K, VX, VY, EToV, GX, GY);
 
     /* Redistribute the elements */
     LoadBalance2d(shape, K, EToV, GX, GY, &(mesh->K), &(mesh->EToV), &(mesh->GX), &(mesh->GY));
 
-    DestroyMatrix(GX);
-    DestroyMatrix(GY);
+    Matrix_free(GX);
+    Matrix_free(GY);
 
     /* Setup element connection, EToE,EToP,EToF & Npar,parK,parF */
-    mesh->Npar = BuildIntVector(mesh->nprocs);
+    mesh->Npar = IntVector_create(mesh->nprocs);
 
-    mesh->EToE = BuildIntMatrix(mesh->K, shape->Nfaces);
-    mesh->EToF = BuildIntMatrix(mesh->K, shape->Nfaces);
-    mesh->EToP = BuildIntMatrix(mesh->K, shape->Nfaces);
+    mesh->EToE = IntMatrix_create(mesh->K, shape->Nfaces);
+    mesh->EToF = IntMatrix_create(mesh->K, shape->Nfaces);
+    mesh->EToP = IntMatrix_create(mesh->K, shape->Nfaces);
 
     SetFacePair2d(shape, mesh->K, mesh->EToV, mesh->EToE, mesh->EToF, mesh->EToP,
                 mesh->Npar, &mesh->parK, &mesh->parF);
     /* Setup nodes coordinate */
-    mesh->x  = BuildMatrix(mesh->K, shape->Np);
-    mesh->y  = BuildMatrix(mesh->K, shape->Np);
+    mesh->x  = Matrix_create(mesh->K, shape->Np);
+    mesh->y  = Matrix_create(mesh->K, shape->Np);
     SetNodeCoord2d(shape, mesh->K, mesh->GX, mesh->GY, mesh->x, mesh->y);
 
     /* Setup boundary nodes connection */
-    mesh->vmapM = BuildIntVector(shape->Nfp*shape->Nfaces*mesh->K);
-    mesh->vmapP = BuildIntVector(shape->Nfp*shape->Nfaces*mesh->K);
+    mesh->vmapM = IntVector_create(shape->Nfp * shape->Nfaces * mesh->K);
+    mesh->vmapP = IntVector_create(shape->Nfp * shape->Nfaces * mesh->K);
     SetNodePair2d(shape, mesh->K, mesh->GX, mesh->GY,
                 mesh->EToE, mesh->EToF, mesh->EToP, mesh->x, mesh->y,
                 mesh->Npar, &(mesh->parNtotalout), &(mesh->parmapOUT),
@@ -88,35 +88,35 @@ MultiReg2d* GenMultiReg2d(StdRegions2d *shape, UnstructMesh *grid){
     /* mesh geo */
     int Nfactor = 4;
     mesh->vgeo = (real*) calloc(Nfactor*mesh->K*shape->Np, sizeof(real));
-    mesh->J    = BuildVector(mesh->K*shape->Np);
-    mesh->area = BuildVector(mesh->K);
-    mesh->ciradius = BuildVector(mesh->K);
+    mesh->J    = Vector_create(mesh->K * shape->Np);
+    mesh->area = Vector_create(mesh->K);
+    mesh->ciradius = Vector_create(mesh->K);
     SetVolumeGeo(shape, mesh->K, mesh->x, mesh->y, mesh->J, mesh->area, mesh->ciradius, mesh->vgeo);
 
     return mesh;
 };
 
-void FreeMultiReg2d(MultiReg2d *mesh){
+void MultiReg2d_free(MultiReg2d *mesh){
     /* mesh info */
-    DestroyIntMatrix(mesh->EToV);
+    IntMatrix_free(mesh->EToV);
 
     /* coordinate */
-    DestroyMatrix(mesh->GX);
-    DestroyMatrix(mesh->GY);
+    Matrix_free(mesh->GX);
+    Matrix_free(mesh->GY);
 
     /* element connection */
-    DestroyIntVector(mesh->Npar);
-    DestroyIntMatrix(mesh->EToE);
-    DestroyIntMatrix(mesh->EToF);
-    DestroyIntMatrix(mesh->EToP);
+    IntVector_free(mesh->Npar);
+    IntMatrix_free(mesh->EToE);
+    IntMatrix_free(mesh->EToF);
+    IntMatrix_free(mesh->EToP);
 
     /* nodes */
-    DestroyMatrix(mesh->x);
-    DestroyMatrix(mesh->y);
+    Matrix_free(mesh->x);
+    Matrix_free(mesh->y);
 
     /* node connection */
-    DestroyIntVector(mesh->vmapM);
-    DestroyIntVector(mesh->vmapP);
+    IntVector_free(mesh->vmapM);
+    IntVector_free(mesh->vmapP);
 }
 
 void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,

@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
 
 void QuadEleTest(void){
     StdRegions2d *quad;
-    quad = GenStdQuadEle(Deg);
+    quad = StdQuadEle_create(Deg);
 
     /* Fmask */
     int i,j;
@@ -27,13 +27,13 @@ void QuadEleTest(void){
     }
     printf("\n\n");
 
-    FreeStdRegions2d(quad);
+    StdRegions2d_free(quad);
 }
 
 void TriEleTest(void){
 
     StdRegions2d *tri;
-    tri = GenStdTriEle(Deg);
+    tri = StdTriEle_create(Deg);
 
     PrintMatrix("Mass matrix", tri->M, tri->Np, tri->Np);
     printf("\n\n");
@@ -55,7 +55,7 @@ void TriEleTest(void){
     printf("\n\n");
     PrintMatrix("LIFT", tri->LIFT, tri->Np, tri->Nfp*tri->Nfaces);
 
-    FreeStdRegions2d(tri);
+    StdRegions2d_free(tri);
 }
 
 void MatrixMuti(void){

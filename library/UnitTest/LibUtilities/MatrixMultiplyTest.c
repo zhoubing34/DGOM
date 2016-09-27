@@ -2,10 +2,10 @@
 
 int main(void){
     int M=3, N=4, K=3;
-    double *A = BuildVector(M*N);
-    double *B = BuildVector(N*K);
-    double *C = BuildVector(M*K);
-    double *exctC = BuildVector(M*K);
+    double *A = Vector_create(M * N);
+    double *B = Vector_create(N * K);
+    double *C = Vector_create(M * K);
+    double *exctC = Vector_create(M * K);
 
     double tempA[3][4] = {{3,4,1,2},
                           {2,5,8,3},
@@ -42,11 +42,11 @@ int main(void){
 
     dgemm_(M, N, K, A, B, C);
 
-    info = CreateVectorTest("Matrix Inverse", C, exctC, M*K);
+    info = CreateVectorTest("Matrix Inverse", C, exctC, M * K);
 
-    DestroyVector(A);
-    DestroyVector(B);
-    DestroyVector(C);
-    DestroyVector(exctC);
+    Vector_free(A);
+    Vector_free(B);
+    Vector_free(C);
+    Vector_free(exctC);
     return info;
 }

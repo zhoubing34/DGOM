@@ -21,9 +21,9 @@ NcFile* SWE_SetNcOutput2d(PhysDomain2d *phys, SWE_Solver2d *solver){
     StdRegions2d *shape = mesh->stdcell;
 
     /* define dimensions */
-    NcDim *ne = DefineNcDim("ne", mesh->K);
-    NcDim *np = DefineNcDim("np", shape->Np);
-    NcDim *t  = DefineNcDim("t",  0);
+    NcDim *ne = NcDim_create("ne", mesh->K);
+    NcDim *np = NcDim_create("np", shape->Np);
+    NcDim *t  = NcDim_create("t", 0);
 
     /* define variables */
     NcDim **dimarray;
@@ -34,15 +34,15 @@ NcFile* SWE_SetNcOutput2d(PhysDomain2d *phys, SWE_Solver2d *solver){
     dimarray    = (NcDim**) calloc(maxDimNum, sizeof(NcDim*));
     dimarray[0] = ne;
     dimarray[1] = np; /* the inner loop dimension comes the last */
-    NcVar *x   = DefineNcVar("x",   ndim, dimarray, "double");
-    NcVar *y   = DefineNcVar("y",   ndim, dimarray, "double");
-    NcVar *bot = DefineNcVar("bot", ndim, dimarray, "double");
+    NcVar *x   = NcVar_create("x", ndim, dimarray, "double");
+    NcVar *y   = NcVar_create("y", ndim, dimarray, "double");
+    NcVar *bot = NcVar_create("bot", ndim, dimarray, "double");
 //    free(dimarray);
 
     ndim        = 1;
 //    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = t;
-    NcVar *time = DefineNcVar("time", ndim, dimarray, "double");
+    NcVar *time = NcVar_create("time", ndim, dimarray, "double");
 //    free(dimarray);
 
     ndim        = 3;
@@ -50,9 +50,9 @@ NcFile* SWE_SetNcOutput2d(PhysDomain2d *phys, SWE_Solver2d *solver){
     dimarray[0] = t;    /* inner loop */
     dimarray[1] = ne;
     dimarray[2] = np;
-    NcVar *h   = DefineNcVar("h",  ndim, dimarray, "double");
-    NcVar *qx  = DefineNcVar("qx", ndim, dimarray, "double");
-    NcVar *qy  = DefineNcVar("qy", ndim, dimarray, "double");
+    NcVar *h   = NcVar_create("h", ndim, dimarray, "double");
+    NcVar *qx  = NcVar_create("qx", ndim, dimarray, "double");
+    NcVar *qy  = NcVar_create("qy", ndim, dimarray, "double");
 //    free(dimarray);
 
     /* define files */
@@ -67,12 +67,12 @@ NcFile* SWE_SetNcOutput2d(PhysDomain2d *phys, SWE_Solver2d *solver){
     vararray[2] = time; vararray[3] = h;
     vararray[4] = qx;   vararray[5] = qy;
     vararray[6] = bot;
-    NcFile *file = DefineNcFile("SWE2d.", mesh->procid, mesh->nprocs, ndim, dimarray, nvar, vararray);
+    NcFile *file = NcFile_create("SWE2d.", mesh->procid, mesh->nprocs, ndim, dimarray, nvar, vararray);
     free(dimarray);
     free(vararray);
 
     /* create files */
-    CreatNcFile(file);
+    NcFile_init(file);
 
     /* set coordinate */
     int ret;

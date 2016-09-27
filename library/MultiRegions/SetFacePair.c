@@ -111,7 +111,7 @@ void SetFacePair2d(StdRegions2d *shape, int Klocal,
 
 //    triangle      vnum[3][2] = { {0,1}, {1,2}, {2,0} };
 //    quadrilateral vnum[4][2] = { {0,1}, {1,2}, {2,3}, {3,0}};
-    int **vnum = BuildIntMatrix(shape->Nfaces, 2);
+    int **vnum = IntMatrix_create(shape->Nfaces, 2);
     for(n=0;n<shape->Nfaces;n++){
         vnum[n][0] = n%(shape->Nv);
         vnum[n][1] = (n+1)%(shape->Nv);
@@ -162,8 +162,8 @@ void SetFacePair2d(StdRegions2d *shape, int Klocal,
     int **parK = (int**) calloc(nprocs, sizeof(int*));
     int **parF = (int**) calloc(nprocs, sizeof(int*));
     for(p2=0;p2<nprocs;++p2){
-        parK[p2] = BuildIntVector(Npar[p2]);
-        parF[p2] = BuildIntVector(Npar[p2]);
+        parK[p2] = IntVector_create(Npar[p2]);
+        parF[p2] = IntVector_create(Npar[p2]);
         Npar[p2] = 0;
         for(n=0;n<Klocal*Nfaces;++n){
             if(myfaces[n].p2==p2 && p2!=procid){
@@ -174,7 +174,7 @@ void SetFacePair2d(StdRegions2d *shape, int Klocal,
         }
     }
     free(myfaces);
-    DestroyIntMatrix(vnum);
+    IntMatrix_free(vnum);
 
     /* assignment */
     *newParK = parK; *newParF = parF;

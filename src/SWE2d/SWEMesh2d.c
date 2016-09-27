@@ -66,7 +66,7 @@ MultiReg2d* ParabolicBowlMesh2d(char **argv, SWE_Solver2d *solver){
     /* set bottom topography */
     int k, i;
     double r2;
-    solver->bot = BuildMatrix(mesh->K, shape->Np);
+    solver->bot = Matrix_create(mesh->K, shape->Np);
     for (k=0; k<mesh->K; k++){
         for (i=0; i<shape->Np; i++){
             r2 = mesh->x[k][i]*mesh->x[k][i] + mesh->y[k][i]*mesh->y[k][i];
@@ -95,7 +95,7 @@ MultiReg2d* DamBreakMesh2d(char **argv, SWE_Solver2d *solver){
 
     /* set bottom topography */
     int k, i;
-    solver->bot = BuildMatrix(mesh->K, shape->Np);
+    solver->bot = Matrix_create(mesh->K, shape->Np);
     for (k=0; k<mesh->K; k++){
         for (i=0; i<shape->Np; i++){
             solver->bot[k][i] = 0.0;
@@ -135,24 +135,24 @@ MultiReg2d* AllocateUniformMesh_SWE2d(char **argv, double xmin, double xmax, dou
 
     UnstructMesh *grid;
     if ( !(memcmp(argv[3], "tri", 3)) ){
-        grid = GenParallelUniformTriMesh(
+        grid = ParallelUniformTriMesh_create(
                 Mx, My, xmin, xmax, ymin, ymax, 1, procid, nprocs);
-//        GenParallelUniformTriMesh(Mx, My, xmin, xmax, ymin, ymax, 1,
+//        ParallelUniformTriMesh_create(Mx, My, xmin, xmax, ymin, ymax, 1,
 //                                  procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
-        mesh = GenMultiReg2d(shape, grid);
+        mesh = MultiReg2d_create(shape, grid);
     }else if( !(memcmp(argv[3], "quad", 4)) ){
-        grid = GenParallelUniformQuadMesh(
+        grid = ParallelUniformQuadMesh_create(
                 Mx, My, xmin, xmax, ymin, ymax, procid, nprocs);
-//        GenParallelUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax,
+//        ParallelUniformQuadMesh_create(Mx, My, xmin, xmax, ymin, ymax,
 //                                   procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
-        mesh = GenMultiReg2d(shape, grid);
+        mesh = MultiReg2d_create(shape, grid);
     }else{
         printf("Wrong mesh type: %s.\n"
                        "The input should be either \'tri\' or \'quad\'.\n", argv[4]);
         MPI_Finalize(); exit(1);
     }
 
-    DestroyUnstructMesh(grid);
+    UnstructMesh_free(grid);
     return mesh;
 }
 
@@ -164,9 +164,9 @@ StdRegions2d* AllocateStandShape_SWE2d(char **argv){
 
     StdRegions2d *shape;
     if ( !(memcmp(argv[3], "tri", 3)) ){
-        shape = GenStdTriEle(N);
+        shape = StdTriEle_create(N);
     }else if( !(memcmp(argv[3], "quad", 4)) ){
-        shape = GenStdQuadEle(N);
+        shape = StdQuadEle_create(N);
     }else{
         printf("Wrong mesh type: %s.\n"
                        "The input should be either \'tri\' or \'quad\'.\n", argv[3]);
