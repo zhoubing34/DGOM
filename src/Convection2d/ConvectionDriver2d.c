@@ -9,7 +9,7 @@
  * Usages:
  * Use the 2 order basis with uniform mesh of 80 elements on each edge:
  *
- *     mpirun -n 2 ./Convection2d 2 80
+ *     mpirun -n 2 ./Convection2d tri 2 80
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
@@ -27,6 +27,10 @@ int main(int argc, char **argv){
     double dt, FinalTime = 2.4;         /* time */
     char casename[16] = "Convection2d"; /* output filename */
 
+//    if(argc>=3){
+//        printf("Wrong number of input arguments");
+//    }
+
     int procid, nprocs; /* process number */
 
     MPI_Init(&argc, &argv);                 /* initialize MPI */
@@ -34,8 +38,8 @@ int main(int argc, char **argv){
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs); /* read process num */
 
     /* get degree and element number */
-    str2int(argv[1], &N, "Wrong degree input");
-    str2int(argv[2], &Ne, "Wrong element number input");
+    str2int(argv[2], &N, "Wrong degree input");
+    str2int(argv[3], &Ne, "Wrong element number input");
 
     if(!procid) {
         printf("--------------------------------\n");
@@ -49,8 +53,17 @@ int main(int argc, char **argv){
         printf("--------------------------------\n");
     }
 
-    StdRegions2d *shape = GenStdTriEle(N);
-//    StdRegions2d *shape = GenStdQuadEle(N);
+    StdRegions2d *shape;
+    if ( !(memcmp(argv[1], "tri", 3)) ){
+        shape = GenStdTriEle(N);
+    }else if( !(memcmp(argv[1], "quad", 4)) ){
+        shape = GenStdQuadEle(N);
+    }else{
+        printf("Wrong mesh type: %s.\n"
+                       "The input should be either \'tri\' or \'quad\'.\n", argv[1]);
+        MPI_Finalize(); exit(1);
+    }
+    /* gen unifrom unsructed mesh */
     MultiReg2d *mesh    = ReadMesh(shape, Ne);
 
 

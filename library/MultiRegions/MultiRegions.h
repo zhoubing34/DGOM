@@ -14,6 +14,7 @@
 
 #include "StdRegions/StdRegions.h"
 #include "LocalRegions/LocalRegions.h"
+#include "LibUtilities/UnstructMesh.h"
 #include <mpi.h>
 #include <parmetisbin.h>
 
@@ -90,8 +91,7 @@ typedef struct MultiReg2d{
 
 
 /* public function */
-MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv, const int **EToV, const double *VX, const double *VY);
-
+MultiReg2d* GenMultiReg2d(StdRegions2d *shape, UnstructMesh *grid);
 void FreeMultiReg2d(MultiReg2d *mesh);
 
 #endif //DGOM_MULTIREGIONS_H

@@ -6,7 +6,6 @@
 
 /* Mesh2d.c */
 MultiReg2d* ReadMesh(StdRegions2d *shape, int Ne);
-void PrintMesh ( MultiReg2d *mesh );
 
 /* InitCondition.c */
 double InitCondition(PhysDomain2d * phys, PhysDomain2d *flowRate);

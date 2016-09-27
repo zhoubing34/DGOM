@@ -46,12 +46,12 @@ void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
       ++(outN[p]);
       ++sk;
       if(sk==Nmyobjs){
-	break;
+        break;
       }
     }
     binup += binsize;
     if(sk==Nmyobjs){
-      break;
+        break;
     }
   }
   /* TW: <---------- replace to here */

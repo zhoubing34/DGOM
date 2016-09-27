@@ -4,7 +4,7 @@
 set(SRC_LIST
         ConvectionDriver2d.c
         ConvectionDriver2d.h
-        Mesh2d.c
+        ConvectionMesh2d.c
         InitCondition.c
         NcOutput.c
         NcOutput.h

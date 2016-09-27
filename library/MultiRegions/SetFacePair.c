@@ -174,6 +174,7 @@ void SetFacePair2d(StdRegions2d *shape, int Klocal,
         }
     }
     free(myfaces);
+    DestroyIntMatrix(vnum);
 
     /* assignment */
     *newParK = parK; *newParF = parF;

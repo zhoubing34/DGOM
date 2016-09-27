@@ -38,17 +38,17 @@ int main(int argc, char **argv){
 
     /* allocate solver */
     SWE_Solver2d *solver = (SWE_Solver2d *)malloc(sizeof(SWE_Solver2d));
-    /* allocate mesh */
-    MultiReg2d   *mesh = SWE_Mesh2d(argv, solver);
+    /* allocate region domain */
+    MultiReg2d   *region = SWE_Mesh2d(argv, solver);
     /* allocate physical domain */
-    PhysDomain2d *phys = SWE_Init2d(argv, solver, mesh);
+    PhysDomain2d *phys = SWE_Init2d(argv, solver, region);
     /* set output file */
     NcFile *outfile = SWE_SetNcOutput2d(phys, solver);
     /* solve  */
     SWE_Run2d(phys, solver, outfile);
 
     /* finalize */
-    SWE_Finalize2d(mesh, phys, outfile);
+    SWE_Finalize2d(region, phys, outfile);
     MPI_Finalize();
 
     return 0;

@@ -3,6 +3,7 @@
 
 #include "MultiRegions/MultiRegions.h"
 #include "LibUtilities/LibUtilities.h"
+#include "LibUtilities/GenUniformMesh.h"
 
 int    TestMeshTri_Nv         = 6;
 int    TestMeshTri_Nvert      = 3;
@@ -23,51 +24,33 @@ int    TestMeshQuad_Klocal[2]  = {2, 2};
 /* set triangle test mesh */
 #define SetTestTriMesh(tri, mesh) \
 do { \
-    int Test_i, Test_j, Kstart=0; \
     int procid, nprocs; \
     MPI_Comm_rank(MPI_COMM_WORLD, &procid); \
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs); \
-    if (nprocs<2) \
-        TestMeshTri_Klocal[0] = 4; \
-    for(Test_i=0;Test_i<procid;++Test_i){  \
-        Kstart += TestMeshTri_Klocal[Test_i]; \
+    UnstructMesh *grid; \
+    if (nprocs<2){ \
+        grid = GenUniformTriMesh(2, 2, -1, 1, -1, 1, 1); \
+    }else{ \
+        grid = GenParallelUniformTriMesh(2, 2, -1, 1, -1, 1, 1, procid, nprocs); \
     } \
-    int **parEToV = BuildIntMatrix(TestMeshTri_Klocal[procid], TestMeshTri_Nvert); \
-    double *TestTri_VX = BuildVector(TestMeshTri_Nv); \
-    double *TestTri_VY = BuildVector(TestMeshTri_Nv); \
-    int Test_sk=0; \
-    for(Test_i=0;Test_i<TestMeshTri_K;Test_i++){ \
-        if(Test_i>=Kstart && Test_i<Kstart+TestMeshTri_Klocal[procid]) { \
-            for (Test_j = 0; Test_j < TestMeshTri_Nvert; Test_j++) { \
-                parEToV[Test_sk][Test_j] = TestMeshTri_EToV[Test_i][Test_j] - 1; } \
-            Test_sk++; \
-        } \
-    } \
-    mesh = GenMultiReg2d(tri, TestMeshTri_Klocal[procid], TestMeshTri_Nv, parEToV, TestMeshTri_VX, TestMeshTri_VY); \
+    mesh = GenMultiReg2d(tri, grid); \
+    DestroyUnstructMesh(grid); \
 }while(0) \
 
 /* set quadrilateral test mesh */
 #define SetTestQuadMesh(quad, mesh) \
 do { \
-    int Test_i, Test_j, Kstart=0; \
     int procid, nprocs; \
     MPI_Comm_rank(MPI_COMM_WORLD, &procid); \
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs); \
-    if (nprocs<2) \
-        TestMeshQuad_Klocal[0] = 4; \
-    for(Test_i=0;Test_i<procid;++Test_i){  \
-        Kstart += TestMeshQuad_Klocal[Test_i]; \
+    UnstructMesh *grid; \
+    if (nprocs<2){ \
+        grid = GenUniformQuadMesh(2, 2, -1, 1, -1, 1); \
+    }else{ \
+        grid = GenParallelUniformQuadMesh(2, 2, -1, 1, -1, 1, procid, nprocs); \
     } \
-    int **parEToV = BuildIntMatrix(TestMeshQuad_Klocal[procid], TestMeshQuad_Nvert); \
-    int Test_sk=0; \
-    for(Test_i=0;Test_i<TestMeshQuad_K;Test_i++){ \
-        if(Test_i>=Kstart && Test_i<Kstart+TestMeshQuad_Klocal[procid]) { \
-            for (Test_j = 0; Test_j < TestMeshQuad_Nvert; Test_j++) { \
-                parEToV[Test_sk][Test_j] = TestMeshQuad_EToV[Test_i][Test_j] - 1; } \
-            Test_sk++; \
-        } \
-    } \
-    mesh = GenMultiReg2d(quad, TestMeshQuad_Klocal[procid], TestMeshQuad_Nv, parEToV, TestMeshQuad_VX, TestMeshQuad_VY); \
+    mesh = GenMultiReg2d(quad, grid); \
+    DestroyUnstructMesh(grid); \
 }while(0) \
 
 #endif

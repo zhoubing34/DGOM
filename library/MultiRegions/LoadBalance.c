@@ -7,11 +7,11 @@
  * @details
  * Call ParMetis library to repart the mesh
  *
- * @param [StdRegions2d*] shape     standard elements, triangle or quadrilateral
- * @param [int]         K           original number of elements
- * @param [int**]       EToV[K][shape->Nv] element to vertex list
- * @param [double**]    GX[K][shape->Nv]   vertex coordinate
- * @param [double**]    GY[K][shape->Nv]   vertex coordinate
+ * @param [in] shape    standard elements, triangle or quadrilateral
+ * @param [in] K        original number of elements
+ * @param [in] EToV     element to vertex list
+ * @param [in] GX       vertex coordinate
+ * @param [in] GY       vertex coordinate
  *
  * @return
  * return values:
@@ -23,7 +23,7 @@
  * newGY  | double*** | new vertex coordinate after mesh redistribution
  *
  */
-void LoadBalance2d(StdRegions2d *shape, int K, const int **EToV, const double **GX, const double **GY,
+void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double **GY,
                  int *newK, int ***nEToV, double ***newGX, double ***newGY){
     int n,p,k,v;
 

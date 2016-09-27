@@ -1,8 +1,8 @@
 #include "MultiRegions.h"
 
 /* private functions */
-void SetVetxCoord2d(StdRegions2d *shape, int K, const double *VX, const double *VY, const int **EToV, double **GX, double **GY);
-void LoadBalance2d(StdRegions2d *shape, int K, const int **EToV, const double **GX, const double **GY,
+void SetVetxCoord2d(StdRegions2d *shape, int K, double *VX, double *VY, int **EToV, double **GX, double **GY);
+void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double **GY,
                  int *newK, int ***newEToV, double ***newx, double ***newy);
 void SetFacePair2d(StdRegions2d *shape, int Klocal,
                  int **EToV, int **EToE, int **EToF, int **EToP,
@@ -18,19 +18,12 @@ void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
 void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *parEtotalout, int **mapOUT);
 /**
  * @brief
- * Generation of two dimension mesh
+ * Generation of two dimensional region.
  *
- * @param [in] shape StdRegions2d pointer: standard element
- * @param [in] K     number of element
- * @param [in] Nv    number of vertex
- * @param [in] EToV  element to vertex list
- * @param [in] VX    vertex coordinate
- * @param [in] VY    vertex coordinate
+ * @param [in] shape standard element pointer.
+ * @param [in] grid  Unstruct mesh pointer.
  *
- * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * mesh     | MultiReg2d* | mesh object
+ * @return mesh  MultiReg2d type pointer.
  *
  * @note
  * 1. The index of vertex in EToV is start from 0;
@@ -40,8 +33,14 @@ void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *parEtotalout, in
  * This function will allocate and initialize a `MultiReg2d` type pointer, so the user should remember to
  * call `FreeMultiReg2d` function manually to free it in case of memory leak.
  */
-MultiReg2d* GenMultiReg2d(StdRegions2d *shape, int K, int Nv,
-                          const int **EToV, const double *VX, const double *VY){
+MultiReg2d* GenMultiReg2d(StdRegions2d *shape, UnstructMesh *grid){
+
+    /* assignment */
+    int K      = grid->ne;
+    int Nv     = grid->nv;
+    int **EToV = grid->EToV;
+    double *VX  = grid->vx;
+    double *VY  = grid->vy;
 
     MultiReg2d *mesh = (MultiReg2d *)calloc(1, sizeof(MultiReg2d));
 
@@ -198,7 +197,7 @@ void SetNodeCoord2d(StdRegions2d *shape, int K, double **GX, double **GY, double
  * GX | double[K][shape->Nv]  | vertex coordinate
  *
  */
-void SetVetxCoord2d(StdRegions2d *shape, int K, const double *VX, const double *VY, const int **EToV, double **GX, double **GY){
+void SetVetxCoord2d(StdRegions2d *shape, int K, double *VX, double *VY, int **EToV, double **GX, double **GY){
     int n,k;
     /* vertex coordinate */
     for(k=0;k<K;k++){

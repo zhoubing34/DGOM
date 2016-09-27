@@ -1,4 +1,4 @@
-#include "LibUtilities.h"
+#include "GenUniformMesh.h"
 
 /**
  * @brief
@@ -7,9 +7,10 @@
  * @details
  * Generate uniform triangle mesh with specific coordinate range and number of elements.
  * The flag 'type' defines how the square divides into two triangles.
- * The function returns the number of elements and vertexes - `Ne` and `Nv`.
- * Variables `EToV`, `VX` and `VY` is allocated inside of the function, therefore the pointer is
- * passed as parameters.
+ * The function returns a pointer to `UnstructMesh` object:
+ * The number of elements and vertexes - `ne` and `ne`;
+ * Variables `EToV`, `vx` and `vy`;
+ * All is allocated inside of the function.
  *
  * @param[in]   Mx      number of elements on x coordinate
  * @param[in]   My      number of elements on x coordinate
@@ -18,29 +19,29 @@
  * @param[in]   ymin    minimum value of y
  * @param[in]   ymax    maxmum value of y
  * @param[in]   type    flag for triangle dividing, 0 for '\' and 1 for '/'
- * @param[out]  newNe   number of elements
- * @param[out]  newNv   number of vertex
- * @param[out]  newEToV vertex index inside of each elements
- * @param[out]  newVX   x coordinate
- * @param[out]  newVY   y coordinate
  *
+ * @return      triGrid unstructed uniform mesh of triangle elements
+ * @note
+ * Generate an uniform triangle grid, the user should call the `DestroyUnstructMesh`
+ * function to deallocate the grid after using it.
  */
-void GenUniformTriMesh(int Mx, int My,
+UnstructMesh* GenUniformTriMesh(int Mx, int My,
                        double xmin, double xmax,
-                       double ymin, double ymax, int type,
-                       int *newNe, int *newNv,
-                       int ***newEToV, double **newVX, double **newVY){
+                       double ymin, double ymax, int type){
 
     /* parameter */
-    int Ne = Mx * My *2;
-    int Nv = (Mx + 1)*(My + 1);
+    int Ne = Mx*My*2;
+    int Nv = (Mx+1)*(My+1);
+    int Dim= 2;
 
-    *newNe = Ne; *newNv = Nv;
+    /* initialize */
+    UnstructMesh* grid = CreateUnstructMesh(Dim, Ne, Nv, TRIANGLE);
+    grid->name = "uniform triangle grid";
 
     /* allocation */
-    int **EToV = BuildIntMatrix(Ne, 3);
-    double *VX = BuildVector(Nv);
-    double *VY = BuildVector(Nv);
+    int **EToV = grid->EToV;
+    double *VX = grid->vx;
+    double *VY = grid->vy;
 
     /* vertex coordinate */
     int index; /* vertex index */
@@ -85,10 +86,7 @@ void GenUniformTriMesh(int Mx, int My,
         }
     }
 
-    /* assignment */
-    *newEToV = EToV;
-    *newVX   = VX;
-    *newVY   = VY;
+    return grid;
 }
 
 /**
@@ -107,68 +105,61 @@ void GenUniformTriMesh(int Mx, int My,
  * @param[in]   xmax    maxmum value of x
  * @param[in]   ymin    minimum value of y
  * @param[in]   ymax    maxmum value of y
- * @param[out]  newNe   number of elements
- * @param[out]  newNv   number of vertex
- * @param[out]  newEToV vertex index inside of each elements
- * @param[out]  newVX   x coordinate
- * @param[out]  newVY   y coordinate
+ *
+ * @return      grid    unstructed uniform mesh of quadrilateral elements
  *
  * @note
- * the parameter `newEToV`, `newVX` and `newVY` will be allocated inside of the function, users
- * have to deallocate them manually after finish using them.
+ * Generate an uniform quadrilateral grid, the user should call the `DestroyUnstructMesh`
+ * function to deallocate the grid after using it.
  */
-void GenUniformQuadMesh(int Mx, int My,
+UnstructMesh* GenUniformQuadMesh(int Mx, int My,
                        double xmin, double xmax,
-                       double ymin, double ymax,
-                       int *newNe, int *newNv,
-                       int ***newEToV, double **newVX, double **newVY){
+                       double ymin, double ymax){
     /* parameter */
-    int Ne = Mx * My;
-    int Nv = (Mx + 1)*(My + 1);
+    int Ne = Mx*My;
+    int Nv = (Mx+1)*(My+1);
+    int Dim=2;
 
-    *newNe = Ne; *newNv = Nv;
+    UnstructMesh* grid = CreateUnstructMesh(Dim, Ne, Nv, QUADRIL);
+    grid->name = "uniform quadrilateral grid";
 
     /* allocation */
-    int **EToV = BuildIntMatrix(Ne, 4);
-    double *VX = BuildVector(Nv);
-    double *VY = BuildVector(Nv);
+    int **EToV = grid->EToV;
+    double *VX = grid->vx;
+    double *VY = grid->vy;
 
     /* vertex coordinate */
     int index; /* vertex index */
-    int ir, ic;
-    for (ir = 0; ir<My+1; ir++){
-        for (ic = 0; ic<Mx+1; ic++){
-            index = ir*(Mx+1) + ic; /* the order of vertex is from left to right, and from bottom to the top */
-            VX[index] = (double)ic/Mx * (xmax - xmin) + xmin;
-            VY[index] = (double)ir/My * (ymax - ymin) + ymin;
+    int dim1, dim2;
+    for (dim1 = 0; dim1<My+1; dim1++){
+        for (dim2 = 0; dim2<Mx+1; dim2++){
+            /* the order of vertex is from left to right, and from bottom to the top */
+            index = dim1*(Mx+1) + dim2;
+            VX[index] = (double)dim2/Mx * (xmax - xmin) + xmin;
+            VY[index] = (double)dim1/My * (ymax - ymin) + ymin;
         }
     }
 
     /* EToV connection */
-    int ie;
-    int topNode[2], botNode[2];
-    for (ir = 0; ir < My; ir++){
+    int ie, topInd[2], botInd[2];
+    for (dim1 = 0; dim1 < My; dim1++){
         for (ie = 0; ie < Mx; ie++){
             /* Assignment of vertex index, which start from 0 */
-            botNode[0] = ir*(Mx + 1)+ie;
-            botNode[1] = ir*(Mx + 1)+ie + 1;
-            topNode[0] = botNode[0] + Mx + 1;
-            topNode[1] = botNode[1] + Mx + 1;
+            botInd[0] = dim1*(Mx + 1)+ie;
+            botInd[1] = dim1*(Mx + 1)+ie + 1;
+            topInd[0] = botInd[0] + Mx + 1;
+            topInd[1] = botInd[1] + Mx + 1;
 
             /* Assignment of EToV,
              * each element start from the left lower vertex */
-            EToV[ir * Mx + ie][0] = botNode[0];
-            EToV[ir * Mx + ie][1] = botNode[1];
-            EToV[ir * Mx + ie][2] = topNode[1];
-            EToV[ir * Mx + ie][3] = topNode[0];
+            EToV[dim1 * Mx + ie][0] = botInd[0];
+            EToV[dim1 * Mx + ie][1] = botInd[1];
+            EToV[dim1 * Mx + ie][2] = topInd[1];
+            EToV[dim1 * Mx + ie][3] = topInd[0];
         }
     }
 
-    /* assignment */
-    *newEToV = EToV;
-    *newVX   = VX;
-    *newVY   = VY;
-
+    return grid;
 }
 
 /**
@@ -193,27 +184,21 @@ void GenUniformQuadMesh(int Mx, int My,
  * @param[in]   type    flag for triangle dividing, 0 for '\' and 1 for '/'
  * @param[in]   procid  index of local process
  * @param[in]   nprocs  number of processes
- * @param[out]  parK    local number of elements
- * @param[out]  newNv   total number of vertex
- * @param[out]  parEToV local EToV
- * @param[out]  newVX   x coordinate of all vertex
- * @param[out]  newVY   y coordinate of all vertex
+ *
+ * @return  parTriGrid  unstructed grid
  *
  * @note
- * the parameter `parEToV`, `newNV`, `newVX` and `newVY` will be allocated inside of the function, users
- * have to deallocate them manually after finish using them.
+ * Generate a parallel uniform triangle grid, the user should call the `DestroyUnstructMesh`
+ * function to deallocate the grid after using it.
  */
-void GenParallelUniformTriMesh(int Mx, int My,
+UnstructMesh* GenParallelUniformTriMesh(int Mx, int My,
                                double xmin, double xmax,
                                double ymin, double ymax, int type,
-                               int procid, int nprocs,
-                               int *parK, int *newNv,
-                               int ***parEToV, double **VX, double **VY){
+                               int procid, int nprocs){
 
-    int **EToV, Ne, Nv;
-    GenUniformTriMesh(Mx, My, xmin, xmax, ymin, ymax, type, &Ne, &Nv, &EToV, VX, VY);
-    int K       = Ne;
-    int Nvertex = 3;
+    UnstructMesh *globalGrid = GenUniformTriMesh(Mx, My, xmin, xmax, ymin, ymax, type);
+    int K       = globalGrid->ne;
+    int **EToV  = globalGrid->EToV;
 
     int *Kprocs = (int *) calloc(nprocs, sizeof(int));
     int  Klocal = (int)( (double)K/ (double)nprocs );
@@ -234,25 +219,35 @@ void GenParallelUniformTriMesh(int Mx, int My,
     for(p=0;p<procid;++p)
         Kstart += Kprocs[p];
 
+    UnstructMesh *parTriGrid = CreateUnstructMesh(
+            globalGrid->dim, Klocal, globalGrid->nv, TRIANGLE);
+    parTriGrid->name = "parallel uniform triangle grid";
+
+    /* assignment of vertex coordinate */
+    int i;
+    for(i=0; i<parTriGrid->nv; i++){
+        parTriGrid->vx[i] = globalGrid->vx[i];
+        parTriGrid->vy[i] = globalGrid->vy[i];
+    }
 
     /* EToV of local mesh */
-    int **newEToV = BuildIntMatrix(Klocal, Nvertex);
+    int **newEToV = parTriGrid->EToV;
+
     /* Assignment of local mesh information */
-    int sk = 0, ie;
-    for (ie = 0; ie < K; ie++){
-        if(ie>=Kstart && ie<Kstart+Klocal) {
-            newEToV[sk][0] = EToV[ie][0];
-            newEToV[sk][1] = EToV[ie][1];
-            newEToV[sk][2] = EToV[ie][2];
+    int sk=0, n;
+    for (n=0; n<K; n++){
+        if(n>=Kstart && n<Kstart+Klocal) {
+            newEToV[sk][0] = EToV[n][0];
+            newEToV[sk][1] = EToV[n][1];
+            newEToV[sk][2] = EToV[n][2];
             ++sk;
         }
     }
 
-    DestroyIntMatrix(EToV);
+    free(Kprocs);
+    DestroyUnstructMesh(globalGrid);
 
-    *parEToV = newEToV;
-    *parK    = Klocal;
-    *newNv   = Nv;
+    return parTriGrid;
 }
 
 /**
@@ -275,27 +270,21 @@ void GenParallelUniformTriMesh(int Mx, int My,
  * @param[in] ymax  maxmum value of y
  * @param[in] procid index of process
  * @param[in] nprocs number of processes
- * @param[out]  parK    local number of elements
- * @param[out]  newNv   total number of vertex
- * @param[out]  parEToV local EToV
- * @param[out]  newVX   x coordinate of all vertex
- * @param[out]  newVY   y coordinate of all vertex
+ *
+ * @return  parQuadGrid  unstructed grid
  *
  * @note
- * the parameter `parEToV`, `newNV`, `newVX` and `newVY` will be allocated inside of the function, users
- * have to deallocate them manually after finish using them.
+ * Generate a parallel uniform quadrilateral grid, the user should call the `DestroyUnstructMesh`
+ * function to deallocate the grid after using it.
  */
-void GenParallelUniformQuadMesh(int Mx, int My,
+UnstructMesh* GenParallelUniformQuadMesh(int Mx, int My,
                                double xmin, double xmax,
                                double ymin, double ymax,
-                               int procid, int nprocs,
-                               int *parK, int *newNv,
-                               int ***parEToV, double **VX, double **VY){
+                               int procid, int nprocs){
 
-    int **EToV, Ne, Nv;
-    GenUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax, &Ne, &Nv, &EToV, VX, VY);
-    int K       = Ne;
-    int Nvertex = 4;
+    UnstructMesh *globalGrid = GenUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax);
+    int K       = globalGrid->ne;
+    int **EToV  = globalGrid->EToV;
 
     int *Kprocs = (int *) calloc(nprocs, sizeof(int));
     int  Klocal = (int)( (double)K/ (double)nprocs );
@@ -316,24 +305,34 @@ void GenParallelUniformQuadMesh(int Mx, int My,
     for(p=0;p<procid;++p)
         Kstart += Kprocs[p];
 
+    UnstructMesh *parQuadGrid = CreateUnstructMesh(
+            globalGrid->dim, Klocal, globalGrid->nv, QUADRIL);
+    parQuadGrid->name = "parallel uniform quadrilateral grid";
 
     /* EToV of local mesh */
-    int **newEToV = BuildIntMatrix(Klocal, Nvertex);
+    int **newEToV = globalGrid->EToV;
+
+    /* assignment of vertex coordinate */
+    int i;
+    for(i=0; i<parQuadGrid->nv; i++){
+        parQuadGrid->vx[i] = globalGrid->vx[i];
+        parQuadGrid->vy[i] = globalGrid->vy[i];
+    }
+
     /* Assignment of local mesh information */
-    int sk = 0, ie;
-    for (ie = 0; ie < K; ie++){
-        if(ie>=Kstart && ie<Kstart+Klocal) {
-            newEToV[sk][0] = EToV[ie][0];
-            newEToV[sk][1] = EToV[ie][1];
-            newEToV[sk][2] = EToV[ie][2];
-            newEToV[sk][3] = EToV[ie][3];
+    int sk = 0, n;
+    for (n = 0; n < K; n++){
+        if(n>=Kstart && n<Kstart+Klocal) {
+            newEToV[sk][0] = EToV[n][0];
+            newEToV[sk][1] = EToV[n][1];
+            newEToV[sk][2] = EToV[n][2];
+            newEToV[sk][3] = EToV[n][3];
             ++sk;
         }
     }
 
-    DestroyIntMatrix(EToV);
+    DestroyUnstructMesh(globalGrid);
+    free(Kprocs);
 
-    *parEToV = newEToV;
-    *parK    = Klocal;
-    *newNv   = Nv;
+    return parQuadGrid;
 }

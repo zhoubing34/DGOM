@@ -8,9 +8,11 @@ set(LIBUTILITIES_SOURCE
         LibUtilities/Utils.c
         LibUtilities/ParallelPairs.c
         LibUtilities/UTest.c
-        LibUtilities/GenUniformMesh.c
+        LibUtilities/UnstructMesh.c LibUtilities/UnstructMesh.h
+        LibUtilities/GenUniformMesh.c LibUtilities/GenUniformMesh.h
         LibUtilities/NetcdfLibrary.c
-        LibUtilities/NetcdfLibrary.h LibUtilities/SlopeLimiter.c LibUtilities/SlopeLimiter.h)
+        LibUtilities/NetcdfLibrary.h
+        LibUtilities/SlopeLimiter.c LibUtilities/SlopeLimiter.h)
 add_library(LibUtilities STATIC ${LIBUTILITIES_SOURCE})
 TARGET_LINK_LIBRARIES(LibUtilities
         iomp5 pthread m dl mkl_core mkl_intel_lp64 mkl_intel_thread # extern MKL library
@@ -54,8 +56,7 @@ target_link_libraries(LocalRegions LibUtilities Polylib)
 # MultiRegions
 # =======================================================================================
 set(MULTI_REGIONS_SOURCE
-        MultiRegions/MultiRegions.c
-        MultiRegions/MultiRegions.h
+        MultiRegions/MultiRegions.c MultiRegions/MultiRegions.h
         MultiRegions/SetFacePair.c
         MultiRegions/SetNodePair.c
         MultiRegions/SetElemetPair.c

@@ -27,21 +27,6 @@ typedef float real;
 /* string to int */
 void str2int(char *str, int *N, char* errmessage);
 
-/* GenUniformMesh */
-void GenUniformTriMesh(int Mx, int My, double xmin, double xmax, double ymin, double ymax, int type,
-                       int *Ne, int *Nv, int ***newEToV, double **newVX, double **newVY);
-
-void GenUniformQuadMesh(int Mx, int My, double xmin, double xmax, double ymin, double ymax,
-                        int *Ne, int *Nv, int ***newEToV, double **newVX, double **newVY);
-
-void GenParallelUniformTriMesh(int Mx, int My, double xmin, double xmax, double ymin, double ymax, int type,
-                               int procid, int nprocs, int *parK, int *newNv,
-                               int ***parEToV, double **VX, double **VY);
-
-void GenParallelUniformQuadMesh(int Mx, int My, double xmin, double xmax, double ymin, double ymax,
-                                int procid, int nprocs, int *parK, int *newNv,
-                                int ***parEToV, double **VX, double **VY);
-
 /* matrix operation */
 void invM(double* A, int N);
 void dgemm_(const unsigned M, const unsigned K, const unsigned N,

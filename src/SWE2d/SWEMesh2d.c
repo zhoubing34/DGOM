@@ -1,4 +1,5 @@
 #include "SWEDriver2d.h"
+#include "LibUtilities/GenUniformMesh.h"
 
 /* private variables */
 MultiReg2d* ParabolicBowlMesh2d(char **argv, SWE_Solver2d *solver);
@@ -123,8 +124,7 @@ MultiReg2d* DamBreakMesh2d(char **argv, SWE_Solver2d *solver){
  */
 MultiReg2d* AllocateUniformMesh_SWE2d(char **argv, double xmin, double xmax, double ymin, double ymax){
     MultiReg2d *mesh;
-    int Ne,Nv,Mx,My,**parEToV;
-    double *VX,*VY;
+    int Mx,My;
 
     GetCellNum_SWE2d(argv, &Mx, &My);
     StdRegions2d *shape = AllocateStandShape_SWE2d(argv);
@@ -133,23 +133,26 @@ MultiReg2d* AllocateUniformMesh_SWE2d(char **argv, double xmin, double xmax, dou
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
+    UnstructMesh *grid;
     if ( !(memcmp(argv[3], "tri", 3)) ){
-        GenParallelUniformTriMesh(Mx, My, xmin, xmax, ymin, ymax, 1,
-                                  procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
-        mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
+        grid = GenParallelUniformTriMesh(
+                Mx, My, xmin, xmax, ymin, ymax, 1, procid, nprocs);
+//        GenParallelUniformTriMesh(Mx, My, xmin, xmax, ymin, ymax, 1,
+//                                  procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
+        mesh = GenMultiReg2d(shape, grid);
     }else if( !(memcmp(argv[3], "quad", 4)) ){
-        GenParallelUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax,
-                                   procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
-        mesh = GenMultiReg2d(shape, Ne, Nv, parEToV, VX, VY);
+        grid = GenParallelUniformQuadMesh(
+                Mx, My, xmin, xmax, ymin, ymax, procid, nprocs);
+//        GenParallelUniformQuadMesh(Mx, My, xmin, xmax, ymin, ymax,
+//                                   procid, nprocs, &Ne, &Nv, &parEToV, &VX, &VY);
+        mesh = GenMultiReg2d(shape, grid);
     }else{
         printf("Wrong mesh type: %s.\n"
                        "The input should be either \'tri\' or \'quad\'.\n", argv[4]);
         MPI_Finalize(); exit(1);
     }
 
-    DestroyIntMatrix(parEToV);
-    DestroyVector(VX);
-    DestroyVector(VY);
+    DestroyUnstructMesh(grid);
     return mesh;
 }
 

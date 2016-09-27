@@ -18,7 +18,7 @@ int main(int argc, char **argv){
 void QuadTest(void){
     int N=3;
 
-    printf("init mesh\n");
+    printf("init tri mesh\n");
     StdRegions2d *quad = GenStdQuadEle(N);
     MultiReg2d *mesh;
     SetTestQuadMesh(quad, mesh);
@@ -44,7 +44,7 @@ void QuadTest(void){
 void TriTest(void){
     int N=3;
 
-    printf("init mesh\n");
+    printf("init quad mesh\n");
     StdRegions2d *tri = GenStdTriEle(N);
     MultiReg2d *mesh;
     SetTestTriMesh(tri, mesh);
