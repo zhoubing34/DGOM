@@ -32,7 +32,10 @@ LINK_DIRECTORIES("${THIRD_LIBRARY_PATH}/lib/"
         "${MKLROOT}/lib/")
 
 # source file
-SUBDIRS(src library)
+add_subdirectory(src)
+
+# library
+add_subdirectory(library)
 
 # add docs
 add_subdirectory(doc)

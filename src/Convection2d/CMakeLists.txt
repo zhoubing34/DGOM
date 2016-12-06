@@ -1,5 +1,3 @@
-
-
 # add source file
 set(SRC_LIST
         ConvectionDriver2d.c
@@ -10,13 +8,6 @@ set(SRC_LIST
         ConvectionRun2d.c
         ConvectionRHS2d.c
         Postprocess.c)
-#        PairFace.c
-#        SetUp.c
-#        BuildMaps.c
-#        InitMeshInfo.c
-#        LoadBalance2d.c
-#        DisDetector.c
-#        LimiterBJ2d.c)
 
 # set executable
 add_executable(Convection2d ${SRC_LIST})
@@ -28,5 +19,4 @@ target_link_libraries(Convection2d metis)
 target_link_libraries(Convection2d PhysDomain)
 
 # install command
-install(TARGETS Convection2d
-        RUNTIME DESTINATION bin)
+install(TARGETS Convection2d RUNTIME DESTINATION bin)
