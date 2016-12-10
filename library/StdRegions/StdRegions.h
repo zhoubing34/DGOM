@@ -13,8 +13,15 @@
 #define STDREGION_H
 
 #include "LibUtilities/LibUtilities.h"
-#include "LibUtilities/UnstructMesh.h"
 #include "Polylib/polylib.h"
+
+typedef enum {
+    TRIANGLE, // triangle
+    QUADRIL,  // quadrilateral
+    TETRA,    // tetrahedron
+    TRIPRISM, // triangle prism
+    HEXA      // hexahedron
+} ElementType;
 
 typedef struct {
     /** Polynomial order */

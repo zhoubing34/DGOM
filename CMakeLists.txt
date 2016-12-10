@@ -28,14 +28,13 @@ include_directories("${CMAKE_SOURCE_DIR}/library"   # source library
         ${MKLROOT}/include)
 
 # add static library path
-LINK_DIRECTORIES("${THIRD_LIBRARY_PATH}/lib/"
-        "${MKLROOT}/lib/")
+LINK_DIRECTORIES("${THIRD_LIBRARY_PATH}/lib/" "${MKLROOT}/lib/")
 
-# source file
-add_subdirectory(src)
+# add unit test
+set(UNITTEST_FOUND TRUE)
 
-# library
-add_subdirectory(library)
+# add source folder
+add_subdirectory(src)       # source
+add_subdirectory(library)   # static library
+add_subdirectory(doc)       # docs
 
-# add docs
-add_subdirectory(doc)

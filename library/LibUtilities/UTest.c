@@ -6,28 +6,34 @@
  * li12242, Tianjin University, li12242@tju.edu.cn
  */
 
-#include "LibUtilities.h"
+#include "UTest.h"
 
 /**
  * @brief
  * Compare Matrix variable with exact solution
  *
- * @param [char*]   message
- * @param [double]  A
- * @param [double]  ExactA
- * @param [int]
- * @param [int]
+ * @param [in]  message Test name
+ * @param [in]  A
+ * @param [in]  ExactA
+ * @param [in]  Nrows
+ * @param [in]  Ncols
  * @return
  * name     | type     | description of value
  * -------- |----------|----------------------
- * success  | int      | 0 - success; 1 - fail
+ * fail  | int      | 0 - success; 1 - fail
  */
-int CreateIntMatrixTest(char *message, int **A, int **ExactA, int Nrows, int Ncols){
+int IntMatrix_test(char *message,
+                int **A, int **ExactA,
+                int Nrows, int Ncols,
+                double elapsedTime) {
+
     double error=0.0, relativeErr;
     double total=0.0;
-    int success=0, i, j;
+    int fail=0, i, j;
+
     double **errorMatrix = Matrix_create(Nrows, Ncols);
-    printf("------------Creating %s Test------------\n", message);
+
+    printf(HEADLINE "1 test from %s\n", message);
     for(i=0;i<Nrows;i++){
         for(j=0;j<Ncols;j++){
             errorMatrix[i][j] = A[i][j] - ExactA[i][j];
@@ -36,19 +42,20 @@ int CreateIntMatrixTest(char *message, int **A, int **ExactA, int Nrows, int Nco
         }
     }
     relativeErr = error/total;
-    printf("Total    Err = %f\n", error);
-    printf("Total        = %f\n", total);
-    printf("Relative Err = %e\n", relativeErr);
+
     if(error > TOTALERR | relativeErr > RELATIVEERROR) {
-        success = 1; // error flag
-        printf("fatal error in %s\n", message);
-        PrintMatrix("The error Matrix", errorMatrix, Nrows, Ncols);
+        fail = 1; // error flag
+        printf(HEADFAIL "1 test failed from %s\n", message);
+        printf("Total Err    = %f\n", error);
+        printf("Total Value  = %f\n", total);
+        printf("Relative Err = %e\n", relativeErr);
+        PrintIntMatrix("The input Matrix", A, Nrows, Ncols);
+        PrintIntMatrix("The exact Matrix", ExactA, Nrows, Ncols);
     }else{
-        printf("test in %s success!\n", message);
+        printf(HEADPASS "1 test passed from %s (%f)\n", message, elapsedTime);
     }
-    printf("-------------Finish %s Test-------------\n", message);
     Matrix_free(errorMatrix);
-    return success;
+    return fail;
 }
 
 
@@ -64,14 +71,21 @@ int CreateIntMatrixTest(char *message, int **A, int **ExactA, int Nrows, int Nco
  * @return
  * name     | type     | description of value
  * -------- |----------|----------------------
- * success  | int      | 0 - success; 1 - fail
+ * fail  | int      | 0 - success; 1 - fail
  */
-int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int Ncols){
+int Matrix_test(char *message,
+                double **A, double **ExactA,
+                int Nrows, int Ncols,
+                double elapsedTime){
+
     double error=0.0, relativeErr;
     double total=0.0;
-    int success=0, i, j;
+    int fail=0, i, j;
+
     double **errorMatrix = Matrix_create(Nrows, Ncols);
-    printf("------------Creating %s Test------------\n", message);
+
+    printf(HEADLINE "1 test from %s\n", message);
+
     for(i=0;i<Nrows;i++){
         for(j=0;j<Ncols;j++){
             errorMatrix[i][j] = A[i][j] - ExactA[i][j];
@@ -80,20 +94,21 @@ int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int 
         }
     }
     relativeErr = error/total;
-    printf("Total    Err = %e\n", error);
-    printf("Total        = %f\n", total);
-    printf("Relative Err = %e\n", relativeErr);
+
     if(error > TOTALERR | relativeErr > RELATIVEERROR) {
-        success = 1; // error flag
-        printf("fatal error in %s\n", message);
+        fail = 1; // error flag
+        printf(HEADFAIL "1 test failed from %s\n", message);
+        printf("Total Err    = %f\n", error);
+        printf("Total Value  = %f\n", total);
+        printf("Relative Err = %e\n", relativeErr);
+
         PrintMatrix("The input Matrix", A, Nrows, Ncols);
         PrintMatrix("The exact Matrix", ExactA, Nrows, Ncols);
     }else{
-        printf("test in %s success!\n", message);
+        printf(HEADPASS "1 test passed from %s (%f)\n", message, elapsedTime);
     }
-    printf("-------------Finish %s Test-------------\n", message);
     Matrix_free(errorMatrix);
-    return success;
+    return fail;
 }
 
 
@@ -111,12 +126,19 @@ int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int 
  * -------- |----------|----------------------
  * success  | int      | 0 - success; 1 - fail
  */
-int CreateVectorTest(char *message, double *A, double *ExactA, int Ncols){
+int Vector_test(char *message,
+                double *A, double *ExactA,
+                int Ncols,
+                double elapsedTime){
+
     double error=0.0, relativeErr;
     double total=0.0;
-    int success=0, i;
+    int fail=0, i;
+
     double *errorVector = Vector_create(Ncols);
-    printf("------------Creating %s Test------------\n", message);
+
+    printf(HEADLINE "1 test from %s\n", message);
+
     for(i=0;i<Ncols;i++){
         errorVector[i] = A[i] - ExactA[i];
         error += fabs( errorVector[i] );
@@ -124,21 +146,22 @@ int CreateVectorTest(char *message, double *A, double *ExactA, int Ncols){
 
     }
     relativeErr = error/total;
-    printf("Total    Err = %f\n", error);
-    printf("Total        = %f\n", total);
-    printf("Relative Err = %e\n", relativeErr);
+
     if(error > TOTALERR | relativeErr > RELATIVEERROR) {
-        success = 1; // error flag
-        printf("fatal error in %s\n", message);
+        fail = 1; // error flag
+        printf(HEADFAIL "1 test failed from %s\n", message);
+
+        printf("Total    Err = %f\n", error);
+        printf("Total        = %f\n", total);
+        printf("Relative Err = %e\n", relativeErr);
         PrintVector("The input Vector =", A, Ncols);
         PrintVector("The exact Vector =", ExactA, Ncols);
     }else{
-        printf("test in %s success!\n", message);
+        printf(HEADPASS "1 test passed from %s (%f)\n", message, elapsedTime);
     }
-    printf("-------------Finish %s Test-------------\n", message);
 
     Vector_free(errorVector);
-    return success;
+    return fail;
 }
 
 void PrintVector(char *message, double *A, int Ncols){

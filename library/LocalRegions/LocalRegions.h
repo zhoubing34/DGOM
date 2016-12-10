@@ -4,7 +4,6 @@
 #include "LibUtilities/LibUtilities.h"
 #include "StdRegions/StdRegions.h"
 
-
 /* public functions */
 void Normals2d(int Nv, double *GX, double *GY, double *nx, double *ny, double *sJ);
 void GeoFactor2d(int Np, double *x, double *y,

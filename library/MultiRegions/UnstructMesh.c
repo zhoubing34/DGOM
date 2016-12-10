@@ -2,7 +2,7 @@
 
 /**
  * @brief
- * Deallocate unstructed grid structure.
+ * Deallocate unstructured grid structure.
  */
 void UnstructMesh_free(UnstructMesh *grid) {
     free(grid->EToV[0]);
@@ -29,7 +29,7 @@ void UnstructMesh_free(UnstructMesh *grid) {
 
 /**
  * @brief
- * Create and allocate an unstructed grid of single element type.
+ * Create and allocate an unstructured grid of single element type.
  */
 UnstructMesh* UnstructMesh_create(int Dim, int Ne, int Nv, ElementType eletype){
 

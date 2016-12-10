@@ -9,7 +9,9 @@ set(MULTI_REGIONS_SOURCE
         SetFacePair.c
         SetNodePair.c
         SetElemetPair.c
-        LoadBalance.c)
+        LoadBalance.c
+        UnstructMesh.c
+        UnstructMesh.h)
 
 add_library(MultiRegions STATIC ${MULTI_REGIONS_SOURCE})
 add_dependencies(MultiRegions LocalRegions)

@@ -6,6 +6,7 @@
 #define DGOM_SLOPELIMITER_H
 
 #include "PhysDomain/PhysDomain.h"
+#include "MultiRegions/UnstructMesh.h"
 
 void SLLoc2d(PhysDomain2d *phys, double beta);
 void SL2d   (PhysDomain2d *phys, double beta);

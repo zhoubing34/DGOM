@@ -7,7 +7,7 @@
 
 #include "PhysDomain/PhysDomain.h"
 #include "LibUtilities/NetcdfLibrary.h"
-#include "LibUtilities/SlopeLimiter.h"
+#include "PhysDomain/SlopeLimiter.h"
 #include "LibUtilities/LibUtilities.h"
 
 typedef struct foo{

@@ -14,7 +14,7 @@
 
 #include "StdRegions/StdRegions.h"
 #include "LocalRegions/LocalRegions.h"
-#include "LibUtilities/UnstructMesh.h"
+#include "UnstructMesh.h"
 #include <mpi.h>
 #include <parmetisbin.h>
 

@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "mkl_lapacke.h"
-//#include "f2c.h"
-//#include "clapack.h"
 
 #include "mpi.h"
 
@@ -21,9 +19,6 @@ typedef float real;
 #define max(a,b)  ( (a>b)?a:b )
 #define min(a,b)  ( (a<b)?a:b )
 
-#define TOTALERR 1.0e-6
-#define RELATIVEERROR 1.0e-8
-
 /* string to int */
 void str2int(char *str, int *N, char* errmessage);
 
@@ -34,14 +29,14 @@ void dgemm_(const unsigned M, const unsigned K, const unsigned N,
 
 /* allocate mem */
 double **Matrix_create(int Nrows, int Ncols);
-double  *Vector_create(int Nrows);
+double *Vector_create(int Nrows);
 int    **IntMatrix_create(int Nrows, int Ncols);
-int     *IntVector_create(int Nrows);
+int    *IntVector_create(int Nrows);
 
 double **Matrix_free(double **);
-double  *Vector_free(double *);
+double *Vector_free(double *);
 int    **IntMatrix_free(int **);
-int     *IntVector_free(int *);
+int    *IntVector_free(int *);
 
 /* ParallelPairs.c */
 void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
@@ -50,21 +45,5 @@ void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
                    int  (*procget)(const void *),
                    void (*marry)(const void *, const void *),
                    int (*compare_objs)(const void *, const void *));
-
-/* UTest.c */
-void PrintVector(char *message, double *A, int Ncols);
-void PrintMatrix(char *message, double **A, int Nrows, int Ncols);
-void PrintIntMatrix(char *message, int **A, int Nrows, int Ncols);
-void SaveMatrix(char *filename, double **A, int Nrows, int Ncols);
-void PrintIntMatrix2File(FILE *fp, char *message, int **Mat, int row, int col);
-void PrintMatrix2File(FILE *fp, char *message, double **Mat, int row, int col);
-void PrintIntVector2File(FILE *fp, char *message, int *Mat, int len);
-void PrintVector2File(FILE *fp, char *message, double *Mat, int len);
-
-int CreateVectorTest(char *message, double *A, double *ExactA, int Ncols);
-int CreateMatrixTest(char *message, double **A, double **ExactA, int Nrows, int Ncols);
-FILE* CreateLog(char *funname, int nprocs, int rank);
-
-int CreateIntMatrixTest(char *message, int **A, int **ExactA, int Nrows, int Ncols);
 
 #endif //LIBUTILITIES_H
