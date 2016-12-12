@@ -11,3 +11,7 @@ add_dependencies(PhysDomain MultiRegions)
 target_link_libraries(PhysDomain MultiRegions LibUtilities)
 
 install(TARGETS PhysDomain ARCHIVE DESTINATION lib)
+
+if(UNITTEST_FOUND)
+    add_subdirectory(test)
+endif(UNITTEST_FOUND)

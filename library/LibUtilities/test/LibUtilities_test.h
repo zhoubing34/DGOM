@@ -2,5 +2,5 @@
 #include "LibUtilities/UTest.h"
 
 // test
-int invM_test();
-int MatrixMultiply();
+int MatrixInverse_test();
+int MatrixMultiply_test();

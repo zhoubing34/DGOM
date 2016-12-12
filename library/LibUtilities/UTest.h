@@ -1,3 +1,6 @@
+#ifndef DGOM_UTEST_H
+#define DGOM_UTEST_H
+
 #include "LibUtilities.h"
 #include <sys/time.h>
 
@@ -11,9 +14,10 @@
 #define RELATIVEERROR 1.0e-8
 
 /* UTest.c */
-void PrintVector(char *message, double *A, int Ncols);
-void PrintMatrix(char *message, double **A, int Nrows, int Ncols);
-void PrintIntMatrix(char *message, int **A, int Nrows, int Ncols);
+void PrintVector_test(char *message, double *A, int Ncols);
+void PrintIntVector_test(char *message, int *A, int Ncols);
+void PrintMatrix_test(char *message, double **A, int Nrows, int Ncols);
+void PrintIntMatrix_test(char *message, int **A, int Nrows, int Ncols);
 void SaveMatrix(char *filename, double **A, int Nrows, int Ncols);
 void PrintIntMatrix2File(FILE *fp, char *message, int **Mat, int row, int col);
 void PrintMatrix2File(FILE *fp, char *message, double **Mat, int row, int col);
@@ -23,6 +27,9 @@ void PrintVector2File(FILE *fp, char *message, double *Mat, int len);
 int IntMatrix_test(char *message, int **A, int **ExactA, int Nrows, int Ncols, double elapsedTime);
 int Matrix_test(char *message, double **A, double **ExactA, int Nrows, int Ncols, double elapsedTime);
 int Vector_test(char *message, double *A, double *ExactA, int Ncols, double elapsedTime);
+int IntVector_test(char *message, int *A, int *ExactA, int Ncols, double elapsedTime);
 
 FILE* CreateLog(char *funname, int nprocs, int rank);
+
+#endif //DGOM_UTEST_H
 

@@ -160,9 +160,9 @@ void GetLIFT2d(StdRegions2d *shape, double **Mes, double **LIFT){
     }
 
     /* get the inverse mass matrix M^{-1} = V*V' */
-    dgemm_(Np, Np, Np,  vc, vct, temp1);
+    Matrix_Multiply(Np, Np, Np, vc, vct, temp1);
     /* LIFT = M^{-1}*Mes */
-    dgemm_(Np, Np, (unsigned)Nfp*Nfaces, temp1, me, temp2);
+    Matrix_Multiply(Np, Np, (unsigned) Nfp * Nfaces, temp1, me, temp2);
 
     sk = 0;
     for(i=0;i<Np;i++){
@@ -208,14 +208,14 @@ void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes){
             inv[j*Nfp+i] = w[j];
         }
     }
-    invM(inv, Nfp);
+    Matrix_Inverse(inv, Nfp);
     /* transform of vandermonde matrix */
     for(i=0;i<Nfp;i++){
         for(j=0;j<Nfp;j++)
             invt[j+Nfp*i] = inv[j*Nfp+i];
     }
     /* get M = inv(V)'*inv(V) */
-    dgemm_(Nfp, Nfp, Nfp, invt, inv, m);
+    Matrix_Multiply(Nfp, Nfp, Nfp, invt, inv, m);
 
     int k, sr, sk;
     for(i=0;i<Nfaces;i++){
@@ -274,7 +274,7 @@ void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, d
             temp[sk++] = V[i][j];
         }
     }
-    invM(temp, Np);
+    Matrix_Inverse(temp, Np);
 
     /* get the gradient of the modal basis */
     GetTriDeriV2d(N, Np, r, s, Vr, Vs);
@@ -289,7 +289,7 @@ void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, d
         }
     }
     /* \f$ \mathbf{Dr} = \mathbf{Vr}*\mathbf{V}^{-1} \f$ */
-    dgemm_(n, n, n, vtemp, temp, dtemp);
+    Matrix_Multiply(n, n, n, vtemp, temp, dtemp);
     sk = 0;
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
@@ -306,7 +306,7 @@ void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, d
         }
     }
     /* \f$ \mathbf{Ds} = \mathbf{Vs}*\mathbf{V}^{-1} \f$ */
-    dgemm_(n, n, n, vtemp, temp, dtemp);
+    Matrix_Multiply(n, n, n, vtemp, temp, dtemp);
     sk = 0;
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
@@ -485,7 +485,7 @@ void GetTriM(int Np, double **V, double **M){
         }
     }
 
-    invM(temp, Np);
+    Matrix_Inverse(temp, Np);
 
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
@@ -493,7 +493,7 @@ void GetTriM(int Np, double **V, double **M){
         }
     }
 
-    dgemm_(n, n, n, invt, temp, Mv);
+    Matrix_Multiply(n, n, n, invt, temp, Mv);
 
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){

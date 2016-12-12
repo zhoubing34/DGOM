@@ -32,8 +32,8 @@ void FetchParmapNode2d(PhysDomain2d *phys,
                        MPI_Request *mpi_recv_requests,
                        int *Nmessage);
 
-void FetchParmapEle2d(PhysDomain2d *phys, float *f_E,
-                      float *f_inE, float *f_outE,
+void FetchParmapEle2d(PhysDomain2d *phys, real *f_E,
+                      real *f_inE, real *f_outE,
                       MPI_Request *mpi_send_requests,
                       MPI_Request *mpi_recv_requests,
                       int *Nmessage);

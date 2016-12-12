@@ -8,8 +8,8 @@ int main(){
 
     printf(HEADSTART "Running 2 test from LibUtilities_Test\n");
 
-    flag[0] = invM_test();
-    flag[1] = MatrixMultiply();
+    flag[0] = MatrixInverse_test();
+    flag[1] = MatrixMultiply_test();
 
     int failNum = 0;
     for(i=0; i<2; i++){

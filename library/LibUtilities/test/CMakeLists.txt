@@ -3,8 +3,8 @@ include_directories(${CMAKE_SOURCE_DIR}/library)
 set(LIBUTILITIES_TEST_SOURCE
         LibUtilities_test.c
         LibUtilities_test.h
-        invM_test.c
-        MatrixMultiply.c)
+        MatrixInverse_test.c
+        MatrixMultiply_test.c)
 
 add_executable(LibUtilities_Test ${LIBUTILITIES_TEST_SOURCE})
 add_dependencies(LibUtilities_Test LibUtilities)

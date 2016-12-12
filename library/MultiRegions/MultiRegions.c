@@ -1,4 +1,5 @@
 #include "MultiRegions.h"
+#include "VertexSort.h"
 
 /* private functions */
 void SetVetxCoord2d(StdRegions2d *shape, int K, double *VX, double *VY, int **EToV, double **GX, double **GY);
@@ -16,6 +17,8 @@ void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
                   double *J, double *area, double *ciradius, real *vgeo);
 
 void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *parEtotalout, int **mapOUT);
+
+void Resort_Vertex(int K, int Nvert, int **EToV, double *VX, double *VY);
 /**
  * @brief
  * Generation of two dimensional region.
@@ -50,6 +53,9 @@ MultiReg2d* MultiReg2d_create(StdRegions2d *shape, UnstructMesh *grid){
     /* standard element */
     mesh->stdcell = shape;
     mesh->Nv = Nv;
+
+    /* reorder vertex in each element */
+    Resort_Vertex(K, shape->Nv, EToV, VX, VY);
 
     double **GX = Matrix_create(K, shape->Nv);
     double **GY = Matrix_create(K, shape->Nv);
@@ -95,6 +101,14 @@ MultiReg2d* MultiReg2d_create(StdRegions2d *shape, UnstructMesh *grid){
 
     return mesh;
 };
+
+
+void Resort_Vertex(int K, int Nvert, int **EToV, double *VX, double *VY){
+    int k;
+    for(k=0; k<K; k++){
+        VertexSort(Nvert, VX, VY, EToV[k]);
+    }
+}
 
 void MultiReg2d_free(MultiReg2d *mesh){
     /* mesh info */

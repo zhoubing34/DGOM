@@ -32,6 +32,7 @@ LINK_DIRECTORIES("${THIRD_LIBRARY_PATH}/lib/" "${MKLROOT}/lib/")
 
 # add unit test
 set(UNITTEST_FOUND TRUE)
+add_definitions(-DDOUBLE_PRECISION)
 
 # add source folder
 add_subdirectory(src)       # source

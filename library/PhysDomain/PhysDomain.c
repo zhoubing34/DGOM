@@ -14,7 +14,6 @@
 void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo);
 void SetParmapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT);
 
-
 PhysDomain2d* GenPhysDomain2d(MultiReg2d *mesh, int Nfields){
 
     PhysDomain2d *phys = (PhysDomain2d *) calloc(1, sizeof(PhysDomain2d));
@@ -127,8 +126,8 @@ void FetchParmapNode2d(PhysDomain2d *phys,
 }
 
 
-void FetchParmapEle2d(PhysDomain2d *phys, float *f_E,
-                      float *f_inE, float *f_outE,
+void FetchParmapEle2d(PhysDomain2d *phys,
+                      real *f_E, real *f_inE, real *f_outE,
                       MPI_Request *mpi_send_requests,
                       MPI_Request *mpi_recv_requests,
                       int *Nmessage){
@@ -147,8 +146,8 @@ void FetchParmapEle2d(PhysDomain2d *phys, float *f_E,
             int Nout = mesh->Npar[p]; // # of variables send to process p
             if(Nout){
                 /* symmetric communications (different ordering) */
-                MPI_Isend(f_outE+sk, Nout, MPI_FLOAT, p, 6666+p,      MPI_COMM_WORLD, mpi_send_requests +Nmess);
-                MPI_Irecv(f_inE+sk,  Nout, MPI_FLOAT, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
+                MPI_Isend(f_outE+sk, Nout, MPI_SIZE, p, 6666+p,      MPI_COMM_WORLD, mpi_send_requests +Nmess);
+                MPI_Irecv(f_inE+sk,  Nout, MPI_SIZE, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;
             }

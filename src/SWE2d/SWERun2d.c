@@ -44,7 +44,7 @@ double SWE_Run2d(PhysDomain2d *phys, SWE_Solver2d *solver, NcFile *outfile){
             const real fb = (real)rk4b[INTRK-1];
 
             SWE_RHS2d(phys, solver, fa, fb, fdt);
-            SLLoc2d(phys, 1.0);
+            SLLoc2d(phys, 2.0);
             SWE_PositivePreserving2d(phys, solver);
         }
 

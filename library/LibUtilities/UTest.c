@@ -23,9 +23,9 @@
  * fail  | int      | 0 - success; 1 - fail
  */
 int IntMatrix_test(char *message,
-                int **A, int **ExactA,
-                int Nrows, int Ncols,
-                double elapsedTime) {
+                   int **A, int **ExactA,
+                   int Nrows, int Ncols,
+                   double elapsedTime) {
 
     double error=0.0, relativeErr;
     double total=0.0;
@@ -49,10 +49,10 @@ int IntMatrix_test(char *message,
         printf("Total Err    = %f\n", error);
         printf("Total Value  = %f\n", total);
         printf("Relative Err = %e\n", relativeErr);
-        PrintIntMatrix("The input Matrix", A, Nrows, Ncols);
-        PrintIntMatrix("The exact Matrix", ExactA, Nrows, Ncols);
+        PrintIntMatrix_test("The input Matrix", A, Nrows, Ncols);
+        PrintIntMatrix_test("The exact Matrix", ExactA, Nrows, Ncols);
     }else{
-        printf(HEADPASS "1 test passed from %s (%f)\n", message, elapsedTime);
+        printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
     Matrix_free(errorMatrix);
     return fail;
@@ -102,10 +102,10 @@ int Matrix_test(char *message,
         printf("Total Value  = %f\n", total);
         printf("Relative Err = %e\n", relativeErr);
 
-        PrintMatrix("The input Matrix", A, Nrows, Ncols);
-        PrintMatrix("The exact Matrix", ExactA, Nrows, Ncols);
+        PrintMatrix_test("The input Matrix", A, Nrows, Ncols);
+        PrintMatrix_test("The exact Matrix", ExactA, Nrows, Ncols);
     }else{
-        printf(HEADPASS "1 test passed from %s (%f)\n", message, elapsedTime);
+        printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
     Matrix_free(errorMatrix);
     return fail;
@@ -154,17 +154,55 @@ int Vector_test(char *message,
         printf("Total    Err = %f\n", error);
         printf("Total        = %f\n", total);
         printf("Relative Err = %e\n", relativeErr);
-        PrintVector("The input Vector =", A, Ncols);
-        PrintVector("The exact Vector =", ExactA, Ncols);
+        PrintVector_test("The input Vector =", A, Ncols);
+        PrintVector_test("The exact Vector =", ExactA, Ncols);
     }else{
-        printf(HEADPASS "1 test passed from %s (%f)\n", message, elapsedTime);
+        printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
 
     Vector_free(errorVector);
     return fail;
 }
 
-void PrintVector(char *message, double *A, int Ncols){
+int IntVector_test(char *message,
+                    int *A, int *ExactA,
+                    int Ncols,
+                    double elapsedTime){
+
+    double error=0.0, relativeErr;
+    double total=0.0;
+    int fail=0, i;
+
+    double *errorVector = Vector_create(Ncols);
+
+    printf(HEADLINE "1 test from %s\n", message);
+
+    for(i=0;i<Ncols;i++){
+        errorVector[i] = A[i] - ExactA[i];
+        error += fabs( errorVector[i] );
+        total += fabs( ExactA[i] );
+
+    }
+    relativeErr = error/total;
+
+    if(error > TOTALERR | relativeErr > RELATIVEERROR) {
+        fail = 1; // error flag
+        printf(HEADFAIL "1 test failed from %s\n", message);
+
+        printf("Total    Err = %f\n", error);
+        printf("Total        = %f\n", total);
+        printf("Relative Err = %e\n", relativeErr);
+        PrintIntVector_test("The input Vector =", A, Ncols);
+        PrintIntVector_test("The exact Vector =", ExactA, Ncols);
+    }else{
+        printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
+    }
+
+    Vector_free(errorVector);
+    return fail;
+}
+
+void PrintVector_test(char *message, double *A, int Ncols){
     int m;
     printf("%s\n", message);
     for(m=0;m<Ncols;++m){
@@ -173,7 +211,16 @@ void PrintVector(char *message, double *A, int Ncols){
     printf(" \n");
 }
 
-void PrintMatrix(char *message, double **A, int Nrows, int Ncols){
+void PrintIntVector_test(char *message, int *A, int Ncols){
+    int m;
+    printf("%s\n", message);
+    for(m=0;m<Ncols;++m){
+        printf(" %d ", A[m]);
+    }
+    printf(" \n");
+}
+
+void PrintMatrix_test(char *message, double **A, int Nrows, int Ncols){
     int n,m;
 
     printf("%s\n", message);
@@ -185,7 +232,7 @@ void PrintMatrix(char *message, double **A, int Nrows, int Ncols){
     }
 }
 
-void PrintIntMatrix(char *message, int **A, int Nrows, int Ncols){
+void PrintIntMatrix_test(char *message, int **A, int Nrows, int Ncols){
     int n,m;
 
     printf("%s\n", message);
@@ -257,9 +304,9 @@ void SaveMatrix(char *filename, double **A, int Nrows, int Ncols){
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
  *
- * @param [char*] funname   Function name
- * @param [int]   rank      Index of local process
- * @param [int]   nprocs    Number of process
+ * @param [in] funname   Function name
+ * @param [in] rank      Index of local process
+ * @param [in] nprocs    Number of process
  *
  * @return
  * return values:

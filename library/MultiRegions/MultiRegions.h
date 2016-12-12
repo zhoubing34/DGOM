@@ -14,9 +14,9 @@
 
 #include "StdRegions/StdRegions.h"
 #include "LocalRegions/LocalRegions.h"
-#include "UnstructMesh.h"
 #include <mpi.h>
 #include <parmetisbin.h>
+#include "UnstructMesh.h"
 
 #define NODETOL  1e-6f
 

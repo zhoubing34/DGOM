@@ -164,9 +164,9 @@ StdRegions2d* AllocateStandShape_SWE2d(char **argv){
 
     StdRegions2d *shape;
     if ( !(memcmp(argv[3], "tri", 3)) ){
-        shape = StdTriEle_create(N);
+        shape = StdRegions2d_create(N, TRIANGLE);
     }else if( !(memcmp(argv[3], "quad", 4)) ){
-        shape = StdQuadEle_create(N);
+        shape = StdRegions2d_create(N, QUADRIL);
     }else{
         printf("Wrong mesh type: %s.\n"
                        "The input should be either \'tri\' or \'quad\'.\n", argv[3]);

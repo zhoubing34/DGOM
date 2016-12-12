@@ -10,7 +10,7 @@
 #include "PhysDomain/SlopeLimiter.h"
 #include "LibUtilities/LibUtilities.h"
 
-typedef struct foo{
+typedef struct{
     double gra;         /* gravity acceleration */
     double dx;          /* minimum grid length */
     double **bot;       /* bottom topography */

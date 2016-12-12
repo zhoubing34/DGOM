@@ -73,7 +73,7 @@ StdRegions2d* StdQuadEle_create(int N){
     GetSurfLinM(quad->N, quad->Nfaces, quad->Fmask, Mes);
     GetLIFT2d(quad, Mes, quad->LIFT);
 
-//    PrintMatrix("Mes", Mes, quad->Np, quad->Nfaces*quad->Nfp);
+//    PrintMatrix_test("Mes", Mes, quad->Np, quad->Nfaces*quad->Nfp);
     Matrix_free(Mes);
 
     /* integration coeff, ws and wv */
@@ -135,7 +135,7 @@ void GetQuadDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, 
             temp[sk++] = V[i][j];
         }
     }
-    invM(temp, Np);
+    Matrix_Inverse(temp, Np);
 
     /* get the gradient of the modal basis */
     GetQuadDeriV2d(N, Np, r, s, Vr, Vs);
@@ -150,7 +150,7 @@ void GetQuadDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, 
         }
     }
     /* \f$ \mathbf{Dr} = \mathbf{Vr}*\mathbf{V}^{-1} \f$ */
-    dgemm_(n, n, n, vtemp, temp, dtemp);
+    Matrix_Multiply(n, n, n, vtemp, temp, dtemp);
     sk = 0;
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
@@ -167,7 +167,7 @@ void GetQuadDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, 
         }
     }
     /* \f$ \mathbf{Ds} = \mathbf{Vs}*\mathbf{V}^{-1} \f$ */
-    dgemm_(n, n, n, vtemp, temp, dtemp);
+    Matrix_Multiply(n, n, n, vtemp, temp, dtemp);
     sk = 0;
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
@@ -231,7 +231,7 @@ void GetQuadM(int Np, double **V, double **M){
         }
     }
 
-    invM(temp, Np);
+    Matrix_Inverse(temp, Np);
 
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
@@ -239,7 +239,7 @@ void GetQuadM(int Np, double **V, double **M){
         }
     }
 
-    dgemm_(n, n, n, invt, temp, Mv);
+    Matrix_Multiply(n, n, n, invt, temp, Mv);
 
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){

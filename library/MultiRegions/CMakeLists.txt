@@ -11,7 +11,9 @@ set(MULTI_REGIONS_SOURCE
         SetElemetPair.c
         LoadBalance.c
         UnstructMesh.c
-        UnstructMesh.h)
+        UnstructMesh.h
+        VertexSort.c
+        VertexSort.h)
 
 add_library(MultiRegions STATIC ${MULTI_REGIONS_SOURCE})
 add_dependencies(MultiRegions LocalRegions)
@@ -22,3 +24,7 @@ target_link_libraries(MultiRegions
         parmetis metis)
 
 install(TARGETS MultiRegions ARCHIVE DESTINATION lib)
+
+if(UNITTEST_FOUND)
+    add_subdirectory(test)
+endif(UNITTEST_FOUND)

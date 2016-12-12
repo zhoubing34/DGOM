@@ -34,8 +34,8 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
     FetchParmapNode2d(phys, mpi_out_requests, mpi_in_requests, &Nmess);
 
     /* NOTE: should be local memory */
-    float  Qk[shape->Np*phys->Nfields];     /* scalar field */
-    float  Uf[shape->Np*flowRate->Nfields]; /* flow rate field */
+    real  Qk[shape->Np*phys->Nfields];     /* scalar field */
+    real  Uf[shape->Np*flowRate->Nfields]; /* flow rate field */
 
     /* volume integral */
     for(k=0;k<K;++k){
@@ -44,8 +44,8 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
         register unsigned int n, m;
 
         /* NOTE: buffer element k into local storage */
-        float *qpt = f_Q + phys->Nfields*shape->Np*k;
-        float *upt = f_s + flowRate->Nfields*shape->Np*k;
+        real *qpt = f_Q + phys->Nfields*shape->Np*k;
+        real *upt = f_s + flowRate->Nfields*shape->Np*k;
 
         int uk = 0;
         for(m=0;m<flowRate->Nfields*shape->Np;++m){
@@ -58,24 +58,24 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
 
         for(n=0;n<shape->Np;++n){
 
-            const float *ptDr = f_Dr+n*shape->Np;
-            const float *ptDs = f_Ds+n*shape->Np;
+            const real *ptDr = f_Dr+n*shape->Np;
+            const real *ptDs = f_Ds+n*shape->Np;
 
-            const float drdx = vgeo[geoid++], drdy = vgeo[geoid++];
-            const float dsdx = vgeo[geoid++], dsdy = vgeo[geoid++];
+            const real drdx = vgeo[geoid++], drdy = vgeo[geoid++];
+            const real dsdx = vgeo[geoid++], dsdy = vgeo[geoid++];
 
             float rhs = 0;
 
             int sk = 0; uk = 0;
             for(m=0;m<shape->Np;++m){
-                const float dr = ptDr[m];
-                const float ds = ptDs[m];
-                const float dx = drdx*dr+dsdx*ds;
-                const float dy = drdy*dr+dsdy*ds;
-                const float u = Uf[uk++];
-                const float v = Uf[uk++];
+                const real dr = ptDr[m];
+                const real ds = ptDs[m];
+                const real dx = drdx*dr+dsdx*ds;
+                const real dy = drdy*dr+dsdy*ds;
+                const real u = Uf[uk++];
+                const real v = Uf[uk++];
 
-                const float C = Qk[sk++];
+                const real C = Qk[sk++];
 
                 rhs -= dx*u*C;
                 rhs -= dy*v*C;
@@ -98,7 +98,7 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
         register unsigned int n, m;
 
         /* NOTE: should be local memory */
-        float fluxQ[shape->Nfaces*shape->Nfp*phys->Nfields];
+        real fluxQ[shape->Nfaces*shape->Nfp*phys->Nfields];
 
         /* NOTE: index into geometric factors */
         int surfid=k*6*shape->Nfp*shape->Nfaces;
@@ -109,12 +109,12 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
 
             int   idM       = (int)surfinfo[surfid++];
             int   idP       = (int)surfinfo[surfid++];
-            const float FSc = surfinfo[surfid++];
-            const float BSc = surfinfo[surfid++];
-            const float NXf = surfinfo[surfid++];
-            const float NYf = surfinfo[surfid++];
+            const real FSc = surfinfo[surfid++];
+            const real BSc = surfinfo[surfid++];
+            const real NXf = surfinfo[surfid++];
+            const real NYf = surfinfo[surfid++];
 
-            float dC, dF, dG;
+            real dC, dF, dG;
             if(idP<0){
                 idP = phys->Nfields*(-1-idP);
                 dC = (f_inQ[idP] - f_Q[idM]);
@@ -125,13 +125,13 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
                 dC = ( f_Q[idP] - f_Q[idM] );
             }
 
-            const float uM = f_s[idM*flowRate->Nfields];
-            const float vM = f_s[idM*flowRate->Nfields+1];
+            const real uM = f_s[idM*flowRate->Nfields];
+            const real vM = f_s[idM*flowRate->Nfields+1];
 
             dF = uM*dC;
             dG = vM*dC;
 
-            const float un = fabsf(NXf*uM + NYf*vM);
+            const real un = fabsf(NXf*uM + NYf*vM);
             fluxQ[sk++] = FSc*( - NXf*dF - NYf*dG + un*dC)*(real)0.5;
 
         }
@@ -139,13 +139,13 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
         /* Lift the flux term */
         for(n=0;n<shape->Np;++n){
 
-            const float *ptLIFT = f_LIFT+n*shape->Nfp*shape->Nfaces;
+            const real *ptLIFT = f_LIFT+n*shape->Nfp*shape->Nfaces;
 
             float rhs = 0;
 
             sk = 0;
             for(m=0;m<shape->Nfp*shape->Nfaces;++m){
-                const float L = ptLIFT[m];
+                const real L = ptLIFT[m];
                 rhs += L*fluxQ[sk++];
             }
 

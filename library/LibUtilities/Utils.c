@@ -23,7 +23,7 @@
  * Row counts first to generalize the vector A, which means that
  * A[i][j] = A[i*N+j]
  */
-void invM(double* A, int N){
+void Matrix_Inverse(double *A, int N){
     int lda = N;
     int ipiv[N];
     int info;
@@ -57,8 +57,8 @@ void invM(double* A, int N){
  * A[i][j] = A[i*N+j]
  */
 
-void dgemm_(const unsigned M, const unsigned K, const unsigned N,
-            const double *A, const double *B, double *C) {
+void Matrix_Multiply(const unsigned M, const unsigned K, const unsigned N,
+                     const double *A, const double *B, double *C) {
     unsigned i, j, k;
 
     for (i = 0; i < M; ++i) {

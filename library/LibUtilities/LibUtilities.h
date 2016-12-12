@@ -12,8 +12,12 @@
 /* variable type */
 #ifdef DOUBLE_PRECISION
 typedef double real;
+#define MPI_SIZE MPI_DOUBLE
+
 #else
 typedef float real;
+#define MPI_SIZE MPI_FLOAT
+
 #endif
 
 #define max(a,b)  ( (a>b)?a:b )
@@ -23,9 +27,9 @@ typedef float real;
 void str2int(char *str, int *N, char* errmessage);
 
 /* matrix operation */
-void invM(double* A, int N);
-void dgemm_(const unsigned M, const unsigned K, const unsigned N,
-            const double *A, const double *B, double *C);
+void Matrix_Inverse(double *A, int N);
+void Matrix_Multiply(const unsigned M, const unsigned K, const unsigned N,
+                     const double *A, const double *B, double *C);
 
 /* allocate mem */
 double **Matrix_create(int Nrows, int Ncols);

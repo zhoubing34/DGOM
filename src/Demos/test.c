@@ -95,7 +95,7 @@ void MatrixMuti(void){
     }
 
 
-    dgemm_(Deg, Deg, Deg, A, B, C);
+    Matrix_Multiply(Deg, Deg, Deg, A, B, C);
 
     sk=0;
     printf("\nC=\n");
@@ -131,7 +131,7 @@ void inverseMatrix(void){
         }
         printf("\n");
     }
-    invM(Matrix, Deg);
+    Matrix_Inverse(Matrix, Deg);
 
 
 //    printf("LWORK[%d]=%f")
