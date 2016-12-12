@@ -7,6 +7,6 @@
 
 #include "MultiRegions/MultiRegions.h"
 #include "LibUtilities/UTest.h"
-
+#include "SetTestMultiRegions.h"
 
 #endif //DGOM_MULITREGIONS_TEST_H

@@ -2,23 +2,6 @@
 #include "LibUtilities/GenUniformMesh.h"
 
 #define N 1
-MultiReg2d* SetTriMultiRegions(){
-//    int N = 1;
-    StdRegions2d *shape = StdRegions2d_create(N, TRIANGLE);
-    UnstructMesh *grid = UniformTriMesh_create(2, 2, -1, 1, -1, 1, 1);
-    MultiReg2d   *mesh = MultiReg2d_create(shape, grid);
-    UnstructMesh_free(grid);
-    return mesh;
-}
-
-MultiReg2d* SetQuadMultiRegions(){
-//    int N = 1;
-    StdRegions2d *shape = StdRegions2d_create(N, QUADRIL);
-    UnstructMesh *grid = UniformQuadMesh_create(2, 2, -1, 1, -1, 1);
-    MultiReg2d   *mesh = MultiReg2d_create(shape, grid);
-    UnstructMesh_free(grid);
-    return mesh;
-}
 
 MultiReg2d* SetTriParallelMultiRegions(){
 //    int N = 1;

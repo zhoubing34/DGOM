@@ -4,15 +4,14 @@
 
 #include "MulitRegions_test.h"
 #include "MultiRegions/VertexSort.h"
-#include "VertexSort_data.h"
-#include "SetTestMultiRegions.h"
+#include "VertexSort_test.h"
 #include "LibUtilities/GenUniformMesh.h"
 
 
-int MultiTriRegions_VertexSort_test(){
+int MultiTriRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     // global variable
     UnstructMesh *grid = UniformTriMesh_create(2, 2, -1, 1, -1, 1, 1);
-    MultiReg2d *mesh = SetTriParallelMultiRegions();
+//    MultiReg2d *mesh = SetTriParallelMultiRegions();
     StdRegions2d *shape = mesh->stdcell;
 
     // local
@@ -33,12 +32,6 @@ int MultiTriRegions_VertexSort_test(){
         }
     }
 
-    // // check
-    // char casename[32] = "MultiTriRegions_VertexSort_Test";
-    // FILE *fp = CreateLog(casename, mesh->procid, mesh->nprocs);
-    // PrintIntMatrix2File(fp, "EToV", mesh->EToV, mesh->K, shape->Nv);
-
-
     // call
     clockT1 = clock();
     for(k=0; k<mesh->K; k++){
@@ -46,26 +39,33 @@ int MultiTriRegions_VertexSort_test(){
     }
     clockT2 = clock();
 
-    // PrintIntMatrix2File(fp, "newEToV", mesh->EToV, mesh->K, shape->Nv);
-    // fclose(fp);
+    // print to log file
+    if(verbose){
+        char casename[32] = "MultiTriRegions_VertexSort_Test";
+        FILE *fp = CreateLog(casename, mesh->procid, mesh->nprocs);
+        PrintIntMatrix2File(fp, "newEToV", mesh->EToV, mesh->K, shape->Nv);
+        fclose(fp);
+    }
 
     // check
-    fail = IntMatrix_test("VertexSort_Quad", mesh->EToV, exEToV, mesh->K, shape->Nv,
-                          (double)((clockT2 - clockT1)/CLOCKS_PER_SEC));
+    if(!mesh->procid){
+        fail = IntMatrix_test("VertexSort_Quad", mesh->EToV, exEToV, mesh->K, shape->Nv,
+                              (double)((clockT2 - clockT1)/CLOCKS_PER_SEC));
+    }
 
     IntMatrix_free(exEToV);
-    StdRegions2d_free(shape);
-    MultiReg2d_free(mesh);
+//    StdRegions2d_free(shape);
+//    MultiReg2d_free(mesh);
     UnstructMesh_free(grid);
 
     return fail;
 }
 
 
-int MultiQuadRegions_VertexSort_test(){
+int MultiQuadRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     // global variable
     UnstructMesh *grid = UniformQuadMesh_create(2, 2, -1, 1, -1, 1);
-    MultiReg2d *mesh = SetQuadParallelMultiRegions();
+//    MultiReg2d *mesh = SetQuadParallelMultiRegions();
     StdRegions2d *shape = mesh->stdcell;
 
     // local
@@ -93,13 +93,23 @@ int MultiQuadRegions_VertexSort_test(){
     }
     clockT2 = clock();
 
+    // print
+    if(verbose){
+        char casename[34] = "MultiQuadRegions_VertexSort_Test";
+        FILE *fp = CreateLog(casename, mesh->procid, mesh->nprocs);
+        PrintIntMatrix2File(fp, "newEToV", mesh->EToV, mesh->K, shape->Nv);
+        fclose(fp);
+    }
+
     // check
-    fail = IntMatrix_test("VertexSort_Quad", mesh->EToV, exEToV, mesh->K, shape->Nv,
-                          (double)((clockT2 - clockT1)/CLOCKS_PER_SEC));
+    if(!mesh->procid) {
+        fail = IntMatrix_test("VertexSort_Quad", mesh->EToV, exEToV, mesh->K, shape->Nv,
+                              (double) ((clockT2 - clockT1) / CLOCKS_PER_SEC));
+    }
 
     IntMatrix_free(exEToV);
-    StdRegions2d_free(shape);
-    MultiReg2d_free(mesh);
+//    StdRegions2d_free(shape);
+//    MultiReg2d_free(mesh);
     UnstructMesh_free(grid);
 
     return fail;

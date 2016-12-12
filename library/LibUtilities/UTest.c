@@ -9,6 +9,30 @@
 #include "UTest.h"
 
 /**
+ * @brief Get configures from commandline and return settings
+ * @param [in]     argc
+ * @param [in]     argv
+ * @param [in,out] isverbose
+ * @param [in,out] ishelp
+ *
+ */
+void UTest_Command(int argc, char** argv, int *ishelp, int *isverbose){
+    int i;
+    *ishelp = 0;
+    *isverbose = 0;
+
+    if(argc>1){
+        for(i=0; i<argc; i++){
+            if(!(memcmp(argv[1], "-help", 5)) )
+                *ishelp = 1;
+            else if(!(memcmp(argv[1], "-verbose", 8)) )
+                *isverbose = 1;
+        }
+    }
+}
+
+
+/**
  * @brief
  * Compare Matrix variable with exact solution
  *

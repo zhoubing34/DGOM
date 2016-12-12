@@ -3,8 +3,6 @@
 
 #include "MultiRegions/MultiRegions.h"
 
-MultiReg2d* SetTriMultiRegions();
-MultiReg2d* SetQuadMultiRegions();
 MultiReg2d* SetTriParallelMultiRegions();
 MultiReg2d* SetQuadParallelMultiRegions();
 

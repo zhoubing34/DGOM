@@ -4,20 +4,23 @@
 
 #include "PhysDomain_test.h"
 
+#define NTEST 2
+
 int main(){
-    int i, flag[2];
+    int i, flag[NTEST];
     int failNum=0;
 
-    printf(HEADSTART "Running 1 test from PhysDomain_test\n");
+    printf(HEADSTART "Running %d test from PhysDomain_test\n", NTEST);
 
-    for(i=0; i<2; i++){
+    for(i=0; i<NTEST; i++){
         if(flag[i])
             failNum++;
     }
+
     if(failNum)
         printf(HEADFINISH "%d test faild from PhysDomain_test\n", failNum);
     else
-    printf(HEADFINISH "1 test passed from PhysDomain_test\n");
+        printf(HEADFINISH "%d test passed from PhysDomain_test\n", NTEST);
 
     return 0;
 }

@@ -68,7 +68,7 @@ void FreePhysDomain2d(PhysDomain2d *phys){
 
 /**
  * @brief
- * Send and receive variables `f_Q` on boundaries on each processes.
+ * Send and receive variables `f_Q` on boundaries in each processes.
  *
  * @details
  * The boundary values of `f_Q` on local process is arranged into `f_outQ` to send to other processes.
@@ -93,12 +93,14 @@ void FreePhysDomain2d(PhysDomain2d *phys){
  *     int Nmess;
  *     FetchParmapNode2d(phys, mpi_out_requests, mpi_in_requests, &Nmess);
  *
+ *     MPI_Status *instatus  = (MPI_Status*) calloc(nprocs, sizeof(MPI_Status));
+ *     MPI_Waitall(Nmess, mpi_in_requests, instatus);
+ *
  */
 void FetchParmapNode2d(PhysDomain2d *phys,
                        MPI_Request *mpi_send_requests,
                        MPI_Request *mpi_recv_requests,
-                       int *Nmessage)
-{
+                       int *Nmessage) {
     int t;
     /* buffer outgoing node data */
     for(t=0;t<phys->parNtotalout;++t)
@@ -115,8 +117,10 @@ void FetchParmapNode2d(PhysDomain2d *phys,
             Nout = mesh->Npar[p]*phys->Nfields*shape->Nfp; // # of variables send to process p
             if(Nout){
                 /* symmetric communications (different ordering) */
-                MPI_Isend(phys->f_outQ+sk, Nout, MPI_FLOAT, p, 6666+p,            MPI_COMM_WORLD, mpi_send_requests +Nmess);
-                MPI_Irecv(phys->f_inQ+sk,  Nout, MPI_FLOAT, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
+                MPI_Isend(phys->f_outQ+sk, Nout, MPI_SIZE, p, 6666+p,
+                          MPI_COMM_WORLD, mpi_send_requests +Nmess);
+                MPI_Irecv(phys->f_inQ+sk,  Nout, MPI_SIZE, p, 6666+mesh->procid,
+                          MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;
             }
@@ -146,8 +150,10 @@ void FetchParmapEle2d(PhysDomain2d *phys,
             int Nout = mesh->Npar[p]; // # of variables send to process p
             if(Nout){
                 /* symmetric communications (different ordering) */
-                MPI_Isend(f_outE+sk, Nout, MPI_SIZE, p, 6666+p,      MPI_COMM_WORLD, mpi_send_requests +Nmess);
-                MPI_Irecv(f_inE+sk,  Nout, MPI_SIZE, p, 6666+mesh->procid, MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
+                MPI_Isend(f_outE+sk, Nout, MPI_SIZE, p, 6666+p,
+                          MPI_COMM_WORLD, mpi_send_requests +Nmess);
+                MPI_Irecv(f_inE+sk,  Nout, MPI_SIZE, p, 6666+mesh->procid,
+                          MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;
             }

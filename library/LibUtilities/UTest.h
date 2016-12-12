@@ -14,6 +14,8 @@
 #define RELATIVEERROR 1.0e-8
 
 /* UTest.c */
+void UTest_Command(int argc, char** argv, int *ishelp, int *isverbose);
+
 void PrintVector_test(char *message, double *A, int Ncols);
 void PrintIntVector_test(char *message, int *A, int Ncols);
 void PrintMatrix_test(char *message, double **A, int Nrows, int Ncols);

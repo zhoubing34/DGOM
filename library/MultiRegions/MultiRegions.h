@@ -88,8 +88,6 @@ typedef struct {
 
 }MultiReg2d;
 
-
-
 /* public function */
 MultiReg2d* MultiReg2d_create(StdRegions2d *shape, UnstructMesh *grid);
 void MultiReg2d_free(MultiReg2d *mesh);
