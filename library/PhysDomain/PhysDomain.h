@@ -8,6 +8,8 @@ typedef struct PhysDomain2d{
     int Nfields;
     /** mesh */
     MultiReg2d* mesh;
+    /** number of surf infomation */
+    int Nsurfinfo;
     /** surf infomation */
     real *surfinfo;
     /** volume info */

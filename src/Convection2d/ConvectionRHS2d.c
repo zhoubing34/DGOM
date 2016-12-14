@@ -131,7 +131,7 @@ void ConvectionRHS2d(PhysDomain2d *phys, PhysDomain2d *flowRate,
             dF = uM*dC;
             dG = vM*dC;
 
-            const real un = fabsf(NXf*uM + NYf*vM);
+            const real un = fabs(NXf*uM + NYf*vM);
             fluxQ[sk++] = FSc*( - NXf*dF - NYf*dG + un*dC)*(real)0.5;
 
         }

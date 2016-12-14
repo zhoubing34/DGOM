@@ -13,7 +13,9 @@ set(MULTI_REGIONS_SOURCE
         UnstructMesh.c
         UnstructMesh.h
         VertexSort.c
-        VertexSort.h)
+        VertexSort.h
+        MultiRegBC/MultiRegBC2d.c
+        MultiRegBC/MultiRegBC2d.h)
 
 add_library(MultiRegions STATIC ${MULTI_REGIONS_SOURCE})
 add_dependencies(MultiRegions LocalRegions)

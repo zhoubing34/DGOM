@@ -13,7 +13,7 @@ double Distance(POINT p1, POINT p2){
 }
 
 // Compare function
-int cmp(const void *p1, const void *p2){
+int cmpPoint(const void *p1, const void *p2){
 	POINT *p3, *p4;
 	double m;
 	p3 = (POINT *)p1;
@@ -40,7 +40,7 @@ void VertexSort(int Nvert, double *x, double *y, int *EToV){
 	stdvert.y  = vertex[0].y;
 	stdvert.nv = vertex[0].nv;
 
-	qsort(&vertex[1], Nvert-1, sizeof(POINT), cmp);
+	qsort(&vertex[1], Nvert-1, sizeof(POINT), cmpPoint);
 
 	for(i=0;i<Nvert;i++){
 		EToV[i] = vertex[i].nv;

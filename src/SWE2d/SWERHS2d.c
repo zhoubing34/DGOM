@@ -144,11 +144,11 @@ void SWE_RHS2d(PhysDomain2d *phys, SWE_Solver2d *solver,
         }
 
         for(n=0;n<Np;++n){
-            const float *ptLIFT = f_LIFT+n*Nfp*Nfaces;
+            const real *ptLIFT = f_LIFT+n*Nfp*Nfaces;
             float rhsH = 0, rhsQx = 0, rhsQy = 0;
             sk = 0;
             for(m=0;m<Nfp*Nfaces;++m){
-                const float L = ptLIFT[m];
+                const real L = ptLIFT[m];
                 rhsH  += L*fluxQ[sk++];
                 rhsQx += L*fluxQ[sk++];
                 rhsQy += L*fluxQ[sk++];

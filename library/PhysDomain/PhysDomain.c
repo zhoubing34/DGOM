@@ -11,7 +11,7 @@
 #include "PhysDomain.h"
 
 /* public variables */
-void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo);
+void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, int *Nsurfinfo, real *surfinfo);
 void SetParmapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT);
 
 PhysDomain2d* GenPhysDomain2d(MultiReg2d *mesh, int Nfields){
@@ -50,7 +50,7 @@ PhysDomain2d* GenPhysDomain2d(MultiReg2d *mesh, int Nfields){
     /* surface info */
     int sz = K*Nfp*Nfaces*6*sizeof(real);
     phys->surfinfo = (real*) malloc(sz);
-    SetSurfInfo2d(mesh, Nfields, phys->surfinfo);
+    SetSurfInfo2d(mesh, Nfields, &(phys->Nsurfinfo), phys->surfinfo);
 
     return phys;
 }
@@ -206,7 +206,7 @@ void SetParmapOut2d(MultiReg2d *mesh, int Nfields, int *parmapOUT){
 }
 
 
-void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo){
+void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, int *Nsurfinfo, real *surfinfo){
 
     int k,f,m,sk = 0;
     StdRegions2d *shape = mesh->stdcell;
@@ -263,6 +263,7 @@ void SetSurfInfo2d(MultiReg2d *mesh, int Nfields, real *surfinfo){
             }
         }
     }
+    *Nsurfinfo = 6; /* number of messages in surfinfo */
 
     /* deallocate mem */
     free(drdx);
