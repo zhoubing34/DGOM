@@ -89,17 +89,13 @@ void pairmarry(const void *obj1, const void *obj2){
  * EToF | int[Klocal][shape->Nv]   | element to face index list
  * EToP | int[Klocal][shape->Nv]   | element to process list
  * Npar | int[nprocs] | number of faces adjacent to each process
- * newParK | int[nprocs][*] | index of local element adjacent other process
- * newParF | int[nprocs][*] | index of local face adjacent other process
  *
  * @note
- * EToE, EToF, EToP and Npar should be allocated before calling this function, while
- * newParK and newParF is allocated inside of the function. Send the address of the
- * matrix pointer as parameters.
+ * EToE, EToF, EToP and Npar should be allocated before calling this function.
  */
 void SetFacePair2d(StdRegions2d *shape, int Klocal,
                  int **EToV, int **EToE, int **EToF, int **EToP,
-                 int *Npar, int ***newParK, int ***newParF){
+                 int *Npar){
 
     int procid, nprocs;
     int Nfaces = shape->Nfaces;
@@ -159,23 +155,7 @@ void SetFacePair2d(StdRegions2d *shape, int Klocal,
         }
     }
 
-    int **parK = (int**) calloc(nprocs, sizeof(int*));
-    int **parF = (int**) calloc(nprocs, sizeof(int*));
-    for(p2=0;p2<nprocs;++p2){
-        parK[p2] = IntVector_create(Npar[p2]);
-        parF[p2] = IntVector_create(Npar[p2]);
-        Npar[p2] = 0;
-        for(n=0;n<Klocal*Nfaces;++n){
-            if(myfaces[n].p2==p2 && p2!=procid){
-                k1 = myfaces[n].k1, f1 = myfaces[n].f1;
-                parK[p2][Npar[p2]  ] = k1;
-                parF[p2][Npar[p2]++] = f1;
-            }
-        }
-    }
     free(myfaces);
     IntMatrix_free(vnum);
 
-    /* assignment */
-    *newParK = parK; *newParF = parF;
 }

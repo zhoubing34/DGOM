@@ -10,20 +10,28 @@
 typedef enum {
     INNERLOC, // 0-inner face
     INNERBS,  // 1-inner boundary surface
-    OPENBS,   // 2-open boundary
-    SLIPWALL, // 3-slip wall
-    NSLIPWALL // 4-non-slip wall
+    SLIPWALL, // 2-slip wall
+    NSLIPWALL, // 3-non-slip wall
+    OPENBS   // 4-open boundary
 } BCType;
+
+typedef struct{
+    int Nv;
+    int *BVToV;
+} OBC2d;
 
 typedef struct {
     int **EToBS; // element to boundary surface type
-    int Nobs;    // # of open boundary surface
+    int Nobc;    // number of open boundary surface
+    int *bcTypeList;
     real *vert_ext; // sparse vector for external data on vertex
 
-    /* send & recv data */
-    real *f_ext; // array of external data for open boundary
-    real *f_in;  //
-    real *f_out; //
+    OBC2d **obc2d; // vector of open boundary pointer
+
+//    /* send & recv data */
+//    real *f_ext; // array of external data for open boundary
+//    real *f_in;  //
+//    real *f_out; //
 
 }MultiRegBC2d;
 

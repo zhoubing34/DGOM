@@ -7,7 +7,7 @@ void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double *
                  int *newK, int ***newEToV, double ***newx, double ***newy);
 void SetFacePair2d(StdRegions2d *shape, int Klocal,
                  int **EToV, int **EToE, int **EToF, int **EToP,
-                 int *Npar, int ***newParK, int ***newParF);
+                 int *Npar);//, int ***newParK, int ***newParF);
 void SetNodeCoord2d(StdRegions2d *shape, int K, double **GX, double **GY, double **x, double **y);
 void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
                  int **EToE, int **EToF, int **EToP, double **x, double **y,
@@ -76,7 +76,7 @@ MultiReg2d* MultiReg2d_create(StdRegions2d *shape, UnstructMesh *grid){
     mesh->EToP = IntMatrix_create(mesh->K, shape->Nfaces);
 
     SetFacePair2d(shape, mesh->K, mesh->EToV, mesh->EToE, mesh->EToF, mesh->EToP,
-                mesh->Npar, &mesh->parK, &mesh->parF);
+                mesh->Npar);
     /* Setup nodes coordinate */
     mesh->x  = Matrix_create(mesh->K, shape->Np);
     mesh->y  = Matrix_create(mesh->K, shape->Np);

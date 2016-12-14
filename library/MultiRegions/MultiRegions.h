@@ -55,10 +55,6 @@ typedef struct {
 
     /** number of faces to send recv to each proc */
     int *Npar;
-    /** local element index of parallel nodes */
-    int **parK;
-    /** local face index of parallel nodes */
-    int **parF;
 
     /** total number of nodes to send recv */
     int parNtotalout;
