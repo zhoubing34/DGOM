@@ -10,7 +10,9 @@ set(MULTIREGIONS_TEST_SRC
         VarMapPair_test.h
         VarMapPair_test.c
         CellPair_test.c
-        CellPair_test.h)
+        CellPair_test.h
+        MulitRegions_test.h
+        MultiRegBC2d_test.c)
 
 add_executable(MulitRegions_Test ${MULTIREGIONS_TEST_SRC})
 

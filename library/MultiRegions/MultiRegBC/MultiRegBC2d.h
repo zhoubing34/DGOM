@@ -35,4 +35,7 @@ typedef struct {
 
 }MultiRegBC2d;
 
+MultiRegBC2d* MultiRegBC2d_create(MultiReg2d *mesh, int Nsurf, int **SFToV);
+void MultiRegBC2d_free(MultiRegBC2d* bc2d);
+
 #endif //DGOM_MULTIREGBC2D_H

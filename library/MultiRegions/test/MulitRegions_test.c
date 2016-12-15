@@ -7,8 +7,9 @@
 #include "VarMapPair_test.h"
 #include "CellPair_test.h"
 #include "VertexSort_test.h"
+#include "MultiRegBC2d_test.h"
 
-#define TESTNUM 6
+#define TESTNUM 8
 
 int main(int argc, char **argv){
 
@@ -49,6 +50,8 @@ int main(int argc, char **argv){
     flag[3] = MultiQuadRegions_VarMapPair_Test(quadMesh, isverbose);
     flag[4] = MultiTriRegions_CellPair_test(triMesh, isverbose);
     flag[5] = MultiQuadRegions_CellPair_test(quadMesh, isverbose);
+    flag[6] = MultiTriRegions_MultiRegBC2d_test(triMesh, isverbose);
+    flag[7] = MultiQuadRegions_MultiRegBC2d_test(quadMesh, isverbose);
 
     StdRegions2d_free(triMesh->stdcell);
     StdRegions2d_free(quadMesh->stdcell);
