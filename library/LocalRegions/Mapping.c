@@ -22,7 +22,7 @@
  * fulfill the Lagrange intepolation property
  * \f$ l_i( \mathbf{r}_j ) = \delta_{ij} \f$ in standard element.
  *
- * @param [StdRegions2d*] shape standard triangle element
+ * @param [stdCell*] shape standard triangle element
  * @param [double]  GX[3] vertex coordinate
  * @param [double]  GY[3] vertex coordinate
  * @return
@@ -61,7 +61,7 @@ void MapTriCoor(StdRegions2d *shape,
  * linear Lagrangian functions, which fulfill the Lagrange intepolation property
  * \f$ l_i( \mathbf{r}_j ) = \delta_{ij} \f$ in standard element.
  *
- * @param [StdRegions2d*] shape standard quadrilateral element
+ * @param [stdCell*] shape standard quadrilateral element
  * @param [double]  GX[3] vertex coordinate
  * @param [double]  GY[3] vertex coordinate
  * @return

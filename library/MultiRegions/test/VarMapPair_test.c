@@ -12,7 +12,7 @@ int MultiTriRegions_VarMapPair_Test(MultiRegBC2d *surf, int verbose){
     int fail = 0, i;
 //    MultiReg2d* mesh = setTriTestMesh();
     MultiReg2d *mesh = surf->mesh;
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     // local variables
     int Nfp = mesh->K*shape->Nfp*shape->Nfaces;
@@ -104,7 +104,7 @@ int MultiQuadRegions_VarMapPair_Test(MultiRegBC2d *surf, int verbose){
     int i, fail = 0;
 //    MultiReg2d* mesh = setQuadTestMesh();
     MultiReg2d *mesh = surf->mesh;
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     // local variables
     int Nfp = mesh->K*shape->Nfp*shape->Nfaces;
@@ -206,7 +206,7 @@ void FetchParmapNode2d(MultiRegBC2d *surf,
     for(t=0;t<surf->parNodeTotalOut;++t)
         f_outQ[t] = f_Q[surf->nodeIndexOut[t]];
 
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     /* do sends */
     int sk = 0, Nmess = 0;

@@ -18,7 +18,7 @@
  * elemapOUT| int*     |
  *
  */
-void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *cellIndOut){
+void SetElementPair(stdCell *shape, MultiReg2d *mesh, int *cellIndOut){
 
     int k, sk = 0;
     int p2, f1;

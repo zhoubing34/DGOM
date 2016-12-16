@@ -6,7 +6,7 @@
 
 MultiRegBC2d* setTriTestMesh(){
 //    int N = 1;
-    StdRegions2d *shape = StdRegions2d_create(N, TRIANGLE);
+    stdCell *shape = sc_create(N, TRIANGLE);
     int procid, nprocs;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
@@ -29,7 +29,7 @@ MultiRegBC2d* setTriTestMesh(){
 
 MultiRegBC2d* setQuadTestMesh(){
 //    int N = 1;
-    StdRegions2d *shape = StdRegions2d_create(N, QUADRIL);
+    stdCell *shape = sc_create(N, QUADRIL);
     int procid, nprocs;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);

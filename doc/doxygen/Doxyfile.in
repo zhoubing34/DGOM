@@ -759,7 +759,7 @@ INPUT                  = @CMAKE_SOURCE_DIR@/doc/doxygen/ \
                          @CMAKE_SOURCE_DIR@/src/SWE2d/ \
                          @CMAKE_SOURCE_DIR@/library/LibUtilities/ \
                          @CMAKE_SOURCE_DIR@/library/Polylib/ \
-                         @CMAKE_SOURCE_DIR@/library/StdRegions/ \
+                         @CMAKE_SOURCE_DIR@/library/StandCell/ \
                          @CMAKE_SOURCE_DIR@/library/LocalRegions/ \
                          @CMAKE_SOURCE_DIR@/library/MultiRegions/ \
                          @CMAKE_SOURCE_DIR@/library/PhysDomain/ \

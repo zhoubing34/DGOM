@@ -5,7 +5,7 @@
 #ifndef DGOM_STDREGIONS_TEST_H
 #define DGOM_STDREGIONS_TEST_H
 
-#include "StdRegions/StdRegions.h"
+#include "StandCell/sc_stdcell.h"
 #include "LibUtilities/LibUtilities.h"
 #include "LibUtilities/UTest.h"
 

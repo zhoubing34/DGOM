@@ -11,7 +11,7 @@ int cellFetch_test(PhysDomain2d *phys, int verbose, char *message, char *filenam
 
     MultiReg2d *mesh = phys->mesh;
     MultiRegBC2d *surf = phys->surf;
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     int K = mesh->K;
     int Np = shape->Np;

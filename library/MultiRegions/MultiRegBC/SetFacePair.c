@@ -78,7 +78,7 @@ void pairmarry(const void *obj1, const void *obj2){
  * @details
  * Set EToE,EToP,EToF & Npar,parK,parF
  *
- * @param [StdRegions2d*] shape standard element
+ * @param [stdCell*] shape standard element
  * @param [int]     Klocal  number of elements
  * @param [int**]   EToV    element to vertex list
  *
@@ -93,7 +93,7 @@ void pairmarry(const void *obj1, const void *obj2){
  * @note
  * EToE, EToF, EToP and Npar should be allocated before calling this function.
  */
-void SetFacePair2d(StdRegions2d *shape, int Klocal,
+void SetFacePair2d(stdCell *shape, int Klocal,
                  int **EToV, int **EToE, int **EToF, int **EToP,
                  int *Npar){
 

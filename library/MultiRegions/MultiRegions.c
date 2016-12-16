@@ -2,15 +2,15 @@
 #include "VertexSort.h"
 
 /* private functions */
-void SetVetxCoord2d(StdRegions2d *shape, int K, double *VX, double *VY, int **EToV, double **GX, double **GY);
-void LoadBalance2d(StdRegions2d *shape, int K, int **EToV, double **GX, double **GY,
+void SetVetxCoord2d(stdCell *shape, int K, double *VX, double *VY, int **EToV, double **GX, double **GY);
+void LoadBalance2d(stdCell *shape, int K, int **EToV, double **GX, double **GY,
                  int *newK, int ***newEToV, double ***newx, double ***newy);
-void SetFacePair2d(StdRegions2d *shape, int Klocal,
+void SetFacePair2d(stdCell *shape, int Klocal,
                  int **EToV, int **EToE, int **EToF, int **EToP,
                  int *Npar);//, int ***newParK, int ***newParF);
-void SetNodeCoord2d(StdRegions2d *shape, int K, double **GX, double **GY, double **x, double **y);
+void SetNodeCoord2d(stdCell *shape, int K, double **GX, double **GY, double **x, double **y);
 
-void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
+void SetVolumeGeo(stdCell *shape, int K, double **x, double **y,
                   double *J, double *area, double *ciradius, real *vgeo);
 
 void Resort_Vertex(int K, int Nvert, int **EToV, double *VX, double *VY);
@@ -32,7 +32,7 @@ void Resort_Vertex(int K, int Nvert, int **EToV, double *VX, double *VY);
  * This function will allocate and initialize a `MultiReg2d` type pointer, so the user should remember to
  * call `MultiReg2d_free` function manually to free it in case of memory leak.
  */
-MultiReg2d* MultiReg2d_create(StdRegions2d *shape, UnstructMesh *grid){
+MultiReg2d* MultiReg2d_create(stdCell *shape, UnstructMesh *grid){
 
     /* assignment */
     int K      = grid->ne;
@@ -123,7 +123,7 @@ void MultiReg2d_free(MultiReg2d *mesh){
     Matrix_free(mesh->y);
 }
 
-void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
+void SetVolumeGeo(stdCell *shape, int K, double **x, double **y,
                   double *J, double *area, double *ciradius, real *vgeo){
     int k,n;
     double *drdx, *dsdx, *drdy, *dsdy, *eJ;
@@ -155,7 +155,7 @@ void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
  * @brief
  * Set the vertex coordinate based on EToV
  *
- * @param [in]   shape StdRegions2d pointer: standard element object
+ * @param [in]   shape stdCell pointer: standard element object
  * @param [in]   K     number of elements
  * @param [in]   GX    input coordinate of vertex in each element
  * @param [in]   GY    input coordinate of vertex in each element
@@ -168,7 +168,7 @@ void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
  * x | double[K][shape->Np]  | node coordinate
  *
  */
-void SetNodeCoord2d(StdRegions2d *shape, int K, double **GX, double **GY, double **x, double **y){
+void SetNodeCoord2d(stdCell *shape, int K, double **GX, double **GY, double **x, double **y){
     int k;
     /* node coordinate */
     for(k=0;k<K;k++) {
@@ -177,7 +177,7 @@ void SetNodeCoord2d(StdRegions2d *shape, int K, double **GX, double **GY, double
         } else if (shape->Nv == 4) {
             MapQuadCoor(shape, GX[k], GY[k], x[k], y[k]);
         } else {
-            printf("fatal error: wrong number of vertex %d in StdRegions2d", shape->Nv);
+            printf("fatal error: wrong number of vertex %d in stdCell", shape->Nv);
         }
     }
 }
@@ -186,7 +186,7 @@ void SetNodeCoord2d(StdRegions2d *shape, int K, double **GX, double **GY, double
  * @brief
  * Set the vertex coordinate based on EToV
  *
- * @param [in]   shape StdRegions2d pointer: standard element object
+ * @param [in]   shape stdCell pointer: standard element object
  * @param [in]   K     number of elements
  * @param [in]   VX    input coordinate of vertex
  * @param [in]   VY    input coordinate of vertex
@@ -200,7 +200,7 @@ void SetNodeCoord2d(StdRegions2d *shape, int K, double **GX, double **GY, double
  * GX | double[K][shape->Nv]  | vertex coordinate
  *
  */
-void SetVetxCoord2d(StdRegions2d *shape, int K, double *VX, double *VY, int **EToV, double **GX, double **GY){
+void SetVetxCoord2d(stdCell *shape, int K, double *VX, double *VY, int **EToV, double **GX, double **GY){
     int n,k;
     /* vertex coordinate */
     for(k=0;k<K;k++){

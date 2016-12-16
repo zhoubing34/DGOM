@@ -20,11 +20,11 @@
 
 vertlist* OBC2d_create(int Nsurf, int **SFToV, int typeid);
 // connect adjacent face nodes
-void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
+void SetNodePair2d(stdCell *shape, int K, double **GX, double **GY,
                    int **EToE, int **EToF, int **EToP, double **x, double **y,
                    int *Npar, int *Ntotalout, int **mapOUT,
                    int *vmapM, int *vmapP);
-void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *cellIndOut);
+void SetElementPair(stdCell *shape, MultiReg2d *mesh, int *cellIndOut);
 
 
 // sort numbers from small to large
@@ -72,7 +72,7 @@ MultiRegBC2d* MultiRegBC2d_create(MultiReg2d *mesh, int Nsurf, int **SFToV){
         printf("Step into MultiRegBC2d_create\n");
 #endif
 
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
     MultiRegBC2d *surf2d = (MultiRegBC2d *) malloc(sizeof(MultiRegBC2d));
     surf2d->mesh = mesh;
 

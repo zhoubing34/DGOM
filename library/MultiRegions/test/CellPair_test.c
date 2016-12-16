@@ -20,7 +20,7 @@ int MultiTriRegions_CellPair_test(MultiRegBC2d *surf, int verbose){
 
 //    MultiReg2d* mesh = setTriTestMesh();
     MultiReg2d *mesh = surf->mesh;
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     double *xM = Vector_create(mesh->K);
     double *xP = Vector_create(mesh->K);
@@ -124,7 +124,7 @@ int MultiQuadRegions_CellPair_test(MultiRegBC2d *surf, int verbose){
 
 //    MultiReg2d* mesh = setQuadTestMesh();
     MultiReg2d *mesh = surf->mesh;
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     double *xM = Vector_create(mesh->K);
     double *xP = Vector_create(mesh->K);

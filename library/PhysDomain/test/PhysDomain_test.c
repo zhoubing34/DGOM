@@ -54,8 +54,8 @@ int main(int argc, char **argv){
             failNum++;
     }
 
-    StdRegions2d_free(triMesh->stdcell);
-    StdRegions2d_free(quadMesh->stdcell);
+    sc_free(triMesh->stdcell);
+    sc_free(quadMesh->stdcell);
     MultiReg2d_free(triMesh);
     MultiReg2d_free(quadMesh);
     MultiRegBC2d_free(triSurf);

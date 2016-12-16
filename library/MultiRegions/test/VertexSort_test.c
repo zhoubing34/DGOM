@@ -12,7 +12,7 @@ int MultiTriRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     // global variable
     UnstructMesh *grid = UniformTriMesh_create(2, 2, -1, 1, -1, 1, 1);
 //    MultiReg2d *mesh = setTriTestMesh();
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     // local
     int **exEToV = IntMatrix_create(mesh->K, shape->Nv);
@@ -54,7 +54,7 @@ int MultiTriRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     }
 
     IntMatrix_free(exEToV);
-//    StdRegions2d_free(shape);
+//    sc_free(shape);
 //    MultiReg2d_free(mesh);
     UnstructMesh_free(grid);
 
@@ -66,7 +66,7 @@ int MultiQuadRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     // global variable
     UnstructMesh *grid = UniformQuadMesh_create(2, 2, -1, 1, -1, 1);
 //    MultiReg2d *mesh = setQuadTestMesh();
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     // local
     int **exEToV = IntMatrix_create(mesh->K, shape->Nv);
@@ -108,7 +108,7 @@ int MultiQuadRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     }
 
     IntMatrix_free(exEToV);
-//    StdRegions2d_free(shape);
+//    sc_free(shape);
 //    MultiReg2d_free(mesh);
     UnstructMesh_free(grid);
 

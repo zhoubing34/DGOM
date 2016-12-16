@@ -2,7 +2,6 @@
 #define DGOM_PHYSDOMAIN_H
 
 #include "MultiRegions/MultiRegions.h"
-#include "MultiRegions/MultiRegBC/MultiRegBC2d.h"
 
 typedef struct{
     /** number of variable fields */

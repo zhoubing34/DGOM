@@ -113,13 +113,20 @@ int Matrix_test(char *message,
     for(i=0;i<Nrows;i++){
         for(j=0;j<Ncols;j++){
             errorMatrix[i][j] = A[i][j] - ExactA[i][j];
-            error += fabs( errorMatrix[i][j] );
+            error = fabs( errorMatrix[i][j] );
+            if (error > TOTALERR){
+                fail = 1; // error flag
+                printf(HEADFAIL "1 test failed from %s\n", message);
+                printf("element [%d, %d] = %f is different from the exact value %f\n",
+                       i+1, j+1, A[i][j], ExactA[i][j]);
+                return fail;
+            }
             total += fabs( ExactA[i][j] );
         }
     }
     relativeErr = error/total;
 
-    if(error > TOTALERR | relativeErr > RELATIVEERROR) {
+    if(relativeErr > RELATIVEERROR) {
         fail = 1; // error flag
         printf(HEADFAIL "1 test failed from %s\n", message);
         printf("Total Err    = %f\n", error);

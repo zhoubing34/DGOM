@@ -6,7 +6,7 @@
  * @details
  * Set fields of EToE,parNtotalout,parmapOut,vmapM & vmapP
  *
- * @param [StdRegions2d*] shape standard element
+ * @param [stdCell*] shape standard element
  * @param [int]     K       number of elements
  * @param [double**]   GX   vertex coordinate
  * @param [double**]   GY   vertex coordinate
@@ -28,7 +28,7 @@
  * @note
  * vmapP contains the mapping from nodes to incoming nodes, which is marked as negative.
  */
-void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
+void SetNodePair2d(stdCell *shape, int K, double **GX, double **GY,
                  int **EToE, int **EToF, int **EToP, double **x, double **y,
                  int *Npar, int *Ntotalout, int **mapOUT,
                  int *vmapM, int *vmapP){

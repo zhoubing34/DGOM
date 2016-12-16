@@ -9,7 +9,7 @@
  * li12242, Tianjin University, li12242@tju.edu.cn
  */
 
-#include "StdRegions.h"
+#include "sc_stdcell.h"
 
 /* Private functions */
 void BuildQuadFmask(int N, int **Fmask);
@@ -31,11 +31,11 @@ void GetQuadDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, 
  * return values:
  * name     | type     | description of value
  * -------- |----------|----------------------
- * tri | StdRegions2d* |
+ * tri | stdCell* |
  *
  */
-StdRegions2d* StdQuadEle_create(int N){
-    StdRegions2d *quad = (StdRegions2d *) calloc(1, sizeof(StdRegions2d));
+stdCell* sc_createQuad(int N){
+    stdCell *quad = (stdCell *) calloc(1, sizeof(stdCell));
 
     int Np = (N+1)*(N+1);
     /* basic info */

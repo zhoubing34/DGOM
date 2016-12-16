@@ -11,11 +11,11 @@ void GeoFactor2d(int Np, double *x, double *y,
                  double *drdx, double *dsdx,
                  double *drdy, double *dsdy, double *J);
 
-void MapTriCoor(StdRegions2d *shape,
+void MapTriCoor(stdCell *shape,
                 double *GX, double *GY,
                 double *x, double *y);
 
-void MapQuadCoor(StdRegions2d *shape,
+void MapQuadCoor(stdCell *shape,
                  double *GX, double *GY,
                  double *x, double *y);
 

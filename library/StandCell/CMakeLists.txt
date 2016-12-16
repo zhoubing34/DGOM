@@ -4,10 +4,10 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
 
 set(STDREGIONS_SOURCE
-        StdRegions.h
-        Triangle.c
-        StdRegions.c
-        Quadrilateral.c)
+        sc_stdcell.h
+        sc_stdcell.c
+        sc_triangle.c
+        sc_quadrilateral.c)
 
 add_library(StdRegions STATIC ${STDREGIONS_SOURCE})
 add_dependencies(StdRegions LibUtilities Polylib)

@@ -6,8 +6,6 @@ set(LIBUTILITIES_SOURCE
         ParallelPairs.c
         UTest.h
         UTest.c
-        GenUniformMesh.c
-        GenUniformMesh.h
         NetcdfLibrary.c
         NetcdfLibrary.h)
 

@@ -19,7 +19,7 @@ void permuteCellIndexBuffer(MultiRegBC2d *, int Nfields, int *cellIndexOut);
 PhysDomain2d* PhysDomain2d_create(MultiReg2d *mesh, MultiRegBC2d *surf, int Nfields){
 
     PhysDomain2d *phys = (PhysDomain2d *) calloc(1, sizeof(PhysDomain2d));
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     int K  = mesh->K;   /* number of elements */
     int Np = shape->Np; /* number of nodes in each element */
@@ -135,7 +135,7 @@ void fetchNodeBuffer2d(PhysDomain2d *phys,
         phys->f_outQ[t] = phys->f_Q[phys->nodeIndexOut[t]];
 
     MultiReg2d *mesh = phys->mesh;
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     /* do sends */
     int sk = 0, Nmess = 0;
@@ -209,7 +209,7 @@ void permuteNodeIndexBuffer(MultiRegBC2d *surf, int Nfields, int *nodeIndexOut){
     int p2, n1, m, fld;
     int nprocs = mesh->nprocs;
     int procid = mesh->procid;
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
     int Nfp = shape->Nfp;
 
     int sp=0, sk=0;
@@ -253,7 +253,7 @@ void setSurfInfo(MultiRegBC2d *surf, int Nfields, real *surfinfo){
 
     int k,f,m,sk = 0;
     MultiReg2d *mesh = surf->mesh;
-    StdRegions2d *shape = mesh->stdcell;
+    stdCell *shape = mesh->stdcell;
 
     int Np = shape->Np;
     int Nfaces = shape->Nfaces;

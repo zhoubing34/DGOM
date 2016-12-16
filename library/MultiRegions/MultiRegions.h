@@ -12,7 +12,7 @@
 #ifndef DGOM_MULTIREGIONS_H
 #define DGOM_MULTIREGIONS_H
 
-#include "StdRegions/StdRegions.h"
+#include "StandCell/sc_stdcell.h"
 #include "LocalRegions/LocalRegions.h"
 #include <mpi.h>
 #include "UnstructMesh.h"
@@ -27,7 +27,7 @@ typedef struct {
     int nprocs;
 
     /** standard element */
-    StdRegions2d *stdcell;
+    stdCell *stdcell;
     /** total number of vertex */
     int Nv;
     /** local number of elements */
@@ -70,7 +70,7 @@ typedef struct {
 }MultiReg2d;
 
 /* public function */
-MultiReg2d* MultiReg2d_create(StdRegions2d *shape, UnstructMesh *grid);
+MultiReg2d* MultiReg2d_create(stdCell *shape, UnstructMesh *grid);
 void MultiReg2d_free(MultiReg2d *mesh);
 
 #endif //DGOM_MULTIREGIONS_H

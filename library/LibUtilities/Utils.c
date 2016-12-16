@@ -50,7 +50,7 @@ void Matrix_Inverse(double *A, int N){
  *
  * @param[in] A is M-by-K matrix
  * @param[in] B is K-by-N matrix
- * @param[inout] C is M-by-N matrix
+ * @param[in,out] C is M-by-N matrix
  *
  * @note
  * Row counts first to generalize the vector A, B and C, which means that
