@@ -6,8 +6,8 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
 set(MULTI_REGIONS_SOURCE
         MultiRegions.c
         MultiRegions.h
-        SetFacePair.c
-        SetNodePair.c
+        MultiRegBC/SetFacePair.c
+        MultiRegBC/SetNodePair.c
         SetElemetPair.c
         LoadBalance.c
         UnstructMesh.c

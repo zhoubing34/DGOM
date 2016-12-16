@@ -15,7 +15,6 @@
 #include "StdRegions/StdRegions.h"
 #include "LocalRegions/LocalRegions.h"
 #include <mpi.h>
-#include <parmetisbin.h>
 #include "UnstructMesh.h"
 
 #define NODETOL  1e-6f
@@ -56,21 +55,6 @@ typedef struct {
     /** number of faces to send recv to each proc */
     int *Npar;
 
-    /** total number of nodes to send recv */
-    int parNtotalout;
-    /** index list of nodes to send out */
-    int *parmapOUT;
-
-    /* total number of element's value to send and recv */
-    int parEtotalout;
-    /* index list of elements to send out */
-    int *elemapOut;
-
-    /** volume id of -ve trace of face node */
-    int *vmapM;
-    /** volume id of +ve trace of face node */
-    int *vmapP;
-
     /* info of each element */
 
     /** jacobi on each nodes */
@@ -80,6 +64,7 @@ typedef struct {
     /* area of each ele */
     double *area;
     /* volume geometric factors */
+    int Nvgeo;
     real *vgeo;
 
 }MultiReg2d;

@@ -2,31 +2,35 @@
 // Created by li12242 on 12/11/16.
 //
 
+#include <MultiRegions/MultiRegions.h>
+#include <MultiRegions/MultiRegBC/MultiRegBC2d.h>
 #include "CellPair_test.h"
 
-void FetchParmapEle2d(MultiReg2d *mesh,
+void FetchParmapEle2d(MultiRegBC2d *surf,
                       real *f_E, real *f_inE, real *f_outE,
                       MPI_Request *mpi_send_requests,
                       MPI_Request *mpi_recv_requests,
                       int *Nmessage);
 
 
-int MultiTriRegions_CellPair_test(MultiReg2d *mesh, int verbose){
+int MultiTriRegions_CellPair_test(MultiRegBC2d *surf, int verbose){
 
     // local variable
     int i,k,fail = 0;
 
-//    MultiReg2d* mesh = SetTriParallelMultiRegions();
+//    MultiReg2d* mesh = setTriTestMesh();
+    MultiReg2d *mesh = surf->mesh;
     StdRegions2d *shape = mesh->stdcell;
 
     double *xM = Vector_create(mesh->K);
     double *xP = Vector_create(mesh->K);
     double *yM = Vector_create(mesh->K);
     double *yP = Vector_create(mesh->K);
-    double *x_in  = Vector_create(mesh->parEtotalout);
-    double *x_out = Vector_create(mesh->parEtotalout);
-    double *y_in  = Vector_create(mesh->parEtotalout);
-    double *y_out = Vector_create(mesh->parEtotalout);
+    int parCellTotalOut = surf->parCellTotalOut;
+    double *x_in  = Vector_create(parCellTotalOut);
+    double *x_out = Vector_create(parCellTotalOut);
+    double *y_in  = Vector_create(parCellTotalOut);
+    double *y_out = Vector_create(parCellTotalOut);
 
     // calculate cell centre
     for(k=0; k<mesh->K; k++){
@@ -47,8 +51,8 @@ int MultiTriRegions_CellPair_test(MultiReg2d *mesh, int verbose){
     int Nmess = 0;
     MPI_Request *mpi_out_requests = (MPI_Request*) calloc(mesh->nprocs, sizeof(MPI_Request));
     MPI_Request *mpi_in_requests  = (MPI_Request*) calloc(mesh->nprocs, sizeof(MPI_Request));
-    FetchParmapEle2d(mesh, xM, x_in, x_out, mpi_out_requests, mpi_in_requests, &Nmess);
-    FetchParmapEle2d(mesh, yM, y_in, y_out, mpi_out_requests, mpi_in_requests, &Nmess);
+    FetchParmapEle2d(surf, xM, x_in, x_out, mpi_out_requests, mpi_in_requests, &Nmess);
+    FetchParmapEle2d(surf, yM, y_in, y_out, mpi_out_requests, mpi_in_requests, &Nmess);
 
     MPI_Status *instatus  = (MPI_Status*) calloc(mesh->nprocs, sizeof(MPI_Status));
     MPI_Waitall(Nmess, mpi_in_requests, instatus);
@@ -65,8 +69,8 @@ int MultiTriRegions_CellPair_test(MultiReg2d *mesh, int verbose){
     }
 
     if(!mesh->procid){
-        fail = Vector_test("EleTriMapPair_x", xP, xM, mesh->parEtotalout, 0);
-        fail = Vector_test("EleTriMapPair_y", yP, yM, mesh->parEtotalout, 0);
+        fail = Vector_test("EleTriMapPair_x", xP, xM, parCellTotalOut, 0);
+        fail = Vector_test("EleTriMapPair_y", yP, yM, parCellTotalOut, 0);
     }
 
     free(mpi_in_requests);
@@ -86,17 +90,17 @@ int MultiTriRegions_CellPair_test(MultiReg2d *mesh, int verbose){
         PrintIntMatrix2File(fp, "EToF", mesh->EToF, mesh->K, shape->Nv);
         /* write EToP */
         PrintIntMatrix2File(fp, "EToP", mesh->EToP, mesh->K, shape->Nv);
-        fprintf(fp, "parEtotalOut = %d\n", mesh->parEtotalout);
-        PrintIntVector2File(fp, "elemapOUT = ", mesh->elemapOut, mesh->parEtotalout);
+        fprintf(fp, "parEtotalOut = %d\n", surf->parCellTotalOut);
+        PrintIntVector2File(fp, "elemapOUT = ", surf->cellIndexOut, surf->parCellTotalOut);
 
         PrintVector2File(fp, "xM", xM, mesh->K);
         PrintVector2File(fp, "xP", xP, mesh->K);
         PrintVector2File(fp, "yM", yM, mesh->K);
         PrintVector2File(fp, "yP", yP, mesh->K);
-        PrintVector2File(fp, "x_out", x_out, mesh->parEtotalout);
-        PrintVector2File(fp, "y_out", y_out, mesh->parEtotalout);
-        PrintVector2File(fp, "x_in", x_in, mesh->parEtotalout);
-        PrintVector2File(fp, "y_in", y_in, mesh->parEtotalout);
+        PrintVector2File(fp, "x_out", x_out, parCellTotalOut);
+        PrintVector2File(fp, "y_out", y_out, parCellTotalOut);
+        PrintVector2File(fp, "x_in", x_in, parCellTotalOut);
+        PrintVector2File(fp, "y_in", y_in, parCellTotalOut);
 
         fclose(fp);
     }
@@ -110,28 +114,27 @@ int MultiTriRegions_CellPair_test(MultiReg2d *mesh, int verbose){
     Vector_free(x_out);
     Vector_free(y_out);
 
-    // free and finalize
-//    StdRegions2d_free(shape);
-//    MultiReg2d_free(mesh);
     return fail;
 }
 
 
-int MultiQuadRegions_CellPair_test(MultiReg2d *mesh, int verbose){
+int MultiQuadRegions_CellPair_test(MultiRegBC2d *surf, int verbose){
     // local variable
     int i,k,fail = 0;
 
-//    MultiReg2d* mesh = SetQuadParallelMultiRegions();
+//    MultiReg2d* mesh = setQuadTestMesh();
+    MultiReg2d *mesh = surf->mesh;
     StdRegions2d *shape = mesh->stdcell;
 
     double *xM = Vector_create(mesh->K);
     double *xP = Vector_create(mesh->K);
     double *yM = Vector_create(mesh->K);
     double *yP = Vector_create(mesh->K);
-    double *x_in  = Vector_create(mesh->parEtotalout);
-    double *x_out = Vector_create(mesh->parEtotalout);
-    double *y_in  = Vector_create(mesh->parEtotalout);
-    double *y_out = Vector_create(mesh->parEtotalout);
+    int parCellTotalOut = surf->parCellTotalOut;
+    double *x_in  = Vector_create(parCellTotalOut);
+    double *x_out = Vector_create(parCellTotalOut);
+    double *y_in  = Vector_create(parCellTotalOut);
+    double *y_out = Vector_create(parCellTotalOut);
 
     // calculate cell centre
     for(k=0; k<mesh->K; k++){
@@ -152,8 +155,8 @@ int MultiQuadRegions_CellPair_test(MultiReg2d *mesh, int verbose){
     int Nmess = 0;
     MPI_Request *mpi_out_requests = (MPI_Request*) calloc(mesh->nprocs, sizeof(MPI_Request));
     MPI_Request *mpi_in_requests  = (MPI_Request*) calloc(mesh->nprocs, sizeof(MPI_Request));
-    FetchParmapEle2d(mesh, xM, x_in, x_out, mpi_out_requests, mpi_in_requests, &Nmess);
-    FetchParmapEle2d(mesh, yM, y_in, y_out, mpi_out_requests, mpi_in_requests, &Nmess);
+    FetchParmapEle2d(surf, xM, x_in, x_out, mpi_out_requests, mpi_in_requests, &Nmess);
+    FetchParmapEle2d(surf, yM, y_in, y_out, mpi_out_requests, mpi_in_requests, &Nmess);
 
     MPI_Status *instatus  = (MPI_Status*) calloc(mesh->nprocs, sizeof(MPI_Status));
     MPI_Waitall(Nmess, mpi_in_requests, instatus);
@@ -170,8 +173,8 @@ int MultiQuadRegions_CellPair_test(MultiReg2d *mesh, int verbose){
     }
 
     if(!mesh->procid){
-        fail = Vector_test("EleQuadMapPair_x", xP, xM, mesh->parEtotalout, 0);
-        fail = Vector_test("EleQuadMapPair_y", yP, yM, mesh->parEtotalout, 0);
+        fail = Vector_test("EleQuadMapPair_x", xP, xM, surf->parCellTotalOut, 0);
+        fail = Vector_test("EleQuadMapPair_y", yP, yM, surf->parCellTotalOut, 0);
     }
 
     free(mpi_in_requests);
@@ -190,17 +193,17 @@ int MultiQuadRegions_CellPair_test(MultiReg2d *mesh, int verbose){
         PrintIntMatrix2File(fp, "EToF", mesh->EToF, mesh->K, shape->Nv);
         /* write EToP */
         PrintIntMatrix2File(fp, "EToP", mesh->EToP, mesh->K, shape->Nv);
-        fprintf(fp, "parEtotalOut = %d\n", mesh->parEtotalout);
-        PrintIntVector2File(fp, "elemapOUT = ", mesh->elemapOut, mesh->parEtotalout);
+        fprintf(fp, "parEtotalOut = %d\n", parCellTotalOut);
+        PrintIntVector2File(fp, "elemapOUT = ", surf->cellIndexOut, parCellTotalOut);
 
         PrintVector2File(fp, "xM", xM, mesh->K);
         PrintVector2File(fp, "xP", xP, mesh->K);
         PrintVector2File(fp, "yM", yM, mesh->K);
         PrintVector2File(fp, "yP", yP, mesh->K);
-        PrintVector2File(fp, "x_out", x_out, mesh->parEtotalout);
-        PrintVector2File(fp, "y_out", y_out, mesh->parEtotalout);
-        PrintVector2File(fp, "x_in", x_in, mesh->parEtotalout);
-        PrintVector2File(fp, "y_in", y_in, mesh->parEtotalout);
+        PrintVector2File(fp, "x_out", x_out, parCellTotalOut);
+        PrintVector2File(fp, "y_out", y_out, parCellTotalOut);
+        PrintVector2File(fp, "x_in", x_in, parCellTotalOut);
+        PrintVector2File(fp, "y_in", y_in, parCellTotalOut);
 
         fclose(fp);
     }
@@ -214,23 +217,21 @@ int MultiQuadRegions_CellPair_test(MultiReg2d *mesh, int verbose){
     Vector_free(x_out);
     Vector_free(y_out);
 
-    // free and finalize
-//    StdRegions2d_free(shape);
-//    MultiReg2d_free(mesh);
     return fail;
 }
 
 
-void FetchParmapEle2d(MultiReg2d *mesh,
+void FetchParmapEle2d(MultiRegBC2d *surf,
                       real *f_E, real *f_inE, real *f_outE,
                       MPI_Request *mpi_send_requests,
                       MPI_Request *mpi_recv_requests,
                       int *Nmessage){
 
     /* buffer outgoing node data */
+    MultiReg2d *mesh = surf->mesh;
     int n;
-    for(n=0;n<mesh->parEtotalout;++n)
-        f_outE[n] = f_E[mesh->elemapOut[n]];
+    for(n=0;n<surf->parCellTotalOut;++n)
+        f_outE[n] = f_E[surf->cellIndexOut[n]];
 
     /* do sends */
     int sk = 0, Nmess = 0, p;

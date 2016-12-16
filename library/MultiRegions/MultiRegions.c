@@ -9,16 +9,12 @@ void SetFacePair2d(StdRegions2d *shape, int Klocal,
                  int **EToV, int **EToE, int **EToF, int **EToP,
                  int *Npar);//, int ***newParK, int ***newParF);
 void SetNodeCoord2d(StdRegions2d *shape, int K, double **GX, double **GY, double **x, double **y);
-void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
-                 int **EToE, int **EToF, int **EToP, double **x, double **y,
-                 int *Npar, int *Ntotalout, int **mapOUT,
-                 int *vmapM, int *vmapP);
+
 void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
                   double *J, double *area, double *ciradius, real *vgeo);
 
-void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *parEtotalout, int **mapOUT);
-
 void Resort_Vertex(int K, int Nvert, int **EToV, double *VX, double *VY);
+
 /**
  * @brief
  * Generation of two dimensional region.
@@ -75,25 +71,15 @@ MultiReg2d* MultiReg2d_create(StdRegions2d *shape, UnstructMesh *grid){
     mesh->EToF = IntMatrix_create(mesh->K, shape->Nfaces);
     mesh->EToP = IntMatrix_create(mesh->K, shape->Nfaces);
 
-    SetFacePair2d(shape, mesh->K, mesh->EToV, mesh->EToE, mesh->EToF, mesh->EToP,
-                mesh->Npar);
+    SetFacePair2d(shape,mesh->K,mesh->EToV,mesh->EToE,mesh->EToF,mesh->EToP,mesh->Npar);
     /* Setup nodes coordinate */
     mesh->x  = Matrix_create(mesh->K, shape->Np);
     mesh->y  = Matrix_create(mesh->K, shape->Np);
     SetNodeCoord2d(shape, mesh->K, mesh->GX, mesh->GY, mesh->x, mesh->y);
 
-    /* Setup boundary nodes connection */
-    mesh->vmapM = IntVector_create(shape->Nfp * shape->Nfaces * mesh->K);
-    mesh->vmapP = IntVector_create(shape->Nfp * shape->Nfaces * mesh->K);
-    SetNodePair2d(shape, mesh->K, mesh->GX, mesh->GY,
-                mesh->EToE, mesh->EToF, mesh->EToP, mesh->x, mesh->y,
-                mesh->Npar, &(mesh->parNtotalout), &(mesh->parmapOUT),
-                mesh->vmapM, mesh->vmapP);
-
-    SetElementPair(shape, mesh, &(mesh->parEtotalout), &(mesh->elemapOut));
     /* mesh geo */
-    int Nfactor = 4;
-    mesh->vgeo = (real*) calloc(Nfactor*mesh->K*shape->Np, sizeof(real));
+    int Nvgeo = 4;
+    mesh->vgeo = (real*) calloc(Nvgeo*mesh->K*shape->Np, sizeof(real));
     mesh->J    = Vector_create(mesh->K * shape->Np);
     mesh->area = Vector_create(mesh->K);
     mesh->ciradius = Vector_create(mesh->K);
@@ -102,7 +88,15 @@ MultiReg2d* MultiReg2d_create(StdRegions2d *shape, UnstructMesh *grid){
     return mesh;
 };
 
-
+/**
+ * @brief permute vertex anticlockwise in each element
+ * @param [in] K number of element
+ * @param [in] Nvert number of vertex in each element
+ * @param [in,out] EToV element to vertex list
+ * @param [in] VX vertex coordinate
+ * @param [in] VY vertex coordiante
+ *
+ */
 void Resort_Vertex(int K, int Nvert, int **EToV, double *VX, double *VY){
     int k;
     for(k=0; k<K; k++){
@@ -127,10 +121,6 @@ void MultiReg2d_free(MultiReg2d *mesh){
     /* nodes */
     Matrix_free(mesh->x);
     Matrix_free(mesh->y);
-
-    /* node connection */
-    IntVector_free(mesh->vmapM);
-    IntVector_free(mesh->vmapP);
 }
 
 void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
@@ -147,8 +137,7 @@ void SetVolumeGeo(StdRegions2d *shape, int K, double **x, double **y,
 
     int sj = 0, sk = 0;
     for(k=0;k<K;++k){
-        GeoFactor2d(shape->Np, x[k], y[k], shape->Dr, shape->Ds,
-                    drdx, dsdx, drdy, dsdy, eJ);
+        GeoFactor2d(shape->Np, x[k], y[k], shape->Dr, shape->Ds, drdx, dsdx, drdy, dsdy, eJ);
         for(n=0;n<shape->Np;n++){
             vgeo[sk++] = (real) drdx[n];
             vgeo[sk++] = (real) drdy[n];

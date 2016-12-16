@@ -16,16 +16,36 @@
 #define IPROC 0
 
 #define I_INNERLOC 0
-#define I_INNERBS  1
-#define I_SLIPWALL   2
-#define I_NSLIPWALL  3
-#define I_OPENBS   4
+#define I_INNERBS 1
 
-OBC2d* OBC2d_create(int Nsurf, int **SFToV, int typeid);
+vertlist* OBC2d_create(int Nsurf, int **SFToV, int typeid);
+// connect adjacent face nodes
+void SetNodePair2d(StdRegions2d *shape, int K, double **GX, double **GY,
+                   int **EToE, int **EToF, int **EToP, double **x, double **y,
+                   int *Npar, int *Ntotalout, int **mapOUT,
+                   int *vmapM, int *vmapP);
+void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *cellIndOut);
+
 
 // sort numbers from small to large
 int cmpVert(const void *a, const void *b){
     return *(int*)a-*(int*)b;
+}
+
+/**
+ * @brief count the number of uique elements in an array
+ * @param [in]     len length of the array
+ * @param [in,out] list array of integer
+ * @param [out]    n number of unique elements
+ */
+int count_unique_integer(int len, int *list){
+    qsort(list, len, sizeof(int), cmpVert); // sort the list
+    int n = 1, i;
+    for(i=0;i<(len-1);i++){
+        if(list[i+1]-list[i] != 0)
+            n++;
+    }
+    return n;
 }
 
 /**
@@ -34,7 +54,13 @@ int cmpVert(const void *a, const void *b){
  * @param [in] mesh MultiReg2d mesh object
  * @param [in] Nsurf number of boundary surface in SFToV
  * @param [in] SFToV surface to vertex
- *
+ * @note
+ * precondition:
+ * 1. The index of vertex in SFToV is start from 0;
+ * 2. The contents of SFToV is
+ * postcondition:
+ * 1. call MultiRegBC2d_free manually to free the MultiRegBC2d structure
+ * in case of memory leak
  */
 MultiRegBC2d* MultiRegBC2d_create(MultiReg2d *mesh, int Nsurf, int **SFToV){
 
@@ -47,7 +73,8 @@ MultiRegBC2d* MultiRegBC2d_create(MultiReg2d *mesh, int Nsurf, int **SFToV){
 #endif
 
     StdRegions2d *shape = mesh->stdcell;
-    MultiRegBC2d *bc2d = (MultiRegBC2d *) malloc(sizeof(MultiRegBC2d));
+    MultiRegBC2d *surf2d = (MultiRegBC2d *) malloc(sizeof(MultiRegBC2d));
+    surf2d->mesh = mesh;
 
     int k,f1,f2;
 
@@ -58,50 +85,42 @@ MultiRegBC2d* MultiRegBC2d_create(MultiReg2d *mesh, int Nsurf, int **SFToV){
         /* check SFToV indicator */
         if(SFToV[f1][2] == I_INNERLOC | SFToV[f1][2] == I_INNERBS ){
             printf("MultiRegBC2d_create: Error boundary type in SFToV[%d][3] = %d\n", f1,SFToV[f1][2]);
-            printf("The boundary type indicator cannot be 0 or 1:\n");
+            printf("The boundary type indicator cannot be %d or %d:\n", I_INNERLOC, I_INNERBS);
             printf("   %d - local boundary surface[default]\n", I_INNERLOC);
             printf("   %d - parallel boundary surface\n", I_INNERBS);
         }
     }
-    qsort(surfList, Nsurf, sizeof(int), cmpVert); // sort the boundary type
 
-    bc2d->Nobc = 1;
-    for(f1=0;f1<(Nsurf-1);f1++){
-        if(surfList[f1+1]-surfList[f1] != 0)
-            bc2d->Nobc++;
-    }
+    surf2d->Nobc = count_unique_integer(Nsurf, surfList);
 
     /* store the boundary type indicator (from smallest to largest) */
-    bc2d->bcTypeList = IntVector_create(bc2d->Nobc);
-    bc2d->bcTypeList[0] = surfList[0];
+    surf2d->bcTypeList = IntVector_create(surf2d->Nobc);
+    surf2d->bcTypeList[0] = surfList[0];
     int sk = 1;
     for(f1=0;f1<(Nsurf-1);f1++){
         if(surfList[f1+1]-surfList[f1] != 0)
-            bc2d->bcTypeList[sk++] = surfList[f1+1];
+            surf2d->bcTypeList[sk++] = surfList[f1+1];
     }
 
-    /* allocate and initialize obc2d */
-    bc2d->obc2d = (OBC2d**) malloc(bc2d->Nobc*sizeof(OBC2d*));
-    for(k=0;k<bc2d->Nobc;k++){
-        bc2d->obc2d[k] = OBC2d_create(Nsurf, SFToV, bc2d->bcTypeList[k]);
+    /* allocate and initialize oblist */
+    surf2d->oblist = (vertlist**) malloc(surf2d->Nobc*sizeof(vertlist*));
+    for(k=0;k<surf2d->Nobc;k++){
+        surf2d->oblist[k] = OBC2d_create(Nsurf, SFToV, surf2d->bcTypeList[k]);
     }
 
-    /* allocate and initialize EToBS */
-    bc2d->EToBS = IntMatrix_create(mesh->K, shape->Nfaces);
+    /* allocate and initialize EToE and EToBS */
+    surf2d->EToE = mesh->EToE;
+    surf2d->EToBS = IntMatrix_create(mesh->K, shape->Nfaces);
 
     int t[2], v[2];
-#if DEBUG
-    if(procid == IPROC)
-        printf("Ne=%d, Nfaces=%d\n", mesh->K, shape->Nfaces);
-#endif
     for(k=0;k<mesh->K;k++){
         for(f2=0; f2<shape->Nfaces; f2++){ // loop through all element surface
             /* inner surface (default) */
-            bc2d->EToBS[k][f2] = INNERLOC;
+            surf2d->EToBS[k][f2] = INNERLOC;
 
             /* the inner boundary surface */
             if(mesh->EToP[k][f2] != mesh->procid){
-                bc2d->EToBS[k][f2] = INNERBS;
+                surf2d->EToBS[k][f2] = INNERBS;
                 continue; // finish this loop
             }
 
@@ -113,10 +132,6 @@ MultiRegBC2d* MultiRegBC2d_create(MultiReg2d *mesh, int Nsurf, int **SFToV){
             qsort(t, 2, sizeof(int), cmpVert);
 
             int t_temp = t[0]*mesh->Nv + t[1];
-#if DEBUG
-            if(procid == IPROC)
-                printf("k=%d, f=%d, n=[%d,%d], v1=%d, v2=%d, t_temp = %d\n", k, f2, n1, n2, t[0], t[1], t_temp);
-#endif
 
             for(f1=0; f1<Nsurf; f1++){
                 v[0] = SFToV[f1][0];
@@ -129,33 +144,42 @@ MultiRegBC2d* MultiRegBC2d_create(MultiReg2d *mesh, int Nsurf, int **SFToV){
                     printf("surfid=%d, v1=%d, v2=%d, v_temp = %d, t_temp?=v_temp%d\n", f1, v[0], v[1], v_temp, t_temp==v_temp);
 #endif
                 if(t_temp == v_temp){ // compare the face
-                    bc2d->EToBS[k][f2] = SFToV[f1][2];
-                    break; // jump out loop
+                    surf2d->EToBS[k][f2] = SFToV[f1][2];
+                    break; // jump out loop of SFToV
                 }
             }
         }
     }
 
-    /* allocate the vertex external data */
-    bc2d->vert_ext = (real*) calloc(mesh->Nv, sizeof(real));
+    /* adjacent face node id */
+    surf2d->vmapM = IntVector_create(shape->Nfp*shape->Nfaces*mesh->K);
+    surf2d->vmapP = IntVector_create(shape->Nfp * shape->Nfaces * mesh->K);
+    SetNodePair2d(shape, mesh->K, mesh->GX, mesh->GY,
+                  mesh->EToE, mesh->EToF, mesh->EToP,
+                  mesh->x, mesh->y,mesh->Npar,
+                  &(surf2d->parNodeTotalOut), &(surf2d->nodeIndexOut),surf2d->vmapM, surf2d->vmapP);
+
+    /* adjacent cell id */
+    surf2d->parCellTotalOut = surf2d->parNodeTotalOut/shape->Nfp;
+    surf2d->cellIndexOut = IntVector_create(surf2d->parCellTotalOut);
+    SetElementPair(shape, mesh, surf2d->cellIndexOut);
 
 #if DEBUG
     if(procid == IPROC)
-        for(k=0;k<mesh->K;k++){
-            printf("EToBS[%d][:] = ", k);
-            for(f1=0;f1<shape->Nv;f1++){
-                printf("%d, ", bc2d->EToBS[k][f1]);
-            }
-            printf("\n");
-        }
         printf("Step out MultiRegBC2d_create\n");
 #endif
-
-    return bc2d;
+    return surf2d;
 }
 
-
-OBC2d* OBC2d_create(int Nsurf, int **SFToV, int typeid){
+/**
+ * @brief create open boundary object
+ *
+ * @param [in]  Nsurf
+ * @param [in]  SFToV
+ * @param [in]  typeid
+ *
+ */
+vertlist* OBC2d_create(int Nsurf, int **SFToV, int typeid){
 
 #if DEBUG
     int procid, nprocs;
@@ -165,7 +189,7 @@ OBC2d* OBC2d_create(int Nsurf, int **SFToV, int typeid){
         printf("Step into OBC2d_create for typeId = %d\n", typeid);
 #endif
 
-    OBC2d *obc2d = (OBC2d*) malloc(sizeof(OBC2d));
+    vertlist *obc2d = (vertlist*) malloc(sizeof(vertlist));
     /* count vertex number */
     int f1, Nsurfv=0;
     int vertlist[Nsurf*2];
@@ -175,27 +199,12 @@ OBC2d* OBC2d_create(int Nsurf, int **SFToV, int typeid){
             vertlist[Nsurfv++] = SFToV[f1][1];
         }
     }
-    qsort(vertlist, Nsurfv, sizeof(int), cmpVert); // sort the vertex
+
+    obc2d->Nv = count_unique_integer(Nsurfv, vertlist);
 
 #if DEBUG
     if(procid == IPROC){
-        printf("vertex number = %d\n", Nsurfv);
-        for(f1=0; f1<Nsurfv; f1++){
-            printf("vertlist[%d] = %d, ", f1, vertlist[f1]);
-        }
-        printf("\n");
-    }
-#endif
-
-    obc2d->Nv = 1;
-    for(f1=0;f1<(Nsurfv-1);f1++){
-        if(vertlist[f1+1]-vertlist[f1] != 0)
-            obc2d->Nv++;
-    }
-
-#if DEBUG
-    if(procid == IPROC){
-        printf("different vertex number = %d\n", obc2d->Nv);
+        printf("different vertex number = %d\n", oblist->Nv);
     }
 #endif
 
@@ -214,20 +223,33 @@ OBC2d* OBC2d_create(int Nsurf, int **SFToV, int typeid){
     return obc2d;
 }
 
-void OBC2d_free(OBC2d *obc){
+/**
+ * @brief
+ * @param [in] obc open boundary object
+ *
+ */
+void OBC2d_free(vertlist *obc){
     IntVector_free(obc->BVToV);
     free(obc);
 }
 
+/**
+ * @brief
+ * @param [in] bc2d
+ */
 void MultiRegBC2d_free(MultiRegBC2d* bc2d){
     IntMatrix_free(bc2d->EToBS);
     int i;
     for(i=0;i<bc2d->Nobc;i++){
-        OBC2d_free(bc2d->obc2d[i]);
+        OBC2d_free(bc2d->oblist[i]);
     }
-    free(bc2d->obc2d);
+    free(bc2d->oblist);
 
+    IntVector_free(bc2d->nodeIndexOut);
+    IntVector_free(bc2d->vmapM);
+    IntVector_free(bc2d->vmapP);
+    IntVector_free(bc2d->cellIndexOut);
     IntVector_free(bc2d->bcTypeList);
-    free(bc2d->vert_ext);
+//    free(bc2d->vert_ext);
     free(bc2d);
 }

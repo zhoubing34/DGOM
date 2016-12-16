@@ -3,6 +3,7 @@
 //
 
 #include <MultiRegions/MultiRegions.h>
+#include <MultiRegions/MultiRegBC/MultiRegBC2d.h>
 #include "MulitRegions_test.h"
 #include "VarMapPair_test.h"
 #include "CellPair_test.h"
@@ -41,22 +42,27 @@ int main(int argc, char **argv){
     if(!procid)
         printf(HEADSTART "Running %d test from MulitRegions_test\n", TESTNUM);
 
-    MultiReg2d *triMesh = SetTriParallelMultiRegions();
-    MultiReg2d *quadMesh = SetQuadParallelMultiRegions();
+    MultiRegBC2d *triSurf = setTriTestMesh();
+    MultiRegBC2d *quadSurf = setQuadTestMesh();
+    MultiReg2d *triMesh = triSurf->mesh;
+    MultiReg2d *quadMesh = quadSurf->mesh;
 
     flag[0] = MultiTriRegions_VertexSort_test(triMesh, isverbose);
     flag[1] = MultiQuadRegions_VertexSort_test(quadMesh, isverbose);
-    flag[2] = MultiTriRegions_VarMapPair_Test(triMesh, isverbose);
-    flag[3] = MultiQuadRegions_VarMapPair_Test(quadMesh, isverbose);
-    flag[4] = MultiTriRegions_CellPair_test(triMesh, isverbose);
-    flag[5] = MultiQuadRegions_CellPair_test(quadMesh, isverbose);
-    flag[6] = MultiTriRegions_MultiRegBC2d_test(triMesh, isverbose);
-    flag[7] = MultiQuadRegions_MultiRegBC2d_test(quadMesh, isverbose);
+    flag[2] = MultiTriRegions_VarMapPair_Test(triSurf, isverbose);
+    flag[3] = MultiQuadRegions_VarMapPair_Test(quadSurf, isverbose);
+    flag[4] = MultiTriRegions_CellPair_test(triSurf, isverbose);
+    flag[5] = MultiQuadRegions_CellPair_test(quadSurf, isverbose);
+    flag[6] = MultiTriRegions_MultiRegBC2d_test(triSurf, isverbose);
+    flag[7] = MultiQuadRegions_MultiRegBC2d_test(quadSurf, isverbose);
+
 
     StdRegions2d_free(triMesh->stdcell);
     StdRegions2d_free(quadMesh->stdcell);
     MultiReg2d_free(triMesh);
     MultiReg2d_free(quadMesh);
+    MultiRegBC2d_free(triSurf);
+    MultiRegBC2d_free(quadSurf);
 
     MPI_Finalize();
     for(i=0; i<TESTNUM; i++){

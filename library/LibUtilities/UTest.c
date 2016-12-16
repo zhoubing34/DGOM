@@ -151,8 +151,7 @@ int Matrix_test(char *message,
  * success  | int      | 0 - success; 1 - fail
  */
 int Vector_test(char *message,
-                double *A, double *ExactA,
-                int Ncols,
+                double *A, double *ExactA, int Ncols,
                 double elapsedTime){
 
     double error=0.0, relativeErr;

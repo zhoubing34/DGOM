@@ -15,23 +15,38 @@ typedef enum {
     OPENBS   // 4-open boundary
 } BCType;
 
+
 typedef struct{
     int Nv;
     int *BVToV;
-} OBC2d;
+} vertlist;
 
 typedef struct {
-    int **EToBS; // element to boundary surface type
-    int Nobc;    // number of open boundary surface
+    MultiReg2d *mesh;
+    /* adjacent cell id of each cell */
+    int **EToE;
+    /* adjacent face type of each cell */
+    int **EToBS;
+    /* array of boundary type indicators */
     int *bcTypeList;
-    real *vert_ext; // sparse vector for external data on vertex
 
-    OBC2d **obc2d; // vector of open boundary pointer
+    /** volume id of -ve trace of face node */
+    int *vmapM;
+    /** volume id of +ve trace of face node */
+    int *vmapP;
 
-//    /* send & recv data */
-//    real *f_ext; // array of external data for open boundary
-//    real *f_in;  //
-//    real *f_out; //
+    /** total number of nodes to send recv */
+    int parNodeTotalOut;
+    /** index list of nodes to send out */
+    int *nodeIndexOut;
+
+    /* total number of element's value to send and recv */
+    int parCellTotalOut;
+    /* index list of elements to send out */
+    int *cellIndexOut;
+
+    int Nobc;    // number of open boundary surface
+    vertlist **oblist; // vector of open boundary pointer
 
 }MultiRegBC2d;
 

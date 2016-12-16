@@ -18,12 +18,8 @@
  * elemapOUT| int*     |
  *
  */
-void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *parEtotalout, int **mapOUT){
+void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *cellIndOut){
 
-    int etotalout = mesh->parNtotalout/shape->Nfp; /* total num of parallel faces*/
-    *parEtotalout = etotalout;
-
-    int *elemapOUT = IntVector_create(etotalout);
     int k, sk = 0;
     int p2, f1;
     /* build map from f_inE to element */
@@ -32,12 +28,11 @@ void SetElementPair(StdRegions2d *shape, MultiReg2d *mesh, int *parEtotalout, in
             for(k=0;k<mesh->K;k++){
                 for(f1=0;f1<shape->Nfaces;f1++){
                     if(mesh->EToP[k][f1]==p2 && p2!=mesh->procid)
-                        elemapOUT[sk++] = k;
+                        cellIndOut[sk++] = k;
                 }
             }
         }
     }
-    *mapOUT = elemapOUT;
 
     int parcnt=-1;
     for(p2=0;p2<mesh->nprocs;p2++){

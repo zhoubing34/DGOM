@@ -7,7 +7,7 @@
 
 #include "MulitRegions_test.h"
 
-int MultiTriRegions_CellPair_test(MultiReg2d*, int);
-int MultiQuadRegions_CellPair_test(MultiReg2d*, int);
+int MultiTriRegions_CellPair_test(MultiRegBC2d*, int);
+int MultiQuadRegions_CellPair_test(MultiRegBC2d*, int);
 
 #endif //DGOM_FACEPAIR_TEST_H

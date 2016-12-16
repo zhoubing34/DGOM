@@ -2,7 +2,12 @@ include_directories(${CMAKE_SOURCE_DIR}/library)
 
 set(PHYSDOMAIN_TEST_SRC
         PhysDomain_test.c
-        PhysDomain_test.h)
+        PhysDomain_test.h
+        NodeFetch_test.c
+        NodeFetch_test.h
+        CellFetch_test.c
+        CellFetch_test.h
+        ../../MultiRegions/test/SetTestMultiRegions.c)
 
 add_executable(PhysDomain_Test ${PHYSDOMAIN_TEST_SRC})
 add_dependencies(PhysDomain_Test PhysDomain)

@@ -1,9 +1,9 @@
 #ifndef DGOM_SETTESTMULTIREGIONS_H
 #define DGOM_SETTESTMULTIREGIONS_H
 
-#include "MultiRegions/MultiRegions.h"
+#include "MultiRegions/MultiRegBC/MultiRegBC2d.h"
 
-MultiReg2d* SetTriParallelMultiRegions();
-MultiReg2d* SetQuadParallelMultiRegions();
+MultiRegBC2d* setTriTestMesh();
+MultiRegBC2d* setQuadTestMesh();
 
 #endif //DGOM_SETTESTMULTIREGIONS_H
