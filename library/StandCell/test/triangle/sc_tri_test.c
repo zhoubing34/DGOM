@@ -4,7 +4,7 @@
 
 #include "sc_tri_test.h"
 #include "sc_tri_data3.h"
-#include "sc_test.h"
+#include "StandCell/test/sc_test.h"
 
 int sc_triCoor_test(stdCell *tri, int verbose){
 

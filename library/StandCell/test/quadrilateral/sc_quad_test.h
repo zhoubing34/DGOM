@@ -5,7 +5,7 @@
 #ifndef DGOM_SC_QUAD_TEST_H
 #define DGOM_SC_QUAD_TEST_H
 
-#include "sc_test.h"
+#include "StandCell/test/sc_test.h"
 
 int sc_quadCoor_test(stdCell *quad, int verbose);
 int sc_quadVandMatrix_test(stdCell *quad, int verbose);

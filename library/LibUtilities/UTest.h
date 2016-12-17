@@ -4,7 +4,7 @@
 #include "LibUtilities.h"
 #include <sys/time.h>
 
-#define HEADSTART   "\033[32m[   RUNING   ]\033[0m " // module reminder
+#define HEADSTART   "\n\033[32m[   RUNING   ]\033[0m " // module reminder
 #define HEADLINE 	"\033[32m[------------]\033[0m " // test reminder
 #define HEADPASS  	"\033[32m[   PASSED   ]\033[0m " // test pass indicator
 #define HEADFAIL 	"\033[31m[   FAILED   ]\033[0m " // test fail indicator

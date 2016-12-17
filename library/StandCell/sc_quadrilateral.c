@@ -10,6 +10,7 @@
  */
 
 #include "sc_stdcell.h"
+#include "Polylib/polylib.h"
 
 /* build the nodes index matrix on each faces */
 int** sc_quadFmask(stdCell *quad);

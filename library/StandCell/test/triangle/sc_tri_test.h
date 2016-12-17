@@ -5,7 +5,7 @@
 #ifndef DGOM_SC_TRI_TEST_H
 #define DGOM_SC_TRI_TEST_H
 
-#include "sc_test.h"
+#include "StandCell/test/sc_test.h"
 
 int sc_triCoor_test(stdCell *tri, int verbose);
 int sc_triVandMatrix_test(stdCell *tri, int verbose);

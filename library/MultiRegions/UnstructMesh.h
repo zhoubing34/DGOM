@@ -7,10 +7,9 @@ typedef struct{
     int dim;                    // Dimensions
     int nv;                     // Num of vertex
     int ne;                     // Num of element
-    ElementType eletype;        // type of each element
+    ElementType eletype;        // type of element
     int **EToV;                 // vertex list in elements, the index start from 0
     double *vx, *vy, *vz;       // coordinate of vertex
-    char *name;   // name string
 } UnstructMesh;
 
 void UnstructMesh_free(UnstructMesh *grid);

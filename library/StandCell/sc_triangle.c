@@ -10,6 +10,7 @@
  */
 
 #include "sc_stdcell.h"
+#include "Polylib/polylib.h"
 
 /* transform the index of orthogonal function to [ti,tj] */
 void sc_triTransInd(int N, int ind, int *ti, int *tj);

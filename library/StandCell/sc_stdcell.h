@@ -13,7 +13,6 @@
 #define DGOM_STDCELL_H
 
 #include "LibUtilities/LibUtilities.h"
-#include "Polylib/polylib.h"
 
 typedef enum {
     TRIANGLE, ///< triangle

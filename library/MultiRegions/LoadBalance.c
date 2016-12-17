@@ -6,7 +6,7 @@
  * Redistribute the elements on each process
  *
  * @details
- * Call ParMetis library to repart the mesh
+ * Call ParMetis library to redistribute the mesh
  *
  * @param [in] shape    standard elements, triangle or quadrilateral
  * @param [in] K        original number of elements

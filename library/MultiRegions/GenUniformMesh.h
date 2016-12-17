@@ -1,7 +1,6 @@
 #ifndef UNIFORMMESH_H
 #define UNIFORMMESH_H
 
-#include "LibUtilities.h"
 #include "MultiRegions/UnstructMesh.h"
 
 UnstructMesh* UniformTriMesh_create(

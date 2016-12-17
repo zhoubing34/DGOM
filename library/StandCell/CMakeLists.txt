@@ -1,7 +1,4 @@
-# =======================================================================================
-# StdRegions
-# =======================================================================================
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
+include_directories(${CMAKE_SOURCE_DIR}/library)
 
 set(STDREGIONS_SOURCE
         sc_stdcell.h
@@ -9,11 +6,11 @@ set(STDREGIONS_SOURCE
         sc_triangle.c
         sc_quadrilateral.c)
 
-add_library(StdRegions STATIC ${STDREGIONS_SOURCE})
-add_dependencies(StdRegions LibUtilities Polylib)
-target_link_libraries(StdRegions LibUtilities Polylib)
+add_library(StandCell STATIC ${STDREGIONS_SOURCE})
+add_dependencies(StandCell LibUtilities Polylib)
+target_link_libraries(StandCell LibUtilities Polylib)
 
-install(TARGETS StdRegions ARCHIVE DESTINATION lib)
+install(TARGETS StandCell ARCHIVE DESTINATION lib)
 
 if(UNITTEST_FOUND)
     add_subdirectory(test)

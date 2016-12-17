@@ -1,4 +1,5 @@
 #include "sc_stdcell.h"
+#include "Polylib/polylib.h"
 
 /* Quadrilateral.c */
 stdCell* sc_createQuad(int N);
@@ -192,7 +193,11 @@ void sc_deriMatrix2d(stdCell *cell, void (*derorthfunc)
     Matrix_free(Vs);
 }
 
-
+/**
+ * @brief create mass matrix of edges
+ * @param [in] cell standard element
+ * @param [out] Mes mass matrix of edges
+ */
 void sc_surfMassMatrix2d(stdCell *cell, double **Mes){
     const int Nfp = cell->Nfp;
     const int Nfaces = cell->Nfaces;
@@ -235,7 +240,6 @@ void sc_surfMassMatrix2d(stdCell *cell, double **Mes){
 /**
  * @brief create LIFT matrix for 2d elements (triangle or quadrilateral)
  * @param [in,out] cell stand element
- *
  */
 double** sc_liftMatrix2d(stdCell *cell){
     const int Np = cell->Np;

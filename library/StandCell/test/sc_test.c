@@ -3,8 +3,8 @@
 //
 
 #include "sc_test.h"
-#include "sc_tri_test.h"
-#include "sc_quad_test.h"
+#include "StandCell/test/triangle/sc_tri_test.h"
+#include "StandCell/test/quadrilateral/sc_quad_test.h"
 
 #define NTEST 5
 
@@ -18,7 +18,7 @@ int main(int argc, char **argv){
     if(ishelp){
         printf(HEADFINISH "DGOM\n" HEADLINE "Unit tests for MultiRegions library\n"
                        HEADLINE "Example usages:\n"
-                       HEADLINE "   mpirun -n 2 -host localhost ./MulitRegions_Test\n"
+                       HEADLINE "   ./StandCell_Test\n"
                        HEADLINE "\n"
                        HEADLINE "Optional features:\n"
                        HEADLINE "   -help     print help information\n"
@@ -27,7 +27,7 @@ int main(int argc, char **argv){
     }
 
     int fail = 0, err[NTEST];
-    int N = 3;
+    int N = 3,i;
     printf(HEADSTART "Running %d test for SandCell_triangle test\n", NTEST);
     stdCell *tri = sc_create(N, TRIANGLE);
     /* triangle test case */
@@ -37,6 +37,14 @@ int main(int argc, char **argv){
     err[3] = sc_triDeriMatrix_test(tri, isverbose);
     err[4] = sc_triLIFT_test(tri, isverbose);
     sc_free(tri);
+
+    for(i=0;i<NTEST;i++)
+        fail += err[i];
+
+    if(fail)
+        printf(HEADFINISH "%d test faild from SandCell_triangle test\n", fail);
+    else
+        printf(HEADFINISH "%d test passed from SandCell_triangle test\n", NTEST);
 
     /* quadrilateral test case */
     stdCell *quad = sc_create(N, QUADRIL);
@@ -48,6 +56,13 @@ int main(int argc, char **argv){
     err[4] = sc_quadLIFT_test(quad, isverbose);
     sc_free(quad);
 
+    for(i=0;i<NTEST;i++)
+        fail += err[i];
+
+    if(fail)
+        printf(HEADFINISH "%d test faild from SandCell_quadrilateral test\n", fail);
+    else
+        printf(HEADFINISH "%d test passed from SandCell_quadrilateral test\n", NTEST);
 
     return fail;
 }
