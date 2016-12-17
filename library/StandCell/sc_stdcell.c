@@ -52,6 +52,10 @@ void sc_free(stdCell *stdcell){
     /* LIFT */
     Matrix_free(stdcell->LIFT);
 
+    /* Gauss quadrature */
+    Vector_free(stdcell->ws);
+    Vector_free(stdcell->wv);
+
     /* float version */
     free(stdcell->f_LIFT);
     free(stdcell->f_Dr);

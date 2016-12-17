@@ -1,6 +1,6 @@
 /**
  * @file
- * Quadrilateral.c
+ * Standard quadrilateral element
  *
  * @brief
  * Functions related with standard quadrilateral elements
@@ -11,340 +11,223 @@
 
 #include "sc_stdcell.h"
 
-/* Private functions */
-void BuildQuadFmask(int N, int **Fmask);
-void GetQuadCoord(int N, double *r, double *s);
-void GetQuadV(int N, int Np, double *r, double *s, double **V);
-void GetQuadM(int Np, double **V, double **M);
-void GetQuadDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs);
-void GetQuadDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, double **Ds);
+/* build the nodes index matrix on each faces */
+int** sc_quadFmask(stdCell *quad);
+
+/* get the nature coordinate of interpolation nodes in standard quadrilateral element */
+void sc_quadCoord(stdCell *quad);
+
+/* transform the index of orthogonal function to [ti,tj] for quadrilateral elements */
+void sc_quadTransInd(int N, int ind, int *ti, int *tj);
+
+/* get orthogonal function value at interpolation nodes */
+void sc_quadOrthogFunc(stdCell *quad, int ind, double *func);
+
+/* calculate the value of derivative function at interpolation points */
+void sc_quadDeriOrthogFunc(stdCell *quad, int ind, double *dr, double *ds);
 
 /**
- * @brief
- * Generation of standard triangle element
- *
- * @details
- *
+ * @brief create standard quadrilateral element
  * @param[in] N polynomial order
- *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * tri | stdCell* |
- *
+ * @return quad standard quadrilateral element
  */
 stdCell* sc_createQuad(int N){
     stdCell *quad = (stdCell *) calloc(1, sizeof(stdCell));
 
-    int Np = (N+1)*(N+1);
+    /* cell type */
+    quad->type = QUADRIL;
+
+    const int Np = (N+1)*(N+1);
+    const int Nfaces = 4;
+    const int Nfp = N+1;
+    const int Nv = 4;
     /* basic info */
     quad->N      = N;
     quad->Np     = Np;
-    quad->Nfaces = 4;
-    quad->Nfp    = N+1;
-    quad->Nv     = 4;
+    quad->Nfaces = Nfaces;
+    quad->Nfp    = Nfp;
+    quad->Nv     = Nv;
 
     /* nodes at faces, Fmask */
-    quad->Fmask = IntMatrix_create(quad->Nfaces, quad->Nfp);
-    BuildQuadFmask(quad->N, quad->Fmask);
+    quad->Fmask = sc_quadFmask(quad);
 
-    /* coordinate */
-    quad->r = (double *) calloc(Np, sizeof(double));
-    quad->s = (double *) calloc(Np, sizeof(double));
-    GetQuadCoord(N, quad->r, quad->s);
+    /* coordinate, r and s */
+    sc_quadCoord(quad);
 
-    /* vandermonde matrix */
-    quad->V = Matrix_create(Np, Np);
-    GetQuadV(N, Np, quad->r, quad->s, quad->V);
+    /* Vandermonde matrix, V */
+    quad->V = sc_VandMatrix2d(quad, sc_quadOrthogFunc);
 
-    /* mass matrix */
-    quad->M = Matrix_create(Np, Np);
-    GetQuadM(Np, quad->V, quad->M);
+    /* mass matrix, M */
+    quad->M = sc_massMatrix(quad);
 
     /* Derivative Matrix, Dr and Ds */
-    quad->Dr = Matrix_create(quad->Np, quad->Np);
-    quad->Ds = Matrix_create(quad->Np, quad->Np);
-    GetQuadDeriM(N, Np, quad->r, quad->s, quad->V, quad->Dr, quad->Ds);
+    sc_deriMatrix2d(quad, sc_quadDeriOrthogFunc);
 
     /* suface LIFT matrix, LIFT */
-    double **Mes = Matrix_create(quad->Np, quad->Nfaces * quad->Nfp);
-    quad->LIFT = Matrix_create(quad->Np, quad->Nfaces * quad->Nfp);
-    GetSurfLinM(quad->N, quad->Nfaces, quad->Fmask, Mes);
-    GetLIFT2d(quad, Mes, quad->LIFT);
+    quad->LIFT = sc_liftMatrix2d(quad);
 
-//    PrintMatrix_test("Mes", Mes, quad->Np, quad->Nfaces*quad->Nfp);
-    Matrix_free(Mes);
-
-    /* integration coeff, ws and wv */
-    /* integration coeff, ws and wv */
-    quad->ws = Vector_create(quad->Nfp);
-    double *r = Vector_create(quad->Nfp);
-    zwglj(r, quad->ws, quad->Nfp, 0, 0);
-    Vector_free(r);
-
-    quad->wv = Vector_create(quad->Np);
-    int i,j;
-    for(i=0;i<quad->Np;i++){
-        for(j=0;j<quad->Np;j++){
-            quad->wv[j] += quad->M[i][j];
-        }
-    }
+    /* integration coefficients, ws and wv */
+    sc_GaussQuadrature2d(quad);
 
     /* float version */
-    size_t sz = quad->Np*(quad->Nfp)*(quad->Nfaces)*sizeof(real);
+    size_t sz = Np*Nfp*Nfaces*sizeof(real);
     quad->f_LIFT = (real *) malloc(sz);
-    sz = quad->Np*quad->Np*sizeof(real);
+    sz = Np*Np*sizeof(real);
     quad->f_Dr = (real*) malloc(sz);
     quad->f_Ds = (real*) malloc(sz);
 
     int sk = 0, n, m;
-    for(n=0;n<quad->Np;++n){
-        for(m=0;m<quad->Nfp*quad->Nfaces;++m){
+    for(n=0;n<Np;++n){
+        for(m=0;m<Nfp*Nfaces;++m){
             quad->f_LIFT[sk++] = (real) quad->LIFT[n][m];
         }
     }
 
     sk = 0;
-    for(n=0;n<quad->Np;++n){
-        for(m=0;m<quad->Np;++m){
+    for(n=0;n<Np;++n){
+        for(m=0;m<Np;++m){
             quad->f_Dr[sk] = (real) quad->Dr[n][m];
             quad->f_Ds[sk] = (real) quad->Ds[n][m];
             ++sk;
         }
     }
 
-
     return quad;
 }
 
-
-void GetQuadDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, double **Ds){
-    double **Vr = Matrix_create(Np, Np);
-    double **Vs = Matrix_create(Np, Np);
-    double *temp = Vector_create(Np * Np);
-    double *vtemp = Vector_create(Np * Np);
-    double *dtemp = Vector_create(Np * Np);
-
-    int i,j,sk=0;
-
-    /* inverse of vandermonde matrix */
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            temp[sk++] = V[i][j];
-        }
-    }
-    Matrix_Inverse(temp, Np);
-
-    /* get the gradient of the modal basis */
-    GetQuadDeriV2d(N, Np, r, s, Vr, Vs);
-
-    /* matrix multiply */
-    unsigned n = (unsigned)Np;
-    sk = 0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            vtemp[sk++] = Vr[i][j];
-        }
-    }
-    /* \f$ \mathbf{Dr} = \mathbf{Vr}*\mathbf{V}^{-1} \f$ */
-    Matrix_Multiply(n, n, n, vtemp, temp, dtemp);
-    sk = 0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            Dr[i][j] = dtemp[sk++];
-        }
-    }
-
-    sk = 0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            vtemp[sk++] = Vs[i][j];
-        }
-    }
-    /* \f$ \mathbf{Ds} = \mathbf{Vs}*\mathbf{V}^{-1} \f$ */
-    Matrix_Multiply(n, n, n, vtemp, temp, dtemp);
-    sk = 0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            Ds[i][j] = dtemp[sk++];
-        }
-    }
-
-    /* dealloc mem */
-    Matrix_free(Vr);
-    Matrix_free(Vs);
-    Vector_free(temp);
-    Vector_free(vtemp);
-    Vector_free(dtemp);
-}
-
-void GetQuadDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs){
-    double *h1 = Vector_create(Np);
-    double *h2 = Vector_create(Np);
-
-    int i,j,k,sk;
-    for(i=0;i<(N+1);i++){
-        GradjacobiP(Np, r, h1, i, 0, 0);
-        for(j=0;j<(N+1);j++){
-            jacobiP(Np, s, h2, j, 0, 0);
-            sk = i*(N+1)+j;  /* column index */
-            for(k=0;k<Np;k++){
-                Vr[k][sk] = h1[k]*h2[k];
-            }
-        }
-    }
-
-    for(i=0;i<(N+1);i++){
-        jacobiP(Np, r, h1, i, 0.0, 0.0);
-        for(j=0;j<(N+1);j++){
-            GradjacobiP(Np, s, h2, j, 0.0, 0.0);
-            sk = i*(N+1)+j;  /* column index */
-            for(k=0;k<Np;k++){
-                Vs[k][sk] = h1[k]*h2[k];
-            }
-        }
-    }
-
-    Vector_free(h1);
-    Vector_free(h2);
-}
-
-
-void GetQuadM(int Np, double **V, double **M){
-    double *temp = Vector_create(Np * Np);
-    double *invt = Vector_create(Np * Np);
-    double *Mv   = Vector_create(Np * Np);
-    const unsigned n = (unsigned)Np;
-
-    int i,j,sk=0;
-
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            temp[sk++] = V[i][j];
-        }
-    }
-
-    Matrix_Inverse(temp, Np);
-
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            invt[j*Np + i] = temp[i*Np + j];
-        }
-    }
-
-    Matrix_Multiply(n, n, n, invt, temp, Mv);
-
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            M[i][j] = Mv[i*Np + j];
-        }
-    }
-}
-
 /**
- * @brief
- * Generate the Vandermonde matrix of quadrilateral element
+ * @brief transform the index of orthogonal function to [ti,tj] for quadrilateral elements
+ * @details the index is arranged as
+ * \f[ [i,j] = \left\{ \begin{array}{lll}
+ * (0,0) & \cdots & (0, N) \cr
+ * (1,0) & \cdots & (0, N) \cr
+ * \cdots \cr
+ * (1,0) & \cdots & (0, N) \end{array} \right\} \f]
  *
- * @details
- * Vandermonde matrix \f$ \mathbf{V} \f$ is derivated by
- * \f[ \mathbf{V}_{mn} = \varphi_n \left( \mathbf{r}_m \right) \f]
- * where \f$ \varphi_n \left( \mathbf{r} \right) \f$ is the modal basis obtained by
- * \f[ \varphi_n \left( \mathbf{r} \right) = P_i(r)P_j(s) \f]
- *
- * where the modal basis is arranged to count \f[ j \f] first.
- *
- * @param [int]      N order
- * @param [int]      Nr number of coordinate
- * @param [doule]    r[Nr]
- * @param [doule]    s[Nr]
- *
- * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * V  | double[Np][Np] | vandermonde matrix
- *
+ * @param [in] N polynomial order
+ * @param [in] ind orthogonal polynomial index
+ * @param [out] ti
+ * @param [out] tj
  */
-void GetQuadV(int N, int Np, double *r, double *s, double **V){
-    double *h1 = Vector_create(Np);
-    double *h2 = Vector_create(Np);
-
-    int i,j,k,sk=0;
-    for(i=0;i<(N+1);i++){
-        jacobiP(Np, r, h1, i, 0.0, 0.0);
-        for(j=0;j<(N+1);j++){
-            jacobiP(Np, s, h2, j, 0.0, 0.0);
-            sk = i*(N+1)+j;  /* column index */
-            for(k=0;k<Np;k++){
-                V[k][sk] = h1[k]*h2[k];
+void sc_quadTransInd(int N, int ind, int *ti, int *tj){
+    int i,j,sk=0;
+    for(i=0;i<N+1;i++){
+        for(j=0;j<N+1;j++){
+            if(sk == ind){
+                *ti = i;
+                *tj = j;
             }
+            sk++;
         }
     }
 }
 
 /**
- * @brief
- * Get the nature coordinate of quadrilateral element
- *
+ * @brief calculate the value of derivative function at interpolation points.
  * @details
- *
- * @param [int] N polynomial order
- *
- * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * r | double[Np] | coordinate r
- * s | double[Np] | coordinate s
- * where Np = (N+1)(N+2)/2
- *
+ * @param [in] quad standard quadrilateral element
+ * @param [in] ind index of orthogonal function
+ * @param [out] dr derivative function with r
+ * @param [out] ds derivative function with s
  * @note
- * r and s shuold be allocated before calling GetQuadCoord
- *
+ * precondition: dr and ds should be allocated before calling @ref sc_quadDeriOrthogFunc
  */
-void GetQuadCoord(int N, double *r, double *s){
-    int Np = (N+1);
-    double *t = Vector_create(Np);
-    double *w = Vector_create(Np);
+void sc_quadDeriOrthogFunc(stdCell *quad, int ind, double *dr, double *ds){
+    const int N = quad->N;
+    const int Np = quad->Np;
+
+    double *r = quad->r;
+    double *s = quad->s;
+    double temp[Np];
+    /* transform to the index [ti,tj] */
+    int ti,tj;
+    sc_quadTransInd(N, ind, &ti, &tj);
+
+    /* Vr */
+    GradjacobiP(Np, r, temp, ti, 0, 0);
+    jacobiP(Np, s, dr, tj, 0, 0);
+    int i;
+    for(i=0;i<Np;i++)
+        dr[i] *= temp[i];
+
+    /* Vs */
+    jacobiP(Np, r, temp, ti, 0.0, 0.0);
+    GradjacobiP(Np, s, ds, tj, 0.0, 0.0);
+    for(i=0;i<Np;i++)
+        ds[i] *= temp[i];
+}
+
+/**
+ * @brief get orthogonal function value at interpolation nodes
+ * @details
+ * The orthogonal function on quadrilateral is derived by the
+ * 1d orthogonal function
+ *
+ * @param [in] cell quadrilateral cell
+ * @param [in] ind index of orthogonal function
+ * @param [out] func value of orthogonal function
+ */
+void sc_quadOrthogFunc(stdCell *quad, int ind, double *func){
+    const int N = quad->N;
+    const int Np = quad->Np;
+
+    double temp[Np];
+    /* transform to the index [ti,tj] */
+    int ti,tj;
+    sc_quadTransInd(N, ind, &ti, &tj);
+
+    double *r = quad->r;
+    double *s = quad->s;
+
+    jacobiP(Np, r, temp, ti, 0.0, 0.0);
+    jacobiP(Np, s, func, tj, 0.0, 0.0);
+
+    int i;
+    for(i=0;i<Np;i++)
+        func[i] *= temp[i];
+}
+
+/**
+ * @brief get the nature coordinate of interpolation nodes in standard quadrilateral element.
+ * @param [int,out] quad standard quadrilateral element
+ * @note
+ * the nodes is arranged along r coordinate first
+ */
+void sc_quadCoord(stdCell *quad){
+    const int Nfp = quad->Nfp;
+    const int Np = quad->Np;
+    double t[Nfp],w[Nfp];
+
+    quad->r = Vector_create(Np);
+    quad->s = Vector_create(Np);
 
     /* get Gauss-Lobatto-Jacobi zeros and weights */
-    zwglj(t, w, Np, 0, 0);
+    zwglj(t, w, Nfp, 0, 0);
 
     int i,j,sk=0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            r[sk]   = t[j];
-            s[sk++] = t[i];
+    for(i=0;i<Nfp;i++){
+        for(j=0;j<Nfp;j++){
+            quad->r[sk]   = t[j];
+            quad->s[sk++] = t[i];
         }
     }
-
-    Vector_free(t);
-    Vector_free(w);
 }
 
 
 /**
- * @brief
- * Build the index matrix of nodes on faces
+ * @brief build the nodes index matrix on each faces
  * @details
  * Four faces of the standard quadrilateral element is
  * \f[ s=-1, \quad r=1, \quad s=1, \quad r=-1 \f]
  *
- * @param [int] N order
- *
- * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * Fmask   | int[Nfaces][Nfp] |
- *
+ * @param [int] quad standard quadralteral element
+ * @return Fmask[Nfaces][Nfp]
  */
-void BuildQuadFmask(int N, int **Fmask){
-    int Nfp = N+1;
+int** sc_quadFmask(stdCell *quad){
+    const int Nfp = quad->Nfp;
+    const int Nfaces = quad->Nfaces;
+
+    int **Fmask = IntMatrix_create(Nfaces, Nfp);
     int i, std, td;
 
     /* face 1, s=-1 */
@@ -374,4 +257,6 @@ void BuildQuadFmask(int N, int **Fmask){
         Fmask[3][i] = std;
         std += td;
     }
+
+    return Fmask;
 }

@@ -1,4 +1,3 @@
-#include <stdlib.h>
 /**
  * @file
  * Standard triangle element
@@ -37,7 +36,7 @@ void sc_triCoord(stdCell *);
 void sc_triSimplex2dP(int Np, double *a, double *b, int i, int j, double *poly);
 
 /* derivative of orthogonal function */
-void sc_triDeriOrhogFunc(stdCell *tri, int ind, double *dr, double *ds);
+void sc_triDeriOrthogFunc(stdCell *tri, int ind, double *dr, double *ds);
 
 /* get orthogonal function value at interpolation nodes */
 void sc_triOrthogFunc(stdCell *cell, int ind, double *func);
@@ -46,8 +45,9 @@ void sc_triOrthogFunc(stdCell *cell, int ind, double *func);
 stdCell* sc_createTri(int N);
 
 
+
 /**
- * @brief transform the index of orthogonal function to [ti,tj]
+ * @brief transform the index of orthogonal function to [ti,tj] for triangle elements
  * @details the index is arranged as
  * \f[ [i,j] = \left\{ \begin{array}{lllll}
  * (0,0) & (0,1) & \cdots & (0,N-1) & (0, N) \cr
@@ -102,10 +102,13 @@ void sc_triOrthogFunc(stdCell *cell, int ind, double *func){
 stdCell* sc_createTri(int N){
     stdCell *tri = (stdCell *) calloc(1, sizeof(stdCell));
 
-    int Np = ((N+1)*(N+2)/2);
-    int Nv = 3;
-    int Nfaces = 3;
-    int Nfp = N+1;
+    /* cell type */
+    tri->type = TRIANGLE;
+
+    const int Np = ((N+1)*(N+2)/2);
+    const int Nv = 3;
+    const int Nfaces = 3;
+    const int Nfp = N+1;
     /* basic info */
     tri->N      = N;
     tri->Np     = Np;
@@ -124,7 +127,7 @@ stdCell* sc_createTri(int N){
     tri->M = sc_massMatrix(tri);
 
     /* Derivative Matrix, Dr and Ds */
-    sc_deriMatrix2d(tri, sc_triDeriOrhogFunc);
+    sc_deriMatrix2d(tri, sc_triDeriOrthogFunc);
 
     /* suface LIFT matrix, LIFT */
     tri->LIFT = sc_liftMatrix2d(tri);
@@ -157,122 +160,6 @@ stdCell* sc_createTri(int N){
 }
 
 /**
- * @brief
- * Get LIFT matrix
- *
- * @param [stdCell] shape               standard element
- * @param [double]       Mes[Np][Nfp*Nfaces] mass matrix of surface integral
- *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * LIFT   | double[Np][Nfp*Nfaces] | LIFT = M^{-1}*Mes
- *
- */
-void GetLIFT2d(stdCell *shape, double **Mes, double **LIFT){
-    unsigned int Np = (unsigned)shape->Np;
-    int Nfp = shape->Nfp, Nfaces=shape->Nfaces;
-    double *vc = Vector_create(Np * Np); /* vandermonde matrix */
-    double *vct = Vector_create(Np * Np); /* transform of vandermonde matrix */
-    double *me = Vector_create(Np * Nfp * Nfaces);
-    double *temp1 = Vector_create(Np * Np); /* inverse of mass matrix */
-    double *temp2 = Vector_create(Np * Nfp * Nfaces);
-
-    int i,j,sk=0;
-    /* assignment */
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            vc[sk] = shape->V[i][j];
-            vct[sk++] = shape->V[j][i];
-        }
-    }
-
-    sk = 0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Nfp*Nfaces;j++) {
-            me[sk++] = Mes[i][j];
-        }
-    }
-
-    /* get the inverse mass matrix M^{-1} = V*V' */
-    Matrix_Multiply(Np, Np, Np, vc, vct, temp1);
-    /* LIFT = M^{-1}*Mes */
-    Matrix_Multiply(Np, Np, (unsigned) Nfp * Nfaces, temp1, me, temp2);
-
-    sk = 0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Nfp*Nfaces;j++)
-            LIFT[i][j] = temp2[sk++];
-    }
-
-    Vector_free(vc);
-    Vector_free(vct);
-    Vector_free(me);
-    Vector_free(temp1);
-    Vector_free(temp2);
-}
-
-/**
- * @brief
- * Get surface mass matrix
- * @details
- * @param [int] N order
- * @param [int] Fmask[Nfaces][Nfp] nodes list at faces
- * @return
- * name  | type     | description of value
- * ----- |----------|----------------------
- * Mes   | double[Np][Nfaces*Nfp] | surface mass matrix
- *
- */
-void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes){
-
-    unsigned Nfp=(unsigned)N+1;
-    double *r= Vector_create(Nfp);
-    double *w= Vector_create(Nfp);
-
-    double *invt = Vector_create(Nfp * Nfp);
-    double *inv = Vector_create(Nfp * Nfp);
-    double *m = Vector_create(Nfp * Nfp);
-    /* get surface mass matrix */
-    zwglj(r, w, Nfp, 0, 0); /* get coordinate */
-    int i,j;
-    for(i=0;i<Nfp;i++){
-        /* get vandermonde matrix */
-        jacobiP(Nfp, r, w, i, 0, 0);
-        for(j=0;j<Nfp;j++){
-            inv[j*Nfp+i] = w[j];
-        }
-    }
-    Matrix_Inverse(inv, Nfp);
-    /* transform of vandermonde matrix */
-    for(i=0;i<Nfp;i++){
-        for(j=0;j<Nfp;j++)
-            invt[j+Nfp*i] = inv[j*Nfp+i];
-    }
-    /* get M = inv(V)'*inv(V) */
-    Matrix_Multiply(Nfp, Nfp, Nfp, invt, inv, m);
-
-    int k, sr, sk;
-    for(i=0;i<Nfaces;i++){
-        for(j=0;j<Nfp;j++){         /* row index of M */
-            for(k=0;k<Nfp;k++){     /* column index of M */
-                sr = Fmask[i][j];   /* row index of Mes */
-                sk = i*Nfp + k;     /* columns index of Mes */
-                Mes[sr][sk] = m[j*Nfp + k];
-            }
-        }
-    }
-
-    Vector_free(invt);
-    Vector_free(inv);
-    Vector_free(m);
-    Vector_free(r);
-    Vector_free(w);
-}
-
-/**
  * @brief calculate the value of derivative function at interpolation points.
  * @details
  * @param [in] tri standard triangle element
@@ -280,9 +167,9 @@ void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes){
  * @param [out] dr derivative function with r
  * @param [out] ds derivative function with s
  * @note
- * precondition: dr and ds should be allocated before.
+ * precondition: dr and ds should be allocated before calling @ref sc_triDeriOrthogFunc
  */
-void sc_triDeriOrhogFunc(stdCell *tri, int ind, double *dr, double *ds){
+void sc_triDeriOrthogFunc(stdCell *tri, int ind, double *dr, double *ds){
     const int Np = tri->Np;
     double a[Np], b[Np];
     sc_rstoad(Np, tri->r, tri->s, a, b);
