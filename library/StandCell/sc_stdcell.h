@@ -51,9 +51,13 @@ typedef struct {
 stdCell* sc_create(int N, cellType type);
 void sc_free(stdCell *);
 
-double** sc_VandMatrix2d(stdCell *cell, void (*orthfunc)(stdCell *cell, int ind, double *func));
 double** sc_massMatrix(stdCell *cell);
 
+/* functions for 2d elements (tri and quad) */
+void sc_deriMatrix2d(stdCell *cell, void (*derorthfunc)(stdCell *, int ind, double *dr, double *ds));
+double** sc_VandMatrix2d(stdCell *cell, void (*orthfunc)(stdCell *, int ind, double *func));
+double** sc_liftMatrix2d(stdCell *cell);
+void sc_GaussQuadrature2d(stdCell *cell);
 
 void GetLIFT2d(stdCell *shape, double **Mes, double **LIFT);
 void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes);

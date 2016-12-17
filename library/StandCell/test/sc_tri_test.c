@@ -4,6 +4,7 @@
 
 #include "sc_tri_test.h"
 #include "sc_tri_data3.h"
+#include "sc_test.h"
 
 int sc_triCoor_test(stdCell *tri, int verbose){
 
@@ -67,6 +68,59 @@ int sc_triMassMatrix_test(stdCell *tri, int verbose){
         PrintMatrix2File(fp, "M", tri->M, NP, NP);
         fclose(fp);
     }
+    Matrix_free(M_ext);
+    return fail;
+}
 
+int sc_triDeriMatrix_test(stdCell *tri, int verbose){
+    int fail =0;
+    extern double tri_Dr[NP][NP];
+    extern double tri_Ds[NP][NP];
+    double **Dr_ext = Matrix_create(NP, NP);
+    double **Ds_ext = Matrix_create(NP, NP);
+
+    int i,j;
+    for(i=0;i<NP;i++){
+        for(j=0;j<NP;j++){
+            Dr_ext[i][j] = tri_Dr[i][j];
+            Ds_ext[i][j] = tri_Ds[i][j];
+        }
+    }
+
+    fail = Matrix_test("sc_triDr_test", tri->Dr, Dr_ext, NP, NP, 0);
+    fail = Matrix_test("sc_triDs_test", tri->Dr, Dr_ext, NP, NP, 0);
+
+    if(verbose){
+        FILE *fp = fopen("sc_triDeriMatrix_test.txt", "w");
+        PrintMatrix2File(fp, "Dr", tri->Dr, NP, NP);
+        PrintMatrix2File(fp, "Ds", tri->Ds, NP, NP);
+        fclose(fp);
+    }
+
+    Matrix_free(Dr_ext);
+    Matrix_free(Ds_ext);
+    return fail;
+}
+
+int sc_triLIFT_test(stdCell *tri, int verbose){
+    int fail = 0;
+    extern double tri_LIFT[NP][NFP];
+    double **LIFT_ext = Matrix_create(NP, NFP);
+    int i,j;
+    for(i=0;i<NP;i++){
+        for(j=0;j<NFP;j++){
+            LIFT_ext[i][j] = tri_LIFT[i][j];
+        }
+    }
+
+    fail = Matrix_test("sc_triLIFT_test", tri->LIFT, LIFT_ext, NP, NFP, 0);
+
+    if(verbose){
+        FILE *fp = fopen("sc_triLIFT_test.txt", "w");
+        PrintMatrix2File(fp, "LIFT", tri->LIFT, NP, NFP);
+        fclose(fp);
+    }
+
+    Matrix_free(LIFT_ext);
     return fail;
 }

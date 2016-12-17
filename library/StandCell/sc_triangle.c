@@ -12,26 +12,48 @@
 
 #include "sc_stdcell.h"
 
-/* private functions of triangle element */
-void xytors(int Np, double *x, double *y, double *r, double *s);
+/* transform the index of orthogonal function to [ti,tj] */
+void sc_triTransInd(int N, int ind, int *ti, int *tj);
+
+/* transfer coordinate [x,y] on equilateral triangle to natural coordinate [r,s] */
+void sc_trixytors(int Np, double *x, double *y, double *r, double *s);
+
+/* transform natural coordinate to collapse coordinate */
 void sc_rstoad(int Np, double *r, double *s, double *a, double *b);
-void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds);
-void GetTriDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs);
-void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, double **Ds);
+
+/* get the gradient of the modal basis (id,jd) on the 2D simplex at (a,b). */
+void sc_triGradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds);
+
+/* build the nodes index matrix on each faces */
 int** sc_triFmask(stdCell *tri);
+
+/* Warp factor to connnect the Legendre-Gauss-Lobatto and equidistant nodes */
 void sc_triWarpfactor(int, double *, int, double *);
+
+/* get the coordinate of interpolations points on standard triangle element */
 void sc_triCoord(stdCell *);
-void GetTriV(int N, int Nr, double *r, double *s, double **V);
-void GetTriM(int Np, double **V, double **M);
+
+/* evaluate 2D orthonormal polynomial on simplex at (a,b) of order (i,j). */
 void sc_triSimplex2dP(int Np, double *a, double *b, int i, int j, double *poly);
+
+/* derivative of orthogonal function */
+void sc_triDeriOrhogFunc(stdCell *tri, int ind, double *dr, double *ds);
+
+/* get orthogonal function value at interpolation nodes */
+void sc_triOrthogFunc(stdCell *cell, int ind, double *func);
+
+/* create standard triangle element */
+stdCell* sc_createTri(int N);
+
 
 /**
  * @brief transform the index of orthogonal function to [ti,tj]
  * @details the index is arranged as
- * i = 0, j = 0,1,2,...,N-1,N;
- * i = 1, j = 0,1,2....,N-1;
- * ...
- * i = N, j = 0;
+ * \f[ [i,j] = \left\{ \begin{array}{lllll}
+ * (0,0) & (0,1) & \cdots & (0,N-1) & (0, N) \cr
+ * (1,0) & (1,1) & \cdots & (1,N-1) \cr
+ * \cdots \cr
+ * (0,N) \end{array} \right\} \f]
  *
  * @param [in] N polynomial order
  * @param [in] ind orthogonal polynomial index
@@ -52,11 +74,11 @@ void sc_triTransInd(int N, int ind, int *ti, int *tj){
 }
 
 /**
- * @brief
- * @param [in]     beginPos    start address
- * @param [in]     linkChar    data linker
- * @param [in,out] year        1-9999
+ * @brief get orthogonal function value at interpolation nodes
  *
+ * @param [in] cell triangle cell
+ * @param [in] ind index of orthogonal function
+ * @param [out] func value of orthogonal function
  */
 void sc_triOrthogFunc(stdCell *cell, int ind, double *func){
     const int N = cell->N;
@@ -75,7 +97,7 @@ void sc_triOrthogFunc(stdCell *cell, int ind, double *func){
  * @brief create standard triangle element
  * @param[in] N polynomial order
  * @note
- * postcondition: the stdCell object should be free manually with @ref sc_free()
+ * postcondition: the stdCell object should be free manually with @ref sc_free
  */
 stdCell* sc_createTri(int N){
     stdCell *tri = (stdCell *) calloc(1, sizeof(stdCell));
@@ -87,9 +109,9 @@ stdCell* sc_createTri(int N){
     /* basic info */
     tri->N      = N;
     tri->Np     = Np;
-    tri->Nv     = 3;
-    tri->Nfaces = 3;
-    tri->Nfp    = N+1;
+    tri->Nv     = Nv;
+    tri->Nfaces = Nfaces;
+    tri->Nfp    = Nfp;
 
     /* nodes at faces, Fmask */
     tri->Fmask = sc_triFmask(tri);
@@ -102,36 +124,18 @@ stdCell* sc_createTri(int N){
     tri->M = sc_massMatrix(tri);
 
     /* Derivative Matrix, Dr and Ds */
-    tri->Dr = Matrix_create(tri->Np, tri->Np);
-    tri->Ds = Matrix_create(tri->Np, tri->Np);
-    GetTriDeriM(tri->N, tri->Np, tri->r, tri->s, tri->V, tri->Dr, tri->Ds);
+    sc_deriMatrix2d(tri, sc_triDeriOrhogFunc);
 
     /* suface LIFT matrix, LIFT */
-    double **Mes = Matrix_create(tri->Np, tri->Nfaces * tri->Nfp);
-    tri->LIFT = Matrix_create(tri->Np, tri->Nfaces * tri->Nfp);
-    GetSurfLinM(tri->N, tri->Nfaces, tri->Fmask, Mes);
-    GetLIFT2d(tri, Mes, tri->LIFT);
+    tri->LIFT = sc_liftMatrix2d(tri);
 
-    Matrix_free(Mes);
-
-    /* integration coeff, ws and wv */
-    tri->ws = Vector_create(tri->Nfp);
-    double *r = Vector_create(tri->Nfp);
-    zwglj(r, tri->ws, tri->Nfp, 0, 0);
-    Vector_free(r);
-
-    tri->wv = Vector_create(tri->Np);
-    int i,j;
-    for(i=0;i<tri->Np;i++){
-        for(j=0;j<tri->Np;j++){
-            tri->wv[j] += tri->M[i][j];
-        }
-    }
+    /* integration coefficients, ws and wv */
+    sc_GaussQuadrature2d(tri);
 
     /* float version */
-    size_t sz = tri->Np*(tri->Nfp)*(tri->Nfaces)*sizeof(real);
+    size_t sz = Np*Nfp*Nfaces*sizeof(real);
     tri->f_LIFT = (real *) malloc(sz);
-    sz = tri->Np*tri->Np*sizeof(real);
+    sz = Np*Np*sizeof(real);
     tri->f_Dr = (real*) malloc(sz);
     tri->f_Ds = (real*) malloc(sz);
 
@@ -145,12 +149,10 @@ stdCell* sc_createTri(int N){
     sk = 0;
     for(n=0;n<tri->Np;++n){
         for(m=0;m<tri->Np;++m){
-            tri->f_Dr[sk] = (real) tri->Dr[n][m];
-            tri->f_Ds[sk] = (real) tri->Ds[n][m];
-            ++sk;
+            tri->f_Dr[sk  ] = (real) tri->Dr[n][m];
+            tri->f_Ds[sk++] = (real) tri->Ds[n][m];
         }
     }
-
     return tri;
 }
 
@@ -271,142 +273,29 @@ void GetSurfLinM(int N, int Nfaces, int **Fmask, double **Mes){
 }
 
 /**
- * @brief
- * Get the Gradient matrix of Lagrange basis at (r,s) at order N
+ * @brief calculate the value of derivative function at interpolation points.
  * @details
- * The Gradient matrix \f$ \mathbf{Dr} \f$ and \f$ \mathbf{Ds} \f$ is obtained through
- * \f[ \mathbf{Dr} \cdot \mathbf{V} = \mathbf{Vr},
- * \quad \mathbf{Ds} \cdot \mathbf{V} = \mathbf{Vs} \f]
- * where
- * \f[ Dr_{(ij)} = \left. \frac{\partial l_j}{\partial r} \right|_{ \mathbf{r}_i },
- * \quad Ds_{(ij)} = \left. \frac{\partial l_j}{\partial s} \right|_{ \mathbf{r}_i } \f]
- *
- * @param [unsigned] N
- * @param [unsigned] Np number of points
- * @param [double]   r[Np] coordinate
- * @param [double]   s[Np] coordinate
- * @param [double]   V[Np][Np] vandermonde matrix
- *
- * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * Dr | double[Np][Np]   |
- * Ds | object[Np][Np]   |
+ * @param [in] tri standard triangle element
+ * @param [in] ind index of orthogonal function
+ * @param [out] dr derivative function with r
+ * @param [out] ds derivative function with s
+ * @note
+ * precondition: dr and ds should be allocated before.
  */
-void GetTriDeriM(int N, int Np, double *r, double *s, double **V, double **Dr, double **Ds){
-    double **Vr = Matrix_create(Np, Np);
-    double **Vs = Matrix_create(Np, Np);
-    double *temp = Vector_create(Np * Np);
-    double *vtemp = Vector_create(Np * Np);
-    double *dtemp = Vector_create(Np * Np);
-
-    int i,j,sk=0;
-
-    /* inverse of vandermonde matrix */
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            temp[sk++] = V[i][j];
-        }
-    }
-    Matrix_Inverse(temp, Np);
-
-    /* get the gradient of the modal basis */
-    GetTriDeriV2d(N, Np, r, s, Vr, Vs);
-
-    /* matrix multiply */
-    unsigned n = (unsigned)Np;
-    sk = 0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            vtemp[sk++] = Vr[i][j];
-        }
-    }
-    /* \f$ \mathbf{Dr} = \mathbf{Vr}*\mathbf{V}^{-1} \f$ */
-    Matrix_Multiply(n, n, n, vtemp, temp, dtemp);
-    sk = 0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            Dr[i][j] = dtemp[sk++];
-        }
-    }
-
-    sk = 0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            vtemp[sk++] = Vs[i][j];
-        }
-    }
-    /* \f$ \mathbf{Ds} = \mathbf{Vs}*\mathbf{V}^{-1} \f$ */
-    Matrix_Multiply(n, n, n, vtemp, temp, dtemp);
-    sk = 0;
-    for(i=0;i<Np;i++){
-        for(j=0;j<Np;j++){
-            /* row counts first */
-            Ds[i][j] = dtemp[sk++];
-        }
-    }
-
-    /* dealloc mem */
-    Matrix_free(Vr);
-    Matrix_free(Vs);
-    Vector_free(temp);
-    Vector_free(vtemp);
-    Vector_free(dtemp);
+void sc_triDeriOrhogFunc(stdCell *tri, int ind, double *dr, double *ds){
+    const int Np = tri->Np;
+    double a[Np], b[Np];
+    sc_rstoad(Np, tri->r, tri->s, a, b);
+    int ti, tj;
+    sc_triTransInd(tri->N, ind, &ti, &tj);
+    sc_triGradSimplex2DP(Np, a, b, ti, tj, dr, ds);
 }
 
 /**
  * @brief
- * get the gradient matrix of the modal basis (i,j) at (r,s) at order N
+ * get the gradient of the modal basis (id,jd) on the 2D simplex at (a,b).
  * @details
- *
- * @param [unsigned] N order
- * @param [int]      Np number of points
- * @param [double]   r[Np] coordinate
- * @param [double]   s[Np] coordinate
- *
- * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * Vr | double[Np][Np] | gradient matrix of r
- * Vs | double[Np][Np] | gradient matrix of s
- *
- */
-void GetTriDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs){
-    double *a = Vector_create(Np);
-    double *b = Vector_create(Np);
-    double *dpdr, *dpds;
-    int i,j,k,sk=0;
-
-    dpdr = Vector_create(Np); dpds = Vector_create(Np);
-
-    sc_rstoad(Np, r, s, a, b);
-    for(i=0;i<N+1;i++){
-        for(j=0;j<N-i+1;j++){
-            GradSimplex2DP(Np, a, b, i, j, dpdr, dpds);
-            /* assignment */
-            for(k=0;k<Np;k++){
-                Vr[k][sk] = dpdr[k];
-                Vs[k][sk] = dpds[k];
-            }
-            sk++;
-        }
-    }
-    Vector_free(dpdr);
-    Vector_free(dpds);
-    Vector_free(a);
-    Vector_free(b);
-
-}
-
-/**
- * @brief
- * Get the gradient of the modal basis (id,jd) on the 2D simplex at (a,b).
- * @details
- * Coordinate (a,b) is calculated from (r,s) by
+ * Coordinate (a,b) is the collapse coordinate, given by
  * \f[ a = 2\frac{1+r}{1-s}, \quad b=s \f]
  * Therefore, the derivatives of (r,s) is obtained by
  * \f[\begin{array}{ll}
@@ -418,25 +307,19 @@ void GetTriDeriV2d(int N, int Np, double *r, double *s, double **Vr, double **Vs
  * \frac{(1+a)/2}{(1-b)/2}\frac{\partial }{\partial a} + \frac{\partial }{\partial b} \cr
  * \end{array}\f]
  *
- * @param [int]      Np number of coordinate
- * @param [double]   a[Np]
- * @param [double]   b[Np]
- * @param [int]      id
- * @param [int]      jd
- *
- * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * car_id   | int      | 车源编号
- * car_info | object   | json对象格式的车源信息
- *
+ * @param [in] Np number of coordinate
+ * @param [in] a collapse coordinate
+ * @param [in] b collapse coordinate
+ * @param [in] id index of
+ * @param [in] jd
+ * @param [out] dmodedr
+ * @param [out] dmodeds
+ * @note
+ * precondition: dmodedr and dmodeds should be allocated before calling @ref sc_triGradSimplex2DP
  */
-void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds){
-    double *fa  = Vector_create(Np);
-    double *dfa = Vector_create(Np);
-    double *gb  = Vector_create(Np);
-    double *dgb = Vector_create(Np);
-    double *temp = Vector_create(Np);
+void sc_triGradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds){
+
+    double fa[Np],dfa[Np],gb[Np],dgb[Np],temp[Np];
     int i;
 
     jacobiP(Np, a, fa, id, 0, 0);
@@ -481,16 +364,11 @@ void GradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmoded
         dmodeds[i] *= pow(2.0, id+0.5);
     }
 
-    Vector_free(fa);
-    Vector_free(dfa);
-    Vector_free(gb);
-    Vector_free(dgb);
-    Vector_free(temp);
 }
 
 /**
  * @brief
- * Evaluate 2D orthonormal polynomial on simplex at (a,b) of order (i,j).
+ * evaluate 2D orthonormal polynomial on simplex at (a,b) of order (i,j).
  * @details
  * The orthogonal basis function \f$ \varphi(\mathbf{r}) \f$ is obtained by
  * \f[ \varphi_n(\mathbf{r}) = \sqrt{2}P_i(a)P_j^{(2i+1, 0)}(b)(1-b)^i \f]
@@ -519,62 +397,7 @@ void sc_triSimplex2dP(int Np, double *a, double *b, int i, int j, double *poly){
 }
 
 /**
- * @brief
- * Generate the Vandermonde matrix of triangle element
- *
- * @details
- * Vandermonde matrix \f$ \mathbf{V} \f$ is derivated by
- * \f[ \mathbf{V}_{mn} = \varphi_n \left( \mathbf{r}_m \right) \f]
- * where \f$ \varphi_n \left( \mathbf{r} \right) \f$ is the modal basis obtained by
- * \f[ \varphi_n \left( \mathbf{r} \right) = \sqrt{2}P_i(a)P_j^{(2i+1, 0)}(b)(1-b)^i \f]
- *
- * where the modal basis is sorted as
- * \f[ n(i,j) = \left\{ \begin{array}{lllll}
- * (0,0) & (0,1) & \cdots & (0,N-1) & (0, N) \cr
- * (1,0) & (1,1) & \cdots & (1,N-1) \cr
- * \cdots \cr
- * (0,N) \end{array} \right\} \f]
- *
- *
- * @param [int]      N order
- * @param [int]      Nr number of coordinate
- * @param [doule]    r[Nr]
- * @param [doule]    s[Nr]
- *
- * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * V  | double[Np][Np] | vandermonde matrix
- *
- */
-void GetTriV(int N, int Nr, double *r, double *s, double **V){
-    int i,j,k,sk=0;
-
-    double *temp = Vector_create(Nr);
-    double *a= Vector_create(Nr);
-    double *b= Vector_create(Nr);
-
-    sc_rstoad(Nr, r, s, a, b);
-
-    for(i=0;i<N+1;i++){
-        for(j=0;j<N-i+1;j++){
-            sc_triSimplex2dP(Nr, a, b, i, j, temp);
-            for(k=0;k<Nr;k++){
-                V[k][sk] = temp[k];
-            }
-            sk++;
-        }
-    }
-
-    Vector_free(a);
-    Vector_free(b);
-    Vector_free(temp);
-}
-
-
-/**
- * @brief the coordinate of triangle element
- *
+ * @brief get the coordinate of interpolations points on standard triangle element
  * @param[in] N polynomial order
  * @param[in,out] r coordinate
  * @param[in,out] s coordinate
@@ -625,7 +448,6 @@ void sc_triCoord(stdCell *tri){
         temp = alpha*L1[i];
         warpf1[i] *= 4.0*L2[i]*L3[i]*(1.0 + temp*temp);
         x[i] += 1.0*warpf1[i];
-//        y[sk] += 0.0;
     }
 
     /* warp2 */
@@ -655,7 +477,7 @@ void sc_triCoord(stdCell *tri){
     }
 
     /* coordinate transfer */
-    xytors(Np, x, y, tri->r, tri->s);
+    sc_trixytors(Np, x, y, tri->r, tri->s);
 }
 
 /**
@@ -729,18 +551,13 @@ void sc_triWarpfactor(int N, double *r, int Nr, double *w){
 }
 
 /**
- * @brief
- * Build the index matrix of nodes on faces
+ * @brief build the nodes index matrix on each faces
  * @details
  * Three faces of the standard triangle element is
  * \f[ s=-1, \quad r+s=0, \quad r=-1 \f]
  *
  * @param [in] N order
- *
- * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * Fmask   | int[Nfaces][Nfp] |
+ * @return int Fmask[Nfaces][Nfp]
  *
  */
 int** sc_triFmask(stdCell *tri){
@@ -784,26 +601,18 @@ int** sc_triFmask(stdCell *tri){
 
 /**
  * @brief
+ * transfer coordinate [x,y] on equilateral triangle to natural coordinate [r,s]
  *
- * @details
- * transfer coordinate (x,y) on equilateral triangle to natural coordinate (r,s)
- * on right triangle
- *
- * @param [int]     Np number of points
- * @param [double]  x[Np] coordinate of equilateral triangle
- * @param [double]  y[Np] coordinate of equilateral triangle
- *
- * @return
- *
- * |name     | type     | description of value |
- * | --- | --- | --- |
- * |r | double[Np] | coordinate |
- * |s | double[Np] | coordinate |
+ * @param [in] Np number of points
+ * @param [in] x coordinate of equilateral triangle
+ * @param [in] y coordinate of equilateral triangle
+ * @param [out] r coordinate of standard triangle
+ * @param [out] s coordinate of standard triangle
  *
  * @note
- * x,y,r and s shuold be allocated before calling xytors
+ * precondition: [x, y] and [r, s] should be allocated before calling @ref sc_trixytors
  */
-void xytors(int Np, double *x, double *y, double *r, double *s){
+void sc_trixytors(int Np, double *x, double *y, double *r, double *s){
     double L1, L2, L3;
     int i;
 
@@ -811,7 +620,6 @@ void xytors(int Np, double *x, double *y, double *r, double *s){
         L1 = (sqrt(3.0)*y[i] + 1)/3.0;
         L2 = (-3.0*x[i] - sqrt(3.0)*y[i] + 2.0)/6.0;
         L3 = ( 3.0*x[i] - sqrt(3.0)*y[i] + 2.0)/6.0;
-
         r[i] = -L2+L3-L1;
         s[i] = -L2-L3+L1;
     }
@@ -827,7 +635,7 @@ void xytors(int Np, double *x, double *y, double *r, double *s){
  * @param [out] b collapse coordinate
  *
  * @note
- * precondition: a and b should be allocated before calling sc_rstoad
+ * precondition: a and b should be allocated before calling @ref sc_rstoad
  */
 
 void sc_rstoad(int Np, double *r, double *s, double *a, double *b){
