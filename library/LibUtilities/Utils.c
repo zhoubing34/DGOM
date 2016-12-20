@@ -114,67 +114,31 @@ void str2int(char *str, int *N, char* errmessage){
 
 /* some very basic memory allocation routines */
 /* row major storage for a 2D matrix array */
-double **Matrix_create(int Nrows, int Ncols){
-    int n;
-    double **A = (double**) calloc(Nrows, sizeof(double*));
 
-    A[0] = (double*) calloc(Nrows*Ncols, sizeof(double));
+#define __T__ double
+#define __MATRIX_CREATE_FUNC Matrix_create
+#include "Utils.h"
 
-    for(n=1;n<Nrows;++n){
-        A[n] = A[n-1]+ Ncols;
-    }
+#define __VECTOR_CREATE_FUNC Vector_create
+#include "Utils.h"
 
-    return A;
-}
-    
-double *Vector_create(int Nrows){
+#define __MATRIX_FREE_FUNC Matrix_free
+#include "Utils.h"
 
-    double *A = (double*) calloc(Nrows, sizeof(double));
+#define __VECTOR_FREE_FUNC Vector_free
+#include "Utils.h"
 
-    return A;
-}
+#undef __T__
 
-/* row major storage for a 2D matrix array */
-int **IntMatrix_create(int Nrows, int Ncols){
-  int n;
-  int **A = (int**) calloc(Nrows, sizeof(int*));
+#define __T__ int
+#define __MATRIX_CREATE_FUNC IntMatrix_create
+#include "Utils.h"
 
-  A[0] = (int*) calloc(Nrows*Ncols, sizeof(int));
+#define __VECTOR_CREATE_FUNC IntVector_create
+#include "Utils.h"
 
-  for(n=1;n<Nrows;++n){
-    A[n] = A[n-1]+ Ncols;
-  }
+#define __MATRIX_FREE_FUNC IntMatrix_free
+#include "Utils.h"
 
-  return A;
-}
-
-int *IntVector_create(int Nrows){
-
-  int *A = (int*) calloc(Nrows, sizeof(int));
-
-  return A;
-}
-
-double *Vector_free(double *v){
-  free(v);
-  return NULL;
-}
-
-double **Matrix_free(double **A){
-  free(A[0]);
-  free(A);
-
-  return NULL;
-}
-
-int *IntVector_free(int *v){
-  free(v);
-  return NULL;
-}
-
-int **IntMatrix_free(int **A){
-  free(A[0]);
-  free(A);
-
-  return NULL;
-}
+#define __VECTOR_FREE_FUNC IntVector_free
+#include "Utils.h"

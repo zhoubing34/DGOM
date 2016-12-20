@@ -2,6 +2,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
 
 set(LIBUTILITIES_SOURCE
         LibUtilities.h
+        Utils.h
         Utils.c
         ParallelPairs.c
         UTest.h
