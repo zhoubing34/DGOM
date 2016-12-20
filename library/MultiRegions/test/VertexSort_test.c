@@ -3,14 +3,14 @@
 //
 
 #include "MulitRegions_test.h"
-#include "MultiRegions/VertexSort.h"
+#include "MultiRegions/mr_grid_resortEToV.h"
 #include "VertexSort_test.h"
 #include "LibUtilities/GenUniformMesh.h"
 
 
 int MultiTriRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     // global variable
-    UnstructMesh *grid = UniformTriMesh_create(2, 2, -1, 1, -1, 1, 1);
+    geoGrid *grid = UniformTriMesh_create(2, 2, -1, 1, -1, 1, 1);
 //    MultiReg2d *mesh = setTriTestMesh();
     stdCell *shape = mesh->stdcell;
 
@@ -35,7 +35,7 @@ int MultiTriRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     // call
     clockT1 = clock();
     for(k=0; k<mesh->K; k++){
-        VertexSort(shape->Nv, grid->vx, grid->vy, mesh->EToV[k]);
+        mr_resortEToV2d(shape->Nv, grid->vx, grid->vy, mesh->EToV[k]);
     }
     clockT2 = clock();
 
@@ -56,7 +56,7 @@ int MultiTriRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     IntMatrix_free(exEToV);
 //    sc_free(shape);
 //    MultiReg2d_free(mesh);
-    UnstructMesh_free(grid);
+    mr_grid_free(grid);
 
     return fail;
 }
@@ -64,7 +64,7 @@ int MultiTriRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
 
 int MultiQuadRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     // global variable
-    UnstructMesh *grid = UniformQuadMesh_create(2, 2, -1, 1, -1, 1);
+    geoGrid *grid = UniformQuadMesh_create(2, 2, -1, 1, -1, 1);
 //    MultiReg2d *mesh = setQuadTestMesh();
     stdCell *shape = mesh->stdcell;
 
@@ -89,7 +89,7 @@ int MultiQuadRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     // call
     clockT1 = clock();
     for(k=0; k<mesh->K; k++){
-        VertexSort(shape->Nv, grid->vx, grid->vy, mesh->EToV[k]);
+        mr_resortEToV2d(shape->Nv, grid->vx, grid->vy, mesh->EToV[k]);
     }
     clockT2 = clock();
 
@@ -110,7 +110,7 @@ int MultiQuadRegions_VertexSort_test(MultiReg2d *mesh, int verbose){
     IntMatrix_free(exEToV);
 //    sc_free(shape);
 //    MultiReg2d_free(mesh);
-    UnstructMesh_free(grid);
+    mr_grid_free(grid);
 
     return fail;
 }

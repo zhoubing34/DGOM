@@ -9,8 +9,23 @@
  */
 
 #include "LibUtilities.h"
+#include "mkl_lapacke.h"
 
 /* matrix operations */
+
+/**
+ * @brief vector division
+ *
+ * @param[in] N number of elements
+ * @param[in] v1 dividend vector
+ * @param[in] v2 divisor vector
+ */
+void Vector_division(int N, double *v1, double *v2){
+    int i;
+    for(i=0;i<N;i++)
+        v1[i] /= v2[i];
+    return;
+}
 
 /**
  * @brief
@@ -23,7 +38,7 @@
  * Row counts first to generalize the vector A, which means that
  * A[i][j] = A[i*N+j]
  */
-void Matrix_Inverse(double *A, int N){
+void Matrix_inverse(double *A, int N){
     int lda = N;
     int ipiv[N];
     int info;
@@ -42,22 +57,17 @@ void Matrix_Inverse(double *A, int N){
 
 
 /**
- * @brief
- * Matrix Multiply
- *
- * @details
- * \f[ \mathbf{C} = \mathbf{A}* \mathbf{B} \f]
+ * @brief matrix multiply
  *
  * @param[in] A is M-by-K matrix
  * @param[in] B is K-by-N matrix
- * @param[in,out] C is M-by-N matrix
+ * @param[out] C is M-by-N matrix
  *
  * @note
- * Row counts first to generalize the vector A, B and C, which means that
- * A[i][j] = A[i*N+j]
+ * Row counts first to generalize the vector A, B and C, which means that A[i*N+j] = A[i][j]
  */
 
-void Matrix_Multiply(const unsigned M, const unsigned K, const unsigned N,
+void Matrix_multiply(const unsigned M, const unsigned K, const unsigned N,
                      const double *A, const double *B, double *C) {
     unsigned i, j, k;
 

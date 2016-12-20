@@ -16,7 +16,7 @@ int MatrixMultiply_test(){
 
     // call
     clockT1 = clock();
-    Matrix_Multiply(M, K, N, A, B, Ct);
+    Matrix_multiply(M, K, N, A, B, Ct);
     clockT2 = clock();
 
     // check Ct equals to C

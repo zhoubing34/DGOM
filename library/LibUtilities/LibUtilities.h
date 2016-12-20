@@ -5,21 +5,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "mkl_lapacke.h"
 
-#include "mpi.h"
-
-/* variable type */
+/* float type */
 #ifdef DOUBLE_PRECISION
 typedef double real;
 #define MPI_SIZE MPI_DOUBLE
-
 #else
 typedef float real;
 #define MPI_SIZE MPI_FLOAT
-
 #endif
 
+/* min and max function */
 #define max(a,b)  ( (a>b)?a:b )
 #define min(a,b)  ( (a<b)?a:b )
 
@@ -27,8 +23,8 @@ typedef float real;
 void str2int(char *str, int *N, char* errmessage);
 
 /* matrix operation */
-void Matrix_Inverse(double *A, int N);
-void Matrix_Multiply(const unsigned M, const unsigned K, const unsigned N,
+void Matrix_inverse(double *A, int N);
+void Matrix_multiply(const unsigned M, const unsigned K, const unsigned N,
                      const double *A, const double *B, double *C);
 
 /* allocate mem */

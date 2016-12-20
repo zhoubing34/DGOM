@@ -25,6 +25,8 @@ typedef enum {
 typedef struct {
     cellType type; ///< cell enum type
 
+    int dim; ///< dimension
+
     int N; ///< polynomial order
     int Np; ///< number of points
     int Nv; ///< number of vertex
@@ -47,15 +49,26 @@ typedef struct {
 
 } stdCell;
 
-/* functions for standard elements */
+/* ======================== functions for standard elements ======================== */
+/* create stand cell object */
 stdCell* sc_create(int N, cellType type);
+/* free stdCell object */
 void sc_free(stdCell *);
+/* calculate the mass matrix */
 double** sc_massMatrix(stdCell *cell);
+/* project the vertex value to interpolation nodes */
+void sc_vertProj(stdCell *cell, double *vertVal, double *nodeVal);
 
-/* functions for 2d elements (tri and quad) */
+
+/* ======================== functions for 2d elements (tri and quad) ======================== */
+/* get the gradient matrix Dr and Ds of Lagrange basis at (r,s) at order N */
 void sc_deriMatrix2d(stdCell *cell, void (*derorthfunc)(stdCell *, int ind, double *dr, double *ds));
+/* calculate the Vandermonde matrix */
 double** sc_VandMatrix2d(stdCell *cell, void (*orthfunc)(stdCell *, int ind, double *func));
+/* create LIFT matrix for 2d elements (triangle or quadrilateral) */
 double** sc_liftMatrix2d(stdCell *cell);
+/* calculate the Gauss quadrature weights for faces (ws) and volume (wv) integral */
 void sc_GaussQuadrature2d(stdCell *cell);
+
 
 #endif //DGOM_STDCELL_H

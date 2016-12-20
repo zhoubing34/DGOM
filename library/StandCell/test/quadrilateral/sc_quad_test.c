@@ -119,3 +119,24 @@ int sc_quadLIFT_test(stdCell *quad, int verbose){
     Matrix_free(LIFT_ext);
     return fail;
 }
+
+
+int sc_quadVertProj_test(stdCell *quad, int verbose){
+    int fail=0;
+    extern double quad_VX[NV];
+    extern double quad_VY[NV];
+
+    double x[quad->Np], y[quad->Np];
+    clock_t clockT1, clockT2;
+
+    clockT1 = clock();
+    sc_vertProj(quad, quad_VX, x);
+    clockT2 = clock();
+    fail = Vector_test("sc_quadVertProj_test", x, quad->r, quad->Np, (clockT2-clockT1)/CLOCKS_PER_SEC);
+
+    clockT1 = clock();
+    sc_vertProj(quad, quad_VY, y);
+    clockT2 = clock();
+    fail = Vector_test("sc_quadVertProj_test", y, quad->s, quad->Np, (clockT2-clockT1)/CLOCKS_PER_SEC);
+    return fail;
+}

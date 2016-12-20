@@ -1,5 +1,5 @@
 #include "LibUtilities.h"
-
+#include "mpi.h"
 
 void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
 		   int  (*numget)(const void *),

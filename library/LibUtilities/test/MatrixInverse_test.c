@@ -22,7 +22,7 @@ int MatrixInverse_test(){
 
     // call
     clockT1 = clock();
-    Matrix_Inverse(temp, Nrow);
+    Matrix_inverse(temp, Nrow);
     clockT2 = clock();
 
     // check

@@ -13,37 +13,37 @@
 #include "Polylib/polylib.h"
 
 /* transform the index of orthogonal function to [ti,tj] */
-void sc_triTransInd(int N, int ind, int *ti, int *tj);
+void sc_transInd_tri(int N, int ind, int *ti, int *tj);
 
 /* transfer coordinate [x,y] on equilateral triangle to natural coordinate [r,s] */
-void sc_trixytors(int Np, double *x, double *y, double *r, double *s);
+void sc_xytors_tri(int Np, double *x, double *y, double *r, double *s);
 
 /* transform natural coordinate to collapse coordinate */
 void sc_rstoad(int Np, double *r, double *s, double *a, double *b);
 
 /* get the gradient of the modal basis (id,jd) on the 2D simplex at (a,b). */
-void sc_triGradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds);
+void sc_gradSimplex2DP_tri(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds);
 
 /* build the nodes index matrix on each faces */
-int** sc_triFmask(stdCell *tri);
+int** sc_fmask_tri(stdCell *tri);
 
 /* Warp factor to connnect the Legendre-Gauss-Lobatto and equidistant nodes */
-void sc_triWarpfactor(int, double *, int, double *);
+void sc_warpfactor_tri(int, double *, int, double *);
 
 /* get the coordinate of interpolations points on standard triangle element */
-void sc_triCoord(stdCell *);
+void sc_coord_tri(stdCell *);
 
 /* evaluate 2D orthonormal polynomial on simplex at (a,b) of order (i,j). */
-void sc_triSimplex2dP(int Np, double *a, double *b, int i, int j, double *poly);
+void sc_simplex2DP_tri(int Np, double *a, double *b, int i, int j, double *poly);
 
 /* derivative of orthogonal function */
-void sc_triDeriOrthogFunc(stdCell *tri, int ind, double *dr, double *ds);
+void sc_deriOrthogFunc_tri(stdCell *tri, int ind, double *dr, double *ds);
 
 /* get orthogonal function value at interpolation nodes */
-void sc_triOrthogFunc(stdCell *cell, int ind, double *func);
+void sc_orthogFunc_tri(stdCell *cell, int ind, double *func);
 
 /* create standard triangle element */
-stdCell* sc_createTri(int N);
+stdCell* sc_create_tri(int N);
 
 
 
@@ -61,7 +61,7 @@ stdCell* sc_createTri(int N);
  * @param [out] ti
  * @param [out] tj
  */
-void sc_triTransInd(int N, int ind, int *ti, int *tj){
+void sc_transInd_tri(int N, int ind, int *ti, int *tj){
     int i,j,sk=0;
     for(i=0;i<N+1;i++){
         for(j=0;j<N-i+1;j++){
@@ -81,7 +81,7 @@ void sc_triTransInd(int N, int ind, int *ti, int *tj){
  * @param [in] ind index of orthogonal function
  * @param [out] func value of orthogonal function
  */
-void sc_triOrthogFunc(stdCell *cell, int ind, double *func){
+void sc_orthogFunc_tri(stdCell *cell, int ind, double *func){
     const int N = cell->N;
     const int Np = cell->Np;
     double *r = cell->r;
@@ -90,8 +90,8 @@ void sc_triOrthogFunc(stdCell *cell, int ind, double *func){
     double a[Np], b[Np];
     sc_rstoad(Np, r, s, a, b);
     int i,j;
-    sc_triTransInd(N, ind, &i, &j);
-    sc_triSimplex2dP(Np, a, b, i, j, func);
+    sc_transInd_tri(N, ind, &i, &j);
+    sc_simplex2DP_tri(Np, a, b, i, j, func);
 }
 
 /**
@@ -100,7 +100,7 @@ void sc_triOrthogFunc(stdCell *cell, int ind, double *func){
  * @note
  * postcondition: the stdCell object should be free manually with @ref sc_free
  */
-stdCell* sc_createTri(int N){
+stdCell* sc_create_tri(int N){
     stdCell *tri = (stdCell *) calloc(1, sizeof(stdCell));
 
     /* cell type */
@@ -118,17 +118,17 @@ stdCell* sc_createTri(int N){
     tri->Nfp    = Nfp;
 
     /* nodes at faces, Fmask */
-    tri->Fmask = sc_triFmask(tri);
+    tri->Fmask = sc_fmask_tri(tri);
 
     /* coordinate, r and s */
-    sc_triCoord(tri);
+    sc_coord_tri(tri);
     /* vandermonde matrix, V */
-    tri->V = sc_VandMatrix2d(tri, sc_triOrthogFunc);
+    tri->V = sc_VandMatrix2d(tri, sc_orthogFunc_tri);
     /* mass matrix, M */
     tri->M = sc_massMatrix(tri);
 
     /* Derivative Matrix, Dr and Ds */
-    sc_deriMatrix2d(tri, sc_triDeriOrthogFunc);
+    sc_deriMatrix2d(tri, sc_deriOrthogFunc_tri);
 
     /* suface LIFT matrix, LIFT */
     tri->LIFT = sc_liftMatrix2d(tri);
@@ -168,15 +168,15 @@ stdCell* sc_createTri(int N){
  * @param [out] dr derivative function with r
  * @param [out] ds derivative function with s
  * @note
- * precondition: dr and ds should be allocated before calling @ref sc_triDeriOrthogFunc
+ * precondition: dr and ds should be allocated before calling @ref sc_deriOrthogFunc_tri
  */
-void sc_triDeriOrthogFunc(stdCell *tri, int ind, double *dr, double *ds){
+void sc_deriOrthogFunc_tri(stdCell *tri, int ind, double *dr, double *ds){
     const int Np = tri->Np;
     double a[Np], b[Np];
     sc_rstoad(Np, tri->r, tri->s, a, b);
     int ti, tj;
-    sc_triTransInd(tri->N, ind, &ti, &tj);
-    sc_triGradSimplex2DP(Np, a, b, ti, tj, dr, ds);
+    sc_transInd_tri(tri->N, ind, &ti, &tj);
+    sc_gradSimplex2DP_tri(Np, a, b, ti, tj, dr, ds);
 }
 
 /**
@@ -203,9 +203,9 @@ void sc_triDeriOrthogFunc(stdCell *tri, int ind, double *dr, double *ds){
  * @param [out] dmodedr
  * @param [out] dmodeds
  * @note
- * precondition: dmodedr and dmodeds should be allocated before calling @ref sc_triGradSimplex2DP
+ * precondition: dmodedr and dmodeds should be allocated before calling @ref sc_gradSimplex2DP_tri
  */
-void sc_triGradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds){
+void sc_gradSimplex2DP_tri(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds){
 
     double fa[Np],dfa[Np],gb[Np],dgb[Np],temp[Np];
     int i;
@@ -269,7 +269,7 @@ void sc_triGradSimplex2DP(int Np, double *a, double *b, int id, int jd, double *
  * @param [out] poly value of orthogonal basis function value
  *
  */
-void sc_triSimplex2dP(int Np, double *a, double *b, int i, int j, double *poly){
+void sc_simplex2DP_tri(int Np, double *a, double *b, int i, int j, double *poly){
     double *h1 = Vector_create(Np);
     double *h2 = Vector_create(Np);
     int n;
@@ -291,7 +291,7 @@ void sc_triSimplex2dP(int Np, double *a, double *b, int i, int j, double *poly){
  * @param[in,out] s coordinate
  *
  */
-void sc_triCoord(stdCell *tri){
+void sc_coord_tri(stdCell *tri){
 
     // local
     double alpopt[15] =  {0.0000, 0.0000, 1.4152, 0.1001, 0.2751, 0.9800, 1.0999, 1.2832,
@@ -330,7 +330,7 @@ void sc_triCoord(stdCell *tri){
     for(i=0;i<Np;i++){
         dL[i] = L3[i] - L2[i];
     }
-    sc_triWarpfactor(N, dL, Np, warpf1);
+    sc_warpfactor_tri(N, dL, Np, warpf1);
 
     for(i=0;i<Np;i++){
         temp = alpha*L1[i];
@@ -342,7 +342,7 @@ void sc_triCoord(stdCell *tri){
     for(i=0;i<Np;i++){
         dL[i] = L1[i] - L3[i];
     }
-    sc_triWarpfactor(N, dL, Np, warpf1);
+    sc_warpfactor_tri(N, dL, Np, warpf1);
 
     for(i=0;i<Np;i++){
         temp = alpha*L2[i];
@@ -355,7 +355,7 @@ void sc_triCoord(stdCell *tri){
     for(i=0;i<Np;i++){
         dL[i] = L2[i] - L1[i];
     }
-    sc_triWarpfactor(N, dL, Np, warpf1);
+    sc_warpfactor_tri(N, dL, Np, warpf1);
 
     for(i=0;i<Np;i++){
         temp = alpha*L3[i];
@@ -365,7 +365,7 @@ void sc_triCoord(stdCell *tri){
     }
 
     /* coordinate transfer */
-    sc_trixytors(Np, x, y, tri->r, tri->s);
+    sc_xytors_tri(Np, x, y, tri->r, tri->s);
 }
 
 /**
@@ -386,9 +386,9 @@ void sc_triCoord(stdCell *tri){
  * @param [out] w waper factors
  *
  * @note
- * precondition: w shuold be allocated before calling sc_triWarpfactor
+ * precondition: w shuold be allocated before calling sc_warpfactor_tri
  */
-void sc_triWarpfactor(int N, double *r, int Nr, double *w){
+void sc_warpfactor_tri(int N, double *r, int Nr, double *w){
     int i, j, Np = N+1;
     double *ye, *l, *re, *rlgl, *wlgl;
     double temp;
@@ -448,7 +448,7 @@ void sc_triWarpfactor(int N, double *r, int Nr, double *w){
  * @return int Fmask[Nfaces][Nfp]
  *
  */
-int** sc_triFmask(stdCell *tri){
+int** sc_fmask_tri(stdCell *tri){
 
     const int Nfp = tri->Nfp;
     const int Nfaces = tri->Nfaces;
@@ -498,9 +498,9 @@ int** sc_triFmask(stdCell *tri){
  * @param [out] s coordinate of standard triangle
  *
  * @note
- * precondition: [x, y] and [r, s] should be allocated before calling @ref sc_trixytors
+ * precondition: [x, y] and [r, s] should be allocated before calling @ref sc_xytors_tri
  */
-void sc_trixytors(int Np, double *x, double *y, double *r, double *s){
+void sc_xytors_tri(int Np, double *x, double *y, double *r, double *s){
     double L1, L2, L3;
     int i;
 
@@ -535,5 +535,23 @@ void sc_rstoad(int Np, double *r, double *s, double *a, double *b){
             a[i] = -1.0;
         }
         b[i] = s[i];
+    }
+}
+
+/**
+ * @brief
+ * Project the triangular vertex value to interpolation nodes.
+ *
+ * @param[in] vertVal value of vertex
+ * @param[in] nodeVal value of nodes
+ *
+ */
+void sc_vertProj_tri(stdCell *cell, double *vertVal, double *nodeVal){
+    int i;
+    double ri, si;
+    for (i = 0; i < cell->Np; ++i) {
+        ri=cell->r[i];
+        si=cell->s[i];
+        nodeVal[i] = 0.5*( -vertVal[0]*(ri + si) + vertVal[1]*(1.+ri) + vertVal[2]*(1.+si));
     }
 }

@@ -4,10 +4,10 @@
 /* Quadrilateral.c */
 stdCell* sc_createQuad(int N);
 /* Triangle.c */
-stdCell* sc_createTri(int N);
+stdCell* sc_create_tri(int N);
 
 /**
- * @brief create stand cell
+ * @brief create stand cell object
  * @param[in] N order
  * @param[in] cellType cell enum type
  */
@@ -15,11 +15,13 @@ stdCell* sc_create(int N, cellType type){
     stdCell *std;
     switch (type){
         case TRIANGLE:
-            std = sc_createTri(N); break;
+            std = sc_create_tri(N);
+            std->dim = 2; break;
         case QUADRIL:
-            std = sc_createQuad(N); break;
+            std = sc_createQuad(N);
+            std->dim = 2; break;
         default:
-            printf("Unknown cell type %d\n", type);
+            printf("StandCell (sc_create): Unknown cell type %d\n", type);
             exit(-1);
     }
     return std;
@@ -33,14 +35,19 @@ void sc_free(stdCell *stdcell){
     /* fmaks */
     IntMatrix_free(stdcell->Fmask);
     /* coordinate */
-    switch (stdcell->type){
-        case TETRA:
-        case TRIPRISM:
-        case HEXA:
-            Vector_free(stdcell->t);
-        default: // TRIANGLE and QUADRIL
+    switch (stdcell->dim){
+        case 2:
             Vector_free(stdcell->r);
             Vector_free(stdcell->s);
+            break;
+        case 3:
+            Vector_free(stdcell->r);
+            Vector_free(stdcell->s);
+            Vector_free(stdcell->t);
+            break;
+        default: // TRIANGLE and QUADRIL
+            printf("StandCell (sc_free): Wrong dimensions %d\n", stdcell->dim);
+            exit(-1);
     }
     /* vandermonde matrix */
     Matrix_free(stdcell->V);
@@ -61,6 +68,28 @@ void sc_free(stdCell *stdcell){
     free(stdcell->f_LIFT);
     free(stdcell->f_Dr);
     free(stdcell->f_Ds);
+
+    free(stdcell);
+}
+
+void sc_vertProj_tri(stdCell *cell, double *vertVal, double *nodeVal);
+void sc_vertProj_quad(stdCell *cell, double *vertVal, double *nodeVal);
+/**
+ * @brief Project the vertex value to interpolation nodes.
+ * @param[in] vertVal value of vertex
+ * @param[in] nodeVal value of nodes
+ */
+void sc_vertProj(stdCell *cell, double *vertVal, double *nodeVal){
+    switch (cell->type){
+        case TRIANGLE:
+            sc_vertProj_tri(cell, vertVal, nodeVal); break;
+        case QUADRIL:
+            sc_vertProj_quad(cell, vertVal, nodeVal); break;
+        default:
+            printf("StandCell (sc_vertProj): Unknown cell type %d\n", cell->type);
+            exit(-1);
+    }
+    return;
 }
 
 /**
@@ -113,7 +142,7 @@ double** sc_massMatrix(stdCell *cell){
     for(i=0;i<Np*Np;i++) // copy matrix to a vector
         inv[sk++] = V[0][i];
 
-    Matrix_Inverse(inv, Np);
+    Matrix_inverse(inv, Np);
 
     // transpose of invV
     for(i=0;i<Np;i++){
@@ -122,7 +151,7 @@ double** sc_massMatrix(stdCell *cell){
         }
     }
 
-    Matrix_Multiply(Np, Np, Np, invt, inv, M[0]);
+    Matrix_multiply(Np, Np, Np, invt, inv, M[0]);
     return M;
 }
 
@@ -179,15 +208,15 @@ void sc_deriMatrix2d(stdCell *cell, void (*derorthfunc)
     for(i=0;i<Np*Np;i++) // copy matrix to a vector
         inv[sk++] = V[0][i];
 
-    Matrix_Inverse(inv, Np);
+    Matrix_inverse(inv, Np);
 
     // get derivative Vandermonde matrix
     sc_deriVandMatrix2d(cell, derorthfunc, Vr, Vs);
 
     /* \f$ \mathbf{Dr} = \mathbf{Vr}*\mathbf{V}^{-1} \f$ */
-    Matrix_Multiply(Np, Np, Np, Vr[0], inv, cell->Dr[0]);
+    Matrix_multiply(Np, Np, Np, Vr[0], inv, cell->Dr[0]);
     /* \f$ \mathbf{Ds} = \mathbf{Vs}*\mathbf{V}^{-1} \f$ */
-    Matrix_Multiply(Np, Np, Np, Vs[0], inv, cell->Ds[0]);
+    Matrix_multiply(Np, Np, Np, Vs[0], inv, cell->Ds[0]);
 
     Matrix_free(Vr);
     Matrix_free(Vs);
@@ -216,14 +245,14 @@ void sc_surfMassMatrix2d(stdCell *cell, double **Mes){
             inv[j*Nfp+i] = w[j];
         }
     }
-    Matrix_Inverse(inv, Nfp);
+    Matrix_inverse(inv, Nfp);
     /* transform of vandermonde matrix */
     for(i=0;i<Nfp;i++){
         for(j=0;j<Nfp;j++)
             invt[j+Nfp*i] = inv[j*Nfp+i];
     }
     /* get M = inv(V)'*inv(V) */
-    Matrix_Multiply(Nfp, Nfp, Nfp, invt, inv, m);
+    Matrix_multiply(Nfp, Nfp, Nfp, invt, inv, m);
 
     int k, sr, sk;
     for(i=0;i<Nfaces;i++){
@@ -258,12 +287,12 @@ double** sc_liftMatrix2d(stdCell *cell){
     }
     double invM[Np*Np];
     // get the inverse mass matrix M^{-1} = V*V'
-    Matrix_Multiply(Np, Np, Np, V[0], vt, invM);
+    Matrix_multiply(Np, Np, Np, V[0], vt, invM);
     // get surface mass matrix Mes
     double **Mes = Matrix_create(Np, Nfaces*Nfp);
     sc_surfMassMatrix2d(cell, Mes);
     /* LIFT = M^{-1}*Mes */
-    Matrix_Multiply(Np, Np, Nfp*Nfaces, invM, Mes[0], LIFT[0]);
+    Matrix_multiply(Np, Np, Nfp * Nfaces, invM, Mes[0], LIFT[0]);
 
     // free surface mass matrix
     Matrix_free(Mes);

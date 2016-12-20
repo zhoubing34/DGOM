@@ -13,19 +13,19 @@
 #include "Polylib/polylib.h"
 
 /* build the nodes index matrix on each faces */
-int** sc_quadFmask(stdCell *quad);
+int** sc_fmask_quad(stdCell *quad);
 
 /* get the nature coordinate of interpolation nodes in standard quadrilateral element */
-void sc_quadCoord(stdCell *quad);
+void sc_coord_quad(stdCell *quad);
 
 /* transform the index of orthogonal function to [ti,tj] for quadrilateral elements */
-void sc_quadTransInd(int N, int ind, int *ti, int *tj);
+void sc_transInd_quad(int N, int ind, int *ti, int *tj);
 
 /* get orthogonal function value at interpolation nodes */
-void sc_quadOrthogFunc(stdCell *quad, int ind, double *func);
+void sc_orthogFunc_quad(stdCell *quad, int ind, double *func);
 
 /* calculate the value of derivative function at interpolation points */
-void sc_quadDeriOrthogFunc(stdCell *quad, int ind, double *dr, double *ds);
+void sc_deriOrthogFunc_quad(stdCell *quad, int ind, double *dr, double *ds);
 
 /**
  * @brief create standard quadrilateral element
@@ -50,19 +50,19 @@ stdCell* sc_createQuad(int N){
     quad->Nv     = Nv;
 
     /* nodes at faces, Fmask */
-    quad->Fmask = sc_quadFmask(quad);
+    quad->Fmask = sc_fmask_quad(quad);
 
     /* coordinate, r and s */
-    sc_quadCoord(quad);
+    sc_coord_quad(quad);
 
     /* Vandermonde matrix, V */
-    quad->V = sc_VandMatrix2d(quad, sc_quadOrthogFunc);
+    quad->V = sc_VandMatrix2d(quad, sc_orthogFunc_quad);
 
     /* mass matrix, M */
     quad->M = sc_massMatrix(quad);
 
     /* Derivative Matrix, Dr and Ds */
-    sc_deriMatrix2d(quad, sc_quadDeriOrthogFunc);
+    sc_deriMatrix2d(quad, sc_deriOrthogFunc_quad);
 
     /* suface LIFT matrix, LIFT */
     quad->LIFT = sc_liftMatrix2d(quad);
@@ -110,7 +110,7 @@ stdCell* sc_createQuad(int N){
  * @param [out] ti
  * @param [out] tj
  */
-void sc_quadTransInd(int N, int ind, int *ti, int *tj){
+void sc_transInd_quad(int N, int ind, int *ti, int *tj){
     int i,j,sk=0;
     for(i=0;i<N+1;i++){
         for(j=0;j<N+1;j++){
@@ -131,9 +131,9 @@ void sc_quadTransInd(int N, int ind, int *ti, int *tj){
  * @param [out] dr derivative function with r
  * @param [out] ds derivative function with s
  * @note
- * precondition: dr and ds should be allocated before calling @ref sc_quadDeriOrthogFunc
+ * precondition: dr and ds should be allocated before calling @ref sc_deriOrthogFunc_quad
  */
-void sc_quadDeriOrthogFunc(stdCell *quad, int ind, double *dr, double *ds){
+void sc_deriOrthogFunc_quad(stdCell *quad, int ind, double *dr, double *ds){
     const int N = quad->N;
     const int Np = quad->Np;
 
@@ -142,7 +142,7 @@ void sc_quadDeriOrthogFunc(stdCell *quad, int ind, double *dr, double *ds){
     double temp[Np];
     /* transform to the index [ti,tj] */
     int ti,tj;
-    sc_quadTransInd(N, ind, &ti, &tj);
+    sc_transInd_quad(N, ind, &ti, &tj);
 
     /* Vr */
     GradjacobiP(Np, r, temp, ti, 0, 0);
@@ -168,14 +168,14 @@ void sc_quadDeriOrthogFunc(stdCell *quad, int ind, double *dr, double *ds){
  * @param [in] ind index of orthogonal function
  * @param [out] func value of orthogonal function
  */
-void sc_quadOrthogFunc(stdCell *quad, int ind, double *func){
+void sc_orthogFunc_quad(stdCell *quad, int ind, double *func){
     const int N = quad->N;
     const int Np = quad->Np;
 
     double temp[Np];
     /* transform to the index [ti,tj] */
     int ti,tj;
-    sc_quadTransInd(N, ind, &ti, &tj);
+    sc_transInd_quad(N, ind, &ti, &tj);
 
     double *r = quad->r;
     double *s = quad->s;
@@ -194,7 +194,7 @@ void sc_quadOrthogFunc(stdCell *quad, int ind, double *func){
  * @note
  * the nodes is arranged along r coordinate first
  */
-void sc_quadCoord(stdCell *quad){
+void sc_coord_quad(stdCell *quad){
     const int Nfp = quad->Nfp;
     const int Np = quad->Np;
     double t[Nfp],w[Nfp];
@@ -224,7 +224,7 @@ void sc_quadCoord(stdCell *quad){
  * @param [int] quad standard quadralteral element
  * @return Fmask[Nfaces][Nfp]
  */
-int** sc_quadFmask(stdCell *quad){
+int** sc_fmask_quad(stdCell *quad){
     const int Nfp = quad->Nfp;
     const int Nfaces = quad->Nfaces;
 
@@ -260,4 +260,24 @@ int** sc_quadFmask(stdCell *quad){
     }
 
     return Fmask;
+}
+
+
+/**
+ * @brief
+ * Project the quadrilateral vertex value to interpolation nodes.
+ *
+ * @param[in] vertVal value of vertex
+ * @param[in] nodeVal value of nodes
+ *
+ */
+void sc_vertProj_quad(stdCell *cell, double *vertVal, double *nodeVal){
+    int i;
+    double ri, si;
+    for (i=0;i<cell->Np;++i) {
+        ri = cell->r[i];
+        si = cell->s[i];
+        nodeVal[i] = 0.25 * (vertVal[0] * (1. - ri) * (1. - si) + vertVal[1] * (1. + ri) * (1. - si)
+                             + vertVal[2] * (1. + ri) * (1. + si) + vertVal[3] * (1. - ri)*(1. + si));
+    }
 }

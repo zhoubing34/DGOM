@@ -4,7 +4,6 @@
 
 #include "sc_tri_test.h"
 #include "sc_tri_data3.h"
-#include "StandCell/test/sc_test.h"
 
 int sc_triCoor_test(stdCell *tri, int verbose){
 
@@ -122,5 +121,27 @@ int sc_triLIFT_test(stdCell *tri, int verbose){
     }
 
     Matrix_free(LIFT_ext);
+    return fail;
+}
+
+int sc_triVertProj_test(stdCell *tri, int verbose){
+    int fail = 0;
+
+    extern double tri_VX[NV];
+    extern double tri_VY[NV];
+
+    double x[tri->Np], y[tri->Np];
+    clock_t clockT1, clockT2;
+
+    clockT1 = clock();
+    sc_vertProj(tri, tri_VX, x);
+    clockT2 = clock();
+    fail = Vector_test("sc_triVertProj_x_test", x, tri->r, tri->Np, (clockT2-clockT1)/CLOCKS_PER_SEC);
+
+    clockT1 = clock();
+    sc_vertProj(tri, tri_VY, y);
+    clockT2 = clock();
+    fail = Vector_test("sc_triVertProj_y_test", y, tri->s, tri->Np, (clockT2-clockT1)/CLOCKS_PER_SEC);
+
     return fail;
 }

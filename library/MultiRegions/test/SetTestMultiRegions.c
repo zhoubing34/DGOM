@@ -10,9 +10,9 @@ MultiRegBC2d* setTriTestMesh(){
     int procid, nprocs;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-    UnstructMesh *grid = ParallelUniformTriMesh_create(2, 2, -1, 1, -1, 1, 1, procid, nprocs);
+    geoGrid *grid = ParallelUniformTriMesh_create(2, 2, -1, 1, -1, 1, 1, procid, nprocs);
     MultiReg2d *mesh = MultiReg2d_create(shape, grid);
-    UnstructMesh_free(grid);
+    mr_grid_free(grid);
 
     extern int SFToV[NSURF][3];
     int **I_SFToV = IntMatrix_create(NSURF, 3);
@@ -33,9 +33,9 @@ MultiRegBC2d* setQuadTestMesh(){
     int procid, nprocs;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-    UnstructMesh *grid = ParallelUniformQuadMesh_create(2, 2, -1, 1, -1, 1, procid, nprocs);
+    geoGrid *grid = ParallelUniformQuadMesh_create(2, 2, -1, 1, -1, 1, procid, nprocs);
     MultiReg2d *mesh = MultiReg2d_create(shape, grid);
-    UnstructMesh_free(grid);
+    mr_grid_free(grid);
 
     extern int SFToV[NSURF][3];
     int **I_SFToV = IntMatrix_create(NSURF, 3);

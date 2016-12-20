@@ -1,18 +1,11 @@
 include_directories(${CMAKE_SOURCE_DIR}/library)
 
 set(MULTIREGIONS_TEST_SRC
-        MulitRegions_test.c
-        MulitRegions_test.h
-        VertexSort_test.c
-        VertexSort_test.h
-        SetTestMultiRegions.c
-        SetTestMultiRegions.h
-        VarMapPair_test.h
-        VarMapPair_test.c
-        CellPair_test.c
-        CellPair_test.h
-        MulitRegions_test.h
-        MultiRegBC2d_test.c)
+        mr_test_main.c
+        mr_grid_test.c
+        mr_grid_test.h
+        mr_reg_test.c
+        mr_reg_test.h)
 
 add_executable(MulitRegions_Test ${MULTIREGIONS_TEST_SRC})
 
