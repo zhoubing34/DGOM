@@ -19,7 +19,7 @@ typeid = ind;\
 }while(0)
 
 /**
- * @brief add boundary conditions into the mesh object
+ * @brief add boundary conditions into the 2d mesh object
  *
  * @details
  * The `SFToV` matrix contains the vertex list and surface type indicator (integer) of each surface,
