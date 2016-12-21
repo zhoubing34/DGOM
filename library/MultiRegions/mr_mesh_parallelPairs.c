@@ -1,12 +1,12 @@
-#include "LibUtilities.h"
+#include "LibUtilities/LibUtilities.h"
 #include "mpi.h"
 
-void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
-		   int  (*numget)(const void *),
-		   void (*numset)(const void *, int ),
-		   int  (*procget)(const void *),
-		   void (*marry)(const void *, const void *),
-		   int (*compare_objs)(const void *, const void *)){
+void mr_mesh_parallelPairs(void *objs, int Nmyobjs, int sizeobj,
+                           int  (*numget)(const void *),
+                           void (*numset)(const void *, int),
+                           int  (*procget)(const void *),
+                           void (*marry)(const void *, const void *),
+                           int (*compare_objs)(const void *, const void *)){
 
   char *myobjs = (char*) objs;
 
@@ -30,7 +30,7 @@ void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
   int globalmaxind;
   MPI_Allreduce(&maxind, &globalmaxind, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
   
-  int binsize = ceil( (double)(globalmaxind)/(double)nprocs ) + 10;
+  int binsize = (int)ceil( (double)(globalmaxind)/(double)nprocs ) + 10;
 
   int *outN = (int*) calloc(nprocs, sizeof(int));
   int *inN  = (int*) calloc(nprocs, sizeof(int));

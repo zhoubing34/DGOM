@@ -5,7 +5,9 @@ set(MULTIREGIONS_TEST_SRC
         mr_grid_test.c
         mr_grid_test.h
         mr_reg_test.c
-        mr_reg_test.h)
+        mr_reg_test.h
+        mr_mesh_test.c
+        mr_mesh_test.h)
 
 add_executable(MulitRegions_Test ${MULTIREGIONS_TEST_SRC})
 

@@ -48,12 +48,15 @@ typedef struct {
     int *vmapM; ///< node id of -ve trace of face node
     int *vmapP; ///< node id of +ve trace of face node
 
-    int parNodeTotalOut; ///< total number of nodes to send recv
+    int parallNodeNum; ///< total number of nodes to send recv
     int *nodeIndexOut; ///< index list of nodes to send out
 
-    int parCellTotalOut; ///< total number of elements to send and recv
-    int *cellIndexOut; ///< index list of elements to send out
+    int parallCellNum; ///< total number of elements to send and recv
+    int *cellIndexOut; ///< index list of elements in send buffer
+    int *cellIndexIn; ///< index list of elements in recv buffer
 
 } parallMesh;
+
+parallMesh* mr_mesh_create(multiReg *region);
 
 #endif //DGOM_MR_MESH_H

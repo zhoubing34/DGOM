@@ -4,7 +4,6 @@ set(LIBUTILITIES_SOURCE
         LibUtilities.h
         Utils.h
         Utils.c
-        ParallelPairs.c
         UTest.h
         UTest.c
         NetcdfLibrary.c

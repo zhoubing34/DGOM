@@ -3,25 +3,25 @@
 #include "mr_grid.h"
 
 /* create node coordinate for multiReg object */
-void mr_reg_nodeCoor(multiReg *region);
+static void mr_reg_nodeCoor(multiReg *region);
 
 /* create node coordinate for 2d multiReg object */
-void mr_reg_nodeCoor2d(multiReg *region);
+static void mr_reg_nodeCoor2d(multiReg *region);
 
 /* create node coordinate for 3d multiReg object */
-void mr_reg_nodeCoor3d(multiReg *region);
+static void mr_reg_nodeCoor3d(multiReg *region);
 
 /* calculate the volume factors (drdx, dsdx, drdy and dsdy) for regions */
-void mr_reg_volumInfo(multiReg *region);
+static void mr_reg_volumInfo(multiReg *region);
 
 /* calculate the volume factors for 2d region */
-void mr_reg_volumInfo2d(multiReg *region);
+static void mr_reg_volumInfo2d(multiReg *region);
 
 /* calculate the volume factors for 3d region */
-void mr_reg_volumInfo3d(multiReg *region);
+static void mr_reg_volumInfo3d(multiReg *region);
 
 /* calculate the volume/area and the length scale of each element */
-void mr_reg_volScale(multiReg *region);
+static void mr_reg_volScale(multiReg *region);
 
 
 /**
@@ -98,7 +98,7 @@ void mr_reg_free(multiReg *region){
  * @brief create node coordinate for multiReg object
  * @param[in,out] region multi-regions object
  */
-void mr_reg_nodeCoor(multiReg *region){
+static void mr_reg_nodeCoor(multiReg *region){
 
     const int dim = region->cell->dim;
     switch (dim){
@@ -117,7 +117,7 @@ void mr_reg_nodeCoor(multiReg *region){
  * @brief create node coordinate for 2d (triangle and quadrilateral)
  * @param[in,out] region multi-regions object
  */
-void mr_reg_nodeCoor3d(multiReg *region){
+static void mr_reg_nodeCoor3d(multiReg *region){
     stdCell *cell = region->cell;
     geoGrid *grid = region->grid;
     const int Np = cell->Np;
@@ -151,7 +151,7 @@ void mr_reg_nodeCoor3d(multiReg *region){
  * @brief create node coordinate for 2d region (triangle and quadrilateral)
  * @param[in,out] region multi-regions object
  */
-void mr_reg_nodeCoor2d(multiReg *region){
+static void mr_reg_nodeCoor2d(multiReg *region){
     stdCell *cell = region->cell;
     geoGrid *grid = region->grid;
     const int Np = cell->Np;
@@ -182,7 +182,7 @@ void mr_reg_nodeCoor2d(multiReg *region){
  * @brief  calculate the volume factors (drdx, dsdx, drdy and dsdy) for regions
  * @param[in,out] region multi-region object
  */
-void mr_reg_volumInfo(multiReg *region) {
+static void mr_reg_volumInfo(multiReg *region) {
     const int dim = region->cell->dim;
     switch (dim){
         case 2:
@@ -201,7 +201,7 @@ void mr_reg_volumInfo(multiReg *region) {
  * @param[in,out] region multi-regions object
  * @todo
  */
-void mr_reg_volumInfo3d(multiReg *region){
+static void mr_reg_volumInfo3d(multiReg *region){
 
     return;
 }
@@ -241,7 +241,7 @@ void mr_reg_volumInfo3d(multiReg *region){
  *
  * @param[in,out] region multi-regions object
  */
-void mr_reg_volumInfo2d(multiReg *region){
+static void mr_reg_volumInfo2d(multiReg *region){
     int k,n;
     const int Np = region->cell->Np;
     double **Dr = region->cell->Dr;
@@ -287,7 +287,7 @@ void mr_reg_volumInfo2d(multiReg *region){
  * @brief calculate the volume/area and the length scale of each element
  * @param[in,out] region multi-region object
  */
-void mr_reg_volScale(multiReg *region){
+static void mr_reg_volScale(multiReg *region){
     stdCell *cell = region->cell;
     geoGrid *grid = region->grid;
     const int Np = cell->Np;
@@ -345,31 +345,3 @@ double mr_reg_integral(multiReg *region, int ind, double *nodalVal){
     }
     return integral;
 }
-
-//void SetVolumeGeo(stdCell *shape, int K, double **x, double **y,
-//                  double *J, double *area, double *ciradius, real *vgeo){
-//    int k,n;
-//    double *drdx, *dsdx, *drdy, *dsdy, *eJ;
-//
-//    int sz = shape->Np*sizeof(double);
-//    drdx = (double*) malloc(sz);
-//    drdy = (double*) malloc(sz);
-//    dsdx = (double*) malloc(sz);
-//    dsdy = (double*) malloc(sz);
-//    eJ   = (double*) malloc(sz);
-//
-//    int sj = 0, sk = 0;
-//    for(k=0;k<K;++k){
-//        GeoFactor2d(shape->Np, x[k], y[k], shape->Dr, shape->Ds, drdx, dsdx, drdy, dsdy, eJ);
-//        for(n=0;n<shape->Np;n++){
-//            vgeo[sk++] = (real) drdx[n];
-//            vgeo[sk++] = (real) drdy[n];
-//            vgeo[sk++] = (real) dsdx[n];
-//            vgeo[sk++] = (real) dsdy[n];
-//            J[sj++] = eJ[n];
-//
-//            area[k] += eJ[n]*shape->wv[n];
-//        }
-//        ciradius[k] = sqrt(area[k]/M_PI);
-//    }
-//}

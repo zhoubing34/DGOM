@@ -12,7 +12,13 @@ set(MULTI_REGIONS_SOURCE
         mr_reg.c
         mr_reg.h
         mr_mesh.c
-        mr_mesh.h)
+        mr_mesh.h
+        mr_mesh_cellConnect.c
+        mr_mesh_cellConnect.h
+        mr_mesh_parallelPairs.c
+        mr_mesh_parallelPairs.h
+        mr_mesh_nodeConnect.c
+        mr_mesh_nodeConnect.h)
 
 add_library(MultiRegions STATIC ${MULTI_REGIONS_SOURCE})
 add_dependencies(MultiRegions StandCell)

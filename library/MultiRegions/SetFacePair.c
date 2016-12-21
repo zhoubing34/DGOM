@@ -73,10 +73,9 @@ void pairmarry(const void *obj1, const void *obj2){
 /* ======================================================================== */
 
 /**
- * @brief
- * Setup element connection
+ * @brief Setup element connection
  * @details
- * Set EToE,EToP,EToF & Npar,parK,parF
+ * Set EToE,EToP,EToF and Npar
  *
  * @param [stdCell*] shape standard element
  * @param [int]     Klocal  number of elements
@@ -107,7 +106,8 @@ void SetFacePair2d(stdCell *shape, int Klocal,
 
 //    triangle      vnum[3][2] = { {0,1}, {1,2}, {2,0} };
 //    quadrilateral vnum[4][2] = { {0,1}, {1,2}, {2,3}, {3,0}};
-    int **vnum = IntMatrix_create(shape->Nfaces, 2);
+//    int **vnum = IntMatrix_create(shape->Nfaces, 2);
+    int vnum[shape->Nfaces, 2];
     for(n=0;n<shape->Nfaces;n++){
         vnum[n][0] = n%(shape->Nv);
         vnum[n][1] = (n+1)%(shape->Nv);
@@ -156,6 +156,6 @@ void SetFacePair2d(stdCell *shape, int Klocal,
     }
 
     free(myfaces);
-    IntMatrix_free(vnum);
+//    IntMatrix_free(vnum);
 
 }

@@ -10,9 +10,6 @@
 #define HEADFAIL 	"\033[31m[   FAILED   ]\033[0m " // test fail indicator
 #define HEADFINISH  "\033[32m[============]\033[0m " // test end indicator
 
-#define TOTALERR 1.0e-6
-#define RELATIVEERROR 1.0e-8
-
 /* UTest.c */
 void UTest_Command(int argc, char** argv, int *ishelp, int *isverbose);
 
@@ -20,7 +17,6 @@ void PrintVector_test(char *message, double *A, int Ncols);
 void PrintIntVector_test(char *message, int *A, int Ncols);
 void PrintMatrix_test(char *message, double **A, int Nrows, int Ncols);
 void PrintIntMatrix_test(char *message, int **A, int Nrows, int Ncols);
-void SaveMatrix(char *filename, double **A, int Nrows, int Ncols);
 void PrintIntMatrix2File(FILE *fp, char *message, int **Mat, int row, int col);
 void PrintMatrix2File(FILE *fp, char *message, double **Mat, int row, int col);
 void PrintIntVector2File(FILE *fp, char *message, int *Mat, int len);
@@ -34,4 +30,3 @@ int IntVector_test(char *message, int *A, int *ExactA, int Ncols, double elapsed
 FILE* CreateLog(char *funname, int nprocs, int rank);
 
 #endif //DGOM_UTEST_H
-

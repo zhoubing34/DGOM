@@ -7,15 +7,15 @@
 #include "MultiRegions/mr_grid_uniformGrid.h"
 #include "LibUtilities/UTest.h"
 
-int mr_triDepartition_test(geoGrid *, double, int verbose);
-int mr_quadDepartition_test(geoGrid *, double, int verbose);
+static int mr_triDepartition_test(geoGrid *, double, int verbose);
+static int mr_quadDepartition_test(geoGrid *, double, int verbose);
 
 /* number of elements on each coordinate */
-int Mx=2, My=2;
 
 int mr_grid_test(int verbose){
 
     int fail=0, N=2;
+    extern int Mx, My;
 
     double clockT1, clockT2;
 
@@ -44,9 +44,10 @@ int mr_grid_test(int verbose){
 }
 
 
-int mr_triDepartition_test(geoGrid *grid, double dt, int verbose){
+static int mr_triDepartition_test(geoGrid *grid, double dt, int verbose){
 
     int fail=0, p, Ktotal=0;
+    extern int Mx, My;
 
     /* find number of elements on all processors */
     int Kprocs[grid->nprocs];
@@ -68,9 +69,10 @@ int mr_triDepartition_test(geoGrid *grid, double dt, int verbose){
     return fail;
 }
 
-int mr_quadDepartition_test(geoGrid *grid, double dt, int verbose){
+static int mr_quadDepartition_test(geoGrid *grid, double dt, int verbose){
 
     int fail=0, p, Ktotal=0;
+    extern int Mx, My;
 
     /* find number of elements on all processors */
     int Kprocs[grid->nprocs];

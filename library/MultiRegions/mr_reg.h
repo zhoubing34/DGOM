@@ -12,7 +12,6 @@
 #ifndef DGOM_MULTIREGIONS_H
 #define DGOM_MULTIREGIONS_H
 
-#include <StandCell/sc_stdcell.h>
 #include "mr_grid.h"
 
 typedef struct {

@@ -38,12 +38,4 @@ double *Vector_free(double *);
 int    **IntMatrix_free(int **);
 int    *IntVector_free(int *);
 
-/* ParallelPairs.c */
-void ParallelPairs(void *objs, int Nmyobjs, int sizeobj,
-                   int  (*numget)(const void *),
-                   void (*numset)(const void *, int ),
-                   int  (*procget)(const void *),
-                   void (*marry)(const void *, const void *),
-                   int (*compare_objs)(const void *, const void *));
-
 #endif //LIBUTILITIES_H

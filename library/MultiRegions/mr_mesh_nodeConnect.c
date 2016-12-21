@@ -1,68 +1,67 @@
-#include "MultiRegions/MultiRegions.h"
+#include <StandCell/sc_stdcell.h>
+#include "mr_mesh_nodeConnect.h"
+#include "mr_mesh.h"
+
+#define NODETOL 1e-10
 
 /**
- * @brief
- * Setup node connection
+ * @brief Setup node connection
  * @details
- * Set fields of EToE,parNtotalout,parmapOut,vmapM & vmapP
+ * Set fields of vmapM, vmapP
  *
- * @param [stdCell*] shape standard element
- * @param [int]     K       number of elements
- * @param [double**]   GX   vertex coordinate
- * @param [double**]   GY   vertex coordinate
- * @param [int**]   EToF    element to face list
- * @param [int**]   EToP    element to process list
- * @param [double**]   x    node coordinate
- * @param [double**]   y    node coordinate
- * @param [int*]       Npar number of faces adjacent to each process
- *
- * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * EToE     | int[K][Nfaces] | element to element list
- * Ntotalout | int   | total number of nodes to send/recv
- * mapOUT | int[K]   | node index of outgoing/ingoing nodes
- * vmapM | int[K*Nfp*Nfaces] | local node list of each face
- * vmapP | int[K*Nfp*Nfaces] | adjacent node list of each face
+ * @param [in,out] shape standard element
  *
  * @note
- * vmapP contains the mapping from nodes to incoming nodes, which is marked as negative.
+ * vmapP contains the mapping from nodes to incoming buffers, which is marked as negative.
  */
-void SetNodePair2d(stdCell *shape, int K, double **GX, double **GY,
-                 int **EToE, int **EToF, int **EToP, double **x, double **y,
-                 int *Npar, int *Ntotalout, int **mapOUT,
-                 int *vmapM, int *vmapP){
+void mr_mesh_nodeConnect2d(parallMesh *mesh){
 
-    int nprocs, procid;
+    stdCell *shape = mesh->cell;
+    multiReg *region = mesh->region;
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    /* constant variables */
+    const int nprocs = mesh->nprocs;
+    const int procid = mesh->procid;
 
-    int Nfaces = shape->Nfaces;
-    int Nfp    = shape->Nfp;
-    int Np     = shape->Np;
+    const int Nfaces = shape->Nfaces;
+    const int Nfp    = shape->Nfp;
+    const int Np     = shape->Np;
+    const int K = mesh->grid->K;
 
     int m;
     int k1,f1, n1, id1, k2,f2,p2,n2;
-
     double x1, y1, x2, y2, d12;
 
-    double *nxk = Vector_create(Nfaces);
-    double *nyk = Vector_create(Nfaces);
-    double *sJk = Vector_create(Nfaces);
+    double **x = region->x;
+    double **y = region->y;
+    int **EToE = mesh->EToE;
+    int **EToF = mesh->EToF;
+    int **EToP = mesh->EToP;
+    int **Fmask = shape->Fmask;
+    int *Npar = mesh->Npar;
+
+    /* allocation */
+    int *vmapM = IntVector_create(K*Nfaces*Nfp);
+    int *vmapP = IntVector_create(K*Nfaces*Nfp);
+
+    mesh->vmapM = vmapM;
+    mesh->vmapP = vmapP;
+    mesh->parallNodeNum = mesh->parallCellNum*Nfp;
+
+    int *parmapOUT = IntVector_create(mesh->parallNodeNum);
+    mesh->nodeIndexOut = parmapOUT;
+
 
     /* first build local */
     for(k1=0;k1<K;++k1){
 
         /* get some information about the face geometries */
-        Normals2d(shape->Nv, GX[k1], GY[k1], nxk, nyk, sJk);
-
         for(f1=0;f1<Nfaces;++f1){
 
             /* volume -> face nodes */
             for(n1=0;n1<Nfp;++n1){
                 id1 = n1+f1*Nfp+k1*Nfp*Nfaces; /* node index as face node */
-                vmapM[id1] = shape->Fmask[f1][n1] + k1*Np;
+                vmapM[id1] = Fmask[f1][n1] + k1*Np;
             }
 
             /* find neighbor */
@@ -75,28 +74,28 @@ void SetNodePair2d(stdCell *shape, int K, double **GX, double **GY,
                 for(n1=0;n1<Nfp;++n1){
                     id1 = n1+f1*Nfp+k1*Nfp*Nfaces;
                     /* set itself as the adjacent node index */
-                    vmapP[id1] = k1*Np + shape->Fmask[f1][n1];
+                    vmapP[id1] = k1*Np + Fmask[f1][n1];
                 }
             }else{
                 /* inner boundary */
                 for(n1=0;n1<Nfp;++n1){
                     id1 = n1+f1*Nfp+k1*Nfp*Nfaces;
-                    x1 = x[k1][shape->Fmask[f1][n1]];
-                    y1 = y[k1][shape->Fmask[f1][n1]];
+                    x1 = x[k1][Fmask[f1][n1]];
+                    y1 = y[k1][Fmask[f1][n1]];
 
                     /* loop over of adjacent face node */
                     for(n2=0;n2<Nfp;++n2){
 
-                        x2 = x[k2][shape->Fmask[f2][n2]];
-                        y2 = y[k2][shape->Fmask[f2][n2]];
+                        x2 = x[k2][Fmask[f2][n2]];
+                        y2 = y[k2][Fmask[f2][n2]];
 
                         /* find normalized distance between these nodes */
                         /* [ use sJk as a measure of edge length (ignore factor of 2) ] */
 
-                        d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))/(sJk[f1]*sJk[f1]);
+                        d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
                         /* judge adjacent node */
                         if(d12<NODETOL){
-                            vmapP[id1] = k2*Np + shape->Fmask[f2][n2];
+                            vmapP[id1] = k2*Np + Fmask[f2][n2];
                         }
                     }
                 }
@@ -155,8 +154,8 @@ void SetNodePair2d(stdCell *shape, int K, double **GX, double **GY,
             p2 = EToP[k1][f1];
             if(p2!=procid){
                 for(n1=0;n1<Nfp;++n1){
-                    xsend[p2][skP[p2]] = x[k1][shape->Fmask[f1][n1]];
-                    ysend[p2][skP[p2]] = y[k1][shape->Fmask[f1][n1]];
+                    xsend[p2][skP[p2]] = x[k1][Fmask[f1][n1]];
+                    ysend[p2][skP[p2]] = y[k1][Fmask[f1][n1]];
                     Esend[p2][skP[p2]] = EToE[k1][f1];
                     Fsend[p2][skP[p2]] = EToF[k1][f1];
                     ++(skP[p2]);
@@ -209,9 +208,11 @@ void SetNodePair2d(stdCell *shape, int K, double **GX, double **GY,
         parNtotalout += skP[p2];
     }
 
-    *Ntotalout = parNtotalout;
-
-    int *parmapOUT = IntVector_create(parNtotalout);
+    if(mesh->parallNodeNum != parNtotalout){
+        printf("Multiregions (mr_mesh_nodeConnect): "
+                       "confilicts occurs between parallel node number and parallel cell number\n");
+        exit(-1);
+    }
 
     /* now match up local nodes with the requested (recv'ed nodes) */
     int sk = 0;
@@ -222,27 +223,21 @@ void SetNodePair2d(stdCell *shape, int K, double **GX, double **GY,
             f1 = Frecv[p2][m]; /* adjacent face */
             x2 = xrecv[p2][m];
             y2 = yrecv[p2][m];
-            Normals2d(shape->Nv, GX[k1], GY[k1], nxk, nyk, sJk);
 
             for(n1=0;n1<Nfp;++n1){
 
-                x1 = x[k1][shape->Fmask[f1][n1]];
-                y1 = y[k1][shape->Fmask[f1][n1]];
-                d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))/(sJk[f1]*sJk[f1]);
+                x1 = x[k1][Fmask[f1][n1]];
+                y1 = y[k1][Fmask[f1][n1]];
+                d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
                 if(d12<NODETOL){
                     /* sk and node index determine the map relationship */
-                    parmapOUT[sk++] = (k1*Np+shape->Fmask[f1][n1]);
+                    parmapOUT[sk++] = (k1*Np+Fmask[f1][n1]);
                 }
             }
         }
     }
 
-    *mapOUT = parmapOUT;
-
     /* deallocate mem */
-    Vector_free(nxk);
-    Vector_free(nyk);
-    Vector_free(sJk);
     IntVector_free(skP);
 
     free(xsendrequests); free(ysendrequests);

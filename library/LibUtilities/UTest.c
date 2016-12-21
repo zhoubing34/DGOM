@@ -8,6 +8,9 @@
 
 #include "UTest.h"
 
+#define _TOTAL_ERR 1.0e-6
+#define _RELATIVE_EER 1.0e-8
+
 /**
  * @brief Get configures from commandline and return settings
  * @param [in]     argc
@@ -67,7 +70,7 @@ int IntMatrix_test(char *message,
     }
     relativeErr = error/total;
 
-    if(error > TOTALERR | relativeErr > RELATIVEERROR) {
+    if(error > _TOTAL_ERR | relativeErr > _RELATIVE_EER) {
         fail = 1; // error flag
         printf(HEADFAIL "1 test failed from %s\n", message);
         printf("Total Err    = %f\n", error);
@@ -114,7 +117,7 @@ int Matrix_test(char *message,
         for(j=0;j<Ncols;j++){
             errorMatrix[i][j] = A[i][j] - ExactA[i][j];
             error = fabs( errorMatrix[i][j] );
-            if (error > TOTALERR){
+            if (error > _TOTAL_ERR){
                 fail = 1; // error flag
                 printf(HEADFAIL "1 test failed from %s\n", message);
                 printf("element [%d, %d] = %f is different from the exact value %f\n",
@@ -126,7 +129,7 @@ int Matrix_test(char *message,
     }
     relativeErr = error/total;
 
-    if(relativeErr > RELATIVEERROR) {
+    if(relativeErr > _RELATIVE_EER) {
         fail = 1; // error flag
         printf(HEADFAIL "1 test failed from %s\n", message);
         printf("Total Err    = %f\n", error);
@@ -141,7 +144,6 @@ int Matrix_test(char *message,
     Matrix_free(errorMatrix);
     return fail;
 }
-
 
 /**
  * @brief
@@ -177,7 +179,7 @@ int Vector_test(char *message,
     }
     relativeErr = error/total;
 
-    if(error > TOTALERR | relativeErr > RELATIVEERROR) {
+    if(error > _TOTAL_ERR | relativeErr > _RELATIVE_EER) {
         fail = 1; // error flag
         printf(HEADFAIL "1 test failed from %s\n", message);
 
@@ -215,7 +217,7 @@ int IntVector_test(char *message,
     }
     relativeErr = error/total;
 
-    if(error > TOTALERR | relativeErr > RELATIVEERROR) {
+    if(error > _TOTAL_ERR | relativeErr > _RELATIVE_EER) {
         fail = 1; // error flag
         printf(HEADFAIL "1 test failed from %s\n", message);
 
@@ -232,99 +234,74 @@ int IntVector_test(char *message,
     return fail;
 }
 
+/* @brief marco for print vector */
+#define _PRINT_VECTOR(message, Ncol, fmt, A) do{\
+    int _dim1;\
+    printf("%s\n", message);\
+    for(_dim1=0;_dim1<Ncol;_dim1++)\
+        printf(fmt, A[_dim1]);\
+    printf("\n");\
+}while(0)
+
 void PrintVector_test(char *message, double *A, int Ncols){
-    int m;
-    printf("%s\n", message);
-    for(m=0;m<Ncols;++m){
-        printf(" %e ", A[m]);
-    }
-    printf(" \n");
+    _PRINT_VECTOR(message, Ncols, " %e ", A);
+}
+void PrintIntVector_test(char *message, int *A, int Ncols){
+    _PRINT_VECTOR(message, Ncols, " %d ", A);
 }
 
-void PrintIntVector_test(char *message, int *A, int Ncols){
-    int m;
-    printf("%s\n", message);
-    for(m=0;m<Ncols;++m){
-        printf(" %d ", A[m]);
-    }
-    printf(" \n");
-}
+/* @brief macros for print matrix */
+#define _PRINT_MATRIX(message, Nrow, Ncol, fmt, A) do{\
+    int _dim1, _dim2;\
+    printf("%s\n", message);\
+    for(_dim1=0;_dim1<Nrow;_dim1++){\
+        for(_dim2=0;_dim2<Ncol;_dim2++)\
+            printf(fmt, A[_dim1][_dim2]);\
+        printf("\n");\
+    }\
+}while(0)
 
 void PrintMatrix_test(char *message, double **A, int Nrows, int Ncols){
-    int n,m;
-
-    printf("%s\n", message);
-    for(n=0;n<Nrows;++n){
-        for(m=0;m<Ncols;++m){
-            printf(" %e ", A[n][m]);
-        }
-        printf(" \n");
-    }
+    _PRINT_MATRIX(message, Nrows, Ncols, " %e ", A);
 }
-
 void PrintIntMatrix_test(char *message, int **A, int Nrows, int Ncols){
-    int n,m;
-
-    printf("%s\n", message);
-    for(n=0;n<Nrows;++n){
-        for(m=0;m<Ncols;++m){
-            printf(" %d ", A[n][m]);
-        }
-        printf(" \n");
-    }
+    _PRINT_MATRIX(message, Nrows, Ncols, " %d ", A);
 }
+
+
+/* @brief macros for write matrix to file */
+#define _WRITE_MATRIX(fp, message, Nrow, Ncol, fmt, A) do{\
+    int _dim1, _dim2;\
+    fprintf(fp, "%s=\n", message);\
+    for(_dim1=0;_dim1<Nrow;_dim1++){\
+        for(_dim2=0;_dim2<Ncol;_dim2++)\
+            fprintf(fp, fmt, A[_dim1][_dim2]);\
+        fprintf(fp, "\n");\
+    }\
+}while(0)
+
 
 void PrintIntMatrix2File(FILE *fp, char *message, int **Mat, int row, int col){
-    fprintf(fp, "%s = \n", message);
-    int n,m;
-    for(n=0;n<row;++n){
-        for(m=0;m<col;++m){
-            fprintf(fp, " %d, ", Mat[n][m]);
-        }
-        fprintf(fp, " \n");
-    }
+    _WRITE_MATRIX(fp, message, row, col, " %d, ", Mat);
 }
+void PrintMatrix2File(FILE *fp, char *message, double **Mat, int row, int col){
+    _WRITE_MATRIX(fp, message, row, col, " %f, ", Mat);
+}
+
+/* @brief marco for write vector to file */
+#define _WRITE_VECTOR(fp, message, Ncol, fmt, A) do{\
+    int _dim1;\
+    fprintf(fp, "%s=\n", message);\
+    for(_dim1=0;_dim1<Ncol;_dim1++)\
+        fprintf(fp, fmt, A[_dim1]);\
+    fprintf(fp, "\n");\
+}while(0)
 
 void PrintIntVector2File(FILE *fp, char *message, int *Mat, int len){
-    fprintf(fp, "%s = \n", message);
-    int n;
-    for(n=0;n<len;++n){
-        fprintf(fp, " %d, ", Mat[n]);
-    }
-    fprintf(fp, "\n");
+    _WRITE_VECTOR(fp, message, len, " %d, ", Mat);
 }
-
 void PrintVector2File(FILE *fp, char *message, double *Mat, int len){
-    fprintf(fp, "%s = \n", message);
-    int n;
-    for(n=0;n<len;++n){
-        fprintf(fp, " %f, ", Mat[n]);
-    }
-    fprintf(fp, "\n");
-}
-
-void PrintMatrix2File(FILE *fp, char *message, double **Mat, int row, int col){
-    fprintf(fp, "%s = \n", message);
-    int n,m;
-    for(n=0;n<row;++n){
-        for(m=0;m<col;++m){
-            fprintf(fp, " %f, ", Mat[n][m]);
-        }
-        fprintf(fp, " \n");
-    }
-}
-
-void SaveMatrix(char *filename, double **A, int Nrows, int Ncols){
-    int n,m;
-    FILE *fp = fopen(filename, "w");
-    for(n=0;n<Nrows;++n){
-        for(m=0;m<Ncols;++m){
-            fprintf(fp, " %g ", A[n][m]);
-        }
-        fprintf(fp, " \n");
-    }
-
-    fclose(fp);
+    _WRITE_VECTOR(fp, message, len, " %f, ", Mat);
 }
 
 /**
@@ -363,9 +340,8 @@ FILE* CreateLog(char *funname, int rank, int nprocs){
         exit(-1);
     }
 
+#undef DSET_NAME_LEN
     FILE *fig = fopen(filename, "w");
 
     return fig;
 }
-
-

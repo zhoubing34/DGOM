@@ -6,12 +6,13 @@
 #include "MultiRegions/mr_grid_uniformGrid.h"
 #include "LibUtilities/UTest.h"
 
-int mr_triRegion_coor_test(multiReg *reg, double dt, int verbose);
-int mr_quadRegion_coor_test(multiReg *reg, double dt, int verbose);
+static int mr_triRegion_coor_test(multiReg *reg, double dt, int verbose);
+static int mr_quadRegion_coor_test(multiReg *reg, double dt, int verbose);
 
 int mr_reg_test(int verbose){
     int fail = 0, N = 2;
-    int Mx = 2, My = 2;
+
+    extern int Mx, My;
 
     double clockT1, clockT2;
 
@@ -46,7 +47,7 @@ int mr_reg_test(int verbose){
     return fail;
 }
 
-int mr_triRegion_coor_test(multiReg *reg, double dt, int verbose){
+static int mr_triRegion_coor_test(multiReg *reg, double dt, int verbose){
 
     int fail = 0;
     geoGrid *grid = reg->grid;
@@ -63,7 +64,7 @@ int mr_triRegion_coor_test(multiReg *reg, double dt, int verbose){
     return fail;
 }
 
-int mr_quadRegion_coor_test(multiReg *reg, double dt, int verbose){
+static int mr_quadRegion_coor_test(multiReg *reg, double dt, int verbose){
 
     int fail = 0;
     geoGrid *grid = reg->grid;

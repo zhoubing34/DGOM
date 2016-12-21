@@ -7,8 +7,12 @@
 #include "MultiRegions/mr_grid.h"
 #include "mr_grid_test.h"
 #include "mr_reg_test.h"
+#include "mr_mesh_test.h"
 
-#define NTEST 2
+#define NTEST 3
+
+int Mx = 4;
+int My = 2;
 
 int main(int argc, char **argv){
 
@@ -33,11 +37,15 @@ int main(int argc, char **argv){
         return 0;
     }
 
+    if(!procid)
+        printf(HEADSTART "Running %d test from MultiRegions\n", NTEST);
+
     // local variable
     int failNum = 0, err[NTEST], i=0;
     // test
     err[i++] = mr_grid_test(isverbose);
     err[i++] = mr_reg_test(isverbose);
+    err[i++] = mr_mesh_test(isverbose);
 
 
     MPI_Finalize();
