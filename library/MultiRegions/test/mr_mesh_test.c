@@ -5,7 +5,7 @@
 #include <MultiRegions/mr_mesh.h>
 #include "MultiRegions/mr_grid_uniformGrid.h"
 #include "LibUtilities/UTest.h"
-
+#include "MultiRegions/mr_mesh_addBoundary.h"
 
 static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose);
 static int mr_quadMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose);
@@ -52,6 +52,30 @@ int mr_mesh_test(int verbose){
     return fail;
 }
 
+static void genBoundary(int *indicator, int **SFToV){
+
+    extern int Mx, My;
+    int Nfaces[4] = {Mx, Mx, My, My};
+    int start_face_Id[4] = {0, Mx, Mx+Mx, Mx*2+My};
+    int start_vert_Id[4] = {0, (Mx+1)*My, Mx, 0};
+    int vert_stride[4] = {1, 1, Mx+1, Mx+1};
+    // loop over 4 boundaries
+    int b,f;
+    for(b=0;b<4;b++){
+        int ind = indicator[b];
+        int startid = start_vert_Id[b];
+        int vstride = vert_stride[b];
+        int startf = start_face_Id[b];
+        for(f=0;f<Nfaces[b];f++){
+            SFToV[f+startf][0] = startid; startid+=vstride;
+            SFToV[f+startf][1] = startid;
+            SFToV[f+startf][2] = ind;
+        }
+    }
+
+    return;
+}
+
 
 static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose){
     int fail = 0;
@@ -61,6 +85,16 @@ static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose)
     const int K = mesh->grid->K;
     const int Nfaces = mesh->cell->Nfaces;
     const int Nfp = mesh->cell->Nfp;
+
+    /* add boundaries */
+    extern int Mx,My;
+
+    int ind[4] = {2,3,4,5};
+    int Nsurf = 2*(Mx+My);
+    int **SFToV = IntMatrix_create(Nsurf, 3);
+    genBoundary(ind, SFToV);
+    mr_mesh_addBoundary2d(mesh, Nsurf, SFToV);
+    IntMatrix_free(SFToV);
 
     if(verbose){
         /* gen log filename */
@@ -76,6 +110,10 @@ static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose)
         PrintIntVector2File(fp, "mesh->vmapP", mesh->vmapP, K*Nfaces*Nfp);
         fprintf(fp, "mesh->parallNodeNum: %d\n", mesh->parallNodeNum);
         PrintIntVector2File(fp, "mesh->nodeIndexOut", mesh->nodeIndexOut, mesh->parallNodeNum);
+
+        fprintf(fp, "mesh->Nbc = %d\n", mesh->Nbc);
+        PrintIntMatrix2File(fp, "mesh->EToBS", mesh->EToBS, K, Nfaces);
+        PrintIntVector2File(fp, "mesh->bcIndList", mesh->bcIndList, mesh->Nbc);
 
         fclose(fp);
     }
@@ -93,6 +131,17 @@ static int mr_quadMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose
     const int Nfaces = mesh->cell->Nfaces;
     const int Nfp = mesh->cell->Nfp;
 
+    /* add boundaries */
+    extern int Mx,My;
+
+    int ind[4] = {2,3,4,5};
+    int Nsurf = 2*(Mx+My);
+    int **SFToV = IntMatrix_create(Nsurf, 3);
+    genBoundary(ind, SFToV);
+    mr_mesh_addBoundary2d(mesh, Nsurf, SFToV);
+    IntMatrix_free(SFToV);
+
+
     if(verbose){
         /* gen log filename */
         char casename[32] = "mr_quadMesh_cellConnect_test";
@@ -107,6 +156,10 @@ static int mr_quadMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose
         PrintIntVector2File(fp, "mesh->vmapP", mesh->vmapP, K*Nfaces*Nfp);
         fprintf(fp, "mesh->parallNodeNum: %d\n", mesh->parallNodeNum);
         PrintIntVector2File(fp, "mesh->nodeIndexOut", mesh->nodeIndexOut, mesh->parallNodeNum);
+
+        fprintf(fp, "mesh->Nbc = %d\n", mesh->Nbc);
+        PrintIntMatrix2File(fp, "mesh->EToBS", mesh->EToBS, K, Nfaces);
+        PrintIntVector2File(fp, "mesh->bcIndList", mesh->bcIndList, mesh->Nbc);
         fclose(fp);
     }
 
