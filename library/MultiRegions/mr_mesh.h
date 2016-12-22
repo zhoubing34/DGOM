@@ -60,5 +60,6 @@ typedef struct {
 } parallMesh;
 
 parallMesh* mr_mesh_create(multiReg *region);
+void mr_mesh_free(parallMesh *mesh);
 
 #endif //DGOM_MR_MESH_H

@@ -2,63 +2,61 @@
 // Created by li12242 on 16/12/16.
 //
 
-#include <MultiRegions/MultiRegions.h>
-#include "NodeFetch_test.h"
-#include "PhysDomain_test.h"
+#include "phys_nodeFetch_test.h"
+#include "PhysField/phys_fetchBuffer.h"
 
 #define DEBUG 0
 
-int nodeFetch_test(PhysDomain2d *phys, int verbose, char *message, char *filename){
+int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filename){
     // local variable
     int fail = 0;
 
-    MultiReg2d *mesh = phys->mesh;
-    MultiRegBC2d *surf = phys->surf;
-    stdCell *shape = mesh->stdcell;
+    parallMesh *mesh = phys->mesh;
+    multiReg *region = phys->region;
+    stdCell *shape = phys->cell;
 
-    int K = mesh->K;
-    int Np = shape->Np;
-    int Nfp = shape->Nfp;
-    int Nfaces = shape->Nfaces;
-    int nprocs = mesh->nprocs;
+    const int K = phys->grid->K;
+    const int Np = shape->Np;
+    const int Nfp = shape->Nfp;
+    const int Nfaces = shape->Nfaces;
+    const int nprocs = mesh->nprocs;
 
     int Nnode = Nfaces*Nfp*K;
-    double *xM = Vector_create(Nnode);
-    double *xP = Vector_create(Nnode);
-    double *yM = Vector_create(Nnode);
-    double *yP = Vector_create(Nnode);
+    double xM[Nnode];
+    double xP[Nnode];
+    double yM[Nnode];
+    double yP[Nnode];
 
     int k,i;
     // assignment
     int sk = 0;
     for(k=0;k<K;k++){
         for(i=0;i<Np;i++){
-            phys->f_Q[sk++] = mesh->x[k][i];
-            phys->f_Q[sk++] = mesh->y[k][i];
+            phys->f_Q[sk++] = region->x[k][i];
+            phys->f_Q[sk++] = region->y[k][i];
         }
     }
 
     sk = 0;
     for(k=0;k<K;k++){
-        for(i=0;i<Np*phys->Nfields;i++){
+        for(i=0;i<Np*phys->Nfield;i++){
             phys->f_ext[sk] = phys->f_Q[sk];
             sk++;
         }
     }
 
     // MPI send & recv operations
-    clock_t clockT1, clockT2;
-    int Nmess = 0;
-    MPI_Request *mpi_send_requests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
-    MPI_Request *mpi_recv_requests  = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
+    double clockT1, clockT2;
+    int Nmess;
+    MPI_Request mpi_send_requests[nprocs];
+    MPI_Request mpi_recv_requests[nprocs];
 
-    clockT1 = clock();
+    clockT1 = MPI_Wtime();
     fetchNodeBuffer2d(phys, mpi_send_requests, mpi_recv_requests, &Nmess);
-    clockT2 = clock();
+    clockT2 = MPI_Wtime();
 
-    MPI_Status *instatus  = (MPI_Status*) calloc(nprocs, sizeof(MPI_Status));
+    MPI_Status instatus[nprocs];
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
-    free(instatus);
 
     sk = 0;
     for(k=0;k<K;k++){
@@ -98,14 +96,14 @@ int nodeFetch_test(PhysDomain2d *phys, int verbose, char *message, char *filenam
     }
 
     if(!mesh->procid) {
-        fail = Vector_test(message, xM, xP, Nnode, (clockT2 - clockT1) / CLOCKS_PER_SEC);
-        fail = Vector_test(message, yM, yP, Nnode, (clockT2 - clockT1) / CLOCKS_PER_SEC);
+        fail = Vector_test(message, xM, xP, Nnode, (clockT2 - clockT1));
+        fail = Vector_test(message, yM, yP, Nnode, (clockT2 - clockT1));
     }
 
     if(verbose){
         FILE *fp = CreateLog(filename, mesh->procid, mesh->nprocs);
         PrintVector2File(fp, "surinfo", phys->surfinfo, K*phys->Nsurfinfo*Nfp*Nfaces);
-        PrintVector2File(fp, "f_Q", phys->f_Q, K*Np*phys->Nfields);
+        PrintVector2File(fp, "f_Q", phys->f_Q, K*Np*phys->Nfield);
         PrintVector2File(fp, "xM", xM, Nnode);
         PrintVector2File(fp, "xP", xP, Nnode);
         PrintVector2File(fp, "yM", yM, Nnode);
@@ -113,13 +111,10 @@ int nodeFetch_test(PhysDomain2d *phys, int verbose, char *message, char *filenam
         fclose(fp);
     }
 
-    Vector_free(xM);
-    Vector_free(xP);
-    Vector_free(yM);
-    Vector_free(yP);
-
-    free(mpi_send_requests);
-    free(mpi_recv_requests);
+//    Vector_free(xM);
+//    Vector_free(xP);
+//    Vector_free(yM);
+//    Vector_free(yP);
 
     return fail;
 }

@@ -5,6 +5,6 @@
 #ifndef DGOM_CELLFETCH_TEST_H
 #define DGOM_CELLFETCH_TEST_H
 
-#include "PhysDomain_test.h"
+#include "phys_test.h"
 
 #endif //DGOM_CELLFETCH_TEST_H

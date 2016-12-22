@@ -82,7 +82,7 @@ int sc_quadDeriMatrix_test(stdCell *quad, int verbose){
     }
 
     fail = Matrix_test("sc_quadDr_test", quad->Dr, Dr_ext, NP, NP, 0);
-    fail = Matrix_test("sc_quadDs_test", quad->Dr, Dr_ext, NP, NP, 0);
+    fail = Matrix_test("sc_quadDs_test", quad->Ds, Ds_ext, NP, NP, 0);
 
     if(verbose){
         FILE *fp = fopen("sc_quadDeriMatrix_test.txt", "w");

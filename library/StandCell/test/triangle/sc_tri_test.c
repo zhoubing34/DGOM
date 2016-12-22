@@ -87,7 +87,7 @@ int sc_triDeriMatrix_test(stdCell *tri, int verbose){
     }
 
     fail = Matrix_test("sc_triDr_test", tri->Dr, Dr_ext, NP, NP, 0);
-    fail = Matrix_test("sc_triDs_test", tri->Dr, Dr_ext, NP, NP, 0);
+    fail = Matrix_test("sc_triDs_test", tri->Ds, Ds_ext, NP, NP, 0);
 
     if(verbose){
         FILE *fp = fopen("sc_triDeriMatrix_test.txt", "w");

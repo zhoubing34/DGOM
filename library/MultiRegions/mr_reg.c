@@ -23,6 +23,9 @@ static void mr_reg_volumInfo3d(multiReg *region);
 /* calculate the volume/area and the length scale of each element */
 static void mr_reg_volScale(multiReg *region);
 
+/* calculate the outward normal vector and jacobi coefficient on faces */
+static void mr_reg_surfInfo2d(multiReg *region);
+
 
 /**
  * @brief
@@ -57,6 +60,9 @@ multiReg* mr_reg_create(geoGrid *grid){
     /* volume/area size and length len */
     mr_reg_volScale(region);
 
+    /* face factors (nx, ny, sJ) */
+    mr_reg_surfInfo2d(region);
+
     return region;
 };
 
@@ -85,7 +91,15 @@ void mr_reg_free(multiReg *region){
     /* Jacobi coefficient */
     Matrix_free(region->J);
     /* volume geometry */
-    free(region->vgeo);
+    Matrix_free(region->drdx);
+    Matrix_free(region->drdy);
+    Matrix_free(region->dsdx);
+    Matrix_free(region->dsdy);
+
+    /* surface geometry */
+    Matrix_free(region->nx);
+    Matrix_free(region->ny);
+    Matrix_free(region->sJ);
 
     /* volume/area size and length len */
     Vector_free(region->size);
@@ -251,12 +265,20 @@ static void mr_reg_volumInfo2d(multiReg *region){
 
     // allocation
     region->J = Matrix_create(K, Np);
-    region->Nvgeo = 4;
-    size_t sz = (size_t)region->Nvgeo*K*Np;
-    region->vgeo = (real*) calloc(sz, sizeof(real));
-    real *vgeo = region->vgeo;
+    region->drdx = Matrix_create(K, Np);
+    region->drdy = Matrix_create(K, Np);
+    region->dsdx = Matrix_create(K, Np);
+    region->dsdy = Matrix_create(K, Np);
 
-    int sk=0;
+    double **drdx = region->drdx;
+    double **drdy = region->drdy;
+    double **dsdx = region->dsdx;
+    double **dsdy = region->dsdy;
+//    region->Nvgeo = 4;
+//    size_t sz = (size_t)region->Nvgeo*K*Np;
+//    region->vgeo = (real*) calloc(sz, sizeof(real));
+//    real *vgeo = region->vgeo;
+
     for(k=0;k<K;k++){
 
         // calculate the dxdr,dxds,dydr,dyds
@@ -274,12 +296,54 @@ static void mr_reg_volumInfo2d(multiReg *region){
                        k, n, region->J[k][n]);
 
             /* inverted Jacobian matrix for coordinate mapping */
-            vgeo[sk++] =  dyds[n]/jtemp; // drdx
-            vgeo[sk++] = -dydr[n]/jtemp; // dsdx
-            vgeo[sk++] = -dxds[n]/jtemp; // drdy
-            vgeo[sk++] =  dxdr[n]/jtemp; // dsdy
+            drdx[k][n] =  dyds[n]/jtemp; // drdx
+            drdy[k][n] = -dydr[n]/jtemp; // dsdx
+            dsdx[k][n] = -dxds[n]/jtemp; // drdy
+            dsdy[k][n] =  dxdr[n]/jtemp; // dsdy
         }
     }
+    return;
+}
+
+/**
+ * @brief calculate the outward normal vector and jacobi coefficient on faces
+ * @param[in] region multi-regions
+ */
+static void mr_reg_surfInfo2d(multiReg *region){
+    int k,f;
+    const int K = region->grid->K;
+    const int Nfaces = region->cell->Nfaces;
+    const int Nfp = region->cell->Nfp;
+
+    double **x = region->x;
+    double **y = region->y;
+    int **Fmask = region->cell->Fmask;
+
+    double **nx = Matrix_create(K, Nfaces);
+    double **ny = Matrix_create(K, Nfaces);
+    double **sJ = Matrix_create(K, Nfaces);
+
+    region->nx = nx;
+    region->ny = ny;
+    region->sJ = sJ;
+
+    for(k=0;k<K;k++){
+        for(f=0;f<Nfaces;f++){
+            double x1 = x[k][Fmask[f][0]];
+            double x2 = x[k][Fmask[f][Nfp-1]];
+            double y1 = y[k][Fmask[f][0]];
+            double y2 = y[k][Fmask[f][Nfp-1]];
+
+            nx[k][f] =  (y2-y1);
+            ny[k][f] = -(x2-x1);
+
+            sJ[k][f] = sqrt(nx[k][f]*nx[k][f]+ny[k][f]*ny[k][f]);
+            nx[k][f] /= sJ[k][f];
+            ny[k][f] /= sJ[k][f];
+            sJ[k][f] /= 2.;
+        }
+    }
+
     return;
 }
 

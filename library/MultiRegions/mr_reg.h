@@ -27,9 +27,17 @@ typedef struct {
     double **z; ///< node coordinate
 
     /* info of each element */
-    int Nvgeo; ///< number of volume geometric factors
-    real *vgeo; ///< volume geometric factors
-    double **J; ///< jacobi-coefficients on each nodes
+//    int Nvgeo; ///< number of volume geometric factors
+//    real *vgeo; ///< volume geometric factors
+    double **drdx; ///< transformation of partial derivative on each nodes
+    double **drdy; ///< transformation of partial derivative on each nodes
+    double **dsdx; ///< transformation of partial derivative on each nodes
+    double **dsdy; ///< transformation of partial derivative on each nodes
+    double **J; ///< jacobi-coefficients on each nodes on each nodes
+
+    double **nx; ///< outward normal vector of each faces
+    double **ny; ///< outward normal vector of each faces
+    double **sJ; ///< jacobi-coefficients of each faces
 
     double *len; ///< radius of each elements
     double *size; ///< area of 2d elements or volume of 3d elements

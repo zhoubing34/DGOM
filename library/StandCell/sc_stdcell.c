@@ -174,7 +174,7 @@ void sc_deriVandMatrix2d(stdCell *cell, void (*derorthfunc)
         derorthfunc(cell, dim2, dr, ds);
         for(dim1=0;dim1<Np;dim1++){
             Vr[dim1][dim2] = dr[dim1];
-            Vs[dim1][dim2] = dr[dim1];
+            Vs[dim1][dim2] = ds[dim1];
         }
     }
 }

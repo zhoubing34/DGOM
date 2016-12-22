@@ -5,7 +5,7 @@
 #ifndef DGOM_PHYSDOMAIN_TEST_H
 #define DGOM_PHYSDOMAIN_TEST_H
 
-#include "PhysDomain/PhysDomain.h"
+#include "PhysField/phs_physField.h"
 #include "LibUtilities/UTest.h"
 
 #endif //DGOM_PHYSDOMAIN_TEST_H
