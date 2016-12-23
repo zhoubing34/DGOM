@@ -62,6 +62,7 @@ physField* phys_create(int Nfields, parallMesh *mesh){
 void PhysDomain2d_free(physField *phys){
 
     free(phys->surfinfo);
+    free(phys->vgeo);
 
     free(phys->f_Q);
     free(phys->f_resQ);
@@ -174,8 +175,8 @@ static void phys_volumeInfo2d(physField *phys){
     const int Np = phys->cell->Np;
 
     int Nvgeo = 4;
-    int sz = K*Np*Nvgeo;
-    real *vgeo = (real*) malloc(sz);
+    size_t sz = (size_t) K*Np*Nvgeo;
+    real *vgeo = (real*) calloc(sz, sizeof(real));
 
     phys->Nvgeo = Nvgeo;
     phys->vgeo = vgeo;
@@ -215,8 +216,8 @@ static void phys_surfInfo2d(physField *phys){
 
     // allocation of surfinfo
     int Nsurfinfo = 6;
-    int sz = K*Nfp*Nfaces*Nsurfinfo*sizeof(real);
-    real *surfinfo = (real*) malloc(sz);
+    size_t sz = (size_t) K*Nfp*Nfaces*Nsurfinfo;
+    real *surfinfo = (real*) calloc(sz, sizeof(real));
     phys->Nsurfinfo = Nsurfinfo;
     phys->surfinfo = surfinfo;
 

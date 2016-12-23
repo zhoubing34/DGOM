@@ -46,32 +46,48 @@ int main(int argc, char **argv){
 
 
     extern int N, Nfield, Mx, My;
+    int **SFToV = IntMatrix_create(1, 3);
+    SFToV[0][0] = 0;
+    SFToV[0][1] = 1;
+    SFToV[0][2] = 0;
 
-    stdCell *shape = sc_create(N, TRIANGLE);
-    geoGrid *grid = mr_grid_createUniformGrid_tri(shape, Mx, My, -1, 1, -1, 1, 1);
-    multiReg *region = mr_reg_create(grid);
-    parallMesh *mesh = mr_mesh_create(region);
-    mr_mesh_addBoundary2d(mesh, 0, NULL);
-    physField *phys = phys_create(Nfield, mesh);
+    stdCell *tri = sc_create(N, TRIANGLE);
+    geoGrid *tri_grid = mr_grid_createUniformGrid_tri(tri, Mx, My, -1, 1, -1, 1, 1);
+//    printf("procid=%d, finish set up tri-grid\n",procid);
+    multiReg *tri_region = mr_reg_create(tri_grid);
+    parallMesh *tri_mesh = mr_mesh_create(tri_region);
+    mr_mesh_addBoundary2d(tri_mesh, 0, NULL);
+    physField *tri_phys = phys_create(Nfield, tri_mesh);
+//    printf("procid=%d, finish set up tri-physField\n", procid);
 
-    err[0] = phys_nodeFetch_test(phys, isverbose, "phys_trinodeFetch_test", "phys_tri_nodeFetch_test");
+    err[0] = phys_nodeFetch_test(tri_phys, isverbose, "phys_trinodeFetch_test", "phys_tri_nodeFetch_test");
 
     /* free memory */
-    sc_free(shape);
-    mr_grid_free(grid);
-    mr_reg_free(region);
-    mr_mesh_free(mesh);
-    PhysDomain2d_free(phys);
+    sc_free(tri);
+    mr_grid_free(tri_grid);
+    mr_reg_free(tri_region);
+    mr_mesh_free(tri_mesh);
+    PhysDomain2d_free(tri_phys);
+//    printf("procid=%d, free tri-physField\n", procid);
 
 
-    shape = sc_create(N, QUADRIL);
-    grid = mr_grid_createUniformGrid_quad(shape, Mx, My, -1, 1, -1, 1);
-    region = mr_reg_create(grid);
-    mesh = mr_mesh_create(region);
-    mr_mesh_addBoundary2d(mesh, 0, NULL);
-    phys = phys_create(Nfield, mesh);
+    stdCell *quad = sc_create(N, QUADRIL);
+    geoGrid *quad_grid = mr_grid_createUniformGrid_quad(quad, Mx, My, -1, 1, -1, 1);
+//    printf("procid=%d, set up grid\n", procid);
+    multiReg *quad_region = mr_reg_create(quad_grid);
+    parallMesh *quad_mesh = mr_mesh_create(quad_region);
+    mr_mesh_addBoundary2d(quad_mesh, 0, NULL);
+    physField *quad_phys = phys_create(Nfield, quad_mesh);
+//    printf("procid=%d,set up physField\n",procid);
 
-    err[1] = phys_nodeFetch_test(phys, isverbose, "phys_quadnodeFetch_test", "phys_quad_nodeFetch_test");
+    err[1] = phys_nodeFetch_test(quad_phys, isverbose, "phys_quadnodeFetch_test", "phys_quad_nodeFetch_test");
+
+    /* free memory */
+    sc_free(quad);
+    mr_grid_free(quad_grid);
+    mr_reg_free(quad_region);
+    mr_mesh_free(quad_mesh);
+    PhysDomain2d_free(quad_phys);
 
     for(i=0; i<TESTNUM; i++){
         if(err[i])
@@ -80,9 +96,9 @@ int main(int argc, char **argv){
 
     if(!procid){
         if(failNum)
-            printf(HEADFINISH "%d test faild from MulitRegions_test\n", failNum);
+            printf(HEADFINISH "%d test faild from PhysField_test\n", failNum);
         else
-            printf(HEADFINISH "%d test passed from MulitRegions_test\n", TESTNUM);
+            printf(HEADFINISH "%d test passed from PhysField_test\n", TESTNUM);
     }
 
     MPI_Finalize();

@@ -1,9 +1,11 @@
 #include "NetcdfLibrary.h"
 #include "LibUtilities.h"
 
+
+
 NcDim* NcDim_create(char *namestr, int len){
     NcDim *dim = (NcDim*) calloc(1, sizeof(NcDim));
-    dim->name  = (char *) malloc(NCNAMELEN*sizeof(char));
+    dim->name  = (char *) calloc(NCNAMELEN, sizeof(char));
 
     /* check name length */
     size_t namelen = strlen(namestr);

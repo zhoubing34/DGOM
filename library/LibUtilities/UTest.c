@@ -341,7 +341,7 @@ FILE* CreateLog(char *funname, int rank, int nprocs){
     }
 
 #undef DSET_NAME_LEN
-    FILE *fig = fopen(filename, "w");
+    FILE *fig = fopen(filename, "w+");
 
     return fig;
 }

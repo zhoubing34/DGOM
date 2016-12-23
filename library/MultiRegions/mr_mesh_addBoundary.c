@@ -130,6 +130,10 @@ static int mr_mesh_cmp(const void *a, const void *b){
  * @param [out]    n number of unique elements
  */
 static int count_unique_integer(int len, int *list){
+
+    if(len ==0 )
+        return 0;
+
     qsort(list, len, sizeof(int), mr_mesh_cmp); // sort the list
     int n = 1, i;
     for(i=0;i<(len-1);i++){

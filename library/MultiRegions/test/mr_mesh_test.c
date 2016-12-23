@@ -93,7 +93,7 @@ static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose)
     int Nsurf = 2*(Mx+My);
     int **SFToV = IntMatrix_create(Nsurf, 3);
     genBoundary(ind, SFToV);
-    mr_mesh_addBoundary2d(mesh, Nsurf, SFToV);
+    mr_mesh_addBoundary2d(mesh, 0, NULL);
     IntMatrix_free(SFToV);
 
     if(verbose){
@@ -103,6 +103,7 @@ static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose)
         PrintIntMatrix2File(fp, "mesh->EToE", mesh->EToE, K, Nfaces);
         PrintIntMatrix2File(fp, "mesh->EToF", mesh->EToF, K, Nfaces);
         PrintIntMatrix2File(fp, "mesh->EToP", mesh->EToP, K, Nfaces);
+        PrintIntVector2File(fp, "mesh->Npar", mesh->Npar, mesh->nprocs);
         fprintf(fp, "mesh->parallCellNum: %d\n", mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->cellIndexOut", mesh->cellIndexOut, mesh->parallCellNum);
@@ -138,7 +139,7 @@ static int mr_quadMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose
     int Nsurf = 2*(Mx+My);
     int **SFToV = IntMatrix_create(Nsurf, 3);
     genBoundary(ind, SFToV);
-    mr_mesh_addBoundary2d(mesh, Nsurf, SFToV);
+    mr_mesh_addBoundary2d(mesh, 0, NULL);
     IntMatrix_free(SFToV);
 
 
@@ -149,6 +150,7 @@ static int mr_quadMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose
         PrintIntMatrix2File(fp, "mesh->EToE", mesh->EToE, K, Nfaces);
         PrintIntMatrix2File(fp, "mesh->EToF", mesh->EToF, K, Nfaces);
         PrintIntMatrix2File(fp, "mesh->EToP", mesh->EToP, K, Nfaces);
+        PrintIntVector2File(fp, "mesh->Npar", mesh->Npar, mesh->nprocs);
         fprintf(fp, "mesh->parallCellNum: %d\n", mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->cellIndexOut", mesh->cellIndexOut, mesh->parallCellNum);

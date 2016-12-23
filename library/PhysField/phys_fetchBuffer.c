@@ -58,8 +58,8 @@ void fetchNodeBuffer2d(physField *phys,
                 /* symmetric communications (different ordering) */
                 MPI_Isend(phys->f_outQ+sk, Nout, MPI_SIZE, p, 6666+p,
                           MPI_COMM_WORLD, mpi_send_requests +Nmess);
-                MPI_Irecv(phys->f_inQ+sk,  Nout, MPI_SIZE, p, 6666+mesh->procid,
-                          MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
+                MPI_Irecv(phys->f_inQ+sk,  Nout, MPI_SIZE, p, 6666+procid,
+                          MPI_COMM_WORLD, mpi_recv_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;
             }
@@ -118,9 +118,9 @@ void fetchCellBuffer(physField *phys,
             int Nout = mesh->Npar[p]; // # of variables send to process p
             if(Nout){
                 /* symmetric communications (different ordering) */
-                MPI_Isend(phys->c_outQ+sk, Nout, MPI_SIZE, p, 6666+p,
+                MPI_Isend(phys->c_outQ+sk, Nout, MPI_SIZE, p, 5666+p,
                           MPI_COMM_WORLD, mpi_send_requests +Nmess);
-                MPI_Irecv(phys->c_inQ+sk,  Nout, MPI_SIZE, p, 6666+mesh->procid,
+                MPI_Irecv(phys->c_inQ+sk,  Nout, MPI_SIZE, p, 5666+mesh->procid,
                           MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;
