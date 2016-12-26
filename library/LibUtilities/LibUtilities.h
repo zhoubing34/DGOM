@@ -5,14 +5,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "pnetcdf.h"
 
 /* float type */
 #ifdef DOUBLE_PRECISION
 typedef double real;
 #define MPI_SIZE MPI_DOUBLE
+#define NC_TYPE NC_DOUBLE
 #else
 typedef float real;
 #define MPI_SIZE MPI_FLOAT
+#define NC_TYPE NC_FLOAT
 #endif
 
 /* min and max function */

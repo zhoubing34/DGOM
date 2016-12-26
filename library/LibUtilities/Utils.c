@@ -142,3 +142,4 @@ void str2int(char *str, int *N, char* errmessage){
 
 #define __VECTOR_FREE_FUNC IntVector_free
 #include "Utils.h"
+#undef __T__

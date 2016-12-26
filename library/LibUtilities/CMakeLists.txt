@@ -6,8 +6,8 @@ set(LIBUTILITIES_SOURCE
         Utils.c
         UTest.h
         UTest.c
-        NetcdfLibrary.c
-        NetcdfLibrary.h)
+        nc_library.c
+        nc_library.h)
 
 add_library(LibUtilities STATIC ${LIBUTILITIES_SOURCE})
 

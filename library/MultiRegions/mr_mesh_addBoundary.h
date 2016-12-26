@@ -7,5 +7,6 @@
 
 #include "mr_mesh.h"
 void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV);
+void mr_mesh_deleteBoundary2d(parallMesh *mesh);
 
 #endif //DGOM_MR_MESH_ADDBOUNDARY_H

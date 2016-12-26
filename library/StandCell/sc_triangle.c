@@ -134,22 +134,22 @@ stdCell* sc_create_tri(int N){
     sc_GaussQuadrature2d(tri);
 
     /* float version */
-    size_t sz = Np*Nfp*Nfaces*sizeof(real);
-    tri->f_LIFT = (real *) malloc(sz);
-    sz = Np*Np*sizeof(real);
-    tri->f_Dr = (real*) malloc(sz);
-    tri->f_Ds = (real*) malloc(sz);
+    size_t sz = (size_t) Np*Nfp*Nfaces;
+    tri->f_LIFT = (real *) calloc(sz, sizeof(real));
 
     int sk = 0, n, m;
-    for(n=0;n<tri->Np;++n){
-        for(m=0;m<tri->Nfp*tri->Nfaces;++m){
+    for(n=0;n<Np;++n){
+        for(m=0;m<Nfp*Nfaces;++m){
             tri->f_LIFT[sk++] = (real) tri->LIFT[n][m];
         }
     }
 
+    sz = (size_t) Np*Np;
+    tri->f_Dr = (real*) calloc(sz, sizeof(real));
+    tri->f_Ds = (real*) calloc(sz, sizeof(real));
     sk = 0;
-    for(n=0;n<tri->Np;++n){
-        for(m=0;m<tri->Np;++m){
+    for(n=0;n<Np;++n){
+        for(m=0;m<Np;++m){
             tri->f_Dr[sk  ] = (real) tri->Dr[n][m];
             tri->f_Ds[sk++] = (real) tri->Ds[n][m];
         }

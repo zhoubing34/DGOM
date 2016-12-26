@@ -52,7 +52,7 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
     MPI_Request mpi_send_requests[nprocs];
     MPI_Request mpi_recv_requests[nprocs];
 
-    printf("procid=%d, fetch node buffer\n", mesh->procid);
+//    printf("procid=%d, fetch node buffer\n", mesh->procid);
     clockT1 = MPI_Wtime();
     fetchNodeBuffer2d(phys, mpi_send_requests, mpi_recv_requests, &Nmess);
     clockT2 = MPI_Wtime();
@@ -61,7 +61,7 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
     MPI_Waitall(Nmess, mpi_send_requests, instatus);
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
-    printf("procid=%d, finish MPI_Waitall\n", mesh->procid);
+//    printf("procid=%d, finish MPI_Waitall\n", mesh->procid);
 
     sk = 0;
     for(k=0;k<K;k++){
@@ -100,7 +100,7 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
         }
     }
 
-    printf("procid=%d, finish xP,yP assignment\n", mesh->procid);
+//    printf("procid=%d, finish xP,yP assignment\n", mesh->procid);
 
     if(!mesh->procid) {
         fail = Vector_test(message, xM, xP, Nnode, (clockT2 - clockT1));
@@ -123,7 +123,7 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
         fclose(fp);
     }
 
-    printf("step out phys_nodeFetch_test\n");
+//    printf("step out phys_nodeFetch_test\n");
 
     return fail;
 }

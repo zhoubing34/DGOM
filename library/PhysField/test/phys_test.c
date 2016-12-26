@@ -2,16 +2,19 @@
 // Created by li12242 on 12/11/16.
 //
 
-#include "phys_test.h"
-#include "phys_nodeFetch_test.h"
+
 #include "MultiRegions/mr_grid_uniformGrid.h"
 #include "MultiRegions/mr_mesh_addBoundary.h"
+#include "phys_test.h"
+#include "phys_nodeFetch_test.h"
+#include "phys_strong_volume_flux2d_test.h"
 
-#define TESTNUM 2
+
+#define TESTNUM 4
 
 int Mx = 4;
 int My = 2;
-int N = 1;
+int N = 3;
 int Nfield = 2;
 
 int main(int argc, char **argv){
@@ -33,7 +36,7 @@ int main(int argc, char **argv){
     }
 
     // local vairable
-    int i,err[TESTNUM];
+    int i=0,err[TESTNUM];
     int failNum=0;
 
     MPI_Init(&argc, &argv);
@@ -60,7 +63,8 @@ int main(int argc, char **argv){
     physField *tri_phys = phys_create(Nfield, tri_mesh);
 //    printf("procid=%d, finish set up tri-physField\n", procid);
 
-    err[0] = phys_nodeFetch_test(tri_phys, isverbose, "phys_trinodeFetch_test", "phys_tri_nodeFetch_test");
+    err[i++] = phys_nodeFetch_test(tri_phys, isverbose, "phys_trinodeFetch_test", "phys_tri_nodeFetch_test");
+    err[i++] = phys_strong_volume_flux2d_test(tri_phys, isverbose, "phys_strong_volume_flux2d_test", "phys_tri_strong_volume_flux2d_test");
 
     /* free memory */
     sc_free(tri);
@@ -80,7 +84,8 @@ int main(int argc, char **argv){
     physField *quad_phys = phys_create(Nfield, quad_mesh);
 //    printf("procid=%d,set up physField\n",procid);
 
-    err[1] = phys_nodeFetch_test(quad_phys, isverbose, "phys_quadnodeFetch_test", "phys_quad_nodeFetch_test");
+    err[i++] = phys_nodeFetch_test(quad_phys, isverbose, "phys_quadnodeFetch_test", "phys_quad_nodeFetch_test");
+    err[i++] = phys_strong_volume_flux2d_test(quad_phys, isverbose, "phys_strong_volume_flux2d_test", "phys_quad_strong_volume_flux2d_test");
 
     /* free memory */
     sc_free(quad);

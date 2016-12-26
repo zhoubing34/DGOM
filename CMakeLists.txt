@@ -10,7 +10,7 @@ set(CMAKE_C_FLAGS "-Wall")
 set(MPI_PATH $ENV{MPI_DIR})                      # use environmental variable MPI_DIR
 set(MPI_C_COMPILER   "${MPI_PATH}/bin/mpicc")    # set mpicc before find mpi package
 set(MPI_CXX_COMPILER "${MPI_PATH}/bin/mpicxx")   # set mpicxx before find mpi package
-set(MKLROOT "/opt/intel/composer_xe_2015.5.222/mkl")
+set(MKLROOT $ENV{MKL_DIR})
 
 find_package(MPI REQUIRED)
 if(NOT MPI_FOUND)
@@ -32,6 +32,7 @@ LINK_DIRECTORIES("${THIRD_LIBRARY_PATH}/lib/" "${MKLROOT}/lib/")
 
 # add unit test
 set(UNITTEST_FOUND TRUE)
+# set precision: double/float
 add_definitions(-DDOUBLE_PRECISION)
 
 # add source folder

@@ -33,6 +33,8 @@ int mr_mesh_test(int verbose){
     sc_free(shape);
     mr_grid_free(grid);
     mr_reg_free(region);
+    mr_mesh_deleteBoundary2d(mesh);
+    mr_mesh_free(mesh);
 
     /* quadrilateral regions */
     shape = sc_create(N, QUADRIL);
@@ -48,6 +50,8 @@ int mr_mesh_test(int verbose){
     sc_free(shape);
     mr_grid_free(grid);
     mr_reg_free(region);
+    mr_mesh_deleteBoundary2d(mesh);
+    mr_mesh_free(mesh);
 
     return fail;
 }

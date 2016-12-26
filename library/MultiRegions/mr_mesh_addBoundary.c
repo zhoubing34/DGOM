@@ -13,6 +13,9 @@ static int mr_mesh_cmp(const void *a, const void *b);
 /* create open boundary vertex list */
 static vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid);
 
+/* free vertex list */
+static void mr_vertList2d_free(vertlist *);
+
 /* find the boundary type id, in bcTypeList */
 #define _surfTypeId(mesh, ind, typeid) do{\
 typeid = ind;\
@@ -118,6 +121,19 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
     }
 }
 
+/**
+ * @brief delete the boundary relative properties
+ */
+void mr_mesh_deleteBoundary2d(parallMesh *mesh){
+    IntMatrix_free(mesh->EToBS);
+    IntVector_free(mesh->bcIndList);
+    int k, Nobc = mesh->Nbc;
+    for(k=0;k<Nobc;k++){
+        mr_vertList2d_free(mesh->obvertlist[k]);
+    }
+    free(mesh->obvertlist);
+}
+
 /* sort numbers from small to large */
 static int mr_mesh_cmp(const void *a, const void *b){
     return (* (int *)a) - (* (int *)b);
@@ -174,4 +190,12 @@ static vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid){
     }
 
     return vertlist2d;
+}
+
+/**
+ * @brief free vertex list
+ */
+static void mr_vertList2d_free(vertlist* list){
+    IntVector_free(list->list);
+    free(list);
 }

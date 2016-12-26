@@ -297,8 +297,8 @@ static void mr_reg_volumInfo2d(multiReg *region){
 
             /* inverted Jacobian matrix for coordinate mapping */
             drdx[k][n] =  dyds[n]/jtemp; // drdx
-            drdy[k][n] = -dydr[n]/jtemp; // dsdx
-            dsdx[k][n] = -dxds[n]/jtemp; // drdy
+            drdy[k][n] = -dxds[n]/jtemp; // dsdx
+            dsdx[k][n] = -dydr[n]/jtemp; // drdy
             dsdy[k][n] =  dxdr[n]/jtemp; // dsdy
         }
     }
