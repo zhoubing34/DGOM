@@ -7,7 +7,7 @@
 #define DEBUG 0
 
 /**
- * @brief volume flux term F = (E, G) integral for 2-d problem
+ * @brief RHS of volume flux term F = (E, G) integral for 2-d problem
  * @details
  *
  * @param[in,out] phys
@@ -32,7 +32,7 @@ void phys_strong_volume_flux2d(physField *phys, nodal_flux_func nodal_flux){
     real Eflux[Np*Nfield], Gflux[Np*Nfield], rhs[Nfield];
 
     for(k=0;k<K;k++){
-        real *var = f_Q + k*Np*Nfield;
+        real *var = f_Q + k*Np*Nfield; // variable in k-th element
 
         // calculate flux term
         for(n=0;n<Np;n++){

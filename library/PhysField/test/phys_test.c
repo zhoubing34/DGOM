@@ -8,9 +8,9 @@
 #include "phys_test.h"
 #include "phys_nodeFetch_test.h"
 #include "phys_strong_volume_flux2d_test.h"
+#include "phys_strong_surface_flux2d_test.h"
 
-
-#define TESTNUM 4
+#define TESTNUM 6
 
 int Mx = 4;
 int My = 2;
@@ -64,7 +64,10 @@ int main(int argc, char **argv){
 //    printf("procid=%d, finish set up tri-physField\n", procid);
 
     err[i++] = phys_nodeFetch_test(tri_phys, isverbose, "phys_trinodeFetch_test", "phys_tri_nodeFetch_test");
-    err[i++] = phys_strong_volume_flux2d_test(tri_phys, isverbose, "phys_strong_volume_flux2d_test", "phys_tri_strong_volume_flux2d_test");
+    err[i++] = phys_strong_volume_flux2d_test(tri_phys, isverbose, "phys_strong_volume_flux2d_test",
+                                              "phys_tri_strong_volume_flux2d_test");
+    err[i++] = phys_strong_surface_flux2d_test(tri_phys, isverbose, "phys_tri_strong_volume_flux2d_test",
+                                               "phys_tri_strong_surface_flux2d_test");
 
     /* free memory */
     sc_free(tri);
@@ -86,6 +89,8 @@ int main(int argc, char **argv){
 
     err[i++] = phys_nodeFetch_test(quad_phys, isverbose, "phys_quadnodeFetch_test", "phys_quad_nodeFetch_test");
     err[i++] = phys_strong_volume_flux2d_test(quad_phys, isverbose, "phys_strong_volume_flux2d_test", "phys_quad_strong_volume_flux2d_test");
+    err[i++] = phys_strong_surface_flux2d_test(quad_phys, isverbose, "phys_quad_strong_volume_flux2d_test",
+                                               "phys_quad_strong_surface_flux2d_test");
 
     /* free memory */
     sc_free(quad);

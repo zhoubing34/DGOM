@@ -6,7 +6,9 @@ set(PHYSDOMAIN_SOURCE
         phys_fetchBuffer.c
         phys_fetchBuffer.h
         phys_strong_volume_flux2d.c
-        phys_strong_volume_flux2d.h)
+        phys_strong_volume_flux2d.h
+        phys_strong_surface_flux2d.c
+        phys_strong_surface_flux2d.h)
 
 add_library(PhysField STATIC ${PHYSDOMAIN_SOURCE})
 add_dependencies(PhysField MultiRegions)

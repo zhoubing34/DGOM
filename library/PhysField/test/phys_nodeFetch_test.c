@@ -111,10 +111,10 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
         FILE *fp = CreateLog(filename, mesh->procid, mesh->nprocs);
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
         fprintf(fp, "dim = %d\n", phys->dim);
-//        fprintf(fp, "Nsurfinfo = %d\n", phys->Nsurfinfo);
-//        PrintVector2File(fp, "surinfo", phys->surfinfo, K*phys->Nsurfinfo*Nfp*Nfaces);
-//        fprintf(fp, "Nvgeo = %d\n", phys->Nvgeo);
-//        PrintVector2File(fp, "vgeo", phys->vgeo, K*phys->Nvgeo);
+        fprintf(fp, "Nsurfinfo = %d\n", phys->Nsurfinfo);
+        PrintVector2File(fp, "surinfo", phys->surfinfo, K*phys->Nsurfinfo*Nfp*Nfaces);
+        fprintf(fp, "Nvgeo = %d\n", phys->Nvgeo);
+        PrintVector2File(fp, "vgeo", phys->vgeo, K*phys->Nvgeo);
         PrintVector2File(fp, "f_Q", phys->f_Q, K*Np*phys->Nfield);
         PrintVector2File(fp, "xM", xM, Nnode);
         PrintVector2File(fp, "xP", xP, Nnode);

@@ -210,7 +210,7 @@ void mr_mesh_nodeConnect2d(parallMesh *mesh){
 
     if(mesh->parallNodeNum != parNtotalout){
         printf("Multiregions (mr_mesh_nodeConnect): "
-                       "confilicts occurs between parallel node number and parallel cell number\n");
+                       "conflicts occurs between parallel node number and parallel cell number\n");
         exit(-1);
     }
 
