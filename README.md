@@ -2,18 +2,16 @@
 
 # What is it about
 
-Implement the Nodal DGM (Discontinuous Galerkin Method) in various applications, include
+Implement the Nodal DGM (Discontinuous Galerkin Method) for various applications, including
 
-* 2d Maxwell equations
 * 2d Convection problem
 * 2d Shallow water equation
-* 3d Ocean modelling (developing)
 
 # Features
 
 * Nodal Discontinuous Galerkin method
-* Various element shapes, e.g. triangle, quadrilateral in two-dimensions and prism in three-dimensions (developing)
-* Parallel computation
+* Various element shapes, e.g. triangle, quadrilateral
+* MPI parallelization
 
 # How to build
 
