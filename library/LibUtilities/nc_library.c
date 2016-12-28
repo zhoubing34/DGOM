@@ -183,13 +183,13 @@ void nc_file_close(nc_file *file){
 
 }
 
-/**
- * @brief pnetcdf error handle function
- * @details
- * @param[in] status error number
- * @param[in] lineno line number
- */
-static void handle_error(int status, int lineno){
-    fprintf(stderr, "Error at line %d: %s\n", lineno, ncmpi_strerror(status));
-    MPI_Abort(MPI_COMM_WORLD, 1);
-}
+///**
+// * @brief pnetcdf error handle function
+// * @details
+// * @param[in] status error number
+// * @param[in] lineno line number
+// */
+//void handle_error(int status, int lineno){
+//    fprintf(stderr, "Error at line %d: %s\n", lineno, ncmpi_strerror(status));
+//    MPI_Abort(MPI_COMM_WORLD, 1);
+//}

@@ -9,7 +9,7 @@
  */
 
 #include <MultiRegions/mr_mesh.h>
-#include "phs_physField.h"
+#include "phys_physField.h"
 
 /* set the surface information of physField object */
 static void phys_surfInfo2d(physField *phys);
@@ -59,7 +59,7 @@ physField* phys_create(int Nfields, parallMesh *mesh){
     return phys;
 }
 
-void PhysDomain2d_free(physField *phys){
+void phys_free(physField *phys){
 
     free(phys->surfinfo);
     free(phys->vgeo);

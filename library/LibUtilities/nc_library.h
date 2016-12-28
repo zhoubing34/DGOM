@@ -33,7 +33,8 @@ typedef struct {
 #define NC_ERROR(t)  \
 do{ \
     if(t != NC_NOERR){ \
-        handle_error(t, __LINE__); \
+        fprintf(stderr, "Error at line %d: %s\n", __LINE__, ncmpi_strerror(t));\
+        MPI_Abort(MPI_COMM_WORLD, 1);\
     } \
 }while(0)
 
@@ -51,4 +52,6 @@ void nc_dim_print(nc_dim *dim);
 void nc_var_print(nc_var *var);
 void nc_file_print(nc_file *file);
 
+
+void handle_error(int status, int lineno);
 #endif

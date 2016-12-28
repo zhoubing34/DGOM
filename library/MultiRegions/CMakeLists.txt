@@ -22,15 +22,15 @@ set(MULTI_REGIONS_SOURCE
         mr_mesh_addBoundary.c
         mr_mesh_addBoundary.h)
 
-add_library(MultiRegions STATIC ${MULTI_REGIONS_SOURCE})
-add_dependencies(MultiRegions StandCell)
-target_link_libraries(MultiRegions
-        LibUtilities
-        StandCell
+add_library(multiregions STATIC ${MULTI_REGIONS_SOURCE})
+add_dependencies(multiregions standcell)
+target_link_libraries(multiregions
+        libutility
+        standcell
         parmetis
         metis)
 
-install(TARGETS MultiRegions ARCHIVE DESTINATION lib)
+install(TARGETS multiregions ARCHIVE DESTINATION lib)
 
 if(UNITTEST_FOUND)
     add_subdirectory(test)

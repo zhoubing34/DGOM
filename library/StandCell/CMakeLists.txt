@@ -6,11 +6,11 @@ set(STDREGIONS_SOURCE
         sc_triangle.c
         sc_quadrilateral.c)
 
-add_library(StandCell STATIC ${STDREGIONS_SOURCE})
-add_dependencies(StandCell LibUtilities Polylib)
-target_link_libraries(StandCell LibUtilities Polylib)
+add_library(standcell STATIC ${STDREGIONS_SOURCE})
+add_dependencies(standcell libutility polylib)
+target_link_libraries(standcell libutility polylib)
 
-install(TARGETS StandCell ARCHIVE DESTINATION lib)
+install(TARGETS standcell ARCHIVE DESTINATION lib)
 
 if(UNITTEST_FOUND)
     add_subdirectory(test)

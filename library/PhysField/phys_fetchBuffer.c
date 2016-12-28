@@ -19,23 +19,24 @@
  *     MPI_Request mpi_out_requests[nprocs];
  *     MPI_Request mpi_in_requests[nprocs];
  *     int Nmess;
- *     fetchNodeBuffer2d(phys, mpi_out_requests, mpi_in_requests, &Nmess);
+ *     phys_fetchNodeBuffer2d(phys, mpi_out_requests, mpi_in_requests, &Nmess);
  *
  *     MPI_Status instatus[nprocs];
  *     MPI_Waitall(Nmess, mpi_in_requests, instatus);
  *
  * @param[in]       phys    PhysDomain2d pointer
- * @param[inout]    mpi_send_requests  MPI_Request pointer
- * @param[inout]    mpi_send_requests  MPI_Request pointer
+ * @param[inout]    mpi_send_requests  MPI_Request send request
+ * @param[inout]    mpi_recv_requests  MPI_Request receive request
  * @param[inout]    Nmessage number of messages stored in `mpi_send_requests` and `mpi_send_requests`
  *
  * @note Nmess is initialize inside the function
  *
  */
-void fetchNodeBuffer2d(physField *phys,
-                       MPI_Request *mpi_send_requests,
-                       MPI_Request *mpi_recv_requests,
-                       int *Nmessage) {
+void phys_fetchNodeBuffer2d(physField *phys,
+                            MPI_Request *mpi_send_requests,
+                            MPI_Request *mpi_recv_requests,
+                            int *Nmessage) {
+
     int n;
     /* buffer outgoing node data */
     for(n=0;n<phys->parallNodeNum;++n)
@@ -56,9 +57,9 @@ void fetchNodeBuffer2d(physField *phys,
             Nout = mesh->Npar[p]*Nfield*Nfp; // # of variables send to process p
             if(Nout){
                 /* symmetric communications (different ordering) */
-                MPI_Isend(phys->f_outQ+sk, Nout, MPI_SIZE, p, 6666+p,
+                MPI_Isend(phys->f_outQ+sk, Nout, MPI_TYPE, p, 6666+p,
                           MPI_COMM_WORLD, mpi_send_requests +Nmess);
-                MPI_Irecv(phys->f_inQ+sk,  Nout, MPI_SIZE, p, 6666+procid,
+                MPI_Irecv(phys->f_inQ+sk,  Nout, MPI_TYPE, p, 6666+procid,
                           MPI_COMM_WORLD, mpi_recv_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;
@@ -83,23 +84,23 @@ void fetchNodeBuffer2d(physField *phys,
  *     MPI_Request mpi_out_requests[nprocs];
  *     MPI_Request mpi_in_requests[nprocs];
  *     int Nmess;
- *     fetchNodeBuffer2d(phys, mpi_out_requests, mpi_in_requests, &Nmess);
+ *     phys_fetchCellBuffer(phys, mpi_out_requests, mpi_in_requests, &Nmess);
  *
  *     MPI_Status instatus[nprocs];
  *     MPI_Waitall(Nmess, mpi_in_requests, instatus);
  *
  * @param[in]       phys    PhysDomain2d pointer
  * @param[inout]    mpi_send_requests  MPI_Request pointer
- * @param[inout]    mpi_send_requests  MPI_Request pointer
+ * @param[inout]    mpi_recv_requests  MPI_Request pointer
  * @param[inout]    Nmessage number of messages stored in `mpi_send_requests` and `mpi_send_requests`
  *
  * @note Nmess is initialize inside the function
  *
  */
-void fetchCellBuffer(physField *phys,
-                     MPI_Request *mpi_send_requests,
-                     MPI_Request *mpi_recv_requests,
-                     int *Nmessage){
+void phys_fetchCellBuffer(physField *phys,
+                          MPI_Request *mpi_send_requests,
+                          MPI_Request *mpi_recv_requests,
+                          int *Nmessage){
 
     parallMesh *mesh = phys->mesh;
 
@@ -118,9 +119,9 @@ void fetchCellBuffer(physField *phys,
             int Nout = mesh->Npar[p]; // # of variables send to process p
             if(Nout){
                 /* symmetric communications (different ordering) */
-                MPI_Isend(phys->c_outQ+sk, Nout, MPI_SIZE, p, 5666+p,
+                MPI_Isend(phys->c_outQ+sk, Nout, MPI_TYPE, p, 5666+p,
                           MPI_COMM_WORLD, mpi_send_requests +Nmess);
-                MPI_Irecv(phys->c_inQ+sk,  Nout, MPI_SIZE, p, 5666+mesh->procid,
+                MPI_Irecv(phys->c_inQ+sk,  Nout, MPI_TYPE, p, 5666+mesh->procid,
                           MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;

@@ -91,14 +91,10 @@ void Matrix_multiply(const unsigned M, const unsigned K, const unsigned N,
  * @brief
  * Transfer string to integer.
  *
- * @param[in] str           the input string
+ * @param[in] str the input string
+ * @param[out] N  output integer
  * @param[in] errmessage    error message
  *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * N        | int      | the integer result
  *
  * Usages:
  *
@@ -106,6 +102,14 @@ void Matrix_multiply(const unsigned M, const unsigned K, const unsigned N,
  */
 void str2int(char *str, int *N, char* errmessage){
     int info = sscanf(str,"%d",N);
+    if (info!=1) {
+        fprintf(stderr, "%s:%s \n", errmessage, str);
+        exit(-1);
+    }
+}
+
+void str2double(char *str, double *scal, char* errmessage){
+    int info = sscanf(str,"%lf", scal);
     if (info!=1) {
         fprintf(stderr, "%s:%s \n", errmessage, str);
         exit(-1);

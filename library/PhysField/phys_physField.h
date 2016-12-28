@@ -36,6 +36,6 @@ typedef struct{
 } physField;
 
 physField* phys_create(int Nfields, parallMesh *mesh);
-void PhysDomain2d_free(physField *phys);
+void phys_free(physField *phys);
 
 #endif //DGOM_PHYSDOMAIN_H

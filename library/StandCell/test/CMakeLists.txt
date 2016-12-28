@@ -11,10 +11,10 @@ set(STDREGIONS_SCR
         quadrilateral/sc_quad_test.h
         quadrilateral/sc_quad_data3.h)
 
-add_executable(StandCell_Test ${STDREGIONS_SCR})
+add_executable(standcell_test ${STDREGIONS_SCR})
 
-add_dependencies(StandCell_Test LibUtilities StandCell)
-target_link_libraries(StandCell_Test LibUtilities StandCell)
+add_dependencies(standcell_test libutility standcell)
+target_link_libraries(standcell_test libutility standcell)
 
-install(TARGETS StandCell_Test
+install(TARGETS standcell_test
         RUNTIME DESTINATION test)

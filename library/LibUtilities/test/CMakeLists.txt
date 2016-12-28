@@ -6,9 +6,9 @@ set(LIBUTILITIES_TEST_SOURCE
         MatrixInverse_test.c
         MatrixMultiply_test.c)
 
-add_executable(LibUtilities_Test ${LIBUTILITIES_TEST_SOURCE})
-add_dependencies(LibUtilities_Test LibUtilities)
-target_link_libraries(LibUtilities_Test LibUtilities)
+add_executable(libutility_test ${LIBUTILITIES_TEST_SOURCE})
+add_dependencies(libutility_test libutility)
+target_link_libraries(libutility_test libutility)
 
-install(TARGETS LibUtilities_Test
+install(TARGETS libutility_test
         RUNTIME DESTINATION test)

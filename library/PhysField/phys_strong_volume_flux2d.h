@@ -5,7 +5,7 @@
 #ifndef DGOM_PHYS_STRONG_VOLUME_FLUX2D_H
 #define DGOM_PHYS_STRONG_VOLUME_FLUX2D_H
 
-#include "phs_physField.h"
+#include "phys_physField.h"
 
 // nodal flux term function for Nfield variables
 typedef int( *nodal_flux_func)(real *var, real *Eflux, real *Gflux);

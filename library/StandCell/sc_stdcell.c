@@ -21,7 +21,7 @@ stdCell* sc_create(int N, cellType type){
             std = sc_createQuad(N);
             std->dim = 2; break;
         default:
-            printf("StandCell (sc_create): Unknown cell type %d\n", type);
+            fprintf(stderr, "StandCell (sc_create): Unknown cell type %d\n", type);
             exit(-1);
     }
     return std;

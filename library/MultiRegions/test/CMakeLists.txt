@@ -9,10 +9,10 @@ set(MULTIREGIONS_TEST_SRC
         mr_mesh_test.c
         mr_mesh_test.h)
 
-add_executable(MulitRegions_Test ${MULTIREGIONS_TEST_SRC})
+add_executable(mulitregions_test ${MULTIREGIONS_TEST_SRC})
 
-add_dependencies(MulitRegions_Test MultiRegions)
-target_link_libraries(MulitRegions_Test MultiRegions)
+add_dependencies(mulitregions_test multiregions)
+target_link_libraries(mulitregions_test multiregions)
 
-install(TARGETS MulitRegions_Test
+install(TARGETS mulitregions_test
         RUNTIME DESTINATION test)

@@ -10,3 +10,4 @@ lib
 *.xml
 3rdParty
 .idea
+cmake-build-debug

@@ -1,8 +1,8 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
 
 set(PHYSDOMAIN_SOURCE
-        phs_physField.c
-        phs_physField.h
+        phys_physField.c
+        phys_physField.h
         phys_fetchBuffer.c
         phys_fetchBuffer.h
         phys_strong_volume_flux2d.c
@@ -10,11 +10,11 @@ set(PHYSDOMAIN_SOURCE
         phys_strong_surface_flux2d.c
         phys_strong_surface_flux2d.h)
 
-add_library(PhysField STATIC ${PHYSDOMAIN_SOURCE})
-add_dependencies(PhysField MultiRegions)
-target_link_libraries(PhysField MultiRegions LibUtilities)
+add_library(physfield STATIC ${PHYSDOMAIN_SOURCE})
+add_dependencies(physfield multiregions)
+target_link_libraries(physfield multiregions libutility)
 
-install(TARGETS PhysField ARCHIVE DESTINATION lib)
+install(TARGETS physfield ARCHIVE DESTINATION lib)
 
 if(UNITTEST_FOUND)
     add_subdirectory(test)

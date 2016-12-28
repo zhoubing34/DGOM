@@ -54,7 +54,7 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
 
 //    printf("procid=%d, fetch node buffer\n", mesh->procid);
     clockT1 = MPI_Wtime();
-    fetchNodeBuffer2d(phys, mpi_send_requests, mpi_recv_requests, &Nmess);
+    phys_fetchNodeBuffer2d(phys, mpi_send_requests, mpi_recv_requests, &Nmess);
     clockT2 = MPI_Wtime();
 
     MPI_Status instatus[nprocs];

@@ -10,9 +10,9 @@ set(PHYSDOMAIN_TEST_SRC
         phys_strong_surface_flux2d_test.c
         phys_strong_surface_flux2d_test.h)
 
-add_executable(PhysField_Test ${PHYSDOMAIN_TEST_SRC})
-add_dependencies(PhysField_Test PhysField)
-target_link_libraries(PhysField_Test PhysField)
+add_executable(physfield_test ${PHYSDOMAIN_TEST_SRC})
+add_dependencies(physfield_test physfield)
+target_link_libraries(physfield_test physfield)
 
-install(TARGETS PhysField_Test
+install(TARGETS physfield_test
         RUNTIME DESTINATION test)

@@ -5,7 +5,7 @@
 #ifndef DGOM_PHYS_STRONG_SURFACE_INTEGRAL2D_H
 #define DGOM_PHYS_STRONG_SURFACE_INTEGRAL2D_H
 
-#include "phs_physField.h"
+#include "phys_physField.h"
 
 typedef int (* wall_condition_func)(real nx, real ny, real *varM, real *varP);
 typedef int (*nodal_flux_func)(real *var, real *Eflux, real *Gflux);

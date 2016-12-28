@@ -15,11 +15,11 @@
 #include "LibUtilities/LibUtilities.h"
 
 typedef enum {
-    TRIANGLE, ///< triangle
-    QUADRIL,  ///< quadrilateral
-    TETRA,    ///< tetrahedron
-    TRIPRISM, ///< triangle prism
-    HEXA      ///< hexahedron
+    TRIANGLE=0, ///< triangle
+    QUADRIL=1,  ///< quadrilateral
+    TETRA=2,    ///< tetrahedron
+    TRIPRISM=3, ///< triangle prism
+    HEXA=4,     ///< hexahedron
 } cellType;
 
 typedef struct {

@@ -4,6 +4,6 @@ set(POLYLIB_SOURCE
         polylib.c
         polylib.h)
 
-add_library(Polylib STATIC ${POLYLIB_SOURCE})
+add_library(polylib STATIC ${POLYLIB_SOURCE})
 
-install(TARGETS Polylib ARCHIVE DESTINATION lib)
+install(TARGETS polylib ARCHIVE DESTINATION lib)

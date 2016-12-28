@@ -10,7 +10,7 @@
 /* float type */
 #ifdef DOUBLE_PRECISION
 typedef double real;
-#define MPI_SIZE MPI_DOUBLE
+#define MPI_TYPE MPI_DOUBLE
 #define NC_TYPE NC_DOUBLE
 #else
 typedef float real;
@@ -24,6 +24,7 @@ typedef float real;
 
 /* string to int */
 void str2int(char *str, int *N, char* errmessage);
+void str2double(char *str, double *scal, char* errmessage);
 
 /* matrix operation */
 void Matrix_inverse(double *A, int N);

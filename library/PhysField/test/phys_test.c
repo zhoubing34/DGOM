@@ -74,7 +74,7 @@ int main(int argc, char **argv){
     mr_grid_free(tri_grid);
     mr_reg_free(tri_region);
     mr_mesh_free(tri_mesh);
-    PhysDomain2d_free(tri_phys);
+    phys_free(tri_phys);
 //    printf("procid=%d, free tri-physField\n", procid);
 
 
@@ -97,7 +97,7 @@ int main(int argc, char **argv){
     mr_grid_free(quad_grid);
     mr_reg_free(quad_region);
     mr_mesh_free(quad_mesh);
-    PhysDomain2d_free(quad_phys);
+    phys_free(quad_phys);
 
     for(i=0; i<TESTNUM; i++){
         if(err[i])
