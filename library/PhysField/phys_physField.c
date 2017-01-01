@@ -39,13 +39,13 @@ physField* phys_create(int Nfields, parallMesh *mesh){
     const int Np = phys->cell->Np;
 
     /* nodal array */
-    phys->f_Q    = (real *) calloc(K*Np*Nfields, sizeof(real));
-    phys->f_rhsQ = (real *) calloc(K*Np*Nfields, sizeof(real));
-    phys->f_resQ = (real *) calloc(K*Np*Nfields, sizeof(real));
-    phys->f_ext  = (real *) calloc(K*Np*Nfields, sizeof(real)); ///> external data
+    phys->f_Q    = (real *) calloc((size_t) K*Np*Nfields, sizeof(real));
+    phys->f_rhsQ = (real *) calloc((size_t) K*Np*Nfields, sizeof(real));
+    phys->f_resQ = (real *) calloc((size_t) K*Np*Nfields, sizeof(real));
+    phys->f_ext  = (real *) calloc((size_t) K*Np*Nfields, sizeof(real)); ///> external data
 
     /* volume array */
-    phys->c_Q = (real *) calloc(K*Nfields, sizeof(real));
+    phys->c_Q = (real *) calloc((size_t) K*Nfields, sizeof(real));
 
     /* send/recv buffer */
     permuteNodalBuffer(phys);

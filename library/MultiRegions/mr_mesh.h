@@ -13,13 +13,13 @@ typedef enum {
     SLIPWALL=2, // 2-slip wall
     NSLIPWALL=3, // 3-non-slip wall
     OPENBS   // 4-open boundary
-} surfType;
+} mr_surfType;
 
 /* vertex index list for open boundaries */
 typedef struct{
     int Nv; ///< number of vertex
     int *list; ///< index list
-} vertlist;
+} mr_vertlist;
 
 
 typedef struct {
@@ -55,7 +55,7 @@ typedef struct {
 //    surfType *bcTypeList; ///< array of boundary types
 
     int Nbc;    ///< number of boundary surface
-    vertlist **obvertlist; ///< list of open boundary vertex
+    mr_vertlist **obvertlist; ///< list of open boundary vertex
 
 } parallMesh;
 

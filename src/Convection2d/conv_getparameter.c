@@ -73,7 +73,7 @@ void conv_getparameter(int argc, char **argv){
     /* assignment */
     solver.N = N;
     solver.Ne = Ne;
-    solver.type = type;
+    solver.type = (sc_cellType) type;
     solver.cfl = CFL;
     solver.finalTime = ftime;
 

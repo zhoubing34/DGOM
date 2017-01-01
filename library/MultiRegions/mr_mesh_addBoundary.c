@@ -11,10 +11,10 @@ static int count_unique_integer(int len, int *list);
 static int mr_mesh_cmp(const void *a, const void *b);
 
 /* create open boundary vertex list */
-static vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid);
+static mr_vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid);
 
 /* free vertex list */
-static void mr_vertList2d_free(vertlist *);
+static void mr_vertList2d_free(mr_vertlist *);
 
 /* find the boundary type id, in bcTypeList */
 #define _surfTypeId(mesh, ind, typeid) do{\
@@ -70,7 +70,7 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
     }
 
     /* allocate and initialize oblist */
-    mesh->obvertlist = (vertlist**) malloc(Nobc*sizeof(vertlist*));
+    mesh->obvertlist = (mr_vertlist**) malloc(Nobc*sizeof(mr_vertlist*));
     for(k=0;k<Nobc;k++){
         mesh->obvertlist[k] = mr_vertList2d_create(Nsurf, SFToV, mesh->bcIndList[k]);
     }
@@ -166,9 +166,9 @@ static int count_unique_integer(int len, int *list){
  * @param [in]  SFToV surface to vertex list
  * @param [in]  typeid the boundary type
  */
-static vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid){
+static mr_vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid){
 
-    vertlist *vertlist2d = (vertlist*) malloc(sizeof(vertlist));
+    mr_vertlist *vertlist2d = (mr_vertlist*) malloc(sizeof(mr_vertlist));
     /* count vertex number */
     int f1, Nvert=0;
     int vertlist[Nsurf*2];
@@ -195,7 +195,7 @@ static vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid){
 /**
  * @brief free vertex list
  */
-static void mr_vertList2d_free(vertlist* list){
+static void mr_vertList2d_free(mr_vertlist* list){
     IntVector_free(list->list);
     free(list);
 }

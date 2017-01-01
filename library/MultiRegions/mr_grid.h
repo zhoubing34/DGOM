@@ -7,7 +7,7 @@
 /* geometry grid structure */
 typedef struct{
     int dim; ///> dimensions
-    cellType type; ///> type of element
+    sc_cellType type; ///> type of element
     int nprocs; ///> number of process
     int procid; ///> index of process
     stdCell *cell; ///> standard element

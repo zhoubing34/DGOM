@@ -20,10 +20,10 @@ typedef enum {
     TETRA=2,    ///< tetrahedron
     TRIPRISM=3, ///< triangle prism
     HEXA=4,     ///< hexahedron
-} cellType;
+} sc_cellType;
 
 typedef struct {
-    cellType type; ///< cell enum type
+    sc_cellType type; ///< cell enum type
 
     int dim; ///< dimension
 
@@ -51,7 +51,7 @@ typedef struct {
 
 /* ======================== functions for standard elements ======================== */
 /* create stand cell object */
-stdCell* sc_create(int N, cellType type);
+stdCell* sc_create(int N, sc_cellType type);
 /* free stdCell object */
 void sc_free(stdCell *);
 /* calculate the mass matrix */

@@ -11,7 +11,7 @@ stdCell* sc_create_tri(int N);
  * @param[in] N order
  * @param[in] cellType cell enum type
  */
-stdCell* sc_create(int N, cellType type){
+stdCell* sc_create(int N, sc_cellType type){
     stdCell *std;
     switch (type){
         case TRIANGLE:

@@ -2,7 +2,15 @@
 // Created by li12242 on 12/22/16.
 //
 
+#include <MultiRegions/mr_mesh.h>
 #include "phys_fetchBuffer.h"
+
+/* send and receive buffers to/from other processes */
+static void phys_fetchBuffer(int procid, int nprocs, int *pout,
+                             real *send_buffer, real *recv_buffer,
+                             MPI_Request *mpi_send_requests,
+                             MPI_Request *mpi_recv_requests,
+                             int *Nmessage);
 
 /**
  * @brief Send/rece nodal value `f_Q` through buffers
@@ -25,9 +33,9 @@
  *     MPI_Waitall(Nmess, mpi_in_requests, instatus);
  *
  * @param[in]       phys    PhysDomain2d pointer
- * @param[inout]    mpi_send_requests  MPI_Request send request
- * @param[inout]    mpi_recv_requests  MPI_Request receive request
- * @param[inout]    Nmessage number of messages stored in `mpi_send_requests` and `mpi_send_requests`
+ * @param[in,out]    mpi_send_requests  MPI_Request send request
+ * @param[in,out]    mpi_recv_requests  MPI_Request receive request
+ * @param[in,out]    Nmessage number of messages stored in `mpi_send_requests` and `mpi_send_requests`
  *
  * @note Nmess is initialize inside the function
  *
@@ -49,24 +57,15 @@ void phys_fetchNodeBuffer2d(physField *phys,
     const int Nfield = phys->Nfield;
     const int Nfp = phys->cell->Nfp;
 
-    /* do sends */
-    int sk = 0, Nmess = 0;
-    int p, Nout;
-    for(p=0;p<nprocs;++p){
-        if(p!=procid){
-            Nout = mesh->Npar[p]*Nfield*Nfp; // # of variables send to process p
-            if(Nout){
-                /* symmetric communications (different ordering) */
-                MPI_Isend(phys->f_outQ+sk, Nout, MPI_TYPE, p, 6666+p,
-                          MPI_COMM_WORLD, mpi_send_requests +Nmess);
-                MPI_Irecv(phys->f_inQ+sk,  Nout, MPI_TYPE, p, 6666+procid,
-                          MPI_COMM_WORLD, mpi_recv_requests +Nmess);
-                sk+=Nout;
-                ++Nmess;
-            }
-        }
+    int Nout[nprocs];
+    for(n=0;n<nprocs;n++){
+        Nout[n] = mesh->Npar[n]*Nfield*Nfp;
     }
-    *Nmessage = Nmess; /* number of messages */
+
+    /* do sends and recv */
+    phys_fetchBuffer(procid, nprocs, Nout, phys->f_outQ, phys->f_inQ,
+                     mpi_send_requests, mpi_recv_requests, Nmessage);
+
 }
 
 /**
@@ -90,9 +89,9 @@ void phys_fetchNodeBuffer2d(physField *phys,
  *     MPI_Waitall(Nmess, mpi_in_requests, instatus);
  *
  * @param[in]       phys    PhysDomain2d pointer
- * @param[inout]    mpi_send_requests  MPI_Request pointer
- * @param[inout]    mpi_recv_requests  MPI_Request pointer
- * @param[inout]    Nmessage number of messages stored in `mpi_send_requests` and `mpi_send_requests`
+ * @param[in,out]    mpi_send_requests  MPI_Request pointer
+ * @param[in,out]    mpi_recv_requests  MPI_Request pointer
+ * @param[in,out]    Nmessage number of messages stored in `mpi_send_requests` and `mpi_send_requests`
  *
  * @note Nmess is initialize inside the function
  *
@@ -112,16 +111,39 @@ void phys_fetchCellBuffer(physField *phys,
     for(n=0;n<phys->parallCellNum;++n)
         phys->c_outQ[n] = phys->c_Q[phys->cellIndexOut[n]];
 
+    /* do sends and recv */
+    phys_fetchBuffer(procid, nprocs, mesh->Npar, phys->c_outQ, phys->c_inQ,
+                     mpi_send_requests, mpi_recv_requests, Nmessage);
+}
+
+
+/**
+ * @brief send and receive buffers to/from other processes.
+ * @param [in]     procid No. of local process
+ * @param [in]     number of all the process
+ * @param [in] pout number of data to send to each process
+ * @param [in] send_buffer buffer for sending
+ * @param [in] recv_buffer buffer for recving
+ * @param [in,out] mpi_send_requests MPI request for MPI_Isend operation
+ * @param [in,out] mpi_recv_requests MPI request for MPI_Irecv operation
+ * @param [in,out] Nmessage number of message
+ *
+ */
+static void phys_fetchBuffer(int procid, int nprocs, int *pout,
+                      real *send_buffer, real *recv_buffer,
+                      MPI_Request *mpi_send_requests,
+                      MPI_Request *mpi_recv_requests,
+                      int *Nmessage){
     /* do sends */
     int sk=0, Nmess=0, p;
     for(p=0;p<nprocs;++p){
         if(p!=procid){
-            int Nout = mesh->Npar[p]; // # of variables send to process p
+            const int Nout = pout[p]; // # of variables send to process p
             if(Nout){
                 /* symmetric communications (different ordering) */
-                MPI_Isend(phys->c_outQ+sk, Nout, MPI_TYPE, p, 5666+p,
+                MPI_Isend(send_buffer+sk, Nout, MPI_TYPE, p, 5666+p,
                           MPI_COMM_WORLD, mpi_send_requests +Nmess);
-                MPI_Irecv(phys->c_inQ+sk,  Nout, MPI_TYPE, p, 5666+mesh->procid,
+                MPI_Irecv(recv_buffer+sk,  Nout, MPI_TYPE, p, 5666+procid,
                           MPI_COMM_WORLD,  mpi_recv_requests +Nmess);
                 sk+=Nout;
                 ++Nmess;

@@ -3,6 +3,16 @@
 
 #include "MultiRegions/mr_mesh.h"
 
+
+typedef struct {
+    real *px_Q; ///> dfdx partial derivative for x direction
+    real *py_Q; ///> dfdy partial derivative for y direction
+    real *px_inQ, *px_outQ; ///> send and recv buffers for p_Q
+    real *py_inQ, *py_outQ; ///> send and recv buffers for q_Q
+    real *vis_Q; ///> viscosity on each node
+} phys_LDG_solver;
+
+
 typedef struct{
     int dim; ///< dimensions
     int Nfield; ///< number of variable fields
@@ -33,6 +43,8 @@ typedef struct{
     real *f_ext; ///< external data
 
     real *f_Q, *f_rhsQ, *f_resQ; ///< nodal information
+
+    phys_LDG_solver viscosity;
 } physField;
 
 physField* phys_create(int Nfields, parallMesh *mesh);

@@ -9,7 +9,7 @@ typedef struct {
     int Ne; ///> number of elements in each coordinate
     double cfl; ///> CFL number
     double dt; ///> delta time
-    cellType type; ///> cell type
+    sc_cellType type; ///> cell type
     double finalTime; ///> final time
     int isverbose; ///> parameters for debug
     nc_file *outfile; ///> output file
