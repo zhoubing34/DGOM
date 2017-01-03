@@ -21,7 +21,7 @@ void conv_run(physField *phys){
 
     extern conv_solver2d solver;
 
-    double ftime = solver.finalTime;
+    double ftime = solver.finaltime;
     double dt = solver.dt;
 
     double time = 0;

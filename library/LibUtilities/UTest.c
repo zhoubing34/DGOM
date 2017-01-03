@@ -26,12 +26,13 @@ void UTest_Command(int argc, char** argv, int *ishelp, int *isverbose){
 
     if(argc>1){
         for(i=0; i<argc; i++){
-            if(!(memcmp(argv[1], "-help", 5)) )
+            if(!(memcmp(argv[i], "-help", 5)) )
                 *ishelp = 1;
-            else if(!(memcmp(argv[1], "-verbose", 8)) )
+            else if(!(memcmp(argv[i], "-verbose", 8)) )
                 *isverbose = 1;
         }
     }
+    return;
 }
 
 

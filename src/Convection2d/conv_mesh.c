@@ -18,7 +18,7 @@ parallMesh* conv_mesh(stdCell *shape){
     const int Ne = solver.Ne;
     geoGrid *grid;
 
-    switch (solver.type){
+    switch (solver.celltype){
         case TRIANGLE:
             grid = mr_grid_createUniformGrid_tri(shape, Ne, Ne, -1, 1, -1, 1, 1);
             break;

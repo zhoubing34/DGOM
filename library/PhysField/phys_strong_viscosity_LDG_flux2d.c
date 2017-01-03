@@ -3,3 +3,7 @@
 //
 
 #include "phys_strong_viscosity_LDG_flux2d.h"
+
+void phys_strong_viscosity_LDG_flux2d(physField *phys){
+
+}

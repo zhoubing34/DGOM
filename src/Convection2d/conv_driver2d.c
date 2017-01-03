@@ -38,7 +38,7 @@ int main(int argc, char **argv){
     conv_getparameter(argc, argv);
 
     /* physical field */
-    stdCell *cell = sc_create(solver.N, solver.type);
+    stdCell *cell = sc_create(solver.N, solver.celltype);
     parallMesh *mesh = conv_mesh(cell);
     physField *phys = phys_create(3, mesh);
 
@@ -51,7 +51,7 @@ int main(int argc, char **argv){
         printf("\n        Deg = %d \n", solver.N);
         printf("\n    Tri Ele = %d \n", solver.Ne);
         printf("\n   Quad Ele = %d \n", solver.Ne);
-        printf("\n   Ele Type = %d \n", solver.type);
+        printf("\n   Ele Type = %d \n", solver.celltype);
         printf("\n");
         printf("--------------------------------\n");
     }
