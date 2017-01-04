@@ -30,6 +30,11 @@ parallMesh* mr_mesh_create(multiReg *region){
     /* node pairs, including the adjacent nodes in other process */
     mr_mesh_nodeConnect2d(mesh);
 
+    /* initialize boundary condition */
+    mesh->EToBS = NULL;
+    mesh->bcIndList = NULL;
+    mesh->obvertlist = NULL;
+
     return mesh;
 }
 

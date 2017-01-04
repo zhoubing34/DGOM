@@ -89,12 +89,15 @@ static void conv_readInputFile(){
     solver.caseid = integer;
 
     // check element type
-    if( (integer!=0) && (integer!=1) ){
+    if( (integer!=conv_rotational_convection) && (integer!=conv_advection_diffusion) ){
         fprintf(stderr, HEADFINISH "%s:\n"
                 HEADLINE " Line %d: case id %d fault. \n"
                 HEADLINE " The input type indicator should be one of \n"
-                HEADLINE "   1 - rotational convection\n"
-                HEADLINE "   2 - advection-diffusion\n", __FILE__, linenum, integer);
+                HEADLINE "   %d - rotational convection\n"
+                HEADLINE "   %d - advection-diffusion\n",
+                __FILE__, linenum, integer,
+                conv_rotational_convection,
+                conv_advection_diffusion);
         exit(-1);
     }
 
@@ -104,12 +107,13 @@ static void conv_readInputFile(){
     fscanf(fp, "%d\n", &integer); linenum++;
 
     // check element type
-    if( (integer!=0) && (integer!=1) ){
+    if( (integer!=TRIANGLE) && (integer!=QUADRIL) ){
         fprintf(stderr, HEADFINISH "%s:\n"
                 HEADLINE " Line %d: element type %d fault. \n"
                 HEADLINE " The input type indicator should be one of \n"
-                HEADLINE "   0 - tri\n"
-                HEADLINE "   1 - quad\n", __FILE__, linenum, integer);
+                HEADLINE "   %d - tri\n"
+                HEADLINE "   %d - quad\n",
+                __FILE__, linenum, integer, TRIANGLE, QUADRIL);
         exit(-1);
     }
 

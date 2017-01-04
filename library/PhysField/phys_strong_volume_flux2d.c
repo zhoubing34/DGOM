@@ -38,7 +38,7 @@ void phys_strong_volume_flux2d(physField *phys, nodal_flux_func nodal_flux){
         for(n=0;n<Np;n++){
             // calculate flux term on the n-th point
             if( nodal_flux(var + n*Nfield, Eflux + n*Nfield, Gflux + n*Nfield) ){
-                printf("PhysField (%s): flux error at k=%d, n=%d\n", __FILE__, k, n);
+                fprintf(stderr ,"PhysField (%s): flux error at k=%d, n=%d\n", __FILE__, k, n);
                 MPI_Abort(MPI_COMM_WORLD, -1);
             }
 #if DEBUG

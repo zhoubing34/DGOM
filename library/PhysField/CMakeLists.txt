@@ -10,7 +10,9 @@ set(PHYSDOMAIN_SOURCE
         phys_strong_surface_flux2d.c
         phys_strong_surface_flux2d.h
         phys_add_LDG_solver.c
-        phys_add_LDG_solver.h)
+        phys_add_LDG_solver.h
+        phys_strong_viscosity_LDG_flux2d.c
+        phys_strong_viscosity_LDG_flux2d.h)
 
 add_library(physfield STATIC ${PHYSDOMAIN_SOURCE})
 add_dependencies(physfield multiregions)

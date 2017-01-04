@@ -5,13 +5,6 @@
 #include <MultiRegions/mr_mesh.h>
 #include "phys_fetchBuffer.h"
 
-/* send and receive buffers to/from other processes */
-static void phys_fetchBuffer(int procid, int nprocs, int *pout,
-                             real *send_buffer, real *recv_buffer,
-                             MPI_Request *mpi_send_requests,
-                             MPI_Request *mpi_recv_requests,
-                             int *Nmessage);
-
 /**
  * @brief Send/rece nodal value `f_Q` through buffers
  *
@@ -129,7 +122,7 @@ void phys_fetchCellBuffer(physField *phys,
  * @param [in,out] Nmessage number of message
  *
  */
-static void phys_fetchBuffer(int procid, int nprocs, int *pout,
+void phys_fetchBuffer(int procid, int nprocs, int *pout,
                       real *send_buffer, real *recv_buffer,
                       MPI_Request *mpi_send_requests,
                       MPI_Request *mpi_recv_requests,

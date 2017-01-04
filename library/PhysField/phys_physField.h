@@ -44,7 +44,7 @@ typedef struct{
 
     real *f_Q, *f_rhsQ, *f_resQ; ///< nodal information
 
-    phys_LDG_solver viscosity;
+    phys_LDG_solver *viscosity;
 } physField;
 
 physField* phys_create(int Nfields, parallMesh *mesh);

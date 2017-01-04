@@ -43,4 +43,11 @@ void phys_fetchCellBuffer(physField *phys,
                           MPI_Request *mpi_recv_requests,
                           int *Nmessage);
 
+/* send and receive buffers to/from other processes */
+void phys_fetchBuffer(int procid, int nprocs, int *pout,
+                      real *send_buffer, real *recv_buffer,
+                      MPI_Request *mpi_send_requests,
+                      MPI_Request *mpi_recv_requests,
+                      int *Nmessage);
+
 #endif //DGOM_PHYS_FETCHBUFFER_H

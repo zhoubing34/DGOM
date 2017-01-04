@@ -56,6 +56,9 @@ physField* phys_create(int Nfields, parallMesh *mesh){
     /* volume geometry */
     phys_volumeInfo2d(phys);
 
+    /* initial LDG solver */
+    phys->viscosity = NULL;
+
     return phys;
 }
 

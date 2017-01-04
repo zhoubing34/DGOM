@@ -4,6 +4,11 @@
 #include "PhysField/phys_physField.h"
 #include "LibUtilities/nc_library.h"
 
+typedef enum{
+    conv_rotational_convection = 1,
+    conv_advection_diffusion = 2,
+} conv_caseid;
+
 typedef struct {
     int caseid; ///> indicator of problem case
     int N; ///> order of polynomial

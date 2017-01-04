@@ -1,9 +1,9 @@
 #include <MultiRegions/mr_mesh.h>
 #include "conv_driver2d.h"
-#include "PhysField/phys_physField.h"
 #include "PhysField/phys_fetchBuffer.h"
 #include "PhysField/phys_strong_volume_flux2d.h"
 #include "PhysField/phys_strong_surface_flux2d.h"
+#include "PhysField/phys_strong_viscosity_LDG_flux2d.h"
 
 int conv_fluxTerm(real *var, real *Eflux, real *Gflux){
     const real c = var[0];
@@ -40,6 +40,8 @@ void conv_rhs(physField *phys, float frka, float frkb, float fdt){
     const int Np = phys->cell->Np;
     const int Nfield = phys->Nfield;
 
+    extern conv_solver2d solver;
+
     /* mpi request buffer */
     MPI_Request mpi_send_requests[nprocs];
     MPI_Request mpi_recv_requests[nprocs];
@@ -58,9 +60,14 @@ void conv_rhs(physField *phys, float frka, float frkb, float fdt){
     /* surface integral */
     phys_strong_surface_integral2d(phys, NULL, NULL, conv_fluxTerm, conv_upWindFlux);
 
+    /* viscosity flux */
+    if(solver.caseid == conv_advection_diffusion)
+        phys_strong_viscosity_LDG_flux2d(phys, NULL, NULL, 0, 0, 0);
+
+
     real *f_resQ = phys->f_resQ;
     real *f_Q = phys->f_Q;
-    real *f_rhsQ = phys->f_rhsQ;
+    const real *f_rhsQ = phys->f_rhsQ;
     int t;
     for(t=0;t<K*Np*Nfield;++t){
         f_resQ[t] = frka*f_resQ[t]+fdt*f_rhsQ[t];   // calculate the resdiual of the equation

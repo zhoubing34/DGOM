@@ -16,7 +16,7 @@ parallMesh* conv_mesh(stdCell *shape){
     extern conv_solver2d solver;
 
     const int Ne = solver.Ne;
-    geoGrid *grid;
+    geoGrid *grid = NULL;
 
     switch (solver.celltype){
         case TRIANGLE:

@@ -4,52 +4,42 @@
 
 #include <PhysField/phys_physField.h>
 #include "conv_driver2d.h"
+#include "PhysField/phys_add_LDG_solver.h"
+
+static void conv_advectDiff(physField *phys);
+static void conv_rotation(physField *phys);
 
 void conv_intilization(physField *phys){
 
     extern conv_solver2d solver;
-    double t;
     double dt = 1e6;
 
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
 
-    /* initial position */
-    const double sigma = 125*1e3/(33*33);
-    const double w = 5*M_PI/6;
-    const double xc = 0.0;
-    const double yc = 0.6;
-
     int k,n;
 
-    double **x = phys->region->x;
-    double **y = phys->region->y;
-
-    /* initial scalar field U = (u, v, c) */
-    int sk = 0;
-    for(k=0;k<K;++k){
-        for(n=0;n<Np;++n){
-            const double xt = x[k][n];
-            const double yt = y[k][n];
-            t = -sigma * ( ( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ) );
-            phys->f_Q[sk++] = (real) exp(t); // c field
-            phys->f_Q[sk++] = (real)(-w * yt); // flow rate at x-coordinate
-            phys->f_Q[sk++] = (real)( w * xt); // flow rate at y-coordinate
-        }
+    switch (solver.caseid){
+        case 1:
+            conv_rotation(phys); break;
+        case 2:
+            conv_advectDiff(phys); break;
+        default:
+            exit(-1);
     }
 
     /* time step */
     const double cfl = solver.cfl;
     const int N = solver.N;
-    multiReg *reg = phys->region;
+    double *len = phys->region->len;
 
-    sk = 0;
+    int sk = 0;
     for(k=0;k<K;++k){
-        double r = reg->len[k];
+        double r = len[k];
         for(n=0;n<Np;n++){
+            sk++; // jump c field
             const real u = phys->f_Q[sk++];
             const real v = phys->f_Q[sk++];
-            sk++; // jump c field
             double spe = sqrt(u*u+v*v);
             dt = min(dt, r/spe/(N+1));
         }
@@ -61,6 +51,72 @@ void conv_intilization(physField *phys){
 
     /* assignment to global variable */
     solver.dt = dt;
-
     return;
+}
+
+static void conv_advectDiff(physField *phys){
+    register int k,n;
+
+    const int K = phys->grid->K;
+    const int Np = phys->cell->Np;
+
+    double **x = phys->region->x;
+    double **y = phys->region->y;
+
+    phys_add_LDG_solver(phys);
+
+    const double xc = -0.5;
+    const double yc = -0.5;
+    const double miu = 0.01;
+
+    int sk = 0;
+    for(k=0;k<K;++k){
+        for(n=0;n<Np;++n){
+            const double xt = x[k][n];
+            const double yt = y[k][n];
+            double t = -( ( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ) )/miu;
+            phys->f_Q[sk++] = (real) exp(t); // c field
+            phys->f_Q[sk++] = (real) 0.5; // flow rate at x-coordinate
+            phys->f_Q[sk++] = (real) 0.5; // flow rate at y-coordinate
+        }
+    }
+
+    sk = 0;
+    for(k=0;k<K;++k){
+        for(n=0;n<Np;++n){
+            phys->viscosity->vis_Q[sk++] = (real) miu;
+            phys->viscosity->vis_Q[sk++] = (real) 0;
+            phys->viscosity->vis_Q[sk++] = (real) 0;
+        }
+    }
+}
+
+static void conv_rotation(physField *phys){
+
+    register int k,n;
+
+    const int K = phys->grid->K;
+    const int Np = phys->cell->Np;
+
+    double **x = phys->region->x;
+    double **y = phys->region->y;
+
+    /* initial position */
+    const double sigma = 125*1e3/(33*33);
+    const double w = 5*M_PI/6;
+    const double xc = 0.0;
+    const double yc = 0.6;
+
+    /* initial scalar field U = (u, v, c) */
+    int sk = 0;
+    for(k=0;k<K;++k){
+        for(n=0;n<Np;++n){
+            const double xt = x[k][n];
+            const double yt = y[k][n];
+            double t = -sigma * ( ( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ) );
+            phys->f_Q[sk++] = (real) exp(t); // c field
+            phys->f_Q[sk++] = (real)(-w * yt); // flow rate at x-coordinate
+            phys->f_Q[sk++] = (real)( w * xt); // flow rate at y-coordinate
+        }
+    }
 }

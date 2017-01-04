@@ -9,13 +9,13 @@
 
 /* float type */
 #ifdef DOUBLE_PRECISION
-typedef double real;
-#define MPI_TYPE MPI_DOUBLE
-#define NC_TYPE NC_DOUBLE
+typedef double real; ///> user defined float type
+#define MPI_TYPE MPI_DOUBLE ///> variable type for MPI subroutines
+#define NC_TYPE NC_DOUBLE ///> variable type for netCDF subroutines
 #else
-typedef float real;
-#define MPI_SIZE MPI_FLOAT
-#define NC_TYPE NC_FLOAT
+typedef float real; ///> user defined float type
+#define MPI_SIZE MPI_FLOAT ///> variable type for MPI subroutines
+#define NC_TYPE NC_FLOAT ///> variable type for netCDF subroutines
 #endif
 
 /* min and max function */
