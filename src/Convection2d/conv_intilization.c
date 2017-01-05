@@ -6,43 +6,22 @@
 #include "conv_driver2d.h"
 #include "PhysField/phys_add_LDG_solver.h"
 
-static void conv_advectDiff(physField *phys);
-static void conv_rotation(physField *phys);
+static double conv_advectDiff(physField *phys);
+static double conv_rotation(physField *phys);
 
 void conv_intilization(physField *phys){
 
     extern conv_solver2d solver;
-    double dt = 1e6;
-
-    const int K = phys->grid->K;
-    const int Np = phys->cell->Np;
-
-    int k,n;
+    const double cfl = solver.cfl;
+    double dt;
 
     switch (solver.caseid){
         case 1:
-            conv_rotation(phys); break;
+            dt = conv_rotation(phys); break;
         case 2:
-            conv_advectDiff(phys); break;
+            dt = conv_advectDiff(phys); break;
         default:
             exit(-1);
-    }
-
-    /* time step */
-    const double cfl = solver.cfl;
-    const int N = solver.N;
-    double *len = phys->region->len;
-
-    int sk = 0;
-    for(k=0;k<K;++k){
-        double r = len[k];
-        for(n=0;n<Np;n++){
-            sk++; // jump c field
-            const real u = phys->f_Q[sk++];
-            const real v = phys->f_Q[sk++];
-            double spe = sqrt(u*u+v*v);
-            dt = min(dt, r/spe/(N+1));
-        }
     }
 
     double gdt;
@@ -54,7 +33,7 @@ void conv_intilization(physField *phys){
     return;
 }
 
-static void conv_advectDiff(physField *phys){
+static double conv_advectDiff(physField *phys){
     register int k,n;
 
     const int K = phys->grid->K;
@@ -89,9 +68,30 @@ static void conv_advectDiff(physField *phys){
             phys->viscosity->vis_Q[sk++] = (real) 0;
         }
     }
+
+    extern conv_solver2d solver;
+    /* time step */
+    double dt = 1e6; // initial time step
+    const int N = solver.N;
+    double *len = phys->region->len;
+
+    sk = 0;
+    for(k=0;k<K;++k){
+        double r = len[k];
+        for(n=0;n<Np;n++){
+            sk++; // jump c field
+            const real u = phys->f_Q[sk++];
+            const real v = phys->f_Q[sk++];
+            double spe = sqrt(u*u+v*v);
+            dt = min(dt, r/spe/(N+1));
+            dt = min(dt, r*r/(N+1)/(N+1)/miu);
+        }
+    }
+
+    return dt;
 }
 
-static void conv_rotation(physField *phys){
+static double conv_rotation(physField *phys){
 
     register int k,n;
 
@@ -119,4 +119,24 @@ static void conv_rotation(physField *phys){
             phys->f_Q[sk++] = (real)( w * xt); // flow rate at y-coordinate
         }
     }
+
+    extern conv_solver2d solver;
+    /* time step */
+    double dt = 1e6; // initial time step
+    const int N = solver.N;
+    double *len = phys->region->len;
+
+    sk = 0;
+    for(k=0;k<K;++k){
+        double r = len[k];
+        for(n=0;n<Np;n++){
+            sk++; // jump c field
+            const real u = phys->f_Q[sk++];
+            const real v = phys->f_Q[sk++];
+            double spe = sqrt(u*u+v*v);
+            dt = min(dt, r/spe/(N+1));
+        }
+    }
+
+    return dt;
 }

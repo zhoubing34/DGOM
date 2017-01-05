@@ -9,6 +9,10 @@
 
 #define DEBUG 0
 
+#if DEBUG
+#include "LibUtilities/UTest.h"
+#endif
+
 static void phys_viscosityflux2d(physField *phys,
                                  viscosity_wall_condition_func slipwall_condition,
                                  viscosity_wall_condition_func non_slipwall_condition,
@@ -42,15 +46,9 @@ void phys_strong_viscosity_LDG_flux2d(physField *phys,
     real *p_outQ = phys->viscosity->px_outQ;
     real *q_outQ = phys->viscosity->py_outQ;
 
-#if DEBUG
-    printf("step into phys_auxiliaryflux2d\n");
-#endif
     // calculate the auxiliary variable
     phys_auxiliaryflux2d(phys, slipwall_condition, non_slipwall_condition, c11, c12, c22);
 
-#if DEBUG
-    printf("step out phys_auxiliaryflux2d\n");
-#endif
 
     register int n;
     // fetch p_Q and q_Q buffer
@@ -67,41 +65,22 @@ void phys_strong_viscosity_LDG_flux2d(physField *phys,
     MPI_Request mpi_send_requests[nprocs], mpi_recv_requests[nprocs];
     int Nmess=0;
 
-#if DEBUG
-    printf("start fetch buffer for p_Q, Nmess=%d\n", Nmess);
-#endif
-
     /* do sends and recv for p_Q */
     phys_fetchBuffer(procid, nprocs, Nout, p_outQ, p_inQ,
                      mpi_send_requests, mpi_recv_requests, &Nmess);
 
-#if DEBUG
-    printf("wait for buffer of p_Q, Nmess=%d\n", Nmess);
-#endif
     MPI_Status instatus[nprocs];
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
-#if DEBUG
-    printf("finish fetch buffer for p_Q\n");
-#endif
 
     /* do sends and recv for q_Q */
     phys_fetchBuffer(procid, nprocs, Nout, q_outQ, q_inQ,
                      mpi_send_requests, mpi_recv_requests, &Nmess);
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
-#if DEBUG
-    printf("finish fetch buffer for q_Q\n");
-#endif
-
-#if DEBUG
-    printf("step into phys_viscosityflux2d\n");
-#endif
     // calculate the RHS of physical field
     phys_viscosityflux2d(phys, slipwall_condition, non_slipwall_condition, c11, c12, c22);
-#if DEBUG
-    printf("step out phys_viscosityflux2d\n");
-#endif
+
 }
 
 
@@ -139,6 +118,11 @@ static void phys_auxiliaryflux2d(physField *phys,
     real p_varM[Nfield], p_varP[Nfield], p_dflux[Nfp*Nfaces*Nfield];
     real q_varM[Nfield], q_varP[Nfield], q_dflux[Nfp*Nfaces*Nfield];
     real vis_varM[Nfield];
+
+#if DEBUG
+    FILE *fp = CreateLog("phys_auxiliaryflux2d_log",
+                         phys->mesh->procid, phys->mesh->nprocs);
+#endif
 
     for(k=0;k<K;k++){
         // volume integral for p and q
@@ -188,6 +172,10 @@ static void phys_auxiliaryflux2d(physField *phys,
                 vis_varM[fld] = vis_Q[idM++];
             }
 
+#if DEBUG
+            fprintf(fp, "\nNfp=%d, bctype=%d, ", n, bstype);
+#endif
+
             // adjacent nodal values
             switch (bstype){
                 case INNERLOC:
@@ -227,20 +215,28 @@ static void phys_auxiliaryflux2d(physField *phys,
             for(fld=0;fld<Nfield;fld++){
                 const real df = (f_varM[fld] - f_varP[fld]);
                 const real dp = nx*(p_varM[fld] - p_varP[fld]) + ny*(q_varM[fld] - q_varP[fld]);
-
+#if DEBUG
+                fprintf(fp, "%f, ", df);
+#endif
                 flux_P[fld] = vis_varM[fld]*fsc*( nx*( -df*0.5 + c12*nx*df - c22*dp ) );
                 flux_Q[fld] = vis_varM[fld]*fsc*( ny*( -df*0.5 + c12*ny*df - c22*dp ) );
             }
         }
 
+#if DEBUG
+        PrintVector2File(fp, "elemental flux_P", p_dflux, Nfield*Nfp*Nfaces);
+        PrintVector2File(fp, "elemental flux_Q", q_dflux, Nfield*Nfp*Nfaces);
+#endif
+
         for(n=0;n<Np;n++){
             const real *ptLIFT = f_LIFT + n*Nfp*Nfaces;
+
+            real *p_rhsQ = p_Q + Nfield*(n+k*Np);
+            real *q_rhsQ = q_Q + Nfield*(n+k*Np);
             for(m=0;m<Nfp*Nfaces;m++){
                 const real L = ptLIFT[m];
                 real *flux_P = p_dflux+m*Nfield;
                 real *flux_Q = q_dflux+m*Nfield;
-                real *p_rhsQ = p_Q + Nfield*(n+k*Np);
-                real *q_rhsQ = q_Q + Nfield*(n+k*Np);
 
                 for(fld=0;fld<Nfield;fld++){
                     p_rhsQ[fld] += L*flux_P[fld];
@@ -250,6 +246,10 @@ static void phys_auxiliaryflux2d(physField *phys,
             }
         }
     }
+#if DEBUG
+    fclose(fp);
+#endif
+
 }
 
 static void phys_viscosityflux2d(physField *phys,
@@ -283,6 +283,11 @@ static void phys_viscosityflux2d(physField *phys,
     real f_varM[Nfield], f_varP[Nfield], f_dflux[Nfp*Nfaces*Nfield];
     real p_varM[Nfield], p_varP[Nfield];
     real q_varM[Nfield], q_varP[Nfield];
+
+#if DEBUG
+    FILE *fp = CreateLog("phys_viscosityflux2d_log",
+                         phys->mesh->procid, phys->mesh->nprocs);
+#endif
 
     for(k=0;k<K;k++){
         // volume integral for p and q
@@ -324,8 +329,12 @@ static void phys_viscosityflux2d(physField *phys,
             for(fld=0;fld<Nfield;fld++){
                 f_varM[fld] = f_Q[idM];
                 p_varM[fld] = p_Q[idM];
-                q_varM[fld] = q_Q[idM];
+                q_varM[fld] = q_Q[idM++];
             }
+
+#if DEBUG
+            fprintf(fp, "\nNfp=%d, bctype=%d, ", n, bstype);
+#endif
 
             // adjacent nodal values
             switch (bstype){
@@ -368,9 +377,16 @@ static void phys_viscosityflux2d(physField *phys,
                 const real dq = (q_varM[fld] - q_varP[fld]);
                 const real dpn = nx*dp + ny*dq;
 
+#if DEBUG
+                fprintf(fp, "%f, %f, %f, ", df, dp, dq);
+#endif
                 flux[fld] = fsc*( -nx*dp*0.5 - ny*dq*0.5 - c11*df - c12*(nx+ny)*dpn);
             }
         }
+
+#if DEBUG
+        PrintVector2File(fp, "elemental flux", f_dflux, Nfield*Nfp*Nfaces);
+#endif
 
         for(n=0;n<Np;n++){
             const real *ptLIFT = f_LIFT + n*Nfp*Nfaces;
@@ -384,4 +400,8 @@ static void phys_viscosityflux2d(physField *phys,
             }
         }
     }
+
+#if DEBUG
+    fclose(fp);
+#endif
 }

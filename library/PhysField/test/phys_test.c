@@ -9,8 +9,9 @@
 #include "phys_nodeFetch_test.h"
 #include "phys_strong_volume_flux2d_test.h"
 #include "phys_strong_surface_flux2d_test.h"
+#include "phys_strong_viscosity_LDG_flux2d_test.h"
 
-#define TESTNUM 6
+#define TESTNUM 8
 
 int Mx = 4;
 int My = 2;
@@ -69,6 +70,10 @@ int main(int argc, char **argv){
     err[i++] = phys_strong_surface_flux2d_test(tri_phys, isverbose, "phys_tri_strong_volume_flux2d_test",
                                                "phys_tri_strong_surface_flux2d_test");
 
+    err[i++] = phys_strong_viscosity_LDG_flux2d_test(tri_phys, isverbose,
+                                                     "phys_tri_strong_viscosity_LDG_flux2d_test",
+                                                     "phys_tri_strong_viscosity_LDG_flux2d_test");
+
     /* free memory */
     sc_free(tri);
     mr_grid_free(tri_grid);
@@ -87,10 +92,15 @@ int main(int argc, char **argv){
     physField *quad_phys = phys_create(Nfield, quad_mesh);
 //    printf("procid=%d,set up physField\n",procid);
 
-    err[i++] = phys_nodeFetch_test(quad_phys, isverbose, "phys_quadnodeFetch_test", "phys_quad_nodeFetch_test");
-    err[i++] = phys_strong_volume_flux2d_test(quad_phys, isverbose, "phys_strong_volume_flux2d_test", "phys_quad_strong_volume_flux2d_test");
+    err[i++] = phys_nodeFetch_test(quad_phys, isverbose, "phys_quadnodeFetch_test",
+                                   "phys_quad_nodeFetch_test");
+    err[i++] = phys_strong_volume_flux2d_test(quad_phys, isverbose, "phys_strong_volume_flux2d_test",
+                                              "phys_quad_strong_volume_flux2d_test");
     err[i++] = phys_strong_surface_flux2d_test(quad_phys, isverbose, "phys_quad_strong_volume_flux2d_test",
                                                "phys_quad_strong_surface_flux2d_test");
+    err[i++] = phys_strong_viscosity_LDG_flux2d_test(quad_phys, isverbose,
+                                                     "phys_quad_strong_viscosity_LDG_flux2d_test",
+                                                     "phys_quad_strong_viscosity_LDG_flux2d_test");
 
     /* free memory */
     sc_free(quad);

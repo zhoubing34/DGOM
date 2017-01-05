@@ -31,14 +31,13 @@ void phys_delete_LDG_solver(physField *phys){
 
     free(phys->viscosity->px_Q);
     free(phys->viscosity->py_Q);
+    free(phys->viscosity->vis_Q);
 
     free(phys->viscosity->px_inQ);
     free(phys->viscosity->py_inQ);
 
     free(phys->viscosity->px_outQ);
-    free(phys->viscosity->px_outQ);
-
-    free(phys->viscosity->vis_Q);
+    free(phys->viscosity->py_outQ);
 
     free(phys->viscosity);
 }
