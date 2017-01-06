@@ -13,7 +13,9 @@ set(SRC_LIST
         conv_run.c
         conv_run.h
         conv_rhs.c
-        conv_rhs.h)
+        conv_rhs.h
+        conv_extsol.c
+        conv_extsol.h)
 
 # set executable
 add_executable(convection2d ${SRC_LIST})

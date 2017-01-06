@@ -22,6 +22,7 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose, char *me
     const int nprocs = phys->mesh->nprocs;
 
     int k,i;
+    real miu = 0.5;
     real px_ext[Np*Nfield*K];
     real py_ext[Np*Nfield*K];
     real rhs_ext[Np*Nfield*K];
@@ -37,17 +38,17 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose, char *me
 
             phys->f_rhsQ[sk] = 0;
             phys->f_Q[sk] = u*u; //
-            phys->viscosity->vis_Q[sk] = 1.0;
-            px_ext[sk] = 2*u;
-            py_ext[sk] = 0.0;
-            rhs_ext[sk++] = 2.0;
+            phys->viscosity->vis_Q[sk] = miu;
+            px_ext[sk] = 2*u*miu;
+            py_ext[sk] = 0.0*miu;
+            rhs_ext[sk++] = 2.0*miu*2;
 
             phys->f_rhsQ[sk] = 0;
             phys->f_Q[sk] = u*v+v*v; // field 1 of -(dEdx + dGdy)
-            phys->viscosity->vis_Q[sk] = 1.0;
-            px_ext[sk] = v;
-            py_ext[sk] = u+2*v;
-            rhs_ext[sk++] = 2.0;
+            phys->viscosity->vis_Q[sk] = miu;
+            px_ext[sk] = v*miu;
+            py_ext[sk] = (u+2*v)*miu;
+            rhs_ext[sk++] = 2.0*miu*2;
         }
     }
 
@@ -61,6 +62,7 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose, char *me
     double clockT1 = MPI_Wtime();
     phys_strong_viscosity_LDG_flux2d(phys, NULL, NULL, 0, 0, 0);
     double clockT2 = MPI_Wtime();
+    phys_strong_viscosity_LDG_flux2d(phys, NULL, NULL, 0, 0, 0);
 
     if(!phys->mesh->procid){
         Vector_test(message, phys->viscosity->px_Q, px_ext, Np*Nfield*K, clockT2-clockT1);

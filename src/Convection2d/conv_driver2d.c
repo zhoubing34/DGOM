@@ -23,6 +23,7 @@
 #include "conv_output.h"
 #include "MultiRegions/mr_mesh_addBoundary.h"
 #include "conv_run.h"
+#include "conv_extsol.h"
 
 conv_solver2d solver; ///< global solver
 
@@ -64,6 +65,9 @@ int main(int argc, char **argv){
 
     /* run solver */
     conv_run(phys);
+
+    /* cal norm error */
+    conv_normerr(phys);
 
     /* finalize */
     conv_finalize(phys);

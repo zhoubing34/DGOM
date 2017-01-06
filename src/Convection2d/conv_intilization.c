@@ -16,9 +16,9 @@ void conv_intilization(physField *phys){
     double dt;
 
     switch (solver.caseid){
-        case 1:
+        case conv_rotational_convection:
             dt = conv_rotation(phys); break;
-        case 2:
+        case conv_advection_diffusion:
             dt = conv_advectDiff(phys); break;
         default:
             exit(-1);
@@ -34,6 +34,8 @@ void conv_intilization(physField *phys){
 }
 
 static double conv_advectDiff(physField *phys){
+
+    extern conv_solver2d solver;
     register int k,n;
 
     const int K = phys->grid->K;
@@ -46,7 +48,7 @@ static double conv_advectDiff(physField *phys){
 
     const double xc = -0.5;
     const double yc = -0.5;
-    const double miu = 0.01;
+    const double miu = solver.viscosity;
 
     int sk = 0;
     for(k=0;k<K;++k){
@@ -55,21 +57,21 @@ static double conv_advectDiff(physField *phys){
             const double yt = y[k][n];
             double t = -( ( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ) )/miu;
             phys->f_Q[sk++] = (real) exp(t); // c field
-            phys->f_Q[sk++] = (real) 0.5; // flow rate at x-coordinate
-            phys->f_Q[sk++] = (real) 0.5; // flow rate at y-coordinate
+            phys->f_Q[sk++] = (real) solver.u; // flow rate at x-coordinate
+            phys->f_Q[sk++] = (real) solver.v; // flow rate at y-coordinate
         }
     }
 
     sk = 0;
     for(k=0;k<K;++k){
         for(n=0;n<Np;++n){
-            phys->viscosity->vis_Q[sk++] = (real) miu;
+            phys->viscosity->vis_Q[sk++] = (real) miu; // viscosity parameter for c field
             phys->viscosity->vis_Q[sk++] = (real) 0;
             phys->viscosity->vis_Q[sk++] = (real) 0;
         }
     }
 
-    extern conv_solver2d solver;
+
     /* time step */
     double dt = 1e6; // initial time step
     const int N = solver.N;
@@ -83,8 +85,8 @@ static double conv_advectDiff(physField *phys){
             const real u = phys->f_Q[sk++];
             const real v = phys->f_Q[sk++];
             double spe = sqrt(u*u+v*v);
-            dt = min(dt, r/spe/(N+1));
-            dt = min(dt, r*r/(N+1)/(N+1)/miu);
+            dt = min(dt, r/spe);
+            dt = min(dt, r*r/sqrt(miu));
         }
     }
 
@@ -134,7 +136,7 @@ static double conv_rotation(physField *phys){
             const real u = phys->f_Q[sk++];
             const real v = phys->f_Q[sk++];
             double spe = sqrt(u*u+v*v);
-            dt = min(dt, r/spe/(N+1));
+            dt = min(dt, r/spe);
         }
     }
 

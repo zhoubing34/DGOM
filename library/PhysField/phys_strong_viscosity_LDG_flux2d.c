@@ -6,6 +6,7 @@
 #include <MultiRegions/mr_grid.h>
 #include "phys_strong_viscosity_LDG_flux2d.h"
 #include "phys_fetchBuffer.h"
+#include "phys_physField.h"
 
 #define DEBUG 0
 
@@ -31,11 +32,13 @@ void phys_strong_viscosity_LDG_flux2d(physField *phys,
     // check LDG solver is initialized
     if(phys->viscosity == NULL){
         fprintf(stderr, "PhysField (%s): line %d\n"
-                "The LDG solver for viscosity is not initialized\n", __FILE__, __LINE__);
+                "The LDG solver for viscosity is not allocated\n", __FILE__, __LINE__);
     }
 
     const int procid = phys->grid->procid;
     const int nprocs = phys->grid->nprocs;
+    const int Np = phys->cell->Np;
+    const int K = phys->grid->K;
     const int Nfp = phys->cell->Nfp;
     const int Nfield = phys->Nfield;
 
@@ -46,11 +49,13 @@ void phys_strong_viscosity_LDG_flux2d(physField *phys,
     real *p_outQ = phys->viscosity->px_outQ;
     real *q_outQ = phys->viscosity->py_outQ;
 
+    register int n;
+
     // calculate the auxiliary variable
     phys_auxiliaryflux2d(phys, slipwall_condition, non_slipwall_condition, c11, c12, c22);
 
 
-    register int n;
+
     // fetch p_Q and q_Q buffer
     for(n=0;n<phys->parallNodeNum;++n){
         p_outQ[n] = p_Q[phys->nodeIndexOut[n]];
@@ -71,12 +76,13 @@ void phys_strong_viscosity_LDG_flux2d(physField *phys,
 
     MPI_Status instatus[nprocs];
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
-
+    MPI_Waitall(Nmess, mpi_send_requests, instatus);
 
     /* do sends and recv for q_Q */
     phys_fetchBuffer(procid, nprocs, Nout, q_outQ, q_inQ,
                      mpi_send_requests, mpi_recv_requests, &Nmess);
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
+    MPI_Waitall(Nmess, mpi_send_requests, instatus);
 
     // calculate the RHS of physical field
     phys_viscosityflux2d(phys, slipwall_condition, non_slipwall_condition, c11, c12, c22);
@@ -139,6 +145,12 @@ static void phys_auxiliaryflux2d(physField *phys,
             real *p = p_Q + (n+k*Np)*Nfield;
             real *q = q_Q + (n+k*Np)*Nfield;
 
+            // initialization: set px and py to zero
+            for(fld=0;fld<Nfield;fld++){
+                p[fld] = 0;
+                q[fld] = 0;
+            }
+
             for(m=0;m<Np;++m){
                 const real dr = ptDr[m]; // m-th column for Dr
                 const real ds = ptDs[m]; // m-th column for Ds
@@ -146,7 +158,6 @@ static void phys_auxiliaryflux2d(physField *phys,
                 const real dy = drdy*dr+dsdy*ds;
 
                 const real *c = f_Q + (m+k*Np)*Nfield;
-
 
                 for(fld=0;fld<Nfield;fld++){
                     p[fld] += visc[fld]*dx*c[fld];

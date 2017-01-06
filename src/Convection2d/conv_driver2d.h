@@ -17,6 +17,9 @@ typedef struct {
     double dt; ///> delta time
     sc_cellType celltype; ///> cell type
     double finaltime; ///> final time
+    double u; ///> flow rate on x direction
+    double v; ///> flow rate on y direction
+    double viscosity; ///> diffusion parameter
     int isverbose; ///> parameters for debug
     nc_file *outfile; ///> output file
 } conv_solver2d;

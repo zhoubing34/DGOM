@@ -10,18 +10,12 @@
 
 /* const strings */
 char helpinfo[] = HEADFINISH "DGOM:\n" HEADLINE "2d convection problem\n"
-        HEADLINE "Command parameters: \n"
-        HEADLINE "   N - order \n"
-        HEADLINE "   Ne - cell number\n"
-        HEADLINE "   Cell Type - tri=0/quad=1\n"
-        HEADLINE "   CFL - CFL number\n"
-        HEADLINE "   time - final time\n"
-        HEADLINE "Example usages:\n"
-        HEADLINE "   mpirun -n 2 -host localhost ./convection2d  2  80  0  0.3  2.4\n"
-        HEADLINE "\n"
         HEADLINE "Optional features:\n"
-        HEADLINE "   -help     print help information\n"
-        HEADFINISH "   -verbose  print variables to log files\n\n";
+        HEADLINE "   -help         print help information\n"
+        HEADLINE "   -preprocess   generate input file\n"
+        HEADLINE "Example usages:\n"
+        HEADLINE "   mpirun -n 2 -host localhost ./convection2d -preprocess\n"
+        HEADFINISH "\n";
 
 char filename[] = "conv2d_paramter.inc";
 
@@ -159,6 +153,14 @@ static void conv_readInputFile(){
     }
 
     solver.finaltime = val;
+
+    // read phys info
+    for(i=0;i<3;i++){ fgets(buffer, len, fp); linenum++; }
+    // read phys parameter
+    fscanf(fp, "%f\n", &val); linenum++; solver.u = val;
+    fscanf(fp, "%f\n", &val); linenum++; solver.v = val;
+    fscanf(fp, "%f\n", &val); linenum++; solver.viscosity = val;
+
     fclose(fp);
 }
 
@@ -191,6 +193,11 @@ static void conv_genInputFile(){
             HEADLINE "    1. CFL number\n"
             HEADLINE "    2. final time\n";
 
+    char physinfo[] = HEADFINISH "physical parameter for advection-diffusion case (3 parameters)\n"
+            HEADLINE "    1. flow rate u for x direction\n"
+            HEADLINE "    2. flow rate v for x direction\n"
+            HEADLINE "    3. viscosity parameter miu\n";
+
     FILE *wfile = fopen(filename, "w");
 
     fprintf(wfile, "%s", probleminfo);
@@ -205,6 +212,11 @@ static void conv_genInputFile(){
     fprintf(wfile, "\n");
 
     fprintf(wfile, "%s", timeinfo);
+    fprintf(wfile, "\n");
+    fprintf(wfile, "\n");
+
+    fprintf(wfile, "%s", physinfo);
+    fprintf(wfile, "\n");
     fprintf(wfile, "\n");
     fprintf(wfile, "\n");
 

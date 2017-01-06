@@ -60,6 +60,9 @@ void conv_rhs(physField *phys, float frka, float frkb, float fdt){
     /* surface integral */
     phys_strong_surface_integral2d(phys, NULL, NULL, conv_fluxTerm, conv_upWindFlux);
 
+    /* waite for finishing send buffer */
+    MPI_Waitall(Nmess, mpi_send_requests, instatus);
+
     /* viscosity flux */
     if(solver.caseid == conv_advection_diffusion)
         phys_strong_viscosity_LDG_flux2d(phys, NULL, NULL, 0, 0, 0);
