@@ -16,6 +16,7 @@
  *
  */
 
+#include <StandCell/sc_stdcell.h>
 #include "conv_driver2d.h"
 #include "conv_getparameter.h"
 #include "conv_intilization.h"
@@ -50,9 +51,13 @@ int main(int argc, char **argv){
         printf("--------------------------------\n");
         printf("\n    2d Convection Test Case\n");
         printf("\n        Deg = %d \n", solver.N);
-        printf("\n    Tri Ele = %d \n", solver.Ne);
-        printf("\n   Quad Ele = %d \n", solver.Ne);
-        printf("\n   Ele Type = %d \n", solver.celltype);
+
+        if(cell->type == TRIANGLE) {
+            printf("\n    Tri Ele = %d \n", solver.Ne);
+        }
+        else if(cell->type == QUADRIL){
+            printf("\n   Quad Ele = %d \n", solver.Ne);
+        }
         printf("\n");
         printf("--------------------------------\n");
     }

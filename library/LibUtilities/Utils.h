@@ -14,9 +14,9 @@
 #ifdef __MATRIX_CREATE_FUNC
 __T__** __MATRIX_CREATE_FUNC(int Nrows, int Ncols){
     int n;
-    __T__ **A = (__T__ **) calloc(Nrows, sizeof(__T__ *));
+    __T__ **A = (__T__ **) calloc((size_t) Nrows, sizeof(__T__ *));
 
-    A[0] = (__T__ *) calloc(Nrows*Ncols, sizeof(__T__));
+    A[0] = (__T__ *) calloc((size_t) Nrows*Ncols, sizeof(__T__));
 
     for(n=1;n<Nrows;++n){
         A[n] = A[n-1]+ Ncols;
@@ -44,7 +44,7 @@ __T__** __MATRIX_CREATE_FUNC(int Nrows, int Ncols){
 #ifdef __VECTOR_CREATE_FUNC
 __T__ *__VECTOR_CREATE_FUNC(int Nrows){
 
-    __T__ *A = (__T__*) calloc(Nrows, sizeof(__T__));
+    __T__ *A = (__T__*) calloc((size_t) Nrows, sizeof(__T__));
 
     return A;
 }

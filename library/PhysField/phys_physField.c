@@ -134,15 +134,15 @@ static void permuteNodalBuffer(physField *phys){
 static void permuteCellBuffer(physField *phys){
 
     const int Nfields = phys->Nfield;
-    const int parallCellNum = phys->mesh->parallCellNum*Nfields;
-    int *cellIndexOut = IntVector_create(parallCellNum);
-    int *cellIndexIn = IntVector_create(parallCellNum);
+    const int phys_parallCellNum = phys->mesh->parallCellNum*Nfields;
+    int *cellIndexOut = IntVector_create(phys_parallCellNum);
+    int *cellIndexIn = IntVector_create(phys_parallCellNum);
 
-    phys->parallCellNum = parallCellNum;
+    phys->parallCellNum = phys_parallCellNum;
     phys->cellIndexIn = cellIndexIn;
     phys->cellIndexOut = cellIndexOut;
 
-    size_t sz = (size_t) parallCellNum;
+    size_t sz = (size_t) phys_parallCellNum;
     phys->c_inQ  = (real *) calloc(sz, sizeof(real));
     phys->c_outQ = (real *) calloc(sz, sizeof(real));
 

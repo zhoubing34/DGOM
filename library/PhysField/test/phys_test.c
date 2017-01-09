@@ -10,8 +10,10 @@
 #include "phys_strong_volume_flux2d_test.h"
 #include "phys_strong_surface_flux2d_test.h"
 #include "phys_strong_viscosity_LDG_flux2d_test.h"
+#include "phys_cellMean_test.h"
+#include "phys_cellFetch_test.h"
 
-#define TESTNUM 8
+#define TESTNUM 12
 
 int Mx = 4;
 int My = 2;
@@ -50,10 +52,10 @@ int main(int argc, char **argv){
 
 
     extern int N, Nfield, Mx, My;
-    int **SFToV = IntMatrix_create(1, 3);
-    SFToV[0][0] = 0;
-    SFToV[0][1] = 1;
-    SFToV[0][2] = 0;
+//    int **SFToV = IntMatrix_create(1, 3);
+//    SFToV[0][0] = 0;
+//    SFToV[0][1] = 1;
+//    SFToV[0][2] = 0;
 
     stdCell *tri = sc_create(N, TRIANGLE);
     geoGrid *tri_grid = mr_grid_createUniformGrid_tri(tri, Mx, My, -1, 1, -1, 1, 1);
@@ -64,10 +66,20 @@ int main(int argc, char **argv){
     physField *tri_phys = phys_create(Nfield, tri_mesh);
 //    printf("procid=%d, finish set up tri-physField\n", procid);
 
-    err[i++] = phys_nodeFetch_test(tri_phys, isverbose, "phys_trinodeFetch_test", "phys_tri_nodeFetch_test");
-    err[i++] = phys_strong_volume_flux2d_test(tri_phys, isverbose, "phys_strong_volume_flux2d_test",
+    err[i++] = phys_cellMean_test(tri_phys, isverbose,
+                                  "phys_tri_cellMean_test",
+                                  "phys_tri_cellMean_test");
+    err[i++] = phys_nodeFetch_test(tri_phys, isverbose,
+                                   "phys_tri_nodeFetch_test",
+                                   "phys_tri_nodeFetch_test");
+    err[i++] = phys_cellFetch_test(tri_phys, isverbose,
+                                   "phys_tri_cellFetch_test",
+                                   "phys_tri_cellFetch_test");
+    err[i++] = phys_strong_volume_flux2d_test(tri_phys, isverbose,
+                                              "phys_tri_strong_volume_flux2d_test",
                                               "phys_tri_strong_volume_flux2d_test");
-    err[i++] = phys_strong_surface_flux2d_test(tri_phys, isverbose, "phys_tri_strong_volume_flux2d_test",
+    err[i++] = phys_strong_surface_flux2d_test(tri_phys, isverbose,
+                                               "phys_tri_strong_surface_flux2d_test",
                                                "phys_tri_strong_surface_flux2d_test");
 
     err[i++] = phys_strong_viscosity_LDG_flux2d_test(tri_phys, isverbose,
@@ -92,11 +104,20 @@ int main(int argc, char **argv){
     physField *quad_phys = phys_create(Nfield, quad_mesh);
 //    printf("procid=%d,set up physField\n",procid);
 
-    err[i++] = phys_nodeFetch_test(quad_phys, isverbose, "phys_quadnodeFetch_test",
+    err[i++] = phys_cellMean_test(quad_phys, isverbose,
+                                  "phys_quad_cellMean_test",
+                                  "phys_quad_cellMean_test");
+    err[i++] = phys_nodeFetch_test(quad_phys, isverbose,
+                                   "phys_quad_nodeFetch_test",
                                    "phys_quad_nodeFetch_test");
-    err[i++] = phys_strong_volume_flux2d_test(quad_phys, isverbose, "phys_strong_volume_flux2d_test",
+    err[i++] = phys_cellFetch_test(quad_phys, isverbose,
+                                   "phys_quad_cellFetch_test",
+                                   "phys_quad_cellFetch_test");
+    err[i++] = phys_strong_volume_flux2d_test(quad_phys, isverbose,
+                                              "phys_quad_strong_volume_flux2d_test",
                                               "phys_quad_strong_volume_flux2d_test");
-    err[i++] = phys_strong_surface_flux2d_test(quad_phys, isverbose, "phys_quad_strong_volume_flux2d_test",
+    err[i++] = phys_strong_surface_flux2d_test(quad_phys, isverbose,
+                                               "phys_quad_strong_surface_flux2d_test",
                                                "phys_quad_strong_surface_flux2d_test");
     err[i++] = phys_strong_viscosity_LDG_flux2d_test(quad_phys, isverbose,
                                                      "phys_quad_strong_viscosity_LDG_flux2d_test",

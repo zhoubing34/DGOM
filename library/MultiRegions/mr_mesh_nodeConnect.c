@@ -120,15 +120,15 @@ void mr_mesh_nodeConnect2d(parallMesh *mesh){
     }
 
     /* now build maps from incoming nodes to variables */
-    double **xsend = (double**) calloc(nprocs, sizeof(double*));
-    double **ysend = (double**) calloc(nprocs, sizeof(double*));
-    double **xrecv = (double**) calloc(nprocs, sizeof(double*));
-    double **yrecv = (double**) calloc(nprocs, sizeof(double*));
+    double **xsend = (double**) calloc((size_t) nprocs, sizeof(double*));
+    double **ysend = (double**) calloc((size_t) nprocs, sizeof(double*));
+    double **xrecv = (double**) calloc((size_t) nprocs, sizeof(double*));
+    double **yrecv = (double**) calloc((size_t) nprocs, sizeof(double*));
 
-    int **Esend = (int**) calloc(nprocs, sizeof(int*));
-    int **Fsend = (int**) calloc(nprocs, sizeof(int*));
-    int **Erecv = (int**) calloc(nprocs, sizeof(int*));
-    int **Frecv = (int**) calloc(nprocs, sizeof(int*));
+    int **Esend = (int**) calloc((size_t) nprocs, sizeof(int*));
+    int **Fsend = (int**) calloc((size_t) nprocs, sizeof(int*));
+    int **Erecv = (int**) calloc((size_t) nprocs, sizeof(int*));
+    int **Frecv = (int**) calloc((size_t) nprocs, sizeof(int*));
 
     for(p2=0;p2<nprocs;++p2){
         if(Npar[p2]){
@@ -164,16 +164,16 @@ void mr_mesh_nodeConnect2d(parallMesh *mesh){
         }
     }
 
-    MPI_Request *xsendrequests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
-    MPI_Request *ysendrequests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
-    MPI_Request *xrecvrequests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
-    MPI_Request *yrecvrequests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
-    MPI_Request *Esendrequests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
-    MPI_Request *Fsendrequests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
-    MPI_Request *Erecvrequests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
-    MPI_Request *Frecvrequests = (MPI_Request*) calloc(nprocs, sizeof(MPI_Request));
+    MPI_Request *xsendrequests = (MPI_Request*) calloc((size_t) nprocs, sizeof(MPI_Request));
+    MPI_Request *ysendrequests = (MPI_Request*) calloc((size_t) nprocs, sizeof(MPI_Request));
+    MPI_Request *xrecvrequests = (MPI_Request*) calloc((size_t) nprocs, sizeof(MPI_Request));
+    MPI_Request *yrecvrequests = (MPI_Request*) calloc((size_t) nprocs, sizeof(MPI_Request));
+    MPI_Request *Esendrequests = (MPI_Request*) calloc((size_t) nprocs, sizeof(MPI_Request));
+    MPI_Request *Fsendrequests = (MPI_Request*) calloc((size_t) nprocs, sizeof(MPI_Request));
+    MPI_Request *Erecvrequests = (MPI_Request*) calloc((size_t) nprocs, sizeof(MPI_Request));
+    MPI_Request *Frecvrequests = (MPI_Request*) calloc((size_t) nprocs, sizeof(MPI_Request));
 
-    MPI_Status  *status = (MPI_Status*) calloc(nprocs, sizeof(MPI_Status));
+    MPI_Status  *status = (MPI_Status*) calloc((size_t) nprocs, sizeof(MPI_Status));
 
     cnt = 0;
     for(p2=0;p2<nprocs;++p2){

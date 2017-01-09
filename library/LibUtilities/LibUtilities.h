@@ -28,7 +28,7 @@ void str2double(char *str, double *scal, char* errmessage);
 
 /* matrix operation */
 void Matrix_inverse(double *A, int N);
-void Matrix_multiply(const unsigned M, const unsigned K, const unsigned N,
+void Matrix_multiply(const int M, const int K, const int N,
                      const double *A, const double *B, double *C);
 
 /* allocate mem */

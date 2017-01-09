@@ -14,7 +14,7 @@
  * @param[in] nodal_flux
  *
  * @note
- *
+ * The field of variable `phys->rhs` will be initialized and assigned to new values.
  */
 void phys_strong_volume_flux2d(physField *phys, nodal_flux_func nodal_flux){
     const int K = phys->grid->K;

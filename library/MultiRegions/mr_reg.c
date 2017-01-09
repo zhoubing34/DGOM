@@ -400,10 +400,10 @@ double mr_reg_integral(multiReg *region, int ind, double *nodalVal){
     double integral = 0;
 
     stdCell *cell = region->cell;
-    double *J = region->J[ind];
+    const double *J = region->J[ind];
     const int Np = cell->Np;
 
-    int i;
+    register int i;
     for(i=0;i<Np;i++){
         integral += J[i]*cell->wv[i]*nodalVal[i];
     }

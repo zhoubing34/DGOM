@@ -7,4 +7,6 @@
 
 #include "phys_test.h"
 
+int phys_cellMean_test(physField *phys, int verbose, char *message, char *filename);
+
 #endif //DGOM_CELLFETCH_TEST_H

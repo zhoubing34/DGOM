@@ -110,6 +110,7 @@ static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose)
         PrintIntVector2File(fp, "mesh->Npar", mesh->Npar, mesh->nprocs);
         fprintf(fp, "mesh->parallCellNum: %d\n", mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
+        PrintIntVector2File(fp, "mesh->faceIndexIn", mesh->faceIndexIn, mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->cellIndexOut", mesh->cellIndexOut, mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->vmapM", mesh->vmapM, K*Nfaces*Nfp);
         PrintIntVector2File(fp, "mesh->vmapP", mesh->vmapP, K*Nfaces*Nfp);
@@ -157,6 +158,7 @@ static int mr_quadMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose
         PrintIntVector2File(fp, "mesh->Npar", mesh->Npar, mesh->nprocs);
         fprintf(fp, "mesh->parallCellNum: %d\n", mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
+        PrintIntVector2File(fp, "mesh->faceIndexIn", mesh->faceIndexIn, mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->cellIndexOut", mesh->cellIndexOut, mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->vmapM", mesh->vmapM, K*Nfaces*Nfp);
         PrintIntVector2File(fp, "mesh->vmapP", mesh->vmapP, K*Nfaces*Nfp);

@@ -10,7 +10,11 @@ set(PHYSDOMAIN_TEST_SRC
         phys_strong_surface_flux2d_test.c
         phys_strong_surface_flux2d_test.h
         phys_strong_viscosity_LDG_flux2d_test.h
-        phys_strong_viscosity_LDG_flux2d_test.c)
+        phys_strong_viscosity_LDG_flux2d_test.c
+        phys_cellMean_test.c
+        phys_cellMean_test.h
+        phys_cellFetch_test.c
+        phys_cellFetch_test.h)
 
 add_executable(physfield_test ${PHYSDOMAIN_TEST_SRC})
 add_dependencies(physfield_test physfield)

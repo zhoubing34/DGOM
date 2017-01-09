@@ -67,9 +67,9 @@ void Matrix_inverse(double *A, int N){
  * Row counts first to generalize the vector A, B and C, which means that A[i*N+j] = A[i][j]
  */
 
-void Matrix_multiply(const unsigned M, const unsigned K, const unsigned N,
+void Matrix_multiply(const int M, const int K, const int N,
                      const double *A, const double *B, double *C) {
-    unsigned i, j, k;
+    int i, j, k;
 
     for (i = 0; i < M; ++i) {
         const double *Ai_ = A + i*K;

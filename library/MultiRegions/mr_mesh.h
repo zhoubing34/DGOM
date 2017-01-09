@@ -48,6 +48,7 @@ typedef struct {
     int parallCellNum; ///< total number of elements to send and recv
     int *cellIndexOut; ///< index list of elements in send buffer
     int *cellIndexIn; ///< index list of elements in recv buffer
+    int *faceIndexIn; ///< index list of face in recv buffer
 
     /* boudary condition */
     int **EToBS; ///< adjacent face type of each cell

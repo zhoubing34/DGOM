@@ -1,6 +1,7 @@
 #include "LibUtilities/LibUtilities.h"
 #include "mr_mesh_parallelPairs.h"
 #include "mr_mesh_cellConnect.h"
+#include "mr_mesh.h"
 
 static int compare_pairs(const void *obj1, const void *obj2);
 static int pairprocget(const void *obj1);
@@ -161,17 +162,22 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
 
     /* now build maps from incoming buffer to cells */
     mesh->cellIndexIn = IntVector_create(mesh->parallCellNum);
+    mesh->faceIndexIn = IntVector_create(mesh->parallCellNum);
 
-    int **Esend = (int**) calloc(nprocs, sizeof(int*));
-    int **Erecv = (int**) calloc(nprocs, sizeof(int*));
+    int **Esend = (int**) calloc((size_t) nprocs, sizeof(int*));
+    int **Erecv = (int**) calloc((size_t) nprocs, sizeof(int*));
+    int **Fsend = (int**) calloc((size_t) nprocs, sizeof(int*));
+    int **Frecv = (int**) calloc((size_t) nprocs, sizeof(int*));
     for(p2=0;p2<nprocs;++p2){
         if(Npar[p2]){
             Esend[p2] = IntVector_create(Npar[p2]);
             Erecv[p2] = IntVector_create(Npar[p2]);
+            Fsend[p2] = IntVector_create(Npar[p2]);
+            Frecv[p2] = IntVector_create(Npar[p2]);
         }
     }
 
-    /* number of nodes adjacent to each process */
+    /* number of faces adjacent to each process */
     int *skP = IntVector_create(nprocs);
     /* send coordinates in local order */
     for(k1=0;k1<Klocal;++k1){
@@ -179,6 +185,7 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
             p2 = mesh->EToP[k1][f1];
             if(p2!=procid){
                 Esend[p2][skP[p2]] = mesh->EToE[k1][f1];
+                Fsend[p2][skP[p2]] = mesh->EToF[k1][f1];
                 ++(skP[p2]);
             }
         }
@@ -186,6 +193,8 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
 
     MPI_Request Esendrequests[nprocs];
     MPI_Request Erecvrequests[nprocs];
+    MPI_Request Fsendrequests[nprocs];
+    MPI_Request Frecvrequests[nprocs];
     MPI_Status  status[nprocs];
 
     int cnt = 0;
@@ -195,6 +204,9 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
 
             MPI_Isend(Esend[p2], Nout, MPI_INT,    p2, 2666+p2, MPI_COMM_WORLD, Esendrequests+cnt);
             MPI_Irecv(Erecv[p2], Nout, MPI_INT,    p2, 2666+procid, MPI_COMM_WORLD, Erecvrequests+cnt);
+
+            MPI_Isend(Fsend[p2], Nout, MPI_INT,    p2, 3666+p2, MPI_COMM_WORLD, Fsendrequests+cnt);
+            MPI_Irecv(Frecv[p2], Nout, MPI_INT,    p2, 3666+procid, MPI_COMM_WORLD, Frecvrequests+cnt);
             ++cnt;
         }
     }
@@ -202,6 +214,8 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
 
     MPI_Waitall(cnt, Esendrequests, status);
     MPI_Waitall(cnt, Erecvrequests, status);
+    MPI_Waitall(cnt, Fsendrequests, status);
+    MPI_Waitall(cnt, Frecvrequests, status);
 
     /* now match up local cells with the requested (recv'ed cell) */
     sk = 0;
@@ -209,13 +223,26 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
         /* for each received face */
         for(n=0;n<skP[p2];++n){
             k1 = Erecv[p2][n]; /* adjacent element index */
-            mesh->cellIndexIn[sk++] = k1;
+            f1 = Frecv[p2][n]; /* adjacent face index */
+            mesh->cellIndexIn[sk] = k1;
+            mesh->faceIndexIn[sk++] = f1;
         }
     }
 
     IntVector_free(skP);
+
+    for(p2=0;p2<nprocs;++p2){
+        if(Npar[p2]){
+            IntVector_free(Esend[p2]);
+            IntVector_free(Erecv[p2]);
+            IntVector_free(Fsend[p2]);
+            IntVector_free(Frecv[p2]);
+        }
+    }
     free(Esend);
     free(Erecv);
+    free(Fsend);
+    free(Frecv);
 
     /* now build maps from outgoing buffer to cells */
     mesh->cellIndexOut = IntVector_create(mesh->parallCellNum);

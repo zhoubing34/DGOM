@@ -4,6 +4,7 @@
 
 #include <MultiRegions/mr_mesh.h>
 #include "phys_fetchBuffer.h"
+#include "phys_physField.h"
 
 /**
  * @brief Send/rece nodal value `f_Q` through buffers
@@ -98,14 +99,20 @@ void phys_fetchCellBuffer(physField *phys,
 
     const int nprocs = mesh->nprocs;
     const int procid = mesh->procid;
+    const int Nfield = phys->Nfield;
 
     /* buffer outgoing node data */
     int n;
     for(n=0;n<phys->parallCellNum;++n)
         phys->c_outQ[n] = phys->c_Q[phys->cellIndexOut[n]];
 
+    int Nout[nprocs];
+    for(n=0;n<nprocs;n++){
+        Nout[n] = mesh->Npar[n]*Nfield;
+    }
+
     /* do sends and recv */
-    phys_fetchBuffer(procid, nprocs, mesh->Npar, phys->c_outQ, phys->c_inQ,
+    phys_fetchBuffer(procid, nprocs, Nout, phys->c_outQ, phys->c_inQ,
                      mpi_send_requests, mpi_recv_requests, Nmessage);
 }
 
