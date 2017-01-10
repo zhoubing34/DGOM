@@ -12,8 +12,9 @@
 #include "phys_strong_viscosity_LDG_flux2d_test.h"
 #include "phys_cellMean_test.h"
 #include "phys_cellFetch_test.h"
+#include "phys_limiter_test.h"
 
-#define TESTNUM 12
+#define TESTNUM 14
 
 int Mx = 4;
 int My = 2;
@@ -85,6 +86,9 @@ int main(int argc, char **argv){
     err[i++] = phys_strong_viscosity_LDG_flux2d_test(tri_phys, isverbose,
                                                      "phys_tri_strong_viscosity_LDG_flux2d_test",
                                                      "phys_tri_strong_viscosity_LDG_flux2d_test");
+    err[i++] = phys_limiter_test(tri_phys, isverbose,
+                                 "phys_tri_limiter_test",
+                                 "phys_tri_limiter_test");
 
     /* free memory */
     sc_free(tri);
@@ -122,7 +126,9 @@ int main(int argc, char **argv){
     err[i++] = phys_strong_viscosity_LDG_flux2d_test(quad_phys, isverbose,
                                                      "phys_quad_strong_viscosity_LDG_flux2d_test",
                                                      "phys_quad_strong_viscosity_LDG_flux2d_test");
-
+    err[i++] = phys_limiter_test(quad_phys, isverbose,
+                                 "phys_quad_limiter_test",
+                                 "phys_quad_limiter_test");
     /* free memory */
     sc_free(quad);
     mr_grid_free(quad_grid);

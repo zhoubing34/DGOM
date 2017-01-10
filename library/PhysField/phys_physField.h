@@ -35,7 +35,7 @@ typedef struct{
 
     int parallCellNum; ///< number of cell variables to send/recv
     int *cellIndexOut; ///< map from send buffer `c_outQ` to cell index
-    int *cellIndexIn; ///< map from recv buffer `c_inQ` to cell index
+    //int *cellIndexIn; ///< map from recv buffer `c_inQ` to cell index
     real *c_inQ, *c_outQ; ///< send/recv buffers for elemental information
 
     /* information */

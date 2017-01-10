@@ -14,7 +14,9 @@ set(PHYSDOMAIN_TEST_SRC
         phys_cellMean_test.c
         phys_cellMean_test.h
         phys_cellFetch_test.c
-        phys_cellFetch_test.h)
+        phys_cellFetch_test.h
+        phys_limiter_test.c
+        phys_limiter_test.h)
 
 add_executable(physfield_test ${PHYSDOMAIN_TEST_SRC})
 add_dependencies(physfield_test physfield)

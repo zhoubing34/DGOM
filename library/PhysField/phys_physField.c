@@ -81,7 +81,7 @@ void phys_free(physField *phys){
 
     IntVector_free(phys->nodeIndexOut);
     IntVector_free(phys->cellIndexOut);
-    IntVector_free(phys->cellIndexIn);
+    //IntVector_free(phys->cellIndexIn);
 }
 
 
@@ -136,10 +136,10 @@ static void permuteCellBuffer(physField *phys){
     const int Nfields = phys->Nfield;
     const int phys_parallCellNum = phys->mesh->parallCellNum*Nfields;
     int *cellIndexOut = IntVector_create(phys_parallCellNum);
-    int *cellIndexIn = IntVector_create(phys_parallCellNum);
+    //int *cellIndexIn = IntVector_create(phys_parallCellNum);
 
     phys->parallCellNum = phys_parallCellNum;
-    phys->cellIndexIn = cellIndexIn;
+    //phys->cellIndexIn = cellIndexIn;
     phys->cellIndexOut = cellIndexOut;
 
     size_t sz = (size_t) phys_parallCellNum;
@@ -159,7 +159,8 @@ static void permuteCellBuffer(physField *phys){
                 for (fld = 0; fld < Nfields;++fld) {
                     /* sk and node index determine the map relationship */
                     cellIndexOut[sp] = Nfields*(mesh->cellIndexOut[sk]) + fld;
-                    cellIndexIn[sp++] = Nfields*(mesh->cellIndexIn[sk]) + fld;
+                    //cellIndexIn[sp] = Nfields*(mesh->cellIndexIn[sk]) + fld;
+                    sp++;
                 }
                 sk++;
             }

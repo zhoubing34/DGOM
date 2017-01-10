@@ -68,7 +68,6 @@ int phys_cellFetch_test(physField *phys, int verbose, char *message, char *filen
         PrintIntVector2File(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->faceIndexIn", mesh->faceIndexIn, mesh->parallCellNum);
         PrintVector2File(fp, "c_Q", phys->c_Q, K*Nfield);
-        PrintIntVector2File(fp, "cellIndexIn", phys->cellIndexIn, phys->parallCellNum);
         PrintIntVector2File(fp, "cellIndexOut", phys->cellIndexOut, phys->parallCellNum);
         PrintVector2File(fp, "c_inQ", phys->c_inQ, phys->parallCellNum);
         PrintVector2File(fp, "c_outQ", phys->c_outQ, phys->parallCellNum);
