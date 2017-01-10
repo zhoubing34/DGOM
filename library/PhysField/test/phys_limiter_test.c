@@ -19,7 +19,7 @@ int phys_limiter_test(physField *phys, int verbose, char *message, char *filenam
     for(k=0;k<K;k++){
         for(i=0;i<Np;i++){
             phys->f_Q[sk++] =      region->x[k][i];
-            phys->f_Q[sk++] =     (region->x[k][i]);
+            phys->f_Q[sk++] =     (region->y[k][i]);
         }
     }
 

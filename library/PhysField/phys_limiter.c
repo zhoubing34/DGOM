@@ -159,6 +159,7 @@ void phys_slloc2d(physField *phys, double beta){
             real c_max = temp;
             real c_min = temp;
 
+            if(trouble_cell[k]==1) break; // trouble cell, jump out the loop
             /* loop over all faces */
             for(f=0;f<Nfaces;f++){
                 int e = EToE[k][f];
@@ -173,8 +174,8 @@ void phys_slloc2d(physField *phys, double beta){
 
                 if( EXCEPTION(uf_mean[(k*Nfaces+f)*Nfield+fld], temp, c_next) ){
 #if DEBUG
-                    fprintf(fp, "k=%d, f=%d, fld=%d, c_mean=%f, c_next=%f, uf_mean=%f\n",
-                            k, f, fld, temp, c_next, uf_mean[(k*Nfaces+f)*Nfield+fld]);
+                    fprintf(fp, "k=%d, fld=%d, f=%d, c_mean=%f, c_next=%f, uf_mean=%f\n",
+                            k, fld, f, temp, c_next, uf_mean[(k*Nfaces+f)*Nfield+fld]);
 #endif
                     trouble_cell[k] = 1;
                 }
@@ -203,8 +204,8 @@ void phys_slloc2d(physField *phys, double beta){
             cell_min[k*Nfield+fld] = min(cell_min[k*Nfield+fld], c_next);
             if( EXCEPTION(uf_mean[(k*Nfaces+f)*Nfield+fld], temp, c_next) ){
 #if DEBUG
-                fprintf(fp, "k=%d, f=%d, fld=%d, c_mean=%f, c_next=%f, uf_mean=%f\n",
-                        k, f, fld, temp, c_next, uf_mean[(k*Nfaces+f)*Nfield+fld]);
+                fprintf(fp, "k=%d, fld=%d, f=%d, c_mean=%f, c_next=%f, uf_mean=%f\n",
+                        k, fld, f, temp, c_next, uf_mean[(k*Nfaces+f)*Nfield+fld]);
 #endif
                 trouble_cell[k] = 1;
             }

@@ -198,6 +198,11 @@ static void conv_genInputFile(){
             HEADLINE "    2. flow rate v for x direction\n"
             HEADLINE "    3. viscosity parameter miu\n";
 
+    char LDGinfo[] = HEADFINISH "LDG parameter for viscosity term (3 parameters)\n"
+            HEADLINE "    1. C11\n"
+            HEADLINE "    2. C12\n"
+            HEADLINE "    3. C22\n";
+
     FILE *wfile = fopen(filename, "w");
 
     fprintf(wfile, "%s", probleminfo);

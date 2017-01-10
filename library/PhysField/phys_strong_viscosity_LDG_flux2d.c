@@ -37,8 +37,6 @@ void phys_strong_viscosity_LDG_flux2d(physField *phys,
 
     const int procid = phys->grid->procid;
     const int nprocs = phys->grid->nprocs;
-    const int Np = phys->cell->Np;
-    const int K = phys->grid->K;
     const int Nfp = phys->cell->Nfp;
     const int Nfield = phys->Nfield;
 

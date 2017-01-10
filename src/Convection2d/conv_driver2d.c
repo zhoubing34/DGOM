@@ -16,7 +16,6 @@
  *
  */
 
-#include <StandCell/sc_stdcell.h>
 #include "conv_driver2d.h"
 #include "conv_getparameter.h"
 #include "conv_intilization.h"
