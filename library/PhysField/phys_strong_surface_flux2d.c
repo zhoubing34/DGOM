@@ -85,8 +85,10 @@ void phys_strong_surface_integral2d
                     break;
             }
 
-            hand_err( nodal_flux(varM, Eflux, Gflux) );
-            hand_err( numerical_flux(nx, ny, varM, varP, Fhs) );
+            nodal_flux(varM, Eflux, Gflux);
+            numerical_flux(nx, ny, varM, varP, Fhs);
+//            hand_err( nodal_flux(varM, Eflux, Gflux) );
+//            hand_err( numerical_flux(nx, ny, varM, varP, Fhs) );
 
             real *flux_Q = dflux + m*Nfield;
             for(fld=0;fld<Nfield;fld++){

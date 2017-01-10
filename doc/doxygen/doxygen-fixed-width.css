@@ -14,6 +14,9 @@ div.contents {
         border-radius: 8px;
 }
 
+div.image img[src="example.png"]{
+        width:30px;
+}
 
 #titlearea {
         background-color: white;

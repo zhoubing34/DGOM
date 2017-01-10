@@ -32,7 +32,7 @@ int conv_upWindFlux(real nx, real ny, real *varM, real *varP, real *Fhs){
 }
 
 
-void conv_rhs(physField *phys, float frka, float frkb, float fdt){
+void conv_rhs(physField *phys, real frka, real frkb, real fdt){
 
     parallMesh *mesh = phys->mesh;
     const int K = mesh->grid->K;
@@ -43,8 +43,8 @@ void conv_rhs(physField *phys, float frka, float frkb, float fdt){
     extern conv_solver2d solver;
 
     /* mpi request buffer */
-    MPI_Request mpi_send_requests[nprocs];
-    MPI_Request mpi_recv_requests[nprocs];
+    MPI_Request *mpi_send_requests = (MPI_Request *) calloc((size_t) nprocs, sizeof(MPI_Request));
+    MPI_Request *mpi_recv_requests = (MPI_Request *) calloc((size_t) nprocs, sizeof(MPI_Request));
 
     int Nmess=0;
     /* fetch nodal value through all procss */
@@ -64,9 +64,12 @@ void conv_rhs(physField *phys, float frka, float frkb, float fdt){
     MPI_Waitall(Nmess, mpi_send_requests, instatus);
 
     /* viscosity flux */
-    if(solver.caseid == conv_advection_diffusion)
-        phys_strong_viscosity_LDG_flux2d(phys, NULL, NULL, 0, 0, 0);
-
+    if(solver.caseid == conv_advection_diffusion) {
+        real c11 = (real) solver.LDG_parameter[0];
+        real c12 = (real) solver.LDG_parameter[1];
+        real c22 = (real) solver.LDG_parameter[2];
+        phys_strong_viscosity_LDG_flux2d(phys, NULL, NULL, c11, c12, c22);
+    }
 
     real *f_resQ = phys->f_resQ;
     real *f_Q = phys->f_Q;
@@ -80,4 +83,7 @@ void conv_rhs(physField *phys, float frka, float frkb, float fdt){
     /* make sure all messages went out */
     MPI_Status outstatus[nprocs];
     MPI_Waitall(Nmess, mpi_send_requests, outstatus);
+
+    free(mpi_recv_requests);
+    free(mpi_send_requests);
 }

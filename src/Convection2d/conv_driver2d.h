@@ -22,7 +22,7 @@ typedef struct {
     double viscosity; ///> diffusion parameter
     int isverbose; ///> parameters for debug
     nc_file *outfile; ///> output file
-    double LDG_parameter[3]; ///> parameter for LDG viscosity soler
+    double LDG_parameter[3]; ///> parameter C11,C12,C22 for LDG viscosity soler
 } conv_solver2d;
 
 #endif

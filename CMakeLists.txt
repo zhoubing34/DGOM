@@ -6,12 +6,15 @@ project(DGOM)
 set(THIRD_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/3rdParty/install")
 
 # set mpi compilers
-set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_C_FLAGS "-Wall")
 set(MPI_PATH $ENV{MPI_DIR})                      # use environmental variable MPI_DIR
 set(MPI_C_COMPILER   "${MPI_PATH}/bin/mpicc")    # set mpicc before find mpi package
 set(MPI_CXX_COMPILER "${MPI_PATH}/bin/mpicxx")   # set mpicxx before find mpi package
 set(MKLROOT $ENV{MKL_DIR})
+
+# release type
+set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -Wall")
 
 find_package(MPI REQUIRED)
 if(NOT MPI_FOUND)

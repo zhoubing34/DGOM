@@ -1,81 +1,128 @@
 /** \page Convection2d
- * Two dimensional scalar convection problem
+ * 二维对流扩散方程求解器
  *
- * \section Introduction
- * A two dimensional linear advection problem is calculated in order to assess
- * the performance of the nodal DG method on triangular and quadrilateral elements.
+ * \section 简介
+ * 二维对流扩散方程作为最典型的守恒方程形式，经常用于检验数值格式的误差，精度以及守恒性等。
  *
- * The governing equation is giving as
+ * 守恒形式控制方程为
  * \f[
- * \frac{\partial u}{\partial t} + \nabla \cdot \mathbf{f}(u, x, t) = 0,
- * \quad x\in\Omega
+ * \frac{\partial T}{\partial t} + \frac{\partial E}{\partial x} + \frac{\partial G}{\partial y} =
+ * \frac{\partial }{\partial x}\left( \mu_x \frac{\partial T}{\partial x} \right)
+ * + \frac{\partial }{\partial y}\left( \mu_y \frac{\partial T}{\partial y} \right),
+ * \quad (x,y)\in\Omega
  * \f]
  *
- * where *u* is the scalar variable, the flux term is giving by
- * \f[\mathbf{f} = \mathbf{a}(x) = (a_1(x)u, a_2(x)u).\f]
+ * 其中 *T* 为守恒变量，而 \f$ \mathbf{F} = \left[ E,G \right] = \left[ uT, vT \right] \f$ 为输运通量项，
+ * \f$ \mu=\left[\mu_x, \mu_y \right] \f$ 分别为 *x*,*y* 方向的扩散系数。
  *
- * Some configuration of the convection problem is given blow.
+ * 验证求解器计算的基本算例包括以下几种。
  *
- * 1. The computation domain is set to \f$[-L, L]\times[-L, L]\f$, where \f$ L = 1 \f$.
+ * \subsection 旋转流
  *
- * 2. The const velocity field is \f$[a_1, a_2] = (-wy, wx)\f$ as shown in Fig.1,
- * where \f$w = 5\pi/6 \f$. The period of the field is \f$T = \frac{2\pi}{w} = 2.4\f$ s.
- * \image html Convect2d_vel.png "Fig 1. The constant velocity field"
+ * 算例基本设置如下
  *
- * 3. The initial scalar field is giving as \f$ u(\mathbf{x}, t = 0) =
- * exp \left( -\sigma \left| \mathbf{x} - \mathbf{x}_c \right|^2 \right) \f$,
- * where \f$ \mathbf{x}_c = (0, 3/5) \f$, \f$ \sigma = 125 \times 1000/33^2 \f$.
- * \image html Convect2d_initcon.png "Fig 2. The initial scalar distribution"
+ * 1. 计算域大小为 \f$[-1, 1]\times[-1, 1]\f$，采用均匀网格计算，可以指定 *x*,*y* 维度上单元个数。
  *
- * 4. Four different mesh resolutions of uniform meshes are used to compare the performance
- * of different element types, triangle and quadrilateral. The resolution of each mesh is [Ne x Ne],
- * where Ne is the number of elements on each edge and Ne is set to 20, 40, 60 and 80 respectively.
- * The triangle element is derived by subdividing the square element.
+ * 2. 流速场逆时针旋转流动 \f$ \left( u,v \right) = (-wy, wx)\f$ （如图1所示），其中 \f$w = 5\pi/6 \f$，
+ * 运动周期为 \f$t = 2\pi/w = 2.4\f$ s。
+ * ![](Convection2d/rotation_flowfield.png "图1. 旋转流速场")
  *
- * 5. The Cauchy boundary condition \f$ u(\partial \Omega) =0 \f$ is applied.
+ * 3. 初始场采用高斯函数表达形式 \f$ T(\mathbf{x}, t=0) =
+ * exp \left[ -\sigma \left| \mathbf{x} - \mathbf{x}_c \right|^2 \right] \f$，其中初始位置
+ * \f$ \mathbf{x}_c = (0, 3/5) \f$，参数 \f$ \sigma = 125 \times 1000/33^2 \f$.
+ * ![](Convection2d/rotation_initialfield.png "图2. 初始场")
  *
- * 6. The time step \f$\Delta t \f$ is obtained by
- * \f[ \Delta t \le CFL \left( \frac{2}{3}min \Delta r_i \right) min_{\Omega}
- * \left( \frac{r_D}{\left| \mathbf{v} \right|} \right)  \f]
- * where \f$r_D\f$ is the radius of circumscribed circle and \f$\Delta r_i\f$
- * is the minimum spatial distance of all nodes in element \f$\Omega\f$.
+ * 4. 旋转流动算例只是纯对流运动，不包括扩散运动。
  *
- * \section Discretization
+ * 5. 开边界条件采用柯西边界条件 \f$ u(\partial \Omega) =0 \f$。
  *
- * The governing equation is
- * \f[\begin{equation} \frac{\partial u}{\partial t} + \frac{\partial F(u)}{\partial x} = S(U)\end{equation}\f]
+ * 6. 时间步长 \f$\Delta t \f$ 根据如下公式确定
+ * \f[ \Delta t = CFL \cdot min_{\Omega_i} \left( \frac{r_D}{| \mathbf{v}| (N+1)} \right) \f]
+ * 其中 \f$r_D\f$ 为单元长度，二维单元中采用公式 \f$ r_D = \sqrt{A/\pi} \f$ 计算。*N* 为单元内数值解
+ * 的最高阶数，\f$ \mathbf{v} \f$ 为单元内速度矢量大小。
  *
- * \f[\begin{equation}U = \begin{bmatrix}\eta \cr q_x \end{bmatrix} \quad
- * F = \begin{bmatrix}q_x \cr \frac{q_x^2}{h} + \frac{1}{2}g(\eta^2 - 2\eta z) \end{bmatrix} \quad
- * S = \begin{bmatrix}0 \cr -g\eta\frac{\partial z}{\partial x} \end{bmatrix}\end{equation}\f]
+ * \subsection 对流扩散运动
  *
- * \f[\begin{equation} U_h = \sum{l_j U_j} \quad F_h(U) = \sum{l_j F(U_j)} \end{equation}\f]
+ * 对流扩散运动采用与旋转流基本相同的设置，如计算域、网格等等。其不同设置包括
  *
- * \f[\begin{equation}\int_{\Omega} l_i l_j \frac{\partial U_j}{\partial t} dx
- * +\int_{\Omega} l_i \frac{\partial l_j}{\partial x} F(U_j) dx= 0 \end{equation}\f]
+ * 1. 流速场为常速度场 \f$ u=v=0.5 \f$。
+ * 2. 扩散系数全场为常数 \f$ \mu_x = \mu_y = \mu_0 \f$。
+ * 3. 初始解与扩散系数有关，其表达式为
+ * \f[ T(\mathbf{x}, t=0)= exp \left[ -\frac{(x-x_0)^2}{\mu_0}-\frac{(y-y_0)^2}{\mu_0}\right] \f]
+ * 其中初始位置 \f$ (x_0, y_0)=(0.5,0.5) \f$。计算终止时，解析解表达式为
+ * \f[ T(\mathbf{x}, t=t_0) = \frac{1}{4t+1} exp \left[ -\frac{(x-x_0-ut_0)^2}{\mu_0(4t+1)}
+ * -\frac{(y-y_0-vt_0)^2}{\mu_0(4t+1)} \right] \f]
  *
- * \f[\begin{equation} \int_{\Omega} l_i l_j \frac{\partial U_j}{\partial t} dx +
- * \int_{\Omega} l_i \frac{\partial l_j}{\partial x} F(U_j) dx+
- * \oint_{\partial \Omega} l_i l_j (F^* - F)\cdot \vec{n} ds = 0  \end{equation}\f]
+ * \section 数值离散
  *
- * \f[\begin{equation} JM \frac{\partial U}{\partial t} + JMD_x F(U) + J_E M_E (F^* - F)\cdot \vec{n} = 0 \end{equation}\f]
+ * 数值离散采用两次分部积分的强形式方法计算，具体离散过程如下。
  *
- * ODE:
+ * 由于方程具有二阶偏导项，首先利用辅助变量 \f$ (p,q) \f$ 转换为一阶偏导形式
  *
- * \f[\begin{equation} \frac{\partial U}{\partial t} = -\frac{\partial r}{\partial x}D_r F(U) +
- * \frac{J_E}{J}M^{-1} M_E (F^* - F)\cdot \vec{n}=L(U(t)) \end{equation}\f]
+ * \f[ \left\{ \begin{array}{l}
+ * \frac{\partial T}{\partial t} + \frac{\partial E}{\partial x} + \frac{\partial G}{\partial y} =
+ * \frac{\partial p}{\partial x} + \frac{\partial q}{\partial y} \cr
+ * p = \mu_0 \frac{\partial T}{\partial x} \cr
+ * q = \mu_0 \frac{\partial T}{\partial y} \cr
+ * \end{array} \right. \f]
  *
- * \f[\begin{equation}rhs = -\frac{\partial r}{\partial x}D_r F(U) +
- * \frac{J_E}{J}M^{-1} M_E (F - F^*)\cdot \vec{n}\end{equation}\f]
+ * 将方程组乘以试验函数后在计算域内积分，并且采用两次分部积分后得到
  *
- * To allow information transfer between cells, the Lax-Friedrichs flux is applied
- * in the surface integration as the numerical flux.
+ * \f[ \left\{ \begin{array}{r}
+ * \int_{\Omega_i} l_i \left( \frac{\partial T}{\partial t} + \frac{\partial E}{\partial x}
+ * + \frac{\partial G}{\partial y} \right) \mathrm{d\Omega} + \oint_{\partial \Omega_i}
+ *  l_i \left( E^* n_x + G^* n_y- En_x - Gn_y \right) \mathrm{\partial \Omega} \cr
+ * = \int_{\Omega_i} l_i \left( \frac{\partial p}{\partial x} +
+ * \frac{\partial q}{\partial y} \right) \mathrm{d\Omega} + \oint_{\partial \Omega_i}
+ * l_i ( p^* n_x+q^* n_y-p n_x-q n_y ) \mathrm{\partial \Omega} \cr
+ * \int_{\Omega_i} l_i p \mathrm{d\Omega} = \int_{\Omega_i} l_i \mu_0 \frac{\partial T}{\partial x}
+ * \mathrm{d\Omega} + \oint_{\partial \Omega_i} \mu_0 l_i (T^* n_x - T n_x) \mathrm{\partial \Omega} \cr
+ * \int_{\Omega_i} l_i q \mathrm{d\Omega} = \int_{\Omega_i} l_i \mu_0 \frac{\partial T}{\partial y}
+ * \mathrm{d\Omega} + \oint_{\partial \Omega_i} \mu_0 l_i (T^* n_y - T n_y) \mathrm{\partial \Omega} \cr
+ * \end{array} \right. \f]
  *
- * A slope limiter is adopted in the aim to suppress the numerical oscillation
- * and preserve the numerical stability. However, most slope limiter will introduce
- * too much numerical diffusion
+ * 其中 \f$ E^*, G^* \f$ 为对流项数值通量，\f$ p^*, q^*, T^* \f$ 为扩散项数值通量。
  *
- * \section Result
+ * 写为矩阵形式
+ *
+ * \f[ \left\{ \begin{array}{r}
+ * J \left( M \frac{\partial T_j}{\partial t} + S_x E_j + S_y G_j \right)
+ * + J_s \cdot M_{es} \left( E^*_j n_x + G^*_j n_y - E_j n_x - G_j n_y \right) \cr
+ * = J \left( S_x p_j + S_y q_j \right) + J_s \cdot M_{es}
+ * \left( p^*_j n_x + q^*_j n_y - p_j n_x - q_j n_y \right) \cr
+ * J \cdot M p_j = \mu J \cdot S_x T_j + \mu J_s \cdot M_{es} \left( T^*_j n_x - T_j n_x \right) \cr
+ * J \cdot M q_j = \mu J \cdot S_y T_j + \mu J_s \cdot M_{es} \left( T^*_j n_y - T_j n_y \right) \cr
+ * \end{array}\right. \f]
+ *
+ * 由于对流通量中包含流速场，在程序中，将流速场作为守恒变量 *T* 的分量，对应的输运通量分量则全部为0，即
+ * \f[ T=\begin{bmatrix} c \cr u \cr v \end{bmatrix},
+ * E=\begin{bmatrix} uc \cr 0 \cr 0 \end{bmatrix},
+ * G=\begin{bmatrix} vc \cr 0 \cr 0 \end{bmatrix}\f]
+ *
+ * 输运项数值通量采用迎风通量，其通量形式为
+ *
+ * \f[ \mathbf{F}^* = \{\{ \mathbf{F} \}\} + \frac{C}{2}[[T]] \f]
+ *
+ * 其中，\f$ \{\{\mathbf{F}\}\} = 0.5\left( \mathbf{F}^- + \mathbf{F}^+ \right) \f$，
+ * \f$ [[T]] = T^- \mathbf{n}^- + T^+ \mathbf{n}^+ \f$，
+ * \f$ C=\left| \mathbf{n}\cdot\mathbf{u} \right| \f$。
+ *
+ * 注意，表达式 \f$ \{\{\mathbf{F}\}\} \f$ 与 \f$ [[T]] \f$ 始终满足数值通量的交换性，
+ * 即 \f$ \mathbf{F}^*(U^-,U^+,n^-,n^+)=\mathbf{F}^*(U^+,U^-,n^+,n^-) \f$。
+ *
+ * 计算粘性项的数值通量则稍微复杂一点，若将 \f$ (p^*, q^*) \f$ 用向量形式 \f$ \mathbf{q}^* \f$ 表示，
+ * 那么根据前人研究，\f$ \mathbf{q}^* \f$ 与 \f$ T^* \f$ 表达式有以下几种 (Li, 2005)
+ *
+ * | Method |     q* |     T* |
+ * | :----  | :----: | :----: |
+ * | LDG (Cockburn and Shu, 1998) | \f$ \{\{q\}\} - C11[[T]] - C12[[q]] \f$ | \f$ \{\{T\}\}+C12[[T]] \f$ |
+ * | DG  (Castillo and Cockburn, 2000) | \f$ \{\{q\}\} - C11[[T]] - C12[[q]] \f$ | \f$ \{\{T\}\}+C12[[T]]-C22[[q]] \f$ |
+ * | Brezzi et al. (2000) | \f$ \{\{q\}\} - a[[T]] \f$ | \f$ \{\{T\}\} \f$ |
+ * | Bassi-Rebay (1997)   | \f$ \{\{q\}\} \f$ | \f$ \{\{T\}\} \f$ |
+ *
+ * 其中DG格式中 C12=0.5 时等价于迎风格式，C11 与 C22 为非负实数，用来保证格式稳定性。
+ *
+ * \section 计算结果
  *
  * To compare the result of different mesh types, several test cases with different
  * orders and mesh resolutions is calculated. The simulation is performed on Mac Mini
@@ -263,5 +310,16 @@
  *
  * \image html Convect2d_ComEfficientEffect1.png "Fig 6. The effect of slope limiter on computational efficiency of different degrees (quadrilateral elements)"
  *
+ * \section 参考文献
  *
+ * 1. Cockburn B, Shu CW. The Local Discontinuous Galerkin Method for
+ * Time-Dependent Convection-Diffusion Systems. SIAM J. Numer. Anal. 1998; 35: 2440–2463.
+ * 2. Castillo P, Cockburn B, Perugia I, Schotzau D. An a priori Error Analysis of the
+ * Local Discontinuous Galerkin Method for Elliptic Problems. SIAM J. Numer. Anal. 2000; 38: 1676–1706.
+ * 3. Brezzi F, Manzini G, Marini D, Pietra P, Russo A. Discontinuous Galerkin Approximations
+ * for Elliptic Problems. Numer. Methods for Partial Differ. Equ. 2000; 16: 365–378.
+ * 4. Bassi F, Rebay S. A High-Order Accurate Discontinuous Finite Element Method for the Numerical
+ * Solution of the Compressible Navier–Stokes Equations. J. Comput. Phys. 1997; 131: 267–279.
+ * 5. Li B Q. Discontinuous finite elements in fluid dynamics and heat transfer[M].
+ * Springer Science & Business Media, 2005.
  */

@@ -79,7 +79,7 @@ static double conv_advectDiff(physField *phys){
 
     sk = 0;
     for(k=0;k<K;++k){
-        double r = len[k];
+        double r = len[k]/(N+1);
         for(n=0;n<Np;n++){
             sk++; // jump c field
             const real u = phys->f_Q[sk++];
@@ -130,7 +130,7 @@ static double conv_rotation(physField *phys){
 
     sk = 0;
     for(k=0;k<K;++k){
-        double r = len[k];
+        double r = len[k]/(N+1);
         for(n=0;n<Np;n++){
             sk++; // jump c field
             const real u = phys->f_Q[sk++];

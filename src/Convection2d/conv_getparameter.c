@@ -161,6 +161,12 @@ static void conv_readInputFile(){
     fscanf(fp, "%f\n", &val); linenum++; solver.v = val;
     fscanf(fp, "%f\n", &val); linenum++; solver.viscosity = val;
 
+    // real LDG parameters
+    for(i=0;i<3;i++){ fgets(buffer, len, fp); linenum++; }
+    fscanf(fp, "%f\n", &val); linenum++; solver.LDG_parameter[0] = val;
+    fscanf(fp, "%f\n", &val); linenum++; solver.LDG_parameter[1] = val;
+    fscanf(fp, "%f\n", &val); linenum++; solver.LDG_parameter[2] = val;
+
     fclose(fp);
 }
 
@@ -221,6 +227,11 @@ static void conv_genInputFile(){
     fprintf(wfile, "\n");
 
     fprintf(wfile, "%s", physinfo);
+    fprintf(wfile, "\n");
+    fprintf(wfile, "\n");
+    fprintf(wfile, "\n");
+
+    fprintf(wfile, "%s", LDGinfo);
     fprintf(wfile, "\n");
     fprintf(wfile, "\n");
     fprintf(wfile, "\n");
