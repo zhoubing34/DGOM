@@ -199,8 +199,8 @@ void sc_coord_quad(stdCell *quad){
     const int Np = quad->Np;
     double t[Nfp],w[Nfp];
 
-    quad->r = Vector_create(Np);
-    quad->s = Vector_create(Np);
+    quad->r = vector_double_create(Np);
+    quad->s = vector_double_create(Np);
 
     /* get Gauss-Lobatto-Jacobi zeros and weights */
     zwglj(t, w, Nfp, 0, 0);
@@ -228,7 +228,7 @@ int** sc_fmask_quad(stdCell *quad){
     const int Nfp = quad->Nfp;
     const int Nfaces = quad->Nfaces;
 
-    int **Fmask = IntMatrix_create(Nfaces, Nfp);
+    int **Fmask = matrix_int_create(Nfaces, Nfp);
     int i, std, td;
 
     /* face 1, s=-1 */

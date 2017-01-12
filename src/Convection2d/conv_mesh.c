@@ -36,12 +36,12 @@ parallMesh* conv_mesh(stdCell *shape){
     /* add boundary condition */
     int indicator[4] = {5,5,5,5};
     int Nsurf = 2*(Ne+Ne);
-    int **SFToV = IntMatrix_create(Nsurf, 3);
+    int **SFToV = matrix_int_create(Nsurf, 3);
     conv_setOBC(indicator, SFToV);
 
     mr_mesh_addBoundary2d(mesh, Nsurf, SFToV);
 
-    IntMatrix_free(SFToV);
+    matrix_int_free(SFToV);
 
     return mesh;
 }

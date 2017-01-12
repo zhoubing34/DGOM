@@ -41,14 +41,14 @@ void mr_mesh_nodeConnect2d(parallMesh *mesh){
     int *Npar = mesh->Npar;
 
     /* allocation */
-    int *vmapM = IntVector_create(K*Nfaces*Nfp);
-    int *vmapP = IntVector_create(K*Nfaces*Nfp);
+    int *vmapM = vector_int_create(K * Nfaces * Nfp);
+    int *vmapP = vector_int_create(K * Nfaces * Nfp);
 
     mesh->vmapM = vmapM;
     mesh->vmapP = vmapP;
     mesh->parallNodeNum = mesh->parallCellNum*Nfp;
 
-    int *parmapOUT = IntVector_create(mesh->parallNodeNum);
+    int *parmapOUT = vector_int_create(mesh->parallNodeNum);
     mesh->nodeIndexOut = parmapOUT;
 
 
@@ -132,20 +132,20 @@ void mr_mesh_nodeConnect2d(parallMesh *mesh){
 
     for(p2=0;p2<nprocs;++p2){
         if(Npar[p2]){
-            xsend[p2] = Vector_create(Npar[p2] * Nfp);
-            ysend[p2] = Vector_create(Npar[p2] * Nfp);
-            Esend[p2] = IntVector_create(Npar[p2] * Nfp);
-            Fsend[p2] = IntVector_create(Npar[p2] * Nfp);
+            xsend[p2] = vector_double_create(Npar[p2] * Nfp);
+            ysend[p2] = vector_double_create(Npar[p2] * Nfp);
+            Esend[p2] = vector_int_create(Npar[p2] * Nfp);
+            Fsend[p2] = vector_int_create(Npar[p2] * Nfp);
 
-            xrecv[p2] = Vector_create(Npar[p2] * Nfp);
-            yrecv[p2] = Vector_create(Npar[p2] * Nfp);
-            Erecv[p2] = IntVector_create(Npar[p2] * Nfp);
-            Frecv[p2] = IntVector_create(Npar[p2] * Nfp);
+            xrecv[p2] = vector_double_create(Npar[p2] * Nfp);
+            yrecv[p2] = vector_double_create(Npar[p2] * Nfp);
+            Erecv[p2] = vector_int_create(Npar[p2] * Nfp);
+            Frecv[p2] = vector_int_create(Npar[p2] * Nfp);
         }
     }
 
     /* number of nodes adjacent to each process */
-    int *skP = IntVector_create(nprocs);
+    int *skP = vector_int_create(nprocs);
 
     /* send coordinates in local order */
     int cnt = 0;
@@ -239,7 +239,7 @@ void mr_mesh_nodeConnect2d(parallMesh *mesh){
     }
 
     /* deallocate mem */
-    IntVector_free(skP);
+    vector_int_free(skP);
 
     free(xsendrequests); free(ysendrequests);
     free(xrecvrequests); free(yrecvrequests);

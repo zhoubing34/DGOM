@@ -59,7 +59,7 @@ int IntMatrix_test(char *message,
     double total=0.0;
     int fail=0, i, j;
 
-    double **errorMatrix = Matrix_create(Nrows, Ncols);
+    double **errorMatrix = matrix_double_create(Nrows, Ncols);
 
     printf(HEADLINE "1 test from %s\n", message);
     for(i=0;i<Nrows;i++){
@@ -82,7 +82,7 @@ int IntMatrix_test(char *message,
     }else{
         printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
-    Matrix_free(errorMatrix);
+    matrix_double_free(errorMatrix);
     return fail;
 }
 
@@ -110,7 +110,7 @@ int Matrix_test(char *message,
     double total=0.0;
     int fail=0, i, j;
 
-    double **errorMatrix = Matrix_create(Nrows, Ncols);
+    double **errorMatrix = matrix_double_create(Nrows, Ncols);
 
     printf(HEADLINE "1 test from %s\n", message);
 
@@ -142,7 +142,7 @@ int Matrix_test(char *message,
     }else{
         printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
-    Matrix_free(errorMatrix);
+    matrix_double_free(errorMatrix);
     return fail;
 }
 
@@ -168,7 +168,7 @@ int Vector_test(char *message,
     double total=0.0;
     int fail=0, i;
 
-    double *errorVector = Vector_create(Ncols);
+    double *errorVector = vector_double_create(Ncols);
 
     printf(HEADLINE "1 test from %s\n", message);
 
@@ -193,7 +193,7 @@ int Vector_test(char *message,
         printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
 
-    Vector_free(errorVector);
+    vector_double_free(errorVector);
     return fail;
 }
 
@@ -206,7 +206,7 @@ int IntVector_test(char *message,
     double total=0.0;
     int fail=0, i;
 
-    double *errorVector = Vector_create(Ncols);
+    double *errorVector = vector_double_create(Ncols);
 
     printf(HEADLINE "1 test from %s\n", message);
 
@@ -231,7 +231,7 @@ int IntVector_test(char *message,
         printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
 
-    Vector_free(errorVector);
+    vector_double_free(errorVector);
     return fail;
 }
 

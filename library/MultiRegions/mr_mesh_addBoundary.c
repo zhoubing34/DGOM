@@ -61,7 +61,7 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
     mesh->Nbc = Nobc;
 
     /* store the boundary type indicator (from smallest to largest) */
-    mesh->bcIndList = IntVector_create(Nobc);
+    mesh->bcIndList = vector_int_create(Nobc);
     mesh->bcIndList[0] = surfList[0];
     int sk = 1;
     for(f1=0;f1<(Nsurf-1);f1++){
@@ -76,7 +76,7 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
     }
 
     /* now allocate the element to surface type matrix */
-    mesh->EToBS = IntMatrix_create(K, Nfaces);
+    mesh->EToBS = matrix_int_create(K, Nfaces);
 
     int t[2], v[2];
     for(k=0;k<K;k++){
@@ -125,8 +125,8 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
  * @brief delete the boundary relative properties
  */
 void mr_mesh_deleteBoundary2d(parallMesh *mesh){
-    IntMatrix_free(mesh->EToBS);
-    IntVector_free(mesh->bcIndList);
+    matrix_int_free(mesh->EToBS);
+    vector_int_free(mesh->bcIndList);
     int k, Nobc = mesh->Nbc;
     for(k=0;k<Nobc;k++){
         mr_vertList2d_free(mesh->obvertlist[k]);
@@ -150,7 +150,7 @@ static int count_unique_integer(int len, int *list){
     if(len ==0 )
         return 0;
 
-    qsort(list, len, sizeof(int), mr_mesh_cmp); // sort the list
+    qsort(list, (size_t)len, sizeof(int), mr_mesh_cmp); // sort the list
     int n = 1, i;
     for(i=0;i<(len-1);i++){
         if(list[i+1]-list[i] != 0)
@@ -180,7 +180,7 @@ static mr_vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid){
     }
 
     vertlist2d->Nv = count_unique_integer(Nvert, vertlist);
-    vertlist2d->list = IntVector_create(vertlist2d->Nv);
+    vertlist2d->list = vector_int_create(vertlist2d->Nv);
 
     int sk = 0;
     vertlist2d->list[sk++] = vertlist[0];
@@ -196,6 +196,6 @@ static mr_vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid){
  * @brief free vertex list
  */
 static void mr_vertList2d_free(mr_vertlist* list){
-    IntVector_free(list->list);
+    vector_int_free(list->list);
     free(list);
 }

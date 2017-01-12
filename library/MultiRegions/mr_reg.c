@@ -75,13 +75,13 @@ void mr_reg_free(multiReg *region){
     /* nodes coordinate */
     switch (dim){
         case 2:
-            Matrix_free(region->x);
-            Matrix_free(region->y);
+            matrix_double_free(region->x);
+            matrix_double_free(region->y);
             break;
         case 3:
-            Matrix_free(region->x);
-            Matrix_free(region->y);
-            Matrix_free(region->z);
+            matrix_double_free(region->x);
+            matrix_double_free(region->y);
+            matrix_double_free(region->z);
             break;
         default:
             printf("MultiRegions (mr_reg_free): Wrong dimensions %d.\n", dim);
@@ -89,21 +89,21 @@ void mr_reg_free(multiReg *region){
     }
 
     /* Jacobi coefficient */
-    Matrix_free(region->J);
+    matrix_double_free(region->J);
     /* volume geometry */
-    Matrix_free(region->drdx);
-    Matrix_free(region->drdy);
-    Matrix_free(region->dsdx);
-    Matrix_free(region->dsdy);
+    matrix_double_free(region->drdx);
+    matrix_double_free(region->drdy);
+    matrix_double_free(region->dsdx);
+    matrix_double_free(region->dsdy);
 
     /* surface geometry */
-    Matrix_free(region->nx);
-    Matrix_free(region->ny);
-    Matrix_free(region->sJ);
+    matrix_double_free(region->nx);
+    matrix_double_free(region->ny);
+    matrix_double_free(region->sJ);
 
     /* volume/area size and length len */
-    Vector_free(region->size);
-    Vector_free(region->len);
+    vector_double_free(region->size);
+    vector_double_free(region->len);
 
     free(region);
 }
@@ -142,9 +142,9 @@ static void mr_reg_nodeCoor3d(multiReg *region){
     double *vy = grid->vy;
     double *vz = grid->vz;
 
-    region->x = Matrix_create(K, Np);
-    region->y = Matrix_create(K, Np);
-    region->z = Matrix_create(K, Np);
+    region->x = matrix_double_create(K, Np);
+    region->y = matrix_double_create(K, Np);
+    region->z = matrix_double_create(K, Np);
 
     int k,i;
     double gx[Nv], gy[Nv], gz[Nv];
@@ -175,8 +175,8 @@ static void mr_reg_nodeCoor2d(multiReg *region){
     double *vx = grid->vx;
     double *vy = grid->vy;
 
-    region->x = Matrix_create(K, Np);
-    region->y = Matrix_create(K, Np);
+    region->x = matrix_double_create(K, Np);
+    region->y = matrix_double_create(K, Np);
 
     int k,i;
     double gx[Nv], gy[Nv];
@@ -264,11 +264,11 @@ static void mr_reg_volumInfo2d(multiReg *region){
     double dxdr[Np], dxds[Np], dydr[Np], dyds[Np];
 
     // allocation
-    region->J = Matrix_create(K, Np);
-    region->drdx = Matrix_create(K, Np);
-    region->drdy = Matrix_create(K, Np);
-    region->dsdx = Matrix_create(K, Np);
-    region->dsdy = Matrix_create(K, Np);
+    region->J = matrix_double_create(K, Np);
+    region->drdx = matrix_double_create(K, Np);
+    region->drdy = matrix_double_create(K, Np);
+    region->dsdx = matrix_double_create(K, Np);
+    region->dsdy = matrix_double_create(K, Np);
 
     double **drdx = region->drdx;
     double **drdy = region->drdy;
@@ -319,9 +319,9 @@ static void mr_reg_surfInfo2d(multiReg *region){
     double **y = region->y;
     int **Fmask = region->cell->Fmask;
 
-    double **nx = Matrix_create(K, Nfaces);
-    double **ny = Matrix_create(K, Nfaces);
-    double **sJ = Matrix_create(K, Nfaces);
+    double **nx = matrix_double_create(K, Nfaces);
+    double **ny = matrix_double_create(K, Nfaces);
+    double **sJ = matrix_double_create(K, Nfaces);
 
     region->nx = nx;
     region->ny = ny;
@@ -357,8 +357,8 @@ static void mr_reg_volScale(multiReg *region){
     const int Np = cell->Np;
     const int K = grid->K;
 
-    region->size = Vector_create(K); // volume or area
-    region->len = Vector_create(K); // length of element
+    region->size = vector_double_create(K); // volume or area
+    region->len = vector_double_create(K); // length of element
     int k,i;
     /* initialize ones */
     double ones[Np];
@@ -399,13 +399,13 @@ static void mr_reg_volScale(multiReg *region){
 double mr_reg_integral(multiReg *region, int ind, double *nodalVal){
     double integral = 0;
 
-    stdCell *cell = region->cell;
     const double *J = region->J[ind];
-    const int Np = cell->Np;
+    const double *w = region->cell->wv;
+    const int Np = region->cell->Np;
 
     register int i;
     for(i=0;i<Np;i++){
-        integral += J[i]*cell->wv[i]*nodalVal[i];
+        integral += J[i]*w[i]*nodalVal[i];
     }
     return integral;
 }

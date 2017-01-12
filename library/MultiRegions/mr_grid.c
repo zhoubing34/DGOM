@@ -26,17 +26,17 @@ void mr_resortEToV(geoGrid *grid);
 void mr_grid_free(geoGrid *grid) {
 
     const int dim = grid->dim;
-    IntMatrix_free(grid->EToV);
+    matrix_int_free(grid->EToV);
 
     switch (dim){ // allocate vertex
         case 2:
-            Vector_free(grid->vx);
-            Vector_free(grid->vy);
+            vector_double_free(grid->vx);
+            vector_double_free(grid->vy);
             break;
         case 3:
-            Vector_free(grid->vx);
-            Vector_free(grid->vy);
-            Vector_free(grid->vz);
+            vector_double_free(grid->vx);
+            vector_double_free(grid->vy);
+            vector_double_free(grid->vz);
             break;
         default:
             printf("MultuRegions (mr_grid_free): Wrong dimension %d.", dim);
@@ -68,7 +68,7 @@ geoGrid* mr_grid_create(stdCell *shape, int K, int Nv, double *vx, double *vy, d
 
     // allocation and assignment of EToV
     int k,i;
-    grid->EToV = IntMatrix_create(K, shape->Nv);
+    grid->EToV = matrix_int_create(K, shape->Nv);
     for(k=0;k<K;k++){
         for(i=0;i<shape->Nv;i++)
             grid->EToV[k][i] = EToV[k][i];
@@ -165,7 +165,7 @@ void mr_grid_partition(geoGrid *grid){
     for(p=0;p<procid;++p)
         Kstart += Kprocs[p];
 
-    int **newEToV = IntMatrix_create(Klocal, grid->cell->Nv);
+    int **newEToV = matrix_int_create(Klocal, grid->cell->Nv);
     /* Assignment of local mesh information */
     int sk=0, n, i;
     for (n=0; n<K; n++){
@@ -176,7 +176,7 @@ void mr_grid_partition(geoGrid *grid){
         }
     }
     /* free the original EToV and assignment */
-    IntMatrix_free(grid->EToV);
+    matrix_int_free(grid->EToV);
     grid->EToV = newEToV;
     grid->K = Klocal;
 }
@@ -190,8 +190,8 @@ void mr_grid_partition(geoGrid *grid){
 void mr_copyVertex2d(geoGrid *grid, double *vx, double *vy){
     const int Nv = grid->Nv;
     int i;
-    grid->vx  = Vector_create(Nv);
-    grid->vy  = Vector_create(Nv);
+    grid->vx  = vector_double_create(Nv);
+    grid->vy  = vector_double_create(Nv);
     grid->vz  = NULL;
     // allocation
     for(i=0;i<Nv;i++){
@@ -210,9 +210,9 @@ void mr_copyVertex2d(geoGrid *grid, double *vx, double *vy){
 void mr_copyVertex3d(geoGrid *grid, double *vx, double *vy, double *vz){
     const int Nv = grid->Nv;
     int i;
-    grid->vx  = Vector_create(Nv);
-    grid->vy  = Vector_create(Nv);
-    grid->vz  = Vector_create(Nv);
+    grid->vx  = vector_double_create(Nv);
+    grid->vy  = vector_double_create(Nv);
+    grid->vz  = vector_double_create(Nv);
     // allocation
     for(i=0;i<Nv;i++){
         grid->vx[i] = vx[i];

@@ -26,7 +26,7 @@ int sc_quadCoor_test(stdCell *quad, int verbose){
 int sc_quadVandMatrix_test(stdCell *quad, int verbose){
     int fail = 0;
     extern double quad_V[NP][NP];
-    double **V_ext = Matrix_create(NP, NP);
+    double **V_ext = matrix_double_create(NP, NP);
     int i,j;
     for(i=0;i<NP;i++){
         for(j=0;j<NP;j++){
@@ -41,14 +41,14 @@ int sc_quadVandMatrix_test(stdCell *quad, int verbose){
         fclose(fp);
     }
 
-    Matrix_free(V_ext);
+    matrix_double_free(V_ext);
     return fail;
 }
 
 int sc_quadMassMatrix_test(stdCell *quad, int verbose){
     int fail = 0;
     extern double quad_M[NP][NP];
-    double **M_ext = Matrix_create(NP, NP);
+    double **M_ext = matrix_double_create(NP, NP);
     int i,j;
     for(i=0;i<NP;i++){
         for(j=0;j<NP;j++){
@@ -62,7 +62,7 @@ int sc_quadMassMatrix_test(stdCell *quad, int verbose){
         PrintMatrix2File(fp, "M", quad->M, NP, NP);
         fclose(fp);
     }
-    Matrix_free(M_ext);
+    matrix_double_free(M_ext);
     return fail;
 }
 
@@ -70,8 +70,8 @@ int sc_quadDeriMatrix_test(stdCell *quad, int verbose){
     int fail =0;
     extern double quad_Dr[NP][NP];
     extern double quad_Ds[NP][NP];
-    double **Dr_ext = Matrix_create(NP, NP);
-    double **Ds_ext = Matrix_create(NP, NP);
+    double **Dr_ext = matrix_double_create(NP, NP);
+    double **Ds_ext = matrix_double_create(NP, NP);
 
     int i,j;
     for(i=0;i<NP;i++){
@@ -91,8 +91,8 @@ int sc_quadDeriMatrix_test(stdCell *quad, int verbose){
         fclose(fp);
     }
 
-    Matrix_free(Dr_ext);
-    Matrix_free(Ds_ext);
+    matrix_double_free(Dr_ext);
+    matrix_double_free(Ds_ext);
     return fail;
 }
 
@@ -100,7 +100,7 @@ int sc_quadDeriMatrix_test(stdCell *quad, int verbose){
 int sc_quadLIFT_test(stdCell *quad, int verbose){
     int fail = 0;
     extern double quad_LIFT[NP][NFP];
-    double **LIFT_ext = Matrix_create(NP, NFP);
+    double **LIFT_ext = matrix_double_create(NP, NFP);
     int i,j;
     for(i=0;i<NP;i++){
         for(j=0;j<NFP;j++){
@@ -116,7 +116,7 @@ int sc_quadLIFT_test(stdCell *quad, int verbose){
         fclose(fp);
     }
 
-    Matrix_free(LIFT_ext);
+    matrix_double_free(LIFT_ext);
     return fail;
 }
 

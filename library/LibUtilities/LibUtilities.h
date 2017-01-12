@@ -32,14 +32,22 @@ void Matrix_multiply(const int M, const int K, const int N,
                      const double *A, const double *B, double *C);
 
 /* allocate mem */
-double **Matrix_create(int Nrows, int Ncols);
-double *Vector_create(int Nrows);
-int    **IntMatrix_create(int Nrows, int Ncols);
-int    *IntVector_create(int Nrows);
+double **matrix_double_create(int Nrows, int Ncols);
+double * vector_double_create(int Nrows);
+int    **matrix_int_create(int Nrows, int Ncols);
+int    * vector_int_create(int Nrows);
+float  **matrix_float_create(int Nrows, int Ncols);
+float  * vector_float_create(int Nrows);
+real   **matrix_real_create(int Nrows, int Ncols);
+real   * vector_real_create(int Nrows);
 
-double **Matrix_free(double **);
-double *Vector_free(double *);
-int    **IntMatrix_free(int **);
-int    *IntVector_free(int *);
+double **matrix_double_free(double **);
+double * vector_double_free(double *);
+int    **matrix_int_free(int **);
+int    * vector_int_free(int *);
+float  **matrix_float_free(float **);
+float  * vector_float_free(float *);
+real   **matrix_real_free(real **);
+real   * vector_real_free(real *);
 
 #endif //LIBUTILITIES_H

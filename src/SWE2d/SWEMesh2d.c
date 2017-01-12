@@ -1,4 +1,4 @@
-#include "SWEDriver2d.h"
+#include "swe_dirver2d.h"
 #include "LibUtilities/GenUniformMesh.h"
 
 /* private variables */
@@ -66,7 +66,7 @@ MultiReg2d* ParabolicBowlMesh2d(char **argv, SWE_Solver2d *solver){
     /* set bottom topography */
     int k, i;
     double r2;
-    solver->bot = Matrix_create(mesh->K, shape->Np);
+    solver->bot = matrix_double_create(mesh->K, shape->Np);
     for (k=0; k<mesh->K; k++){
         for (i=0; i<shape->Np; i++){
             r2 = mesh->x[k][i]*mesh->x[k][i] + mesh->y[k][i]*mesh->y[k][i];
@@ -95,7 +95,7 @@ MultiReg2d* DamBreakMesh2d(char **argv, SWE_Solver2d *solver){
 
     /* set bottom topography */
     int k, i;
-    solver->bot = Matrix_create(mesh->K, shape->Np);
+    solver->bot = matrix_double_create(mesh->K, shape->Np);
     for (k=0; k<mesh->K; k++){
         for (i=0; i<shape->Np; i++){
             solver->bot[k][i] = 0.0;

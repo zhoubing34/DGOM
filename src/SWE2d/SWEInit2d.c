@@ -1,4 +1,4 @@
-#include "SWEDriver2d.h"
+#include "swe_dirver2d.h"
 
 void ParabolicBowlInit2d(SWE_Solver2d *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);
 void DamBreakDryInit2d(SWE_Solver2d *solver, PhysDomain2d *phys, MultiReg2d *mesh, double hmin);

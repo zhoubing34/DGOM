@@ -1,4 +1,4 @@
-#include "SWEDriver2d.h"
+#include "swe_dirver2d.h"
 
 /* Private function */
 void SWE_NodalHLL2d(SWE_Solver2d *solver, real hM, real hP,

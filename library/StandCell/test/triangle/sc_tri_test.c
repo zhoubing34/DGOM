@@ -31,7 +31,7 @@ int sc_Fmask(stdCell *tri, int verbose){
 int sc_triVandMatrix_test(stdCell *tri, int verbose){
     int fail = 0;
     extern double tri_V[NP][NP];
-    double **V_ext = Matrix_create(NP, NP);
+    double **V_ext = matrix_double_create(NP, NP);
     int i,j;
     for(i=0;i<NP;i++){
         for(j=0;j<NP;j++){
@@ -46,14 +46,14 @@ int sc_triVandMatrix_test(stdCell *tri, int verbose){
         fclose(fp);
     }
 
-    Matrix_free(V_ext);
+    matrix_double_free(V_ext);
     return fail;
 }
 
 int sc_triMassMatrix_test(stdCell *tri, int verbose){
     int fail = 0;
     extern double tri_M[NP][NP];
-    double **M_ext = Matrix_create(NP, NP);
+    double **M_ext = matrix_double_create(NP, NP);
     int i,j;
     for(i=0;i<NP;i++){
         for(j=0;j<NP;j++){
@@ -67,7 +67,7 @@ int sc_triMassMatrix_test(stdCell *tri, int verbose){
         PrintMatrix2File(fp, "M", tri->M, NP, NP);
         fclose(fp);
     }
-    Matrix_free(M_ext);
+    matrix_double_free(M_ext);
     return fail;
 }
 
@@ -75,8 +75,8 @@ int sc_triDeriMatrix_test(stdCell *tri, int verbose){
     int fail =0;
     extern double tri_Dr[NP][NP];
     extern double tri_Ds[NP][NP];
-    double **Dr_ext = Matrix_create(NP, NP);
-    double **Ds_ext = Matrix_create(NP, NP);
+    double **Dr_ext = matrix_double_create(NP, NP);
+    double **Ds_ext = matrix_double_create(NP, NP);
 
     int i,j;
     for(i=0;i<NP;i++){
@@ -96,15 +96,15 @@ int sc_triDeriMatrix_test(stdCell *tri, int verbose){
         fclose(fp);
     }
 
-    Matrix_free(Dr_ext);
-    Matrix_free(Ds_ext);
+    matrix_double_free(Dr_ext);
+    matrix_double_free(Ds_ext);
     return fail;
 }
 
 int sc_triLIFT_test(stdCell *tri, int verbose){
     int fail = 0;
     extern double tri_LIFT[NP][NFP];
-    double **LIFT_ext = Matrix_create(NP, NFP);
+    double **LIFT_ext = matrix_double_create(NP, NFP);
     int i,j;
     for(i=0;i<NP;i++){
         for(j=0;j<NFP;j++){
@@ -120,7 +120,7 @@ int sc_triLIFT_test(stdCell *tri, int verbose){
         fclose(fp);
     }
 
-    Matrix_free(LIFT_ext);
+    matrix_double_free(LIFT_ext);
     return fail;
 }
 

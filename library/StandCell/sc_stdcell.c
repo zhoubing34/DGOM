@@ -33,36 +33,36 @@ stdCell* sc_create(int N, sc_cellType type){
  */
 void sc_free(stdCell *stdcell){
     /* fmaks */
-    IntMatrix_free(stdcell->Fmask);
+    matrix_int_free(stdcell->Fmask);
     /* coordinate */
     switch (stdcell->dim){
         case 2:
-            Vector_free(stdcell->r);
-            Vector_free(stdcell->s);
+            vector_double_free(stdcell->r);
+            vector_double_free(stdcell->s);
             break;
         case 3:
-            Vector_free(stdcell->r);
-            Vector_free(stdcell->s);
-            Vector_free(stdcell->t);
+            vector_double_free(stdcell->r);
+            vector_double_free(stdcell->s);
+            vector_double_free(stdcell->t);
             break;
         default: // TRIANGLE and QUADRIL
             printf("StandCell (sc_free): Wrong dimensions %d\n", stdcell->dim);
             exit(-1);
     }
     /* vandermonde matrix */
-    Matrix_free(stdcell->V);
+    matrix_double_free(stdcell->V);
     /* mass matrix */
-    Matrix_free(stdcell->M);
+    matrix_double_free(stdcell->M);
     /* Derivative Matrix */
-    Matrix_free(stdcell->Dr);
-    Matrix_free(stdcell->Ds);
+    matrix_double_free(stdcell->Dr);
+    matrix_double_free(stdcell->Ds);
 
     /* LIFT */
-    Matrix_free(stdcell->LIFT);
+    matrix_double_free(stdcell->LIFT);
 
     /* Gauss quadrature */
-    Vector_free(stdcell->ws);
-    Vector_free(stdcell->wv);
+    vector_double_free(stdcell->ws);
+    vector_double_free(stdcell->wv);
 
     /* float version */
     free(stdcell->f_LIFT);
@@ -105,7 +105,7 @@ double** sc_VandMatrix2d(stdCell *cell, void (*orthfunc)(stdCell*, int ind, doub
     const int Np = cell->Np;
 
     // allocation
-    double **V = Matrix_create(Np, Np);
+    double **V = matrix_double_create(Np, Np);
 
     // assignment
     double temp[cell->Np];
@@ -137,7 +137,7 @@ double** sc_massMatrix(stdCell *cell){
 
     int i,j,sk=0;
     // allocation
-    double **M = Matrix_create(Np, Np);
+    double **M = matrix_double_create(Np, Np);
 
     for(i=0;i<Np*Np;i++) // copy matrix to a vector
         inv[sk++] = V[0][i];
@@ -195,12 +195,12 @@ void sc_deriMatrix2d(stdCell *cell, void (*derorthfunc)
         (stdCell *, int ind, double *dr, double *ds)){
     const int Np = cell->Np;
     // allocation
-    cell->Dr = Matrix_create(Np, Np);
-    cell->Ds = Matrix_create(Np, Np);
+    cell->Dr = matrix_double_create(Np, Np);
+    cell->Ds = matrix_double_create(Np, Np);
 
     double **V = cell->V;
-    double **Vr = Matrix_create(Np, Np);
-    double **Vs = Matrix_create(Np, Np);
+    double **Vr = matrix_double_create(Np, Np);
+    double **Vs = matrix_double_create(Np, Np);
     double inv[Np*Np];
 
     // inverse of Vandermonde matrix
@@ -218,8 +218,8 @@ void sc_deriMatrix2d(stdCell *cell, void (*derorthfunc)
     /* \f$ \mathbf{Ds} = \mathbf{Vs}*\mathbf{V}^{-1} \f$ */
     Matrix_multiply(Np, Np, Np, Vs[0], inv, cell->Ds[0]);
 
-    Matrix_free(Vr);
-    Matrix_free(Vs);
+    matrix_double_free(Vr);
+    matrix_double_free(Vs);
 }
 
 /**
@@ -275,7 +275,7 @@ double** sc_liftMatrix2d(stdCell *cell){
     const int Nfaces = cell->Nfaces;
     const int Nfp = cell->Nfp;
     // allocation
-    double **LIFT = Matrix_create(Np, Nfaces*Nfp);
+    double **LIFT = matrix_double_create(Np, Nfaces * Nfp);
 
     double **V = cell->V;
     double vt[Np*Np]; //transpose Vandermonde matrix
@@ -289,13 +289,13 @@ double** sc_liftMatrix2d(stdCell *cell){
     // get the inverse mass matrix M^{-1} = V*V'
     Matrix_multiply(Np, Np, Np, V[0], vt, invM);
     // get surface mass matrix Mes
-    double **Mes = Matrix_create(Np, Nfaces*Nfp);
+    double **Mes = matrix_double_create(Np, Nfaces * Nfp);
     sc_surfMassMatrix2d(cell, Mes);
     /* LIFT = M^{-1}*Mes */
     Matrix_multiply(Np, Np, Nfp * Nfaces, invM, Mes[0], LIFT[0]);
 
     // free surface mass matrix
-    Matrix_free(Mes);
+    matrix_double_free(Mes);
     return LIFT;
 }
 
@@ -308,11 +308,11 @@ void sc_GaussQuadrature2d(stdCell *cell){
     const int Np = cell->Np;
     double r[Nfp];
     // Gauss quadrature weights for face
-    cell->ws = Vector_create(Nfp);
+    cell->ws = vector_double_create(Nfp);
     zwglj(r, cell->ws, Nfp, 0, 0);
 
     // Gauss quadrature weights for volume
-    cell->wv = Vector_create(Np);
+    cell->wv = vector_double_create(Np);
     int i,j;
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){

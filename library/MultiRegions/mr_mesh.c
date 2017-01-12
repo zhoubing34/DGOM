@@ -39,17 +39,17 @@ parallMesh* mr_mesh_create(multiReg *region){
 }
 
 void mr_mesh_free(parallMesh *mesh){
-    IntMatrix_free(mesh->EToE);
-    IntMatrix_free(mesh->EToF);
-    IntMatrix_free(mesh->EToP);
+    matrix_int_free(mesh->EToE);
+    matrix_int_free(mesh->EToF);
+    matrix_int_free(mesh->EToP);
 
-    IntVector_free(mesh->Npar);
-    IntVector_free(mesh->vmapM);
-    IntVector_free(mesh->vmapP);
+    vector_int_free(mesh->Npar);
+    vector_int_free(mesh->vmapM);
+    vector_int_free(mesh->vmapP);
 
-    IntVector_free(mesh->nodeIndexOut);
-    IntVector_free(mesh->cellIndexIn);
-    IntVector_free(mesh->cellIndexOut);
+    vector_int_free(mesh->nodeIndexOut);
+    vector_int_free(mesh->cellIndexIn);
+    vector_int_free(mesh->cellIndexOut);
 
     return;
 }

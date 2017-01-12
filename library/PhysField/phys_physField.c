@@ -79,8 +79,8 @@ void phys_free(physField *phys){
     free(phys->c_inQ);
     free(phys->c_outQ);
 
-    IntVector_free(phys->nodeIndexOut);
-    IntVector_free(phys->cellIndexOut);
+    vector_int_free(phys->nodeIndexOut);
+    vector_int_free(phys->cellIndexOut);
     //IntVector_free(phys->cellIndexIn);
 }
 
@@ -94,7 +94,7 @@ static void permuteNodalBuffer(physField *phys){
 
     const int Nfields = phys->Nfield;
     const int parallNodalNum = phys->mesh->parallNodeNum*Nfields;
-    int *nodeIndexOut = IntVector_create(parallNodalNum);
+    int *nodeIndexOut = vector_int_create(parallNodalNum);
     phys->parallNodeNum = parallNodalNum;
     phys->nodeIndexOut = nodeIndexOut;
 
@@ -135,7 +135,7 @@ static void permuteCellBuffer(physField *phys){
 
     const int Nfields = phys->Nfield;
     const int phys_parallCellNum = phys->mesh->parallCellNum*Nfields;
-    int *cellIndexOut = IntVector_create(phys_parallCellNum);
+    int *cellIndexOut = vector_int_create(phys_parallCellNum);
     //int *cellIndexIn = IntVector_create(phys_parallCellNum);
 
     phys->parallCellNum = phys_parallCellNum;

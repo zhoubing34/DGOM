@@ -139,7 +139,7 @@ void mr_grid_loadBalance2d(geoGrid *grid){
     }
 
     /* receive the EToV from each process, including itself */
-    int **newEToV = IntMatrix_create(totalinK, Nv);
+    int **newEToV = matrix_int_create(totalinK, Nv);
     MPI_Request inRequests[nprocs], outRequests[nprocs];
 
     int cnt = 0;
@@ -170,7 +170,7 @@ void mr_grid_loadBalance2d(geoGrid *grid){
     MPI_Waitall(nprocs, outRequests, outstatus);
 
     /* assignment of the new element list and vertex coordinate */
-    IntMatrix_free(grid->EToV);
+    matrix_int_free(grid->EToV);
 
     grid->EToV = newEToV;
     grid->K  = totalinK;

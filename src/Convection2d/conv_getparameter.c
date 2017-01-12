@@ -8,15 +8,6 @@
 
 #define DEBUG 0
 
-/* const strings */
-char helpinfo[] = HEADFINISH "DGOM:\n" HEADLINE "2d convection problem\n"
-        HEADLINE "Optional features:\n"
-        HEADLINE "   -help         print help information\n"
-        HEADLINE "   -preprocess   generate input file\n"
-        HEADLINE "Example usages:\n"
-        HEADLINE "   mpirun -n 2 -host localhost ./convection2d -preprocess\n"
-        HEADFINISH "\n";
-
 char filename[] = "conv2d_paramter.inc";
 
 /* generate the input file */
@@ -39,6 +30,15 @@ void conv_getparameter(int argc, char **argv){
     int procid, nprocs;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+
+    /* const strings */
+    char helpinfo[] = HEADFINISH "DGOM:\n" HEADLINE "2d convection problem\n"
+            HEADLINE "Optional features:\n"
+            HEADLINE "   -help         print help information\n"
+            HEADLINE "   -preprocess   generate input file\n"
+            HEADLINE "Example usages:\n"
+            HEADLINE "   mpirun -n 2 -host localhost ./convection2d -preprocess\n"
+            HEADFINISH "\n";
 
     if(ishelp & (!procid)){
         printf("%s", helpinfo);

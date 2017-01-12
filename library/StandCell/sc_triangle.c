@@ -267,8 +267,8 @@ static void sc_gradSimplex2DP_tri(int Np, double *a, double *b, int id, int jd, 
  *
  */
 static void sc_simplex2DP_tri(int Np, double *a, double *b, int i, int j, double *poly){
-    double *h1 = Vector_create(Np);
-    double *h2 = Vector_create(Np);
+    double *h1 = vector_double_create(Np);
+    double *h2 = vector_double_create(Np);
     int n;
 
     jacobiP(Np, a, h1, i, 0.0, 0.0);
@@ -277,8 +277,8 @@ static void sc_simplex2DP_tri(int Np, double *a, double *b, int i, int j, double
     for(n=0;n<Np;n++){
         poly[n] = sqrt(2.0)*h1[n]*h2[n]*pow(1-b[n], i);
     }
-    Vector_free(h1);
-    Vector_free(h2);
+    vector_double_free(h1);
+    vector_double_free(h2);
 }
 
 /**
@@ -305,8 +305,8 @@ static void sc_coord_tri(stdCell *tri){
     }
 
     // allocations
-    tri->r = Vector_create(Np);
-    tri->s = Vector_create(Np);
+    tri->r = vector_double_create(Np);
+    tri->s = vector_double_create(Np);
 
     double L1[Np], L2[Np], L3[Np];
     double x[Np], y[Np], dL[Np], warpf1[Np];
@@ -390,11 +390,11 @@ static void sc_warpfactor_tri(int N, double *r, int Nr, double *w){
     double *ye, *l, *re, *rlgl, *wlgl;
     double temp;
 
-    ye   = Vector_create(Np);
-    l    = Vector_create(Nr);
-    re   = Vector_create(Np); /* equidistant nodes */
-    rlgl = Vector_create(Np); /* Gauss-Lobatto-Jacobi nodes */
-    wlgl = Vector_create(Np); /* Gauss-Lobatto-Jacobi weights */
+    ye   = vector_double_create(Np);
+    l    = vector_double_create(Nr);
+    re   = vector_double_create(Np); /* equidistant nodes */
+    rlgl = vector_double_create(Np); /* Gauss-Lobatto-Jacobi nodes */
+    wlgl = vector_double_create(Np); /* Gauss-Lobatto-Jacobi weights */
 
     /* initialization */
     for(i=0;i<Nr;i++){
@@ -428,11 +428,11 @@ static void sc_warpfactor_tri(int N, double *r, int Nr, double *w){
     }
 
     /* deallocate mem */
-    Vector_free(ye);
-    Vector_free(l);
-    Vector_free(re);
-    Vector_free(rlgl);
-    Vector_free(wlgl);
+    vector_double_free(ye);
+    vector_double_free(l);
+    vector_double_free(re);
+    vector_double_free(rlgl);
+    vector_double_free(wlgl);
 }
 
 /**
@@ -449,7 +449,7 @@ static int** sc_fmask_tri(stdCell *tri){
 
     const int Nfp = tri->Nfp;
     const int Nfaces = tri->Nfaces;
-    int **Fmask = IntMatrix_create(Nfaces, Nfp);
+    int **Fmask = matrix_int_create(Nfaces, Nfp);
 
     int temp[Nfp];
     int nrp[Nfp]; /* # of nodes from s=-1 to s=1 */

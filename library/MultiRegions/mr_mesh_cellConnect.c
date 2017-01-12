@@ -96,11 +96,11 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
 
     int **EToV = mesh->grid->EToV;
 
-    mesh->EToE = IntMatrix_create(Klocal, Nv);
-    mesh->EToF = IntMatrix_create(Klocal, Nv);
-    mesh->EToP = IntMatrix_create(Klocal, Nv);
+    mesh->EToE = matrix_int_create(Klocal, Nv);
+    mesh->EToF = matrix_int_create(Klocal, Nv);
+    mesh->EToP = matrix_int_create(Klocal, Nv);
 
-    mesh->Npar = IntVector_create(nprocs);
+    mesh->Npar = vector_int_create(nprocs);
     mesh->parallCellNum = 0;
 
     int *Npar = mesh->Npar;
@@ -161,8 +161,8 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
     free(myfaces);
 
     /* now build maps from incoming buffer to cells */
-    mesh->cellIndexIn = IntVector_create(mesh->parallCellNum);
-    mesh->faceIndexIn = IntVector_create(mesh->parallCellNum);
+    mesh->cellIndexIn = vector_int_create(mesh->parallCellNum);
+    mesh->faceIndexIn = vector_int_create(mesh->parallCellNum);
 
     int **Esend = (int**) calloc((size_t) nprocs, sizeof(int*));
     int **Erecv = (int**) calloc((size_t) nprocs, sizeof(int*));
@@ -170,15 +170,15 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
     int **Frecv = (int**) calloc((size_t) nprocs, sizeof(int*));
     for(p2=0;p2<nprocs;++p2){
         if(Npar[p2]){
-            Esend[p2] = IntVector_create(Npar[p2]);
-            Erecv[p2] = IntVector_create(Npar[p2]);
-            Fsend[p2] = IntVector_create(Npar[p2]);
-            Frecv[p2] = IntVector_create(Npar[p2]);
+            Esend[p2] = vector_int_create(Npar[p2]);
+            Erecv[p2] = vector_int_create(Npar[p2]);
+            Fsend[p2] = vector_int_create(Npar[p2]);
+            Frecv[p2] = vector_int_create(Npar[p2]);
         }
     }
 
     /* number of faces adjacent to each process */
-    int *skP = IntVector_create(nprocs);
+    int *skP = vector_int_create(nprocs);
     /* send coordinates in local order */
     for(k1=0;k1<Klocal;++k1){
         for(f1=0;f1<Nfaces;++f1){
@@ -229,14 +229,14 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
         }
     }
 
-    IntVector_free(skP);
+    vector_int_free(skP);
 
     for(p2=0;p2<nprocs;++p2){
         if(Npar[p2]){
-            IntVector_free(Esend[p2]);
-            IntVector_free(Erecv[p2]);
-            IntVector_free(Fsend[p2]);
-            IntVector_free(Frecv[p2]);
+            vector_int_free(Esend[p2]);
+            vector_int_free(Erecv[p2]);
+            vector_int_free(Fsend[p2]);
+            vector_int_free(Frecv[p2]);
         }
     }
     free(Esend);
@@ -245,7 +245,7 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
     free(Frecv);
 
     /* now build maps from outgoing buffer to cells */
-    mesh->cellIndexOut = IntVector_create(mesh->parallCellNum);
+    mesh->cellIndexOut = vector_int_create(mesh->parallCellNum);
 
     sk = 0;
     for(p2=0;p2<mesh->nprocs;p2++){

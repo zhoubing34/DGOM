@@ -37,7 +37,7 @@ geoGrid* mr_grid_createUniformGrid_tri
     const int Nv = (Mx+1)*(My+1);
 
     /* allocation */
-    int **EToV = IntMatrix_create(K, 3);
+    int **EToV = matrix_int_create(K, 3);
     double VX[Nv], VY[Nv];
 
     /* vertex coordinate */
@@ -86,7 +86,7 @@ geoGrid* mr_grid_createUniformGrid_tri
     geoGrid* grid = mr_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
 
     /* free memory */
-    IntMatrix_free(EToV);
+    matrix_int_free(EToV);
     return grid;
 }
 
@@ -124,7 +124,7 @@ geoGrid* mr_grid_createUniformGrid_quad
     const int Nv = (Mx+1)*(My+1);
 
     /* allocation */
-    int **EToV = IntMatrix_create(K, 4);
+    int **EToV = matrix_int_create(K, 4);
     double VX[Nv], VY[Nv];
 
     /* vertex coordinate */
@@ -162,7 +162,7 @@ geoGrid* mr_grid_createUniformGrid_quad
     geoGrid* grid = mr_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
 
     /* free memory */
-    IntMatrix_free(EToV);
+    matrix_int_free(EToV);
 
     return grid;
 }

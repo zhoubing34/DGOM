@@ -95,10 +95,10 @@ static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose)
 
     int ind[4] = {2,3,4,5};
     int Nsurf = 2*(Mx+My);
-    int **SFToV = IntMatrix_create(Nsurf, 3);
+    int **SFToV = matrix_int_create(Nsurf, 3);
     genBoundary(ind, SFToV);
     mr_mesh_addBoundary2d(mesh, 0, NULL);
-    IntMatrix_free(SFToV);
+    matrix_int_free(SFToV);
 
     if(verbose){
         /* gen log filename */
@@ -142,10 +142,10 @@ static int mr_quadMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose
 
     int ind[4] = {2,3,4,5};
     int Nsurf = 2*(Mx+My);
-    int **SFToV = IntMatrix_create(Nsurf, 3);
+    int **SFToV = matrix_int_create(Nsurf, 3);
     genBoundary(ind, SFToV);
     mr_mesh_addBoundary2d(mesh, 0, NULL);
-    IntMatrix_free(SFToV);
+    matrix_int_free(SFToV);
 
 
     if(verbose){

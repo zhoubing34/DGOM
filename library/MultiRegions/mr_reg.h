@@ -27,8 +27,6 @@ typedef struct {
     double **z; ///< node coordinate
 
     /* info of each element */
-//    int Nvgeo; ///< number of volume geometric factors
-//    real *vgeo; ///< volume geometric factors
     double **drdx; ///< transformation of partial derivative on each nodes
     double **drdy; ///< transformation of partial derivative on each nodes
     double **dsdx; ///< transformation of partial derivative on each nodes

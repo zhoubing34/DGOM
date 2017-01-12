@@ -1,8 +1,5 @@
 /**
- * @file
- * Matrix and vector operation functions
- *
- * @brief
+ * @file Matrix and vector operation functions
  *
  * @author
  * li12242, Tianjin University, li12242@tju.edu.cn
@@ -120,30 +117,57 @@ void str2double(char *str, double *scal, char* errmessage){
 /* row major storage for a 2D matrix array */
 
 #define __T__ double
-#define __MATRIX_CREATE_FUNC Matrix_create
+#define __MATRIX_CREATE_FUNC matrix_double_create
 #include "Utils.h"
 
-#define __VECTOR_CREATE_FUNC Vector_create
+#define __VECTOR_CREATE_FUNC vector_double_create
 #include "Utils.h"
 
-#define __MATRIX_FREE_FUNC Matrix_free
+#define __MATRIX_FREE_FUNC matrix_double_free
 #include "Utils.h"
 
-#define __VECTOR_FREE_FUNC Vector_free
+#define __VECTOR_FREE_FUNC vector_double_free
+#include "Utils.h"
+#undef __T__
+
+#define __T__ float
+#define __MATRIX_CREATE_FUNC matrix_float_create
 #include "Utils.h"
 
+#define __VECTOR_CREATE_FUNC vector_float_create
+#include "Utils.h"
+
+#define __MATRIX_FREE_FUNC matrix_float_free
+#include "Utils.h"
+
+#define __VECTOR_FREE_FUNC vector_float_free
+#include "Utils.h"
+#undef __T__
+
+#define __T__ real
+#define __MATRIX_CREATE_FUNC matrix_real_create
+#include "Utils.h"
+
+#define __VECTOR_CREATE_FUNC vector_real_create
+#include "Utils.h"
+
+#define __MATRIX_FREE_FUNC matrix_real_free
+#include "Utils.h"
+
+#define __VECTOR_FREE_FUNC vector_real_free
+#include "Utils.h"
 #undef __T__
 
 #define __T__ int
-#define __MATRIX_CREATE_FUNC IntMatrix_create
+#define __MATRIX_CREATE_FUNC matrix_int_create
 #include "Utils.h"
 
-#define __VECTOR_CREATE_FUNC IntVector_create
+#define __VECTOR_CREATE_FUNC vector_int_create
 #include "Utils.h"
 
-#define __MATRIX_FREE_FUNC IntMatrix_free
+#define __MATRIX_FREE_FUNC matrix_int_free
 #include "Utils.h"
 
-#define __VECTOR_FREE_FUNC IntVector_free
+#define __VECTOR_FREE_FUNC vector_int_free
 #include "Utils.h"
 #undef __T__

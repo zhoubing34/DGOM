@@ -1,4 +1,4 @@
-#include "SWEDriver2d.h"
+#include "swe_dirver2d.h"
 
 /* private function */
 void RK45_Coeff(double *, double *, double *);
@@ -9,9 +9,9 @@ double SWE_Run2d(PhysDomain2d *phys, SWE_Solver2d *solver, NcFile *outfile){
     /* Runge-Kutta time evaluation coefficient */
     double *rk4a, *rk4b, *rk4c;
     /* allocation */
-    rk4a = Vector_create(5);
-    rk4b = Vector_create(5);
-    rk4c = Vector_create(6);
+    rk4a = vector_double_create(5);
+    rk4b = vector_double_create(5);
+    rk4c = vector_double_create(6);
     RK45_Coeff(rk4a, rk4b, rk4c);
 
     /* store initial condition */
