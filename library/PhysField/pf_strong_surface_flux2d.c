@@ -5,7 +5,7 @@
 #include <StandCell/sc_stdcell.h>
 #include "pf_strong_surface_flux2d.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 /**
  * @brief calculate the surface integral of strong form

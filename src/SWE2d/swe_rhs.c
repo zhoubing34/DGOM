@@ -13,6 +13,8 @@
 static real gra;
 static real hcrit;
 
+static void swe_sour(swe_solver *solver, physField *phys);
+
 int swe_flux_term(real *var, real *Eflux, real *Gflux){
     const real h  = var[0];
     const real qx = var[1];
@@ -147,7 +149,6 @@ void swe_rhs(swe_solver *solver, real frka, real frkb, real fdt){
 
     /* viscosity flux */
     /* source term */
-    void swe_sour(swe_solver *, physField *);
     swe_sour(solver, phys);
 
     real *f_resQ = phys->f_resQ;
@@ -183,8 +184,12 @@ static void swe_sour(swe_solver *solver, physField *phys){
     const int Np       = phys->cell->Np;
     const int Nfields  = phys->Nfield;
 
+    const real M2 = (real) solver->roughness*solver->roughness;
+
     real *f_Q = phys->f_Q;
     real *f_rhsQ = phys->f_rhsQ;
+
+    const double p = 10/3;
 
     register int k,n,m,geoid=0;
 
@@ -199,6 +204,9 @@ static void swe_sour(swe_solver *solver, physField *phys){
 
             const int ind = (k*Np+n)*Nfields;
             const real h = f_Q[ind];
+            const real qx = f_Q[ind];
+            const real qy = f_Q[ind];
+            const real qn = sqrt(qx*qx+qy*qy);
 
             real rhs_qx = 0, rhs_qy = 0;
             if(h>hcrit){ // for wet nodes
@@ -213,6 +221,9 @@ static void swe_sour(swe_solver *solver, physField *phys){
                     rhs_qx += dx * b;
                     rhs_qy += dy * b;
                 }
+
+                rhs_qx += qx*qn*M2/pow(h, p);
+                rhs_qy += qy*qn*M2/pow(h, p);
             }
 
             f_rhsQ[ind+1] += -gra*h*rhs_qx;

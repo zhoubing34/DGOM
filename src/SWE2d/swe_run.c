@@ -1,5 +1,4 @@
 #include <PhysField/pf_phys.h>
-#include <MultiRegions/mr_mesh.h>
 #include "swe_driver2d.h"
 #include "PhysField/pf_cellMean.h"
 #include "swe_output.h"
@@ -39,7 +38,7 @@ void swe_run(swe_solver *solver){
         if (time+dt > ftime) { dt = ftime-time; }
 
         if(!procid){
-            printf("Process:%f, dt:%f\n", time/ftime, dt);
+            printf("Process:%f, dt:%f\r", time/ftime, dt);
         }
 
         for (INTRK=1; INTRK<=5; ++INTRK) {
@@ -48,26 +47,10 @@ void swe_run(swe_solver *solver){
             const real fa = (real)rk4a[INTRK-1];
             const real fb = (real)rk4b[INTRK-1];
             swe_rhs(solver, fa, fb, fdt);
-#if DEBUG
-            int ind = 13302-3;
-            printf("procid=%d, var=[%f, %f, %f]\n",
-                   phys->mesh->procid, phys->f_Q[ind],
-                   phys->f_Q[ind+1], phys->f_Q[ind+2]);
-#endif
+
             pf_slloc2d(phys, 2.0);
-#if DEBUG
-            ind = 13302-3;
-            printf("procid=%d, var=[%f, %f, %f]\n",
-                   phys->mesh->procid, phys->f_Q[ind],
-                   phys->f_Q[ind+1], phys->f_Q[ind+2]);
-#endif
             swe_ppreserve(solver);
-#if DEBUG
-            ind = 13302-3;
-            printf("procid=%d, var=[%f, %f, %f]\n",
-                   phys->mesh->procid, phys->f_Q[ind],
-                   phys->f_Q[ind+1], phys->f_Q[ind+2]);
-#endif
+
         }
         /* increment current time */
         time += dt;
