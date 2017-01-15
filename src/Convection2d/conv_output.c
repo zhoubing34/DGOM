@@ -1,5 +1,5 @@
 #include <MultiRegions/mr_mesh.h>
-#include <PhysField/phys_physField.h>
+#include <PhysField/pf_phys.h>
 #include "conv_driver2d.h"
 
 /**

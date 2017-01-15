@@ -1,22 +1,22 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
 
 set(PHYSDOMAIN_SOURCE
-        phys_physField.c
-        phys_physField.h
-        phys_fetchBuffer.c
-        phys_fetchBuffer.h
-        phys_strong_volume_flux2d.c
-        phys_strong_volume_flux2d.h
-        phys_strong_surface_flux2d.c
-        phys_strong_surface_flux2d.h
-        phys_add_LDG_solver.c
-        phys_add_LDG_solver.h
-        phys_strong_viscosity_LDG_flux2d.c
-        phys_strong_viscosity_LDG_flux2d.h
-        phys_cellMean.c
-        phys_cellMean.h
-        phys_limiter.c
-        phys_limiter.h)
+        pf_phys.c
+        pf_phys.h
+        pf_fetchBuffer.c
+        pf_fetchBuffer.h
+        pf_strong_volume_flux2d.c
+        pf_strong_volume_flux2d.h
+        pf_strong_surface_flux2d.c
+        pf_strong_surface_flux2d.h
+        pf_add_LDG_solver.c
+        pf_add_LDG_solver.h
+        pf_strong_viscosity_LDG_flux2d.c
+        pf_strong_viscosity_LDG_flux2d.h
+        pf_cellMean.c
+        pf_cellMean.h
+        pf_limiter.c
+        pf_limiter.h)
 
 add_library(physfield STATIC ${PHYSDOMAIN_SOURCE})
 add_dependencies(physfield multiregions)

@@ -1,7 +1,7 @@
 #ifndef CONVECTION2D_H
 #define CONVECTION2D_H
 
-#include "PhysField/phys_physField.h"
+#include "PhysField/pf_phys.h"
 #include "LibUtilities/nc_library.h"
 
 typedef enum{

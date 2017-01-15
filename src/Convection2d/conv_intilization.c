@@ -2,9 +2,12 @@
 // Created by li12242 on 16/12/27.
 //
 
-#include <PhysField/phys_physField.h>
+#include <PhysField/pf_phys.h>
+#include <MultiRegions/mr_mesh.h>
 #include "conv_driver2d.h"
-#include "PhysField/phys_add_LDG_solver.h"
+#include "PhysField/pf_add_LDG_solver.h"
+
+#define DEBUG 0
 
 static double conv_advectDiff(physField *phys);
 static double conv_rotation(physField *phys);
@@ -30,6 +33,11 @@ void conv_intilization(physField *phys){
 
     /* assignment to global variable */
     solver.dt = dt;
+//    int procid;
+//    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
+//    if(!procid)
+//        printf(" time interval = %f\n", solver.dt);
+
     return;
 }
 
@@ -44,7 +52,7 @@ static double conv_advectDiff(physField *phys){
     double **x = phys->region->x;
     double **y = phys->region->y;
 
-    phys_add_LDG_solver(phys);
+    pf_add_LDG_solver(phys);
 
     const double xc = -0.5;
     const double yc = -0.5;
@@ -87,9 +95,13 @@ static double conv_advectDiff(physField *phys){
             double spe = sqrt(u*u+v*v);
             dt = min(dt, r/spe);
             dt = min(dt, r*r/sqrt(miu));
+#if DEBUG
+            int procid = phys->mesh->procid;
+            if(!procid)
+                printf("k=%d, n=%d, r=%f, spe=%f, mu=%f, dt=%f\n", k,n,r,spe,miu,dt);
+#endif
         }
     }
-
     return dt;
 }
 

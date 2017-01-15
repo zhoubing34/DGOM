@@ -1,6 +1,6 @@
 #include <MultiRegions/mr_mesh.h>
 #include "conv_driver2d.h"
-#include "PhysField/phys_physField.h"
+#include "PhysField/pf_phys.h"
 #include "conv_output.h"
 #include "conv_rhs.h"
 
@@ -47,6 +47,7 @@ void conv_run(physField *phys){
             conv_rhs(phys, fa, fb, fdt);
         }
 
+        printf("processing: %f%%\r", time/ftime);
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
         conv_putvar(phys, counter++, time);

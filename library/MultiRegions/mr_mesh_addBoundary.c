@@ -47,7 +47,8 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
     for(f1=0;f1<Nsurf;f1++){
         surfList[f1] = SFToV[f1][2];
         if(SFToV[f1][2] == INNERLOC | SFToV[f1][2] == INNERBS ){
-            printf("MultiRegions (mr_mesh_addBoundary): Error boundary type in SFToV[%d][3] = %d\n", f1,SFToV[f1][2]);
+            printf("mr_mesh_addBoundary (%s): Error boundary type in SFToV[%d][3] = %d\n",
+                   __FILE__, f1,SFToV[f1][2]);
             printf("The boundary type indicator cannot be %d or %d:\n", INNERLOC, INNERBS);
             printf("   %d - local boundary surface[default]\n", INNERLOC);
             printf("   %d - parallel boundary surface\n", INNERBS);

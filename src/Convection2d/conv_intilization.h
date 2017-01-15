@@ -5,7 +5,7 @@
 #ifndef DGOM_CONV_INTILIZATION_H
 #define DGOM_CONV_INTILIZATION_H
 
-#include "PhysField/phys_physField.h"
+#include "PhysField/pf_phys.h"
 void conv_intilization(physField *phys);
 
 #endif //DGOM_CONV_INTILIZATION_H

@@ -27,13 +27,13 @@ int main(int argc, char **argv){
 
     // print help information
     if(ishelp && !procid){
-        printf(HEADFINISH "DGOM\n" HEADLINE "Unit tests for MultiRegions library\n"
+        printf(HEADEND "DGOM\n" HEADLINE "Unit tests for MultiRegions library\n"
                        HEADLINE "Usages:\n"
                        HEADLINE "   mpirun -n 2 -host localhost ./MulitRegions_Test\n"
                        HEADLINE "\n"
                        HEADLINE "Optional features:\n"
                        HEADLINE "   -help     print help information\n"
-                       HEADFINISH "   -verbose  print variables to log files\n");
+                       HEADEND "   -verbose  print variables to log files\n");
         return 0;
     }
 
@@ -57,9 +57,9 @@ int main(int argc, char **argv){
 
     if(!procid){
         if(failNum)
-            printf(HEADFINISH "%d test faild from MulitRegions_test\n", failNum);
+            printf(HEADEND "%d test faild from MulitRegions_test\n", failNum);
         else
-            printf(HEADFINISH "%d test passed from MulitRegions_test\n", NTEST);
+            printf(HEADEND "%d test passed from MulitRegions_test\n", NTEST);
     }
     return failNum;
 }

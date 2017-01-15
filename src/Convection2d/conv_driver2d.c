@@ -41,25 +41,7 @@ int main(int argc, char **argv){
     /* physical field */
     stdCell *cell = sc_create(solver.N, solver.celltype);
     parallMesh *mesh = conv_mesh(cell);
-    physField *phys = phys_create(3, mesh);
-
-
-    if(!mesh->procid) {
-        printf("--------------------------------\n");
-        printf("          Convection2d\n");
-        printf("--------------------------------\n");
-        printf("\n    2d Convection Test Case\n");
-        printf("\n        Deg = %d \n", solver.N);
-
-        if(cell->type == TRIANGLE) {
-            printf("\n    Tri Ele = %d \n", solver.Ne);
-        }
-        else if(cell->type == QUADRIL){
-            printf("\n   Quad Ele = %d \n", solver.Ne);
-        }
-        printf("\n");
-        printf("--------------------------------\n");
-    }
+    physField *phys = pf_create(3, mesh);
 
     /* initialization */
     conv_intilization(phys);
@@ -89,6 +71,6 @@ void conv_finalize(physField *phys){
     mr_reg_free(phys->region);
     mr_mesh_deleteBoundary2d(phys->mesh);
     mr_mesh_free(phys->mesh);
-    phys_free(phys);
+    pf_free(phys);
     MPI_Finalize();
 }

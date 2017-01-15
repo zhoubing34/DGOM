@@ -17,9 +17,9 @@ int main(){
             failNum++;
     }
     if(failNum)
-        printf(HEADFINISH "%d test faild from LibUtilities_Test\n", failNum);
+        printf(HEADEND "%d test faild from LibUtilities_Test\n", failNum);
     else
-        printf(HEADFINISH "2 test passed from LibUtilities_Test\n");
+        printf(HEADEND "2 test passed from LibUtilities_Test\n");
 
     return 0;
 }

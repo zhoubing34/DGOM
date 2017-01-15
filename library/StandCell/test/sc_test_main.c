@@ -16,13 +16,13 @@ int main(int argc, char **argv){
 
     // print help information
     if(ishelp){
-        printf(HEADFINISH "DGOM\n" HEADLINE "Unit tests for MultiRegions library\n"
+        printf(HEADEND "DGOM\n" HEADLINE "Unit tests for MultiRegions library\n"
                        HEADLINE "Example usages:\n"
                        HEADLINE "   ./StandCell_Test\n"
                        HEADLINE "\n"
                        HEADLINE "Optional features:\n"
                        HEADLINE "   -help     print help information\n"
-                       HEADFINISH "   -verbose  print variables to log files\n\n");
+                       HEADEND "   -verbose  print variables to log files\n\n");
         return 0;
     }
 
@@ -46,9 +46,9 @@ int main(int argc, char **argv){
         fail += err[i];
 
     if(fail)
-        printf(HEADFINISH "%d test faild from SandCell_triangle test\n", fail);
+        printf(HEADEND "%d test faild from SandCell_triangle test\n", fail);
     else
-        printf(HEADFINISH "%d test passed from SandCell_triangle test\n", NTEST);
+        printf(HEADEND "%d test passed from SandCell_triangle test\n", NTEST);
 
     /* quadrilateral test case */
     stdCell *quad = sc_create(N, QUADRIL);
@@ -66,9 +66,9 @@ int main(int argc, char **argv){
         fail += err[i];
 
     if(fail)
-        printf(HEADFINISH "%d test faild from SandCell_quadrilateral test\n", fail);
+        printf(HEADEND "%d test faild from SandCell_quadrilateral test\n", fail);
     else
-        printf(HEADFINISH "%d test passed from SandCell_quadrilateral test\n", NTEST);
+        printf(HEADEND "%d test passed from SandCell_quadrilateral test\n", NTEST);
 
     return fail;
 }

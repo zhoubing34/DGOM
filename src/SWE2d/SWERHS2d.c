@@ -1,4 +1,4 @@
-#include "swe_dirver2d.h"
+#include "swe_driver2d.h"
 
 void SWE_RHS2d(PhysDomain2d *phys, SWE_Solver2d *solver,
                const real frka, const real frkb, const real fdt){

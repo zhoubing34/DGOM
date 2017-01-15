@@ -8,7 +8,7 @@
 #define HEADLINE 	"\033[32m[------------]\033[0m " // test reminder
 #define HEADPASS  	"\033[32m[   PASSED   ]\033[0m " // test pass indicator
 #define HEADFAIL 	"\033[31m[   FAILED   ]\033[0m " // test fail indicator
-#define HEADFINISH  "\033[32m[============]\033[0m " // test end indicator
+#define HEADEND     "\033[32m[============]\033[0m " // test end indicator
 
 /* UTest.c */
 void UTest_Command(int argc, char** argv, int *ishelp, int *isverbose);

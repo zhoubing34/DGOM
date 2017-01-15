@@ -1,9 +1,9 @@
 #include <MultiRegions/mr_mesh.h>
 #include "conv_driver2d.h"
-#include "PhysField/phys_fetchBuffer.h"
-#include "PhysField/phys_strong_volume_flux2d.h"
-#include "PhysField/phys_strong_surface_flux2d.h"
-#include "PhysField/phys_strong_viscosity_LDG_flux2d.h"
+#include "PhysField/pf_fetchBuffer.h"
+#include "PhysField/pf_strong_volume_flux2d.h"
+#include "PhysField/pf_strong_surface_flux2d.h"
+#include "PhysField/pf_strong_viscosity_LDG_flux2d.h"
 
 int conv_fluxTerm(real *var, real *Eflux, real *Gflux){
     const real c = var[0];
@@ -48,17 +48,17 @@ void conv_rhs(physField *phys, real frka, real frkb, real fdt){
 
     int Nmess=0;
     /* fetch nodal value through all procss */
-    phys_fetchNodeBuffer2d(phys, mpi_send_requests, mpi_recv_requests, &Nmess);
+    pf_fetchNodeBuffer2d(phys, mpi_send_requests, mpi_recv_requests, &Nmess);
 
     /* volume integral */
-    phys_strong_volume_flux2d(phys, conv_fluxTerm);
+    pf_strong_volume_flux2d(phys, conv_fluxTerm);
 
     /* waite to recv */
     MPI_Status instatus[nprocs];
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
     /* surface integral */
-    phys_strong_surface_integral2d(phys, NULL, NULL, conv_fluxTerm, conv_upWindFlux);
+    pf_strong_surface_flux2d(phys, NULL, NULL, conv_fluxTerm, conv_upWindFlux);
 
     /* waite for finishing send buffer */
     MPI_Waitall(Nmess, mpi_send_requests, instatus);
@@ -68,7 +68,7 @@ void conv_rhs(physField *phys, real frka, real frkb, real fdt){
         real c11 = (real) solver.LDG_parameter[0];
         real c12 = (real) solver.LDG_parameter[1];
         real c22 = (real) solver.LDG_parameter[2];
-        phys_strong_viscosity_LDG_flux2d(phys, NULL, NULL, c11, c12, c22);
+        pf_strong_viscosity_LDG_flux2d(phys, NULL, NULL, c11, c12, c22);
     }
 
     real *f_resQ = phys->f_resQ;

@@ -1,0 +1,240 @@
+#include <PhysField/pf_phys.h>
+#include <MultiRegions/mr_mesh.h>
+#include "swe_driver2d.h"
+#include "PhysField/pf_cellMean.h"
+#include "swe_output.h"
+#include "PhysField/pf_limiter.h"
+#include "swe_rhs.h"
+
+#define DEBUG 0
+
+/* private function */
+void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
+double swe_time_interval(swe_solver *solver);
+void swe_ppreserve(swe_solver *solver);
+
+void swe_run(swe_solver *solver){
+    /* Runge-Kutta time evaluation coefficient */
+    double rk4a[5], rk4b[5], rk4c[6];
+    swe_rk_parameter(rk4a, rk4b, rk4c);
+
+    physField *phys = solver->phys;
+
+    /* store loop condition */
+    int     INTRK, tstep=0;
+    int     procid = phys->mesh->procid;
+    double  time    = 0.0;
+    double  ftime   = solver->ftime;
+    double  dt;  /* delta time */
+    /* save initial condition */
+    swe_save_var(solver, tstep++, time);
+
+    double mpitime0 = MPI_Wtime();
+
+    /* time step loop  */
+    while (time<ftime){
+        dt = swe_time_interval(solver);
+        if(dt<1e-4) dt = 1e-4;
+        /* adjust final step to end exactly at FinalTime */
+        if (time+dt > ftime) { dt = ftime-time; }
+
+        if(!procid){
+            printf("Process:%f, dt:%f\n", time/ftime, dt);
+        }
+
+        for (INTRK=1; INTRK<=5; ++INTRK) {
+            /* compute rhs of equations */
+            const real fdt = (real)dt;
+            const real fa = (real)rk4a[INTRK-1];
+            const real fb = (real)rk4b[INTRK-1];
+            swe_rhs(solver, fa, fb, fdt);
+#if DEBUG
+            int ind = 13302-3;
+            printf("procid=%d, var=[%f, %f, %f]\n",
+                   phys->mesh->procid, phys->f_Q[ind],
+                   phys->f_Q[ind+1], phys->f_Q[ind+2]);
+#endif
+            pf_slloc2d(phys, 2.0);
+#if DEBUG
+            ind = 13302-3;
+            printf("procid=%d, var=[%f, %f, %f]\n",
+                   phys->mesh->procid, phys->f_Q[ind],
+                   phys->f_Q[ind+1], phys->f_Q[ind+2]);
+#endif
+            swe_ppreserve(solver);
+#if DEBUG
+            ind = 13302-3;
+            printf("procid=%d, var=[%f, %f, %f]\n",
+                   phys->mesh->procid, phys->f_Q[ind],
+                   phys->f_Q[ind+1], phys->f_Q[ind+2]);
+#endif
+        }
+        /* increment current time */
+        time += dt;
+        swe_save_var(solver, tstep++, time);
+    }
+    double mpitime1 = MPI_Wtime();
+    double elapsetime = mpitime1 - mpitime0;
+
+    if(!procid)
+        printf("proc: %d,\t time taken: %lg\n", procid, elapsetime);
+
+    return;
+}
+
+void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c){
+    /* low storage RK coefficients */
+    rk4a[0] =              0.0;
+    rk4a[1] =  -567301805773.0 / 1357537059087.0;
+    rk4a[2] = -2404267990393.0 / 2016746695238.0;
+    rk4a[3] = -3550918686646.0 / 2091501179385.0;
+    rk4a[4] = -1275806237668.0 /  842570457699.0;
+    rk4b[0] =  1432997174477.0 /  9575080441755.0;
+    rk4b[1] =  5161836677717.0 / 13612068292357.0;
+    rk4b[2] =  1720146321549.0 /  2090206949498.0;
+    rk4b[3] =  3134564353537.0 /  4481467310338.0;
+    rk4b[4] =  2277821191437.0 / 14882151754819.0;
+    rk4c[0] =              0.0;
+    rk4c[1] =  1432997174477.0 / 9575080441755.0;
+    rk4c[2] =  2526269341429.0 / 6820363962896.0;
+    rk4c[3] =  2006345519317.0 / 3224310063776.0;
+    rk4c[4] =  2802321613138.0 / 2924317926251.0;
+    rk4c[5] =              1.0;
+}
+
+/**
+ * @brief
+ * Predict the wave speed and give local delta time
+ *
+ * @details
+ * The wave speed is given as \f[ c = \sqrt{gh}+\left| \mathbf{u} \right| \f],
+ * and the delta time is derived \f[ dt = dx/dt \f], while \f$ dx \f$ is the
+ * characteristic length.
+ *
+ * @param[PhysDomain2d*] phys
+ * @param[SWE_Solver2d*] solver
+ *
+ * @return
+ * return values:
+ * name     | type     | description of value
+ * -------- |----------|----------------------
+ * dt   | double | delta time
+ *
+ */
+double swe_time_interval(swe_solver *solver){
+
+    double dt   = 1e4;
+    const double gra  = solver->gra;
+    const double hcrit = solver->hcrit;
+
+    physField *phys = solver->phys;
+    const int Np = phys->cell->Np;
+    const int K = phys->grid->K;
+    const int Nfield = phys->Nfield;
+
+    register int k,n;
+    double gdt;
+    real h,u,v;
+
+    for(k=0;k<K;k++){
+        double len = phys->region->len[k];
+        double c = 1e-10;
+        int isdry = 0;
+        for(n=0;n<Np;n++){
+            int ind = (k*Np+n)*Nfield;
+            h = phys->f_Q[ind++];
+            u = phys->f_Q[ind++]; u /= h;
+            v = phys->f_Q[ind  ]; v /= h;
+
+            if(h<hcrit){
+                isdry = 1;
+            }
+            c = max(c, sqrt(gra*h)+sqrt(u*u+v*v));
+        }
+        if(isdry){ continue; } // jump this cell
+
+        dt = min(dt, len/(double)c);
+#if 0
+        int procid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &procid);
+        if(!procid) printf("k=%d, hmean=%f, c=%f, dt=%f\n",k,hmean,c,dt);
+#endif
+    }
+    /* gather all the delta time in all process */
+    dt = dt*solver->cfl;
+    MPI_Allreduce(&dt, &gdt, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+    return gdt;
+}
+
+
+/**
+ * @brief
+ * Positive-preserving operator from Xing and Shu (2010).
+ *
+ * @details
+ * The positive operator will reconstruct the conserve variables in each element
+ * to eliminate the negative water depth.
+ *
+ * @param[in,out] solver SWE_Solver2d pointer
+ */
+void swe_ppreserve(swe_solver *solver){
+
+    physField *phys = solver->phys;
+
+    const int Nfield = phys->Nfield;
+    const int Np = phys->cell->Np;
+    const int K = phys->grid->K;
+    const double hcrit = solver->hcrit;
+
+    register int i,k,ind;
+
+    pf_cellMean(phys);
+
+    for(k=0;k<K;k++){
+        ind = k*Nfield; /* index of k-th cell */
+        real hmean  = phys->c_Q[ind];
+        real qxmean = phys->c_Q[ind+1];
+        real qymean = phys->c_Q[ind+2];
+        /* correct negative water depth */
+        if(hmean<0.0){
+            for(i=0;i<Np;i++) {
+                ind = (k*Np + i)*Nfield;
+                phys->f_Q[ind  ] -= hmean;
+                phys->f_Q[ind+1]  = 0.0;
+                phys->f_Q[ind+2]  = 0.0;
+            }
+            hmean = 0.0;
+            qxmean = 0.0;
+            qymean = 0.0;
+        }
+
+        ind = k*Np*Nfield; /* index of first node */
+        real hmin = phys->f_Q[ind];
+        /* compute minimum water depth */
+        for(i=1;i<Np;i++){
+            ind += Nfield;
+            hmin = min(hmin, phys->f_Q[ind]);
+        }
+        /* positive operator */
+        real theta;
+        if(hmean > hmin){ /* in case for `hmean = hmin` */
+            theta = min(1, hmean/(hmean-hmin));
+        }else{ /* for hmean = hmin */
+            theta = 0.0;
+        }
+        /* reconstruction */
+        for(i=0;i<Np;i++){
+            ind = (k*Np + i)*Nfield;
+            phys->f_Q[ind  ] = (phys->f_Q[ind  ] - hmean )*theta + hmean;
+            phys->f_Q[ind+1] = (phys->f_Q[ind+1] - qxmean)*theta + qxmean;
+            phys->f_Q[ind+2] = (phys->f_Q[ind+2] - qymean)*theta + qymean;
+
+            if(phys->f_Q[ind]<hcrit){
+                phys->f_Q[ind+1] = 0.0;
+                phys->f_Q[ind+2] = 0.0;
+            }
+        }
+    }
+
+    return;
+}
