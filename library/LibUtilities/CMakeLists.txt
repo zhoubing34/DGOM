@@ -7,7 +7,9 @@ set(LIBUTILITIES_SOURCE
         UTest.h
         UTest.c
         nc_library.c
-        nc_library.h)
+        nc_library.h
+        arg_section.c
+        arg_section.h)
 
 add_library(libutility STATIC ${LIBUTILITIES_SOURCE})
 

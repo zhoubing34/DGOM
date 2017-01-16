@@ -33,7 +33,7 @@ void swe_run(swe_solver *solver){
     /* time step loop  */
     while (time<ftime){
         dt = swe_time_interval(solver);
-        if(dt<1e-4) dt = 1e-4;
+        //if(dt<1e-4) dt = 1e-4;
         /* adjust final step to end exactly at FinalTime */
         if (time+dt > ftime) { dt = ftime-time; }
 
