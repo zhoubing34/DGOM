@@ -15,6 +15,8 @@ set(SRC_LIST
         swe_run.h
         swe_rhs.c
         swe_rhs.h
+        swe_extsol.c
+        swe_extsol.h
         )
 
 add_executable(swe2d ${SRC_LIST})

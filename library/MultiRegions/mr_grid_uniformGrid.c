@@ -114,8 +114,9 @@ geoGrid* mr_grid_createUniformGrid_quad
 {
     /* check stand element */
     if(shape->type !=  QUADRIL){
-        printf("MultiRegions (mr_grid_createUniformGrid_quad): "
-                       "the input element type %d is not quadrilateral!\n", shape->type);
+        fprintf(stderr, "mr_grid_createUniformGrid_quad (%s): %d\n"
+                "the input element type %d is not quadrilateral!\n",
+                __FILE__, __LINE__, shape->type);
         exit(-1);
     }
 
@@ -163,6 +164,69 @@ geoGrid* mr_grid_createUniformGrid_quad
 
     /* free memory */
     matrix_int_free(EToV);
+
+    return grid;
+}
+
+
+geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename){
+    char element_file[1024];
+    char vertex_file[1024];
+    strcpy(element_file, casename);
+    strcat(element_file, ".ele");
+    strcpy(vertex_file, casename);
+    strcat(vertex_file, ".node");
+
+    /* read the EToV */
+    FILE *fp;
+    if( (fp = fopen(element_file, "r")) == NULL ){
+        fprintf(stderr, "mr_grid_read_file (%s): %d\n"
+                        "Unable to open element file %s.\n",
+                __FILE__,__LINE__,element_file);
+    }
+    int Nv, K, temp;
+    fscanf(fp, "%d %d %d\n", &K, &Nv, &temp);
+    // check element vertex
+    if(shape->Nv !=  Nv){
+        fprintf(stderr, "mr_grid_file2d (%s): %d\n"
+                "the input element type is not correct!\n", __FILE__, __LINE__);
+        exit(-1);
+    }
+
+    int **EToV = matrix_int_create(K, Nv);
+    int k,n;
+    for(k=0;k<K;k++){
+        fscanf(fp, "%d", &temp); //read index
+        for(n=0;n<Nv;n++){
+            fscanf(fp, "%d", EToV[0]+k*Nv+n);
+        }
+        fscanf(fp, "%d", &temp); //read region id
+    }
+    fclose(fp);
+
+    /* read vertex */
+    if( (fp = fopen(vertex_file, "r")) == NULL ){
+        fprintf(stderr, "mr_grid_read_file (%s): %d\n"
+                        "Unable to open node file %s.\n",
+                __FILE__,__LINE__,vertex_file);
+    }
+    fscanf(fp, "%d %d %d %d\n", &Nv, &temp, &temp, &temp);
+    double *vx = vector_double_create(Nv);
+    double *vy = vector_double_create(Nv);
+    for(n=0;n<Nv;n++){
+        fscanf(fp, "%d", &temp); //read vertex id
+        fscanf(fp, "%lf", vx+n);
+        fscanf(fp, "%lf", vy+n);
+    }
+    fclose(fp);
+
+    /* initialize */
+    geoGrid* grid = mr_grid_create(shape, K, Nv, vx, vy, NULL, EToV);
+
+    /* free memory */
+    matrix_int_free(EToV);
+    vector_double_free(vx);
+    vector_double_free(vy);
 
     return grid;
 }

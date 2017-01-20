@@ -33,6 +33,7 @@
 #include "MultiRegions/mr_mesh_addBoundary.h"
 #include "swe_output.h"
 #include "swe_run.h"
+#include "swe_extsol.h"
 
 int main(int argc, char **argv){
 
@@ -47,6 +48,9 @@ int main(int argc, char **argv){
 
     /* run */
     swe_run(solver);
+
+    /* norm error */
+    //swe_normerr(solver);
 
     /* finalize */
     static void swe_finalize(swe_solver*);

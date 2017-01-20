@@ -32,14 +32,19 @@ void swe_run(swe_solver *solver){
 
     /* time step loop  */
     while (time<ftime){
+        /* save result */
+        //swe_save_var(solver, tstep++, time);
+
+        /* calculate time interval */
         dt = swe_time_interval(solver);
+
         //if(dt<1e-4) dt = 1e-4;
         /* adjust final step to end exactly at FinalTime */
         if (time+dt > ftime) { dt = ftime-time; }
 
-        if(!procid){
-            printf("Process:%f, dt:%f\r", time/ftime, dt);
-        }
+        // if(!procid){
+        //     printf("Process:%f, dt:%f\r", time/ftime, dt);
+        // }
 
         for (INTRK=1; INTRK<=5; ++INTRK) {
             /* compute rhs of equations */
@@ -50,17 +55,18 @@ void swe_run(swe_solver *solver){
 
             pf_slloc2d(phys, 2.0);
             swe_ppreserve(solver);
-
         }
         /* increment current time */
         time += dt;
-        swe_save_var(solver, tstep++, time);
     }
     double mpitime1 = MPI_Wtime();
     double elapsetime = mpitime1 - mpitime0;
 
+    // last
+    swe_save_var(solver, tstep++, time);
+
     if(!procid)
-        printf("proc: %d,\t time taken: %lg\n", procid, elapsetime);
+        printf("proc: %d, time taken: %lg\n", procid, elapsetime);
 
     return;
 }
