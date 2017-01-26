@@ -66,26 +66,28 @@ static arg_section** swe_create_section(){
     return section_p;
 }
 
-static void swe_free_section(arg_section **arg_section){
+static void swe_free_section(arg_section **section_p){
     int n;
     for(n=0;n<SECTION_NUM;n++)
-        section_free(arg_section[n]);
+        section_free(section_p[n]);
+
+    free(section_p);
     return;
 }
 
 void swe_create_input(){
-    arg_section **arg_section = swe_create_section();
+    arg_section **section_p = swe_create_section();
 
     int n;
     for(n=0;n<SECTION_NUM;n++)
-        section_print(arg_section[n]);
+        section_print(section_p[n]);
 
     FILE *fp = fopen(FILE_NAME, "w");
     for(n=0;n<SECTION_NUM;n++){
-        section_write_file(arg_section[n], fp);
+        section_write_file(section_p[n], fp);
     }
     fclose(fp);
-    swe_free_section(arg_section);
+    swe_free_section(section_p);
 }
 
 arg_section** swe_read_input(){

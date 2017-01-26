@@ -1,6 +1,5 @@
 #include <MultiRegions/mr_mesh.h>
 #include "conv_driver2d.h"
-#include "PhysField/pf_phys.h"
 #include "conv_output.h"
 #include "conv_rhs.h"
 

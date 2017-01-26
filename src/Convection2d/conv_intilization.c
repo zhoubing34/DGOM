@@ -33,10 +33,6 @@ void conv_intilization(physField *phys){
 
     /* assignment to global variable */
     solver.dt = dt;
-//    int procid;
-//    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
-//    if(!procid)
-//        printf(" time interval = %f\n", solver.dt);
 
     return;
 }

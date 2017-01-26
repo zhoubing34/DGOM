@@ -9,11 +9,10 @@
  * Usages:
  * Use the 2 order basis with uniform triangular mesh (0) of 80 elements on each edge:
  *
- *     mpirun -n 2 -host localhost ./convection2d 2 80 0 0.3 2.4
+ *     mpirun -n 2 -host localhost ./convection2d
  *
  * @author
- * li12242, Tianjin University, li12242@tju.edu.cn
- *
+ * Li Longxiang, Tianjin University, li12242@tju.edu.cn
  */
 
 #include "conv_driver2d.h"

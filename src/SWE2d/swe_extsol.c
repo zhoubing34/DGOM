@@ -6,11 +6,11 @@
 
 typedef void (*extsol_fun)(real x, real y, double t, real *ext);
 
-double gra;
+static double gra;
 
 void swe_parabolicbowl_ext(real x, real y, double t, real *ext){
 
-    extern double gra;
+    //extern double gra;
     const double alpha = 1.6*1e-7;
     const double w = sqrt(8*gra*alpha);
     const double X = -1;
@@ -39,8 +39,8 @@ void swe_normerr(swe_solver *solver){
     const int Nfield = phys->Nfield;
     const int Np = phys->cell->Np;
 
-    /* global variable */
-    extern double gra;
+    /* set global variable */
+    //extern double gra;
     gra = solver->gra;
 
     extsol_fun extsolFun=NULL;
