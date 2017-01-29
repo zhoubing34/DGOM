@@ -1,5 +1,11 @@
-#include <parmetisbin.h>
+#include "parmetis.h"
+#include "metis.h"
 #include "mr_grid.h"
+
+#define MAXNCON 12
+#define UNBALANCE_FRACTION 1.05
+#define PMV3_OPTION_DBGLVL 1
+#define PMV3_OPTION_SEED 2
 
 /**
  * @brief
@@ -36,27 +42,27 @@ void mr_grid_loadBalance2d(geoGrid *grid){
     MPI_Allgather(&Klocal, 1, MPI_INT, Kprocs, 1, MPI_INT, MPI_COMM_WORLD);
 
     /* element distribution -- cumulative element count on processes */
-    idxtype *elmdist = idxmalloc(nprocs+1, "elmdist");
+    idx_t *elmdist = (idx_t*) calloc(nprocs+1, sizeof(idx_t));
 
     elmdist[0] = 0;
     for(p=0;p<nprocs;++p)
         elmdist[p+1] = elmdist[p] + Kprocs[p];
 
     /* list of element starts */
-    idxtype *eptr = idxmalloc(Klocal+1, "eptr");
+    idx_t *eptr = (idx_t*) calloc(Klocal+1, sizeof(idx_t));
 
     eptr[0] = 0;
     for(k=0;k<Klocal;++k)
         eptr[k+1] = eptr[k] + Nv;
 
     /* local element to vertex */
-    idxtype *eind = idxmalloc(Nv*Klocal, "eind");
+    idx_t *eind = (idx_t*) calloc(Nv*Klocal, sizeof(idx_t));
     for(k=0;k<Klocal;++k)
         for(n=0;n<Nv;++n)
             eind[k*Nv+n] = EToV[k][n];
 
     /* weight per element */
-    idxtype *elmwgt = idxmalloc(Klocal, "elmwgt");
+    idx_t *elmwgt = (idx_t*) calloc(Klocal, sizeof(idx_t));
 
     for(k=0;k<Klocal;++k)
         elmwgt[k] = 1;
@@ -96,7 +102,7 @@ void mr_grid_loadBalance2d(geoGrid *grid){
     int edgecut;
 
     /** the process index of redistributing each element */
-    idxtype *part = idxmalloc(Klocal, "part");
+    idx_t *part = (idx_t *) calloc(Klocal, sizeof(idx_t));
 
     MPI_Comm comm;
     MPI_Comm_dup(MPI_COMM_WORLD, &comm);

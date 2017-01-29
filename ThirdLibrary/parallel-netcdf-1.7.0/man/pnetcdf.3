@@ -1,0 +1,1105 @@
+.nr yr \n(yr+1900
+.af mo 01
+.af dy 01
+.TH PNETCDF 3 2016-03-03 "Printed: \n(yr-\n(mo-\n(dy" "LIBRARY FUNCTIONS"
+.SH NAME
+PnetCDF \- Parallel library for accessing files in Network Common Data Form (CDF, CDF-2 and CDF-5 formats)
+.SH SYNOPSIS
+.ft B
+.na
+.nh
+#include <pnetcdf.h>
+.sp
+
+mpicc ...  -lpnetcdf
+
+.ad
+.hy
+Complete documentation for the PnetCDF libraries can be found at the PnetCDF website: http://cucis.ece.northwestern.edu/projects/PnetCDF/.
+.sp
+.SH "LIBRARY VERSION"
+.LP
+This document describes Parallel netCDF APIs
+for the C programming language.
+.HP
+\fBconst char* ncmpi_inq_libvers()\fR
+.sp
+(Corresponds to \fBnc_inq_libvers(\|)\fR in netCDF)
+.sp
+Returns a string identifying the version of the PnetCDF library, and
+when it was built, like: "1.7.0 of 03 Mar 2016".
+.LP
+The RCS \fBident(1)\fP command will find a string like
+"$\|Id: @\|(#) PnetCDF library version 
+1.7.0 of 03 Mar 2016 $"
+in the library. The SCCS \fBwhat(1)\fP command will find a string like
+"PnetCDF library version 1.7.0 of 03 Mar 2016".
+.SH "RETURN VALUES"
+.LP
+All PnetCDF functions (except
+\fBncmpi_inq_libvers(\|)\fR and \fBncmpi_strerror(\|)\fR) return an integer status.
+
+If this returned status value is not equal to
+\fBNC_NOERR\fR (zero), it
+indicates that an error occurred. The possible status values are defined in 
+system include file <errno.h> and in "pnetcdf.h".
+.HP
+\fBconst char* ncmpi_strerror(int \fIstatus\fP)\fR
+.sp
+(Corresponds to \fBnc_strerror(\|)\fR in netCDF)
+.sp
+Returns a string textual translation of the \fIstatus\fP
+value, like "Attribute or variable name contains illegal characters"
+or "No such file or directory".
+.sp
+.SH "FILE OPERATIONS"
+.LP
+.HP
+\fBint ncmpi_create(MPI_Comm \fIcomm\fP, const char \fIpath\fP[], int \fIcmode\fP, MPI_Info \fIinfo\fP, int* \fIncid\fP)\fR
+
+(Corresponds to \fBnc_create(\|)\fR in netCDF)
+.sp
+Creates a new netCDF dataset at \fIpath\fP collectively by a group of MPI
+processes specified by \fIcomm\fP, returning a netCDF ID in \fIncid\fP.  The
+argument \fIcmode\fP may include the bitwise-or of the following flags:
+\fBNC_NOCLOBBER\fR to protect existing datasets (default is \fBNC_CLOBBER\fR,
+silently blows them away), \fBNC_SHARE\fR for stronger metadata data consistency
+control, \fBNC_64BIT_OFFSET\fR to create a file in the 64-bit offset format
+(CDF-2), as opposed to classic format, the default, or \fBNC_64BIT_DATA\fR to
+create a file in the 64-bit data format (CDF-5).
+Use either \fBNC_64BIT_OFFSET\fR or \fBNC_64BIT_DATA\fR.
+The 64-bit offset format allows the creation of very large files with far fewer
+restrictions than netCDF classic format, but can only be read by the netCDF
+library version 3.6 or greater. Users are cautioned that files that use the
+64-bit offset format will not be recognized by netCDF applications linked to an
+earlier version of the netCDF library than 3.6.  Applications linked to version
+3.6 or later will be able to transparently access either the classic format or
+64-bit offset format.
+The 64-bit data format allows the creation of very large array variables.
+CDF-5 files currently will not be recognized by netCDF 3 or 4 library.
+.
+
+The argument \fIcmode\fP must be consistent among all MPI processes that
+collectively create the file.  The argument \fIinfo\fP is an MPI info object.
+Users can use it to supply the file access hints further performance
+improvement.  The hints include existing MPI-IO hints as well as hints defined
+and used in PnetCDF.
+.sp
+When a netCDF dataset is created, it is opened in \fBNC_WRITE\fR mode.
+When this function returns, the new netCDF dataset is in define mode.
+.HP
+\fBint ncmpi_open(MPI_Comm \fIcomm\fP, const char \fIpath\fP[], int \fImode\fP, MPI_Info \fIinfo\fP, int* \fIncid\fP)\fR
+
+(Corresponds to \fBnc_open(\|)\fR in netCDF)
+.sp
+Opens an existing netCDF dataset at \fIpath\fP collectively by a group of MPI
+processes specified by \fIcomm\fP, returning a netCDF ID in \fIncid\fP.  The type
+of access is described by the \fImode\fP parameter, which may include the
+bitwise-or of the following flags: \fBNC_WRITE\fR for read-write access (default
+read-only), \fBNC_SHARE\fR for stronger metadata data consistency control.
+.sp
+
+The argument \fImode\fP must be consistent among all MPI processes that
+collectively open the file.  The argument \fIinfo\fP is an MPI info object.
+Users can use it to supply the file access hints further performance
+improvement.  The hints include existing MPI-IO hints as well as hints defined
+and used in PnetCDF.
+.HP
+\fBint ncmpi_redef(int \fIncid\fP)\fR
+
+(Corresponds to \fBnc_redef(\|)\fR in netCDF)
+.sp
+Puts an open netCDF dataset into define mode, 
+so dimensions, variables, and attributes can be added or renamed and 
+attributes can be deleted.
+.HP
+\fBint ncmpi_enddef(int \fIncid\fP)\fR
+
+(Corresponds to \fBnc_enddef(\|)\fR in netCDF)
+.sp
+Takes an open netCDF dataset out of define mode.
+The changes made to the netCDF dataset
+while it was in define mode are checked and committed to disk if no
+problems occurred.
+After a successful call, variable data can be read or written to the dataset.
+.HP
+\fBint ncmpi_sync(int \fIncid\fP)\fR
+
+(Corresponds to \fBnc_sync(\|)\fR in netCDF)
+.sp
+Unless the
+\fBNC_SHARE\fR
+bit is set in
+\fBncmpi_open(\|)\fR or \fBncmpi_create(\|)\fR,
+data written by PnetCDF APIs may be cached by local file system on each compute
+node.  This API flushes cached data by calling MPI_File_sync.
+.HP
+\fBint ncmpi_abort(int \fIncid\fP)\fR
+
+(Corresponds to \fBnc_abort(\|)\fR in netCDF)
+.sp
+You don't need to call this function.  This function is called automatically by
+\fBncmpi_close(\|)\fR if the netCDF was in define mode and something goes wrong with
+the commit.  If the netCDF dataset isn't in define mode, then this function
+is equivalent to \fBncmpi_close(\|)\fR.  If it is called after \fBncmpi_redef(\|)\fR, but before
+\fBncmpi_enddef(\|)\fR, the new definitions are not committed and the dataset is closed.
+If it is called after \fBncmpi_create(\|)\fR but before \fBncmpi_enddef(\|)\fR, the dataset
+disappears.
+.HP
+\fBint ncmpi_close(int \fIncid\fP)\fR
+
+(Corresponds to \fBnc_close(\|)\fR in netCDF)
+.sp
+Closes an open netCDF dataset.  If the dataset is in define mode,
+\fBncmpi_enddef(\|)\fR will be called before closing.  After a dataset is closed, its ID
+may be reassigned to another dataset.
+.HP
+\fBint ncmpi_inq(int \fIncid\fP, int* \fIndims\fP, int* \fInvars\fP,
+int* \fInatts\fP, int* \fIunlimdimid\fP)\fR
+
+(Corresponds to \fBnc_inq(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_ndims(int \fIncid\fP, int* \fIndims\fP)\fR
+
+(Corresponds to \fBnc_inq_ndims(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_nvars(int \fIncid\fP, int* \fInvars\fP)\fR
+
+(Corresponds to \fBnc_inq_nvars(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_natts(int \fIncid\fP, int* \fInatts\fP)\fR
+
+(Corresponds to \fBnc_inq_natts(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_unlimdim(int \fIncid\fP, int* \fIunlimdimid\fP)\fR
+
+(Corresponds to \fBnc_inq_unlimdim(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_format(int \fIncid\fP, int* \fIformatn\fP)\fR
+
+(Corresponds to \fBnc_inq_format(\|)\fR in netCDF)
+.sp
+Use these functions to find out what is in a netCDF dataset.
+Upon successful return,
+\fIndims\fP will contain  the
+number of dimensions defined for this netCDF dataset,
+\fInvars\fP will contain the number of variables,
+\fInatts\fP will contain the number of attributes, and
+\fIunlimdimid\fP will contain the
+dimension ID of the unlimited dimension if one exists, or
+-1 otherwise.
+\fIformatn\fP will contain the version number of the dataset <format>, one of
+\fBNC_FORMAT_CLASSIC\fR, \fBNC_FORMAT_64BIT\fR, or \fBNC_FORMAT_64BIT_DATA\fR.
+If any of the
+return parameters is a \fBNULL\fR pointer, then the corresponding information
+will not be returned; hence, no space need be allocated for it.
+.HP
+\fBint ncmpi_def_dim(int \fIncid\fP, const char \fIname\fP[], MPI_Offset \fIlen\fP, int* \fIdimid\fP)\fR
+
+(Corresponds to \fBnc_def_dim(\|)\fR in netCDF)
+.sp
+Adds a new dimension to an open netCDF dataset, which must be 
+in define mode.
+\fIname\fP is the dimension name.
+If \fIdimid\fP is not a \fBNULL\fR pointer then upon successful completion \fIdimid\fP will contain the dimension ID of the newly created dimension.
+
+.SH "DIMENSIONS"
+.LP
+.HP
+\fBint ncmpi_inq_dimid(int \fIncid\fP, const char \fIname\fP[], int* \fIdimid\fP)\fR
+
+(Corresponds to \fBnc_inq_dimid(\|)\fR in netCDF)
+.sp
+Given a dimension name, returns the ID of a netCDF dimension in \fIdimid\fP.
+.HP
+\fBint ncmpi_inq_dim(int \fIncid\fP, int \fIdimid\fP, char \fIname\fP[], MPI_Offset* \fIlen\fP)\fR
+
+(Corresponds to \fBnc_inq_dim(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_dimname(int \fIncid\fP, int \fIdimid\fP, char \fIname\fP[])\fR
+
+(Corresponds to \fBnc_inq_dimname(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_dimlen(int \fIncid\fP, int \fIdimid\fP, MPI_Offset* \fIlen\fP)\fR
+
+(Corresponds to \fBnc_inq_dimlen(\|)\fR in netCDF)
+.sp
+Use these functions to find out about a dimension.
+If either the \fIname\fP
+argument or \fIlen\fP argument is a \fBNULL\fR pointer, then
+the associated information will not be returned.  Otherwise,
+\fIname\fP should be  big enough (\fBNC_MAX_NAME\fR)
+to hold the dimension name as the name will be copied into your storage.
+The length return parameter, \fIlen\fP
+will contain the size of the dimension.
+For the unlimited dimension, the returned length is the current
+maximum value used for writing into any of the variables which use
+the dimension.
+.HP
+\fBint ncmpi_rename_dim(int \fIncid\fP, int \fIdimid\fP, const char \fIname\fP[])\fR
+
+(Corresponds to \fBnc_rename_dim(\|)\fR in netCDF)
+.sp
+Renames an existing dimension in an open netCDF dataset.
+If the new name is longer than the old name, the netCDF dataset must be in 
+define mode.
+You cannot rename a dimension to have the same name as another dimension.
+.SH "VARIABLES"
+.LP
+.HP
+\fBint ncmpi_def_var(int \fIncid\fP, const char \fIname\fP[], nc_type \fIxtype\fP, int \fIndims\fP, const int \fIdimids\fP[], int* \fIvarid\fP)\fR
+
+(Corresponds to \fBnc_def_var(\|)\fR in netCDF)
+.sp
+Adds a new variable to a netCDF dataset. The netCDF must be in define mode.
+If not \fBNULL\fR, then \fIvarid\fP will be set to the netCDF variable ID.
+\fIndims\fP will be the number of dimensions for the variable.
+\fIname\fP will be the name of the netCDF variable.
+\fIxtype\fP is the external, netCDF type of the variable and should be one of
+\fBNC_BYTE\fR
+\fBNC_CHAR\fR,
+\fBNC_SHORT\fR,
+\fBNC_INT\fR,
+\fBNC_FLOAT\fR, or
+\fBNC_DOUBLE\fR,
+for CDF-1 and CDF-2 file formats.
+CDF-5 defines additional external types:
+\fBNC_UBYTE\fR,
+\fBNC_USHORT\fR,
+\fBNC_UINT\fR,
+\fBNC_INT64\fR, and
+\fBNC_UINT64\fR.
+\fIdimids\fP argument is a vector of ndims dimension IDs corresponding to the
+variable dimensions.
+.HP
+\fBint ncmpi_inq_varid(int \fIncid\fP, const char \fIname\fP[], int* \fIvarid\fP)\fR
+
+(Corresponds to \fBnc_inq_varid(\|)\fR in netCDF)
+.sp
+Returns the ID of a netCDF variable in \fIvarid\fP given its name.
+.HP
+\fBint ncmpi_inq_var(int \fIncid\fP, int \fIvarid\fP, char \fIname\fP[], nc_type* \fIxtype\fP, int* \fIndims\fP, int \fIdimids\fP[],
+int* \fInatts\fP)\fR
+
+(Corresponds to \fBnc_inq_var(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_varname(int \fIncid\fP, int \fIvarid\fP, char \fIname\fP[])\fR
+
+(Corresponds to \fBnc_inq_varname(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_vartype(int \fIncid\fP, int \fIvarid\fP, nc_type* \fIxtype\fP)\fR
+
+(Corresponds to \fBnc_inq_vartype(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_varndims(int \fIncid\fP, int \fIvarid\fP, int* \fIndims\fP)\fR
+
+(Corresponds to \fBnc_inq_varndims(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_vardimid(int \fIncid\fP, int \fIvarid\fP, int \fIdimids\fP[])\fR
+
+(Corresponds to \fBnc_inq_vardimid(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_varnatts(int \fIncid\fP, int \fIvarid\fP, int* \fInatts\fP)\fR
+
+(Corresponds to \fBnc_inq_varnatts(\|)\fR in netCDF)
+.sp
+Returns information about a netCDF variable, given its ID.
+If any of the
+return parameters (\fIname\fP, \fIxtype\fP, \fIndims\fP, \fIdimids\fP, or
+\fInatts\fP) is a \fBNULL\fR pointer, then the corresponding information
+will not be returned; hence, no space need be allocated for it.
+.HP
+\fBint ncmpi_rename_var(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[])\fR
+
+(Corresponds to \fBnc_rename_var(\|)\fR in netCDF)
+.sp
+Changes the name of a netCDF variable.
+If the new name is longer than the old name, the netCDF must be in define mode.
+You cannot rename a variable to have the name of any existing variable.
+
+.SH "WRITING AND READING WHOLE VARIABLES"
+.LP
+.HP
+\fBint ncmpi_put_var_text(int \fIncid\fP, int \fIvarid\fP, const char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_var_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var_uchar(int \fIncid\fP, int \fIvarid\fP, const unsigned char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_var_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var_schar(int \fIncid\fP, int \fIvarid\fP, const signed char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_var_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var_short(int \fIncid\fP, int \fIvarid\fP, const short \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_var_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var_int(int \fIncid\fP, int \fIvarid\fP, const int \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_var_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var_long(int \fIncid\fP, int \fIvarid\fP, const long \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_var_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var_float(int \fIncid\fP, int \fIvarid\fP, const float \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_var_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var_double(int \fIncid\fP, int \fIvarid\fP, const double \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_var_double(\|)\fR in netCDF)
+
+
+.sp
+Writes an entire netCDF variable (i.e. all the values).  The netCDF
+dataset must be open and in data mode.  The type of the data is
+specified in the function name, and it is converted to the external
+type of the specified variable, if possible, otherwise an
+\fBNC_ERANGE\fR error is returned. Note that rounding is not performed
+during the conversion. Floating point numbers are truncated when
+converted to integers.
+.HP
+\fBint ncmpi_get_var_text(int \fIncid\fP, int \fIvarid\fP, char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_var_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var_uchar(int \fIncid\fP, int \fIvarid\fP, unsigned char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_var_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var_schar(int \fIncid\fP, int \fIvarid\fP, signed char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_var_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var_short(int \fIncid\fP, int \fIvarid\fP, short \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_var_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var_int(int \fIncid\fP, int \fIvarid\fP, int \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_var_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var_long(int \fIncid\fP, int \fIvarid\fP, long \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_var_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var_float(int \fIncid\fP, int \fIvarid\fP, float \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_var_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var_double(int \fIncid\fP, int \fIvarid\fP, double \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_var_double(\|)\fR in netCDF)
+
+
+.sp
+Reads an entire netCDF variable (i.e. all the values).
+The netCDF dataset must be open and in data mode.  
+The data is converted from the external type of the specified variable,
+if necessary, to the type specified in the function name.  If conversion is
+not possible, an \fBNC_ERANGE\fR error is returned.
+.SH "WRITING AND READING ONE DATUM"
+.LP
+.HP
+\fBint ncmpi_put_var1_text(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], char \fI*out\fP)\fR
+
+(Corresponds to \fBnc_put_var1_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var1_uchar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], unsigned char \fI*out\fP)\fR
+
+(Corresponds to \fBnc_put_var1_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var1_schar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], signed char \fI*out\fP)\fR
+
+(Corresponds to \fBnc_put_var1_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var1_short(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], short \fI*out\fP)\fR
+
+(Corresponds to \fBnc_put_var1_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var1_int(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], int \fI*out\fP)\fR
+
+(Corresponds to \fBnc_put_var1_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var1_long(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], long \fI*out\fP)\fR
+
+(Corresponds to \fBnc_put_var1_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var1_float(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], float \fI*out\fP)\fR
+
+(Corresponds to \fBnc_put_var1_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_var1_double(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], double \fI*out\fP)\fR
+
+(Corresponds to \fBnc_put_var1_double(\|)\fR in netCDF)
+
+
+.sp
+Puts a single data value into a variable at the position \fIindex\fP of an
+open netCDF dataset that is in data mode.  The type of the data is
+specified in the function name, and it is converted to the external type
+of the specified variable, if possible, otherwise an \fBNC_ERANGE\fR
+error is returned.
+.HP
+\fBint ncmpi_get_var1_text(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], char* \fIin\fP)\fR
+
+(Corresponds to \fBnc_get_var1_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var1_uchar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], unsigned char* \fIin\fP)\fR
+
+(Corresponds to \fBnc_get_var1_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var1_schar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], signed char* \fIin\fP)\fR
+
+(Corresponds to \fBnc_get_var1_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var1_short(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], short* \fIin\fP)\fR
+
+(Corresponds to \fBnc_get_var1_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var1_int(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], int* \fIin\fP)\fR
+
+(Corresponds to \fBnc_get_var1_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var1_long(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], long* \fIin\fP)\fR
+
+(Corresponds to \fBnc_get_var1_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var1_float(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], float* \fIin\fP)\fR
+
+(Corresponds to \fBnc_get_var1_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_var1_double(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIindex\fP[], double* \fIin\fP)\fR
+
+(Corresponds to \fBnc_get_var1_double(\|)\fR in netCDF)
+
+
+.sp
+Gets a single data value from a variable at the position \fIindex\fP
+of an open netCDF dataset that is in data mode.  
+The data is converted from the external type of the specified variable,
+if necessary, to the type specified in the function name.  If conversion is
+not possible, an \fBNC_ERANGE\fR error is returned.
+.SH "WRITING AND READING AN ARRAY"
+.LP
+.HP
+\fBint ncmpi_put_vara_text(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vara_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vara_uchar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const unsigned char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vara_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vara_schar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const signed char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vara_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vara_short(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const short \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vara_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vara_int(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const int \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vara_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vara_long(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const long \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vara_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vara_float(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const float \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vara_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vara_double(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const double \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vara_double(\|)\fR in netCDF)
+
+
+.sp
+Writes an array section of values into a netCDF variable of an open
+netCDF dataset, which must be in data mode.  The array section is specified
+by the \fIstart\fP and \fIcount\fP vectors, which give the starting index
+and count of values along each dimension of the specified variable.
+The type of the data is
+specified in the function name and is converted to the external type
+of the specified variable, if possible, otherwise an \fBNC_ERANGE\fR
+error is returned.
+.HP
+\fBint ncmpi_get_vara_text(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vara_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vara_uchar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], unsigned char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vara_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vara_schar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], signed char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vara_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vara_short(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], short \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vara_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vara_int(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], int \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vara_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vara_long(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], long \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vara_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vara_float(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], float \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vara_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vara_double(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], double \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vara_double(\|)\fR in netCDF)
+
+
+.sp
+Reads an array section of values from a netCDF variable of an open
+netCDF dataset, which must be in data mode.  The array section is specified
+by the \fIstart\fP and \fIcount\fP vectors, which give the starting index
+and count of values along each dimension of the specified variable.
+The data is converted from the external type of the specified variable,
+if necessary, to the type specified in the function name.  If conversion is
+not possible, an \fBNC_ERANGE\fR error is returned.
+.SH "WRITING AND READING A SLICED ARRAY"
+.LP
+.HP
+\fBint ncmpi_put_vars_text(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vars_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vars_uchar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const unsigned char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vars_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vars_schar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const signed char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vars_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vars_short(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const short \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vars_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vars_int(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const int \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vars_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vars_long(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const long \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vars_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vars_float(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const float \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vars_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_vars_double(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const double \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_vars_double(\|)\fR in netCDF)
+
+
+.sp
+These functions are used for \fIstrided output\fP, which is like the
+array section output described above, except that
+the sampling stride (the interval between accessed values) is
+specified for each dimension.
+For an explanation of the sampling stride
+vector, see COMMON ARGUMENTS DESCRIPTIONS below.
+.HP
+\fBint ncmpi_get_vars_text(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vars_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vars_uchar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], unsigned char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vars_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vars_schar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], signed char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vars_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vars_short(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], short \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vars_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vars_int(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], int \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vars_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vars_long(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], long \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vars_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vars_float(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], float \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vars_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_vars_double(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], double \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_vars_double(\|)\fR in netCDF)
+
+
+.sp
+These functions are used for \fIstrided input\fP, which is like the
+array section input described above, except that 
+the sampling stride (the interval between accessed values) is
+specified for each dimension.
+For an explanation of the sampling stride
+vector, see COMMON ARGUMENTS DESCRIPTIONS below.
+.SH "WRITING AND READING A MAPPED ARRAY"
+.LP
+.HP
+\fBint ncmpi_put_varm_text(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], const char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_varm_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_varm_uchar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], const unsigned char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_varm_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_varm_schar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], const signed char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_varm_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_varm_short(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], const short \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_varm_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_varm_int(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], const int \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_varm_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_varm_long(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], const long \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_varm_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_varm_float(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], const float \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_varm_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_varm_double(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], const double \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_varm_double(\|)\fR in netCDF)
+
+
+.sp
+These functions are used for \fImapped output\fP, which is like
+strided output described above, except that an additional index mapping
+vector is provided to specify the in-memory arrangement of the data
+values.
+For an explanation of the index
+mapping vector, see COMMON ARGUMENTS DESCRIPTIONS below.
+.HP
+\fBint ncmpi_get_varm_text(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_varm_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_varm_uchar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], unsigned char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_varm_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_varm_schar(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], signed char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_varm_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_varm_short(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], short \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_varm_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_varm_int(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], int \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_varm_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_varm_long(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], long \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_varm_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_varm_float(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], float \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_varm_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_varm_double(int \fIncid\fP, int \fIvarid\fP, const MPI_Offset \fIstart\fP[], const MPI_Offset \fIcount\fP[], const MPI_Offset \fIstride\fP[], const MPI_Offset \fIimap\fP[], double \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_varm_double(\|)\fR in netCDF)
+
+
+.sp
+These functions are used for \fImapped input\fP, which is like
+strided input described above, except that an additional index mapping
+vector is provided to specify the in-memory arrangement of the data
+values.
+For an explanation of the index
+mapping vector, see COMMON ARGUMENTS DESCRIPTIONS below.
+.SH "ATTRIBUTES"
+.LP
+.HP
+\fBint ncmpi_put_att_text(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type \fIxtype\fP, MPI_Offset \fIlen\fP, const char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_att_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_att_uchar(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type \fIxtype\fP, MPI_Offset \fIlen\fP, const unsigned char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_att_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_att_schar(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type \fIxtype\fP, MPI_Offset \fIlen\fP, const signed char \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_att_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_att_short(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type \fIxtype\fP, MPI_Offset \fIlen\fP, const short \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_att_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_att_int(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type \fIxtype\fP, MPI_Offset \fIlen\fP, const int \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_att_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_att_long(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type \fIxtype\fP, MPI_Offset \fIlen\fP, const long \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_att_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_att_float(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type \fIxtype\fP, MPI_Offset \fIlen\fP, const float \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_att_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_put_att_double(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type \fIxtype\fP, MPI_Offset \fIlen\fP, const double \fIout\fP[])\fR
+
+(Corresponds to \fBnc_put_att_double(\|)\fR in netCDF)
+
+
+.HP
+\fBint ncmpi_put_att(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type \fIxtype\fP, MPI_Offset \fIlen\fP, void * \fIip\fP)\fR
+
+(Corresponds to \fBnc_put_att(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_att(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], void ** \fIip\fP)\fR
+
+(Corresponds to \fBnc_get_att(\|)\fR in netCDF)
+.sp
+Unlike variables, attributes do not have 
+separate functions for defining and writing values.
+This family of functions defines a new attribute with a value or changes
+the value of an existing attribute.
+If the attribute is new, or if the space required to
+store the attribute value is greater than before,
+the netCDF dataset must be in define mode.
+The parameter \fIlen\fP is the number of values from \fIout\fP to transfer.
+It is often one, except that for
+\fBncmpi_put_att_text(\|)\fR it will usually be
+\fBstrlen(\fIout\fP)\fR.
+.sp
+For these functions, the type component of the function name refers to
+the in-memory type of the value, whereas the \fIxtype\fP argument refers to the
+external type for storing the value.  An \fBNC_ERANGE\fR
+error results if
+a conversion between these types is not possible.  In this case the value
+is represented with the appropriate fill-value for the associated 
+external type.
+.HP
+\fBint ncmpi_inq_attname(int \fIncid\fP, int \fIvarid\fP, int \fIattnum\fP, char \fIname\fP[])\fR
+
+(Corresponds to \fBnc_inq_attname(\|)\fR in netCDF)
+.sp
+Gets the
+name of an attribute, given its variable ID and attribute number.
+This function is useful in generic applications that
+need to get the names of all the attributes associated with a variable,
+since attributes are accessed by name rather than number in all other
+attribute functions.  The number of an attribute is more volatile than
+the name, since it can change when other attributes of the same variable
+are deleted.  The attributes for each variable are numbered
+from 0 (the first attribute) to
+\fInvatts\fP-1,
+where \fInvatts\fP is
+the number of attributes for the variable, as returned from a call to
+\fBncmpi_inq_varnatts(\|)\fR.
+If the \fIname\fP parameter is a \fBNULL\fR pointer, no name will be
+returned and no space need be allocated.
+.HP
+\fBint ncmpi_inq_att(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type* \fIxtype\fP, MPI_Offset* \fIlen\fP)\fR
+
+(Corresponds to \fBnc_inq_att(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_attid(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], int* \fIattnum\fP)\fR
+
+(Corresponds to \fBnc_inq_attid(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_atttype(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], nc_type* \fIxtype\fP)\fR
+
+(Corresponds to \fBnc_inq_atttype(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_inq_attlen(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], MPI_Offset* \fIlen\fP)\fR
+
+(Corresponds to \fBnc_inq_attlen(\|)\fR in netCDF)
+.sp
+These functions return information about a netCDF attribute,
+given its variable ID and name.  The information returned is the
+external type in \fIxtype\fP
+and the number of elements in the attribute as \fIlen\fP.
+If any of the return arguments is a \fBNULL\fR pointer,
+the specified information will not be returned.
+.HP
+\fBint ncmpi_copy_att(int \fIncid\fP, int \fIvarid_in\fP, const char \fIname\fP[], int \fIncid_out\fP, int \fIvarid_out\fP)\fR
+
+(Corresponds to \fBnc_copy_att(\|)\fR in netCDF)
+.sp
+Copies an
+attribute from one netCDF dataset to another.  It can also be used to
+copy an attribute from one variable to another within the same netCDF.
+\fIncid_in\fP is the netCDF ID of an input netCDF dataset from which the
+attribute will be copied.
+\fIvarid_in\fP
+is the ID of the variable in the input netCDF dataset from which the
+attribute will be copied, or \fBNC_GLOBAL\fR
+for a global attribute.
+\fIname\fP
+is the name of the attribute in the input netCDF dataset to be copied.
+\fIncid_out\fP
+is the netCDF ID of the output netCDF dataset to which the attribute will be 
+copied.
+It is permissible for the input and output netCDF ID's to be the same.  The
+output netCDF dataset should be in define mode if the attribute to be
+copied does not already exist for the target variable, or if it would
+cause an existing target attribute to grow.
+\fIvarid_out\fP
+is the ID of the variable in the output netCDF dataset to which the attribute will
+be copied, or \fBNC_GLOBAL\fR to copy to a global attribute.
+.HP
+\fBint ncmpi_rename_att(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], const char \fInewname\fP[])\fR
+
+(Corresponds to \fBnc_rename_att(\|)\fR in netCDF)
+.sp
+Changes the
+name of an attribute.  If the new name is longer than the original name,
+the netCDF must be in define mode.  You cannot rename an attribute to
+have the same name as another attribute of the same variable.
+\fIname\fP is the original attribute name.
+\fInewname\fP
+is the new name to be assigned to the specified attribute.  If the new name
+is longer than the old name, the netCDF dataset must be in define mode.
+.HP
+\fBint ncmpi_del_att(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[])\fR
+
+(Corresponds to \fBnc_del_att(\|)\fR in netCDF)
+.sp
+Deletes an attribute from a netCDF dataset.  The dataset must be in
+define mode.
+.HP
+\fBint ncmpi_get_att_text(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_att_text(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_att_uchar(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], unsigned char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_att_uchar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_att_schar(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], signed char \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_att_schar(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_att_short(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], short \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_att_short(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_att_int(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], int \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_att_int(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_att_long(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], long \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_att_long(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_att_float(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], float \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_att_float(\|)\fR in netCDF)
+.HP
+\fBint ncmpi_get_att_double(int \fIncid\fP, int \fIvarid\fP, const char \fIname\fP[], double \fIin\fP[])\fR
+
+(Corresponds to \fBnc_get_att_double(\|)\fR in netCDF)
+
+
+.sp
+Gets the value(s) of a netCDF attribute, given its
+variable ID and name.  Converts from the external type to the type
+specified in
+the function name, if possible, otherwise returns an \fBNC_ERANGE\fR
+error.
+All elements of the vector of attribute
+values are returned, so you must allocate enough space to hold
+them.  If you don't know how much space to reserve, call
+\fBncmpi_inq_attlen(\|)\fR
+first to find out the length of the attribute.
+.SH "COMMON ARGUMENT DESCRIPTIONS"
+.LP
+In this section we define some common arguments which are used in the 
+"FUNCTION DESCRIPTIONS" section.
+.TP
+int \fIncid\fP
+is the netCDF ID returned from a previous, successful call to
+\fBncmpi_open(\|)\fR or \fBncmpi_create(\|)\fR
+.TP
+char \fIname\fP[]
+is the name of a dimension, variable, or attribute. The names of 
+dimensions, variables and attributes consist of arbitrary
+sequences of alphanumeric characters (as well as underscore '_',
+period '.' and hyphen '-'), beginning with a letter or
+underscore. (However names commencing with underscore are reserved for
+system use.) Case is significant in netCDF names. A zero-length name
+is not allowed.
+As an input argument, 
+it shall be a pointer to a 0-terminated string; as an output argument, it 
+shall be the address of a buffer in which to hold such a string.
+The maximum allowable number of characters 
+(excluding the terminating 0) is \fBNC_MAX_NAME\fR.
+.TP
+nc_type \fIxtype\fP
+specifies the external data type of a netCDF variable or attribute and
+is one of the following:
+\fBNC_BYTE\fR, \fBNC_CHAR\fR, \fBNC_SHORT\fR, \fBNC_INT\fR, 
+\fBNC_FLOAT\fR, or \fBNC_DOUBLE\fR for CDF-1 and CDF-2 file formats.
+These are used to specify 8-bit integers,
+characters, 16-bit integers, 32-bit integers, 32-bit IEEE floating point
+numbers, and 64-bit IEEE floating-point numbers, respectively.
+(\fBNC_LONG\fR in netCDF version 2 is now obsolete and set to \fBNC_INT\fR).
+CDF-5 defines additional external types:
+\fBNC_UBYTE\fR, \fBNC_USHORT\fR, \fBNC_UINT\fR, \fBNC_INT64\fR, and \fBNC_UINT64\fR.
+.TP
+int \fIdimids\fP[]
+is a vector of dimension ID's and defines the shape of a netCDF variable.
+The size of the vector shall be greater than or equal to the
+rank (i.e. the number of dimensions) of the variable (\fIndims\fP).
+The vector shall be ordered by the speed with which a dimension varies:
+\fIdimids\fP[\fIndims\fP-1]
+shall be the dimension ID of the most rapidly
+varying dimension and
+\fIdimids\fP[0]
+shall be the dimension ID of the most slowly
+varying dimension.
+The maximum possible number of
+dimensions for a variable is given by the symbolic constant
+\fBNC_MAX_VAR_DIMS\fR.
+.TP
+int \fIdimid\fP
+is the ID of a netCDF dimension.
+netCDF dimension ID's are allocated sequentially from the 
+non-negative
+integers beginning with 0.
+.TP
+int \fIndims\fP
+is either the total number of dimensions in a netCDF dataset or the rank
+(i.e. the number of dimensions) of a netCDF variable.
+The value shall not be negative or greater than the symbolic constant 
+\fBNC_MAX_VAR_DIMS\fR.
+.TP
+int \fIvarid\fP
+is the ID of a netCDF variable or (for the attribute-access functions) 
+the symbolic constant
+\fBNC_GLOBAL\fR,
+which is used to reference global attributes.
+netCDF variable ID's are allocated sequentially from the 
+non-negative
+integers beginning with 0.
+.TP
+int* \fInatts\fP
+is the number of global attributes in a netCDF dataset  for the
+\fBncmpi_inquire(\|)\fR
+function or the number
+of attributes associated with a netCDF variable for the
+\fBncmpi_varinq(\|)\fR
+function.
+.TP
+const MPI_Offset \fIindex\fP[]
+specifies the  coordinates of the netCDF data value to be accessed.
+The indices start at 0;
+thus, for example, the first data value of a
+two-dimensional variable is (0,0).
+The size of the vector shall be at least the rank of the associated
+netCDF variable and its elements shall correspond, in order, to the
+variable's dimensions.
+.TP
+const MPI_Offset \fIstart\fP[]
+specifies the starting point
+for accessing a netCDF variable's data values
+in terms of the indicial coordinates of 
+the corner of the array section.
+The indices start at 0;
+thus, the first data
+value of a variable is (0, 0, ..., 0).
+The size of the vector shall be at least the rank of the associated
+netCDF variable and its elements shall correspond, in order, to the
+variable's dimensions.
+.TP
+const MPI_Offset \fIcount\fP[]
+specifies the number of indices selected along each dimension of the
+array section.
+Thus, to access a single value, for example, specify \fIcount\fP as
+(1, 1, ..., 1).
+Note that, for strided I/O, this argument must be adjusted
+to be compatible with the \fIstride\fP and \fIstart\fP arguments so that 
+the interaction of the
+three does not attempt to access an invalid data co-ordinate.
+The elements of the
+\fIcount\fP vector correspond, in order, to the variable's dimensions.
+.TP
+const MPI_Offset \fIstride\fP[]
+specifies the sampling interval along each dimension of the netCDF
+variable.   The elements of the stride vector correspond, in order,
+to the netCDF variable's dimensions (\fIstride\fP[0])
+gives the sampling interval along the most slowly 
+varying dimension of the netCDF variable).  Sampling intervals are
+specified in type-independent units of elements (a value of 1 selects
+consecutive elements of the netCDF variable along the corresponding
+dimension, a value of 2 selects every other element, etc.).
+A \fBNULL\fR stride argument is treated as (1, 1, ... , 1).
+.TP
+const MPI_Offset \fIimap\fP[]
+specifies the mapping between the dimensions of a netCDF variable and
+the in-memory structure of the internal data array.  The elements of
+the index mapping vector correspond, in order, to the netCDF variable's
+dimensions (\fIimap\fP[0] gives the distance
+between elements of the internal array corresponding to the most
+slowly varying dimension of the netCDF variable).
+Distances between elements are specified in type-independent units of
+elements (the distance between internal elements that occupy adjacent
+memory locations is 1 and not the element's byte-length as in netCDF 2).
+A \fBNULL\fR pointer means the memory-resident values have
+the same structure as the associated netCDF variable.
+.SH "VARIABLE PREFILLING"
+.LP
+PnetCDF does not support data filling.
+.SH "ENVIRONMENT VARIABLES"
+.TP 4
+.B PNETCDF_SAFE_MODE
+Set to 1 to enable metadata consistency check. Warning messages will
+be printed to stdout if any inconsistency is detected.
+.SH "MAILING-LISTS"
+.LP
+A mailing list is available for
+discussion of the PnetCDF interface and announcements about PnetCDF bugs,
+fixes, and enhancements.
+To subscribe or unsubscribe to the PnetCDF mailing list,
+visit https://lists.mcs.anl.gov/mailman/listinfo/parallel-netcdf
+.RE
+.SH "SEE ALSO"
+.LP
+.BR ncmpidump (1),
+.BR ncmpigen (1),
+.BR ncmpidiff (1),
+.BR ncmpivalid (1),
+.BR pnetcdf (3).
+.LP
+\fIPnetCDF User's Guide\fP, published
+by Northwestern University and Argonne National Laboratory.
+This document is adopted from the
+\fInetCDF User's Guide\fP, developed at
+the Unidata Program Center, University Corporation for Atmospheric
+Research, located in Boulder, Colorado.
+
+PnetCDF home page at http://cucis.ece.northwestern.edu/projects/PnetCDF/.
