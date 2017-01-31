@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(DGOM)
 
-# set mpi compilers
+# set compilers
 set(CMAKE_C_FLAGS "-Wall")
 set(MPI_PATH $ENV{MPI_DIR})                      # use environmental variable MPI_DIR
 set(MPI_C_COMPILER   "${MPI_PATH}/bin/mpicc")    # set mpicc before find mpi package
@@ -15,31 +15,31 @@ endif()
 set(CMAKE_C_COMPILER   ${MPI_C_COMPILER})
 set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
 
-# release type
+# build type
 set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
 
-# 3rd library, pnetcdf, parmetis, lapack
-set(THIRD_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/thirdLibrary")
+# external library
+set(THIRD_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/externlib")
 
-# add header path
+# include path
 include_directories(
         "${CMAKE_SOURCE_DIR}/library"               # source library
         "${CMAKE_SOURCE_DIR}/include"               # source include
-        "${MPI_INCLUDE_PATH}"                       # mpi include
-        "${THIRD_LIBRARY_PATH}/install/include/"    # Third library include
+        "${MPI_INCLUDE_PATH}"                       # mpich2 include
+        "${THIRD_LIBRARY_PATH}/install/include/"    # external library include
         )
 
-# add static library path
+# static library path
 LINK_DIRECTORIES("${THIRD_LIBRARY_PATH}/install/lib/")
 
-# add unit test
+# set unit test
 set(UNITTEST_FOUND TRUE)
 # set precision: double/float
 add_definitions(-DDOUBLE_PRECISION)
 
 # add source folder
-add_subdirectory(thirdLibrary)
+add_subdirectory(externlib)
 add_subdirectory(src)       # source
 add_subdirectory(library)   # static library
 add_subdirectory(doc)       # docs

@@ -8,6 +8,8 @@ build
 lib
 *.nc
 *.xml
-3rdParty
 .idea
 cmake-build-debug
+externlib/CLAPACK-3.1.1.1
+externlib/parallel-netcdf-1.7.0
+externlib/parmetis-4.0.3

@@ -8,7 +8,6 @@
 #ifdef MKL_LIB
 #include "mkl_lapacke.h"
 #else
-
 #include "f2c.h"
 #include "blaswrap.h"
 #include "clapack.h"

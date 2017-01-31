@@ -33,7 +33,7 @@ void swe_run(swe_solver *solver){
     /* time step loop  */
     while (time<ftime){
         /* save result */
-        //swe_save_var(solver, tstep++, time);
+        swe_save_var(solver, tstep++, time);
 
         /* calculate time interval */
         dt = swe_time_interval(solver);
@@ -42,9 +42,9 @@ void swe_run(swe_solver *solver){
         /* adjust final step to end exactly at FinalTime */
         if (time+dt > ftime) { dt = ftime-time; }
 
-        // if(!procid){
-        //     printf("Process:%f, dt:%f\r", time/ftime, dt);
-        // }
+         if(!procid){
+             printf("Process:%f, dt:%f\r", time/ftime, dt);
+         }
 
         for (INTRK=1; INTRK<=5; ++INTRK) {
             /* compute rhs of equations */
@@ -53,7 +53,7 @@ void swe_run(swe_solver *solver){
             const real fb = (real)rk4b[INTRK-1];
             swe_rhs(solver, fa, fb, fdt);
 
-            pf_slloc2d(phys, 2.0);
+            pf_slloc2d(phys, 1.0);
             swe_ppreserve(solver);
         }
         /* increment current time */

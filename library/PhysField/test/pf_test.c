@@ -101,12 +101,10 @@ int main(int argc, char **argv){
 
     stdCell *quad = sc_create(N, QUADRIL);
     geoGrid *quad_grid = mr_grid_createUniformGrid_quad(quad, Mx, My, -1, 1, -1, 1);
-//    printf("procid=%d, set up grid\n", procid);
     multiReg *quad_region = mr_reg_create(quad_grid);
     parallMesh *quad_mesh = mr_mesh_create(quad_region);
     mr_mesh_addBoundary2d(quad_mesh, 0, NULL);
     physField *quad_phys = pf_create(Nfield, quad_mesh);
-//    printf("procid=%d,set up physField\n",procid);
 
     err[i++] = phys_cellMean_test(quad_phys, isverbose,
                                   "phys_quad_cellMean_test",

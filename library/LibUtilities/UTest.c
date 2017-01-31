@@ -1,9 +1,7 @@
 /**
- * @file
- * Unit test functions
+ * @file Unit test functions
  *
- * @author
- * li12242, Tianjin University, li12242@tju.edu.cn
+ * @author li12242, Tianjin University, li12242@tju.edu.cn
  */
 
 #include "UTest.h"
@@ -306,24 +304,14 @@ void PrintVector2File(FILE *fp, char *message, double *Mat, int len){
 }
 
 /**
- * @brief
- * Create log file to check function routine
+ * @brief Create log file to check function routine
+ * @author li12242, Tianjin University, li12242@tju.edu.cn
  *
- * @author
- * li12242, Tianjin University, li12242@tju.edu.cn
+ * @param[in] funname   Function name
+ * @param[in] rank      Index of local process
+ * @param[in] nprocs    Number of process
  *
- * @param [in] funname   Function name
- * @param [in] rank      Index of local process
- * @param [in] nprocs    Number of process
- *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * fig      | FILE*    | file handle
- *
- * @attention
- * Remember to close file with file handle
+ * @return fig file handle of log file.
  *
  */
 FILE* CreateLog(char *funname, int rank, int nprocs){

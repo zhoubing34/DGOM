@@ -16,7 +16,7 @@
  * @param[in] xmax  maximum value of x
  * @param[in] ymin  minimum value of y
  * @param[in] ymax  maximum value of y
- * @param[in] type    flag for triangle dividing, 0 for '\' and 1 for '/'
+ * @param[in] type  flag for triangle dividing, 0 for '\' and 1 for '/'
  *
  * @return grid geometry grid object
  */

@@ -5,15 +5,13 @@
 #include "mat_arith.h"
 
 /**
- * @brief
- * Inverse of square matrix A
+ * @brief Inverse of square matrix A
  *
  * @param[in] N row of square matrix
- * @param[in] A[N*N] reshape matrix M
+ * @param[in] A matrix
  *
  * @note
- * Row counts first to generalize the vector A, which means that
- * A[i][j] = A[i*N+j]
+ * Row counts first to generalize the vector A, which means that A[i][j] = A[i*N+j]
  */
 void Matrix_inverse(double *A, int N){
 #ifdef MKL_LIB
@@ -38,7 +36,7 @@ void Matrix_inverse(double *A, int N){
     integer  ERR_INFO;
     integer  LWORK = W * W;
     double Workspace[LWORK];
-    // - Compute the LU factorization of a M by N matrix A
+    // - Compute the LU factorization of a M by N matrix W
     dgetrf_(&W, &W, A, &LDA, IPIV, &ERR_INFO);
     // - Generate inverse of the matrix given its LU decompsotion
     dgetri_(&W, A, &LDA, IPIV, Workspace, &LWORK, &ERR_INFO);
@@ -57,7 +55,6 @@ void Matrix_inverse(double *A, int N){
  * @note
  * Row counts first to generalize the vector A, B and C, which means that A[i*N+j] = A[i][j]
  */
-
 void Matrix_multiply(const int M, const int K, const int N,
                      const double *A, const double *B, double *C) {
     int i, j, k;
@@ -72,7 +69,6 @@ void Matrix_multiply(const int M, const int K, const int N,
             for (k = 0; k < K; ++k) {
                 cij += *(Ai_ + k) * *(B_j + k*N);
             }
-
             *(C + j + i*N) = cij;
         }
     }

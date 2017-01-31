@@ -8,22 +8,14 @@
 #define PMV3_OPTION_SEED 2
 
 /**
- * @brief
- * Redistribute the elements on each process
- *
- * @details
- * Call ParMetis library to redistribute the mesh,
- * in order to achieve the load balance
- *
+ * @brief Redistribute the elements on each process.
+ * @details Call ParMetis library to redistribute the mesh.
  * @param [in,out] grid geometry grid object
- *
- * @note
- * The properties of EToV and K is updated.
+ * @note The properties of EToV and K is updated.
  */
 void mr_grid_loadBalance2d(geoGrid *grid){
 
     int n,p,k,v;
-
     /* MPI process */
     const int nprocs = grid->nprocs;
     const int procid = grid->procid;
@@ -42,27 +34,27 @@ void mr_grid_loadBalance2d(geoGrid *grid){
     MPI_Allgather(&Klocal, 1, MPI_INT, Kprocs, 1, MPI_INT, MPI_COMM_WORLD);
 
     /* element distribution -- cumulative element count on processes */
-    idx_t *elmdist = (idx_t*) calloc(nprocs+1, sizeof(idx_t));
+    idx_t *elmdist = (idx_t*) calloc((size_t) nprocs+1, sizeof(idx_t));
 
     elmdist[0] = 0;
     for(p=0;p<nprocs;++p)
         elmdist[p+1] = elmdist[p] + Kprocs[p];
 
     /* list of element starts */
-    idx_t *eptr = (idx_t*) calloc(Klocal+1, sizeof(idx_t));
+    idx_t *eptr = (idx_t*) calloc((size_t) Klocal+1, sizeof(idx_t));
 
     eptr[0] = 0;
     for(k=0;k<Klocal;++k)
         eptr[k+1] = eptr[k] + Nv;
 
     /* local element to vertex */
-    idx_t *eind = (idx_t*) calloc(Nv*Klocal, sizeof(idx_t));
+    idx_t *eind = (idx_t*) calloc((size_t) Nv*Klocal, sizeof(idx_t));
     for(k=0;k<Klocal;++k)
         for(n=0;n<Nv;++n)
             eind[k*Nv+n] = EToV[k][n];
 
     /* weight per element */
-    idx_t *elmwgt = (idx_t*) calloc(Klocal, sizeof(idx_t));
+    idx_t *elmwgt = (idx_t*) calloc((size_t) Klocal, sizeof(idx_t));
 
     for(k=0;k<Klocal;++k)
         elmwgt[k] = 1;
@@ -83,7 +75,7 @@ void mr_grid_loadBalance2d(geoGrid *grid){
     int nparts = nprocs;
 
     /* tpwgts */
-    float *tpwgts = (float*) calloc(Klocal, sizeof(float));
+    float *tpwgts = (float*) calloc((size_t) Klocal, sizeof(float));
 
     for(k=0;k<Klocal;++k)
         tpwgts[k] = (float)1./nprocs;
@@ -102,7 +94,7 @@ void mr_grid_loadBalance2d(geoGrid *grid){
     int edgecut;
 
     /** the process index of redistributing each element */
-    idx_t *part = (idx_t *) calloc(Klocal, sizeof(idx_t));
+    idx_t *part = (idx_t *) calloc((size_t) Klocal, sizeof(idx_t));
 
     MPI_Comm comm;
     MPI_Comm_dup(MPI_COMM_WORLD, &comm);
@@ -128,9 +120,9 @@ void mr_grid_loadBalance2d(geoGrid *grid){
     free(tpwgts);
 
     /** number of elements send to each process */
-    int *outK = (int*) calloc(nprocs, sizeof(int));
+    int *outK = (int*) calloc((size_t) nprocs, sizeof(int));
     /** number of elements to receive from each process */
-    int *inK = (int*) calloc(nprocs, sizeof(int));;
+    int *inK = (int*) calloc((size_t) nprocs, sizeof(int));;
 
     for(k=0;k<Klocal;++k)
         ++outK[part[k]];

@@ -31,7 +31,7 @@ void Matrix_inverse(double *A, int N);
 void Matrix_multiply(const int M, const int K, const int N,
                      const double *A, const double *B, double *C);
 
-/* allocate mem */
+/* allocation */
 double **matrix_double_create(int Nrows, int Ncols);
 double * vector_double_create(int Nrows);
 int    **matrix_int_create(int Nrows, int Ncols);

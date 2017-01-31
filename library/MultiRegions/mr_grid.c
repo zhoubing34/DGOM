@@ -50,7 +50,6 @@ void mr_grid_free(geoGrid *grid) {
 /**
  * @brief
  * Create and allocate geometry grid object.
- * @note
  *
  */
 geoGrid* mr_grid_create(stdCell *shape, int K, int Nv, double *vx, double *vy, double *vz, int **EToV){
