@@ -20,13 +20,13 @@ void pf_cellMean(physField *phys){
     real *c_Q = phys->c_Q;
     real var[Np];
     for(k=0;k<K;k++){
-        const double Area = phys->region->size[k];
+        const double Area = 1.0/phys->region->size[k];
         for(fld=0;fld<Nfield;fld++){
             sk = fld+(k*Np)*Nfield;
             for(n=0;n<Np;n++){
                 var[n] = f_Q[sk]; sk+=Nfield;
             }
-            c_Q[k*Nfield + fld] = mr_reg_integral(phys->region, k, var)/Area;
+            c_Q[k*Nfield + fld] = Area * mr_reg_integral(phys->region, k, var);
         }
     }
 

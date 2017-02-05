@@ -3,9 +3,11 @@
 //
 
 #include <MultiRegions/mr_mesh.h>
+#include <StandCell/sc_stdcell.h>
 #include "pf_limiter.h"
 #include "pf_cellMean.h"
 #include "pf_fetchBuffer.h"
+#include "pf_phys.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -13,38 +15,155 @@
 #endif
 
 #define TOL 1e-8
+#define INFTY 1e10
 #define EXCEPTION(u, u1, u2) ( ((u-u1)>TOL)& ((u-u2)>TOL) )||( ((u1-u)>TOL)&((u2-u)>TOL))
 
-
-static void pf_faceMean(physField *phys, int k, int f, real *f_mean){
+/**
+ * @brief integral averaged values of each faces
+ * @param[in] phys physical field structure.
+ * @param[in,out] f_mean integral averaged values of each faces
+ */
+static void pf_face_mean(physField *phys, real *f_mean){
 
     const int Nfield = phys->Nfield;
+    const int Nfaces = phys->cell->Nfaces;
     const int Nfp = phys->cell->Nfp;
     const int Np = phys->cell->Np;
+    const int K = phys->grid->K;
 
     double *ws = phys->cell->ws;
-    real *f_Q = phys->f_Q + k*Np*Nfield;
-    int *fmask = phys->cell->Fmask[f];
-
-    register int n,m,fld;
-    /* initialization */
-    for(fld=0;fld<Nfield;fld++){
-        f_mean[fld] = 0;
-    }
-    for(n=0;n<Nfp;n++){
-        m = fmask[n]*Nfield;
-        double w = ws[n]*0.5;
-        for(fld=0;fld<Nfield;fld++){
-            f_mean[fld] += f_Q[m+fld]*w;
+    register int k,f,n,m,fld;
+    for(k=0;k<K;k++){
+        real *f_Q = phys->f_Q + k*Np*Nfield;
+        for(f=0;f<Nfaces;f++){
+            int sk = k*Nfaces*Nfield + f*Nfield;
+            /* initialization */
+            for(fld=0;fld<Nfield;fld++){
+                f_mean[sk+fld] = 0;
+            }
+            int *fmask = phys->cell->Fmask[f];
+            for(n=0;n<Nfp;n++){
+                m = fmask[n]*Nfield;
+                double w = ws[n]*0.5;
+                for(fld=0;fld<Nfield;fld++){
+                    f_mean[sk+fld] += f_Q[m+fld]*w;
+                }
+            }
         }
     }
+    return;
+}
+
+static void pf_weiface_mean(physField *phys, real *f_mean){
+    const int Nfield = phys->Nfield;
+    const int Nfaces = phys->cell->Nfaces;
+    const int K = phys->grid->K;
+    const int Nfp = phys->cell->Nfp;
+    const int procid = phys->mesh->procid;
+    const int nprocs = phys->mesh->nprocs;
+
+    multiReg *region = phys->region;
+    parallMesh *mesh = phys->mesh;
+    register int k,f,n,fld;
+    real *xc = vector_real_create(K);
+    real *yc = vector_real_create(K);
+    for(k=0;k<K;k++){
+        const double Area = 1.0/region->size[k];
+        xc[k] = Area * mr_reg_integral(region, k, region->x[k]);
+        yc[k] = Area * mr_reg_integral(region, k, region->y[k]);
+    }
+    const int parallCellNum = phys->mesh->parallCellNum;
+    real *xc_out = vector_real_create(parallCellNum);
+    real *xc_in = vector_real_create(parallCellNum);
+    real *yc_out = vector_real_create(parallCellNum);
+    real *yc_in = vector_real_create(parallCellNum);
+
+    for(n=0;n<parallCellNum;++n){
+        int sk = mesh->cellIndexOut[n];
+        xc_out[n] = xc[sk];
+        yc_out[n] = yc[sk];
+    }
+    MPI_Request xc_out_requests[nprocs];
+    MPI_Request xc_in_requests[nprocs];
+    MPI_Request yc_out_requests[nprocs];
+    MPI_Request yc_in_requests[nprocs];
+    int Nmess;
+    pf_fetchBuffer(procid, nprocs, mesh->Npar, xc_out, xc_in,
+                   xc_out_requests, xc_in_requests, &Nmess);
+    pf_fetchBuffer(procid, nprocs, mesh->Npar, yc_out, yc_in,
+                   yc_out_requests, yc_in_requests, &Nmess);
+
+    real *c_Q = phys->c_Q;
+    int **EToE = mesh->EToE;
+    int **EToP = mesh->EToP;
+    double **x = phys->region->x;
+    double **y = phys->region->y;
+    for(k=0;k<K;k++){
+        for(f=0;f<Nfaces;f++){
+            int sk = k*Nfaces*Nfield + f*Nfield;
+            /* initialization */
+            for(fld=0;fld<Nfield;fld++){
+                f_mean[sk+fld] = 0;
+            }
+
+            int e = EToE[k][f];
+            int p = EToP[k][f];
+            if(p!=procid) { continue; }
+
+            int v1 = phys->cell->Fmask[f][0];
+            int v2 = phys->cell->Fmask[f][Nfp-1];
+            double xf = (x[k][v1] + x[k][v2])*0.5;
+            double yf = (y[k][v1] + y[k][v2])*0.5;
+
+            double d1 = (xf - xc[k])*(xf - xc[k]) + (yf - yc[k])*(yf - yc[k]);
+            double d2 = (xf - xc[e])*(xf - xc[e]) + (yf - yc[e])*(yf - yc[e]);
+            real w1 = d2/(d1 + d2);
+            real w2 = d1/(d1 + d2);
+            for(fld=0;fld<Nfield;fld++)
+                f_mean[sk+fld] = (c_Q[k*Nfield+fld]*w1 + c_Q[e*Nfield+fld]*w2);
+        }
+    }
+    MPI_Status instatus[nprocs];
+    MPI_Waitall(Nmess, xc_in_requests, instatus);
+    MPI_Waitall(Nmess, xc_out_requests, instatus);
+    MPI_Waitall(Nmess, yc_in_requests, instatus);
+    MPI_Waitall(Nmess, yc_out_requests, instatus);
+
+    for(n=0;n<parallCellNum;n++){
+        k = mesh->cellIndexIn[n];
+        f = mesh->faceIndexIn[n];
+
+        real xc_next = xc_in[n];
+        real yc_next = yc_in[n];
+        int v1 = phys->cell->Fmask[f][0];
+        int v2 = phys->cell->Fmask[f][Nfp-1];
+        double xf = (x[k][v1] + x[k][v2])*0.5;
+        double yf = (y[k][v1] + y[k][v2])*0.5;
+
+        double d1 = (xf - xc[k])*(xf - xc[k]) + (yf - yc[k])*(yf - yc[k]);
+        double d2 = (xf - xc_next)*(xf - xc_next) + (yf - yc_next)*(yf - yc_next);
+        real w1 = d2/(d1 + d2);
+        real w2 = d1/(d1 + d2);
+
+        int sk = k*Nfaces*Nfield + f*Nfield;
+        for(fld=0;fld<Nfield;fld++){
+            f_mean[sk+fld] = (c_Q[k*Nfield+fld]*w1 + phys->c_inQ[n*Nfield+fld]*w2);
+        }
+    }
+
+    vector_real_free(xc_out);
+    vector_real_free(xc_in);
+    vector_real_free(yc_out);
+    vector_real_free(yc_in);
+
+    vector_real_free(xc);
+    vector_real_free(yc);
+    return;
 }
 
 /**
  * @brief calculate the gradient by Gauss-Green method
- *
  * @param[in] phys
- * @param[in] uf_mean
  * @param[out] px
  * @param[out] py
  */
@@ -54,12 +173,16 @@ static void phys_gradient_Green(physField *phys, real *px, real *py){
     const int Nfaces = phys->cell->Nfaces;
     const int Nfp = phys->cell->Nfp;
 
-    double **x = phys->region->x;
-    double **y = phys->region->y;
-
     register int k,f,fld,sk;
+    int **fmask = phys->cell->Fmask;
+
+    real f_mean[K*Nfaces*Nfield];
+    pf_weiface_mean(phys, f_mean);
+
     for(k=0;k<K;k++){
         double A = 1.0/phys->region->size[k];
+        double *x = phys->region->x[k];
+        double *y = phys->region->y[k];
 
         for(fld=0;fld<Nfield;fld++){
             sk = k*Nfield+fld;
@@ -68,28 +191,122 @@ static void phys_gradient_Green(physField *phys, real *px, real *py){
         }
 
         for(f=0;f<Nfaces;f++){
-            real f_mean[Nfield];
-            pf_faceMean(phys, k, f, f_mean);
-
-            int v1 = phys->cell->Fmask[f][0];
-            int v2 = phys->cell->Fmask[f][Nfp-1];
-            double x1 = x[k][v1];
-            double x2 = x[k][v2];
-            double y1 = y[k][v1];
-            double y2 = y[k][v2];
+            int v1 = fmask[f][0];
+            int v2 = fmask[f][Nfp-1];
+            double x1 = x[v1];
+            double x2 = x[v2];
+            double y1 = y[v1];
+            double y2 = y[v2];
 
             double dx =  (y2-y1);
             double dy = -(x2-x1);
 
             for(fld=0;fld<Nfield;fld++){
                 sk = k*Nfield+fld;
-                px[sk] += f_mean[fld]*dx*A;
-                py[sk] += f_mean[fld]*dy*A;
-#if DEBUG
-                if(!phys->mesh->procid)
-                    printf("k=%d, f=%d, fld=%d, f_mean=%f, px=%f, py=%f\n",
-                           k,f,fld,f_mean[fld],px[sk],py[sk]);
-#endif
+                int sf = k*Nfaces*Nfield + f*Nfield;
+                px[sk] += f_mean[sf+fld]*dx*A;
+                py[sk] += f_mean[sf+fld]*dy*A;
+            }
+        }
+    }
+
+    return;
+}
+
+
+void pf_adjacent_cellinfo(physField *phys, real *cell_max, real *cell_min){
+    const int K = phys->grid->K;
+    const int Nfield = phys->Nfield;
+    const int procid = phys->mesh->procid;
+    const int nprocs = phys->mesh->nprocs;
+    const int Nfaces = phys->cell->Nfaces;
+
+    register int k,n,f,fld;
+
+    MPI_Request mpi_out_requests[nprocs];
+    MPI_Request mpi_in_requests[nprocs];
+    int Nmess;
+
+    /* do sends and recv */
+    pf_fetchCellBuffer(phys, mpi_out_requests, mpi_in_requests, &Nmess);
+
+    /* local cell loop */
+    int **EToE = phys->mesh->EToE;
+    int **EToP = phys->mesh->EToP;
+    for(k=0;k<K;k++){
+        real *c_mean = phys->c_Q + k*Nfield; // mean value of k-th cell
+        real c_max[Nfield];
+        real c_min[Nfield];
+        /* initialize of c_max & c_min */
+        for(fld=0;fld<Nfield;fld++){
+            c_max[fld] = c_mean[fld];
+            c_min[fld] = c_mean[fld];
+        }
+
+        for(f=0;f<Nfaces;f++){
+            int e = EToE[k][f];
+            int p = EToP[k][f];
+            // if adjacent cell is on other process, jump this cycle
+            if(p!=procid) continue;
+
+            for(fld=0;fld<Nfield;fld++){
+                real c_next = phys->c_Q[e*Nfield+fld];
+                c_max[fld] = max(c_max[fld], c_next);
+                c_min[fld] = min(c_min[fld], c_next);
+            }
+        }
+        for(fld=0;fld<Nfield;fld++){
+            int sk = k*Nfield + fld;
+            cell_max[sk] = c_max[fld];
+            cell_min[sk] = c_min[fld];
+        }
+    }
+
+    /* wait for 2. sends and recv buffers */
+    MPI_Status instatus[nprocs];
+    MPI_Waitall(Nmess, mpi_in_requests, instatus);
+    MPI_Waitall(Nmess, mpi_out_requests, instatus);
+
+    /* parallel cell loop */
+    parallMesh *mesh = phys->mesh;
+    for(n=0;n<mesh->parallCellNum;n++){
+        k = mesh->cellIndexIn[n];
+        for(fld=0;fld<Nfield;fld++){
+            real c_next = phys->c_inQ[n*Nfield+fld];
+            int sk = k*Nfield+fld;
+            cell_max[sk] = max(cell_max[sk], c_next);
+            cell_min[sk] = min(cell_min[sk], c_next);
+        }
+    }
+}
+
+void pf_BJ_limiter(physField *phys, real *cell_max, real *cell_min,
+                   double beta, real *psi){
+
+    const int K = phys->grid->K;
+    const int Nfield = phys->Nfield;
+    const int Np = phys->cell->Np;
+
+    register int k,fld,n;
+    for(k=0;k<K;k++){
+        real *f_Q = phys->f_Q + k*Np*Nfield; // variable of k-th cell
+        for(fld=0;fld<Nfield;fld++){
+            int sk = k*Nfield+fld;
+            real qmax = cell_max[sk];
+            real qmin = cell_min[sk];
+            real qmean = phys->c_Q[sk];
+            psi[sk] = 1.0;
+            for(n=0;n<Np;n++){
+                real qval = f_Q[n*Nfield+fld];
+                double rk = 1.0;
+                /* compute the limiter `psi` */
+                if(qval > qmax){
+                    rk = (qmax - qmean)/(qval - qmean);
+                }else if(qval < qmin){
+                    rk = (qmin - qmean)/(qval - qmean);
+                }
+                real t = max(min(beta*rk, 1.0), min(rk, beta));
+                psi[sk] = min(psi[sk], t);
             }
         }
     }
@@ -117,12 +334,8 @@ void pf_slloc2d(physField *phys, double beta){
 
     const int K = phys->grid->K;
     const int Nfield = phys->Nfield;
-    const int procid = phys->mesh->procid;
-    const int nprocs = phys->mesh->nprocs;
-    const int Nfaces = phys->cell->Nfaces;
     const int Np = phys->cell->Np;
-
-    register int k,n,f,fld;
+    register int k,n,fld;
 
 #if DEBUG
     FILE *fp = CreateLog("phys_slloc2d", phys->mesh->procid, phys->mesh->nprocs);
@@ -132,172 +345,236 @@ void pf_slloc2d(physField *phys, double beta){
     pf_cellMean(phys);
 
     /* 2. fetch cell info with other processes */
+    real cell_max[K*Nfield], cell_min[K*Nfield];
+    pf_adjacent_cellinfo(phys, cell_max, cell_min);
+
+    /* 3. calculate the unlimited gradient */
+    real px[K*Nfield], py[K*Nfield];
+    phys_gradient_Green(phys, px, py);
+
+    /* 4. calculate the limited results */
+    real psi[K*Nfield];
+    pf_BJ_limiter(phys, cell_max, cell_min, beta, psi);
+
+    /* 5. reconstruction */
+    multiReg *region = phys->region;
+    for(k=0;k<K;k++){
+        double A = 1.0/phys->region->size[k];
+        double xc = A * mr_reg_integral(region, k, region->x[k]);
+        double yc = A * mr_reg_integral(region, k, region->y[k]);
+
+        real *f_Q = phys->f_Q + k*Np*Nfield; // variable of k-th cell
+        for(fld=0;fld<Nfield;fld++){
+            int sk = k*Nfield+fld;
+            /* compute the limited gradient */
+            real qx = px[sk] * psi[sk];
+            real qy = py[sk] * psi[sk];
+
+            /* reconstruction of each element */
+            real qmean = phys->c_Q[sk];
+            for(n=0;n<Np;n++){
+                real dx = (real)(region->x[k][n] - xc);
+                real dy = (real)(region->y[k][n] - yc);
+
+                f_Q[n*Nfield+fld] = qmean + dx*qx + dy*qy;
+            }
+        }
+    }
+#if DEBUG
+    fclose(fp);
+#endif
+    return;
+}
+
+
+static void triGradient(real *x, real *y, real *f, real *px, real *py){
+    real a[4], b[2];
+    a[0] = x[1] - x[0]; a[1] = y[1] - y[0];
+    a[2] = x[2] - x[0]; a[3] = y[2] - y[0];
+    b[0] = f[1] - f[0]; b[1] = f[2] - f[0];
+
+    real det = a[0]*a[3] - a[1]*a[2];
+    *px = ( b[0]*a[3] - b[1]*a[1])/det;
+    *py = (-b[0]*a[2] + b[1]*a[0])/det;
+}
+
+static void VA_weigrad(
+        const int Nfaces, const int Nfield,
+        real *px, real *py,
+        real *wpx, real *wpy){
+
+    register int i,j,fld;
+    real EPSILON = 1.0e-12;
+    real gra_x[Nfaces], gra_y[Nfaces], gra_det[Nfaces];
+    for(fld=0;fld<Nfield;fld++){
+        real frac=Nfaces*EPSILON;
+        wpx[fld] = 0.0;
+        wpy[fld] = 0.0;
+        for(i=0;i<Nfaces;i++){
+            gra_x[i] = px[i*Nfield+fld];
+            gra_y[i] = py[i*Nfield+fld];
+            gra_det[i] = gra_x[i]*gra_x[i] + gra_y[i]*gra_y[i];
+        }
+        for(i=0;i<Nfaces;i++){
+            real w = 1.0;
+            for(j=0;j<Nfaces;j++){
+                if(i==j){ continue; }
+                w = w*gra_det[j];
+            }
+            frac += w;
+            w += EPSILON;
+            wpx[fld] += w*gra_x[i];
+            wpy[fld] += w*gra_y[i];
+#if DEBUG
+            printf("fld=%d, f=%d, w=%f\n", fld, i, w);
+#endif
+        }
+        wpx[fld] /= frac;
+        wpy[fld] /= frac;
+    }
+}
+
+void pf_vert_limit(physField *phys){
+    const int K = phys->grid->K;
+    const int Nfield = phys->Nfield;
+    const int nprocs = phys->mesh->nprocs;
+    const int Nfaces = phys->cell->Nfaces;
+    const int Np = phys->cell->Np;
+    const int Nvert = phys->grid->Nv;
+    const int Nfp = phys->cell->Nfp;
+
+    parallMesh *mesh = phys->mesh;
+    multiReg *region = phys->region;
+    real *f_Q = phys->f_Q;
+
+    register int k,n,f,fld;
+    /** 1. calculate the cell average value */
+    pf_cellMean(phys);
+    /* 2. fetch cell info with other processes */
     MPI_Request mpi_out_requests[nprocs];
     MPI_Request mpi_in_requests[nprocs];
     int Nmess;
-
     /* do sends and recv */
     pf_fetchCellBuffer(phys, mpi_out_requests, mpi_in_requests, &Nmess);
-
-    /* 4.1. judge the trouble cell, get c_max and c_min  */
-    int **EToE = phys->mesh->EToE;
-    int **EToP = phys->mesh->EToP;
-    real cell_max[K*Nfield], cell_min[K*Nfield];
-    int t_cell[K];
-
-    for(k=0;k<K;k++){
-        t_cell[k] = 0;
-        real *c_mean = phys->c_Q + k*Nfield; // mean value of k-th cell
-        real c_max[Nfield];
-        real c_min[Nfield];
-        /* initialize of c_max & c_min */
-        for(fld=0;fld<Nfield;fld++){
-            c_max[fld] = c_mean[fld];
-            c_min[fld] = c_mean[fld];
-        }
-
-        for(f=0;f<Nfaces;f++){
-            int e = EToE[k][f];
-            int p = EToP[k][f];
-            // if adjacent cell is on other process, jump this cycle
-            if(p!=procid) continue;
-
-            real f_mean[Nfield];
-            pf_faceMean(phys, k, f, f_mean);
-
-//            if(e!=k){
-            for(fld=0;fld<Nfield;fld++){
-                real c_next = phys->c_Q[e*Nfield+fld];
-
-                c_max[fld] = max(c_max[fld], c_next);
-                c_min[fld] = min(c_min[fld], c_next);
-
-                if( EXCEPTION(f_mean[fld], c_mean[fld], c_next) )
-                    t_cell[k] = 1;
-#if DEBUG
-                    fprintf(fp, "k=%d, f=%d, fld=%d, c_mean=%f, c_next=%f, f_mean=%f\n",
-                            k, f, fld, c_mean[fld], c_next, f_mean[fld]);
-#endif
-            }
-//            }else if(e==k){
-//                for(fld=0;fld<Nfield;fld++){
-//                    c_max[fld] = max(c_max[fld], f_mean[fld]);
-//                    c_min[fld] = min(c_min[fld], f_mean[fld]);
-//                }
-//            }
-        }
-
-        int sk = k*Nfield;
-        for(fld=0;fld<Nfield;fld++){
-            cell_max[sk+fld] = c_max[fld];
-            cell_min[sk+fld] = c_min[fld];
-        }
-    }
 
     /* wait for 2. sends and recv buffers */
     MPI_Status instatus[nprocs];
     MPI_Waitall(Nmess, mpi_in_requests, instatus);
     MPI_Waitall(Nmess, mpi_out_requests, instatus);
 
-    /* 4.2. judge the trouble cell, get c_max and c_min from parallel process  */
-    parallMesh *mesh = phys->mesh;
+    /** 2. limited vertex value  */
+    int **EToV = phys->grid->EToV;
+    /* maximum and minimum of each vertex */
+    real *vmax = vector_real_create(Nvert * Nfield);
+    real *vmin = vector_real_create(Nvert * Nfield);
+    for(n=0;n<Nvert*Nfield;n++){
+        vmax[n] = -INFTY;
+        vmin[n] =  INFTY;
+    }
+    /* local vertex */
+    for(k=0;k<K;k++){
+        for(f=0;f<Nfaces;f++){
+            int v = EToV[k][f];
+            for(fld=0;fld<Nfield;fld++){
+                int sk = v*Nfield+fld;
+                vmax[sk] = max(phys->c_Q[k*Nfield+fld], vmax[sk]);
+                vmin[sk] = min(phys->c_Q[k*Nfield+fld], vmin[sk]);
+            }
+        }
+    }
+    /* adjacent parallel vertex */
     for(n=0;n<mesh->parallCellNum;n++){
         k = mesh->cellIndexIn[n];
         f = mesh->faceIndexIn[n];
-        real *c_mean = phys->c_Q+k*Nfield; // mean value of k-th cell
-        real f_mean[Nfield];
-        pf_faceMean(phys, k, f, f_mean);
+        int v1 = EToV[k][f];
+        int v2 = EToV[k][(f+1)/Nfaces];
         for(fld=0;fld<Nfield;fld++){
-            real c_next = phys->c_inQ[n*Nfield+fld];
-            int sk = k*Nfield+fld;
-            cell_max[sk] = max(cell_max[sk], c_next);
-            cell_min[sk] = min(cell_min[sk], c_next);
-            if( EXCEPTION(f_mean[fld], c_mean[fld], c_next) ){
+            int sk = v1*Nfield+fld;
+            vmax[sk] = max(phys->c_inQ[n*Nfield+fld], vmax[sk]);
+            vmin[sk] = min(phys->c_inQ[n*Nfield+fld], vmin[sk]);
+            sk = v2*Nfield+fld;
+            vmax[sk] = max(phys->c_inQ[n*Nfield+fld], vmax[sk]);
+            vmin[sk] = min(phys->c_inQ[n*Nfield+fld], vmin[sk]);
+        }
+    }
 #if DEBUG
-                fprintf(fp, "k=%d, f=%d, fld=%d, c_mean=%f, c_next=%f, f_mean=%f\n",
-                        k, f, fld, c_mean[fld], c_next, f_mean[fld]);
+    FILE *fp = CreateLog("pf_vert_limit", phys->mesh->procid, phys->mesh->nprocs);
+    PrintVector2File(fp, "vmax", vmax, Nvert*Nfield);
+    PrintVector2File(fp, "vmin", vmin, Nvert*Nfield);
 #endif
-                t_cell[k] = 1;
+    /* limit vertex value of each element */
+    for(k=0;k<K;k++){
+        for(f=0;f<Nfaces;f++){
+            int *fmask = phys->cell->Fmask[f];
+            int sk = k*Np*Nfield+ fmask[0]; // node index
+            int v = EToV[k][f]; // vertex index
+            for(fld=0;fld<Nfield;fld++){
+                if(f_Q[sk*Nfield+fld] > vmax[v*Nfield+fld]){
+                    f_Q[sk*Nfield+fld] = vmax[v*Nfield+fld];
+                }else if (f_Q[sk*Nfield+fld] < vmin[v*Nfield+fld]){
+                    f_Q[sk*Nfield+fld] = vmin[v*Nfield+fld];
+                }
+#if DEBUG
+                fprintf(fp, "k=%d, f=%d, fld=%d, f_Q=%f\n", k,f,fld,f_Q[sk*Nfield+fld]);
+#endif
             }
         }
     }
+    vector_real_free(vmax);
+    vector_real_free(vmin);
 
-#if DEBUG
-    PrintIntVector2File(fp, "trouble_cell", t_cell, K);
-#endif
-
-    /* 5. calculate the unlimited gradient */
-    real px[K*Nfield], py[K*Nfield];
-    phys_gradient_Green(phys, px, py);
-#if DEBUG
-    PrintVector2File(fp, "px", px, K*Nfield);
-    PrintVector2File(fp, "py", py, K*Nfield);
-#endif
-
-    /* 6. calculate the limited results */
-    multiReg *region = phys->region;
+    real xt[3], yt[3], ft[3];
+    real *px = vector_real_create(Nfaces*Nfield);
+    real *py = vector_real_create(Nfaces*Nfield);
     for(k=0;k<K;k++){
-        /* check if the cell need limited */
-        //if(t_cell[k]==0 ) continue;
-
         double A = 1.0/phys->region->size[k];
-
         double xc = A * mr_reg_integral(region, k, region->x[k]);
         double yc = A * mr_reg_integral(region, k, region->y[k]);
-
-        real *f_Q = phys->f_Q + k*Np*Nfield; // variable of k-th cell
+        xt[0] = xc;
+        yt[0] = yc;
+        for(f=0;f<Nfaces;f++){
+            int *fmask = phys->cell->Fmask[f];
+            int v1 = fmask[0]; // local node index
+            int v2 = fmask[Nfp-1]; // local node index
+            xt[1] = region->x[k][v1];
+            yt[1] = region->y[k][v1];
+            xt[2] = region->x[k][v2];
+            yt[2] = region->y[k][v2];
+            v1 = k*Np*Nfield+ fmask[0]; // global node index
+            v2 = k*Np*Nfield+ fmask[Nfp-1]; // global node index
+            for(fld=0;fld<Nfield;fld++){
+                /* 3. gradient of each face */
+                ft[0] = phys->c_Q[k*Nfield+fld];
+                ft[1] = f_Q[v1*Nfield + fld];
+                ft[2] = f_Q[v2*Nfield + fld];
+                triGradient(xt, yt, ft, px+f*Nfield+fld, py+f*Nfield+fld);
+#if DEBUG
+                fprintf(fp, "k=%d, f=%d, fld=%d, px=%f, py=%f\n", k,f,fld,px[f*Nfield+fld],py[f*Nfield+fld] );
+#endif
+            }
+        }
+        /* 4. weighted gradient */
+        real wpx[Nfield], wpy[Nfield];
+        VA_weigrad(Nfaces, Nfield, px, py, wpx, wpy);
+#if DEBUG
         for(fld=0;fld<Nfield;fld++){
-            real qmax = cell_max[k*Nfield+fld];
-            real qmin = cell_min[k*Nfield+fld];
-            real qmean = phys->c_Q[k*Nfield+fld];
-            real t, psi = 1.0;
-            for(n=0;n<Np;n++){
-                real qval = f_Q[n*Nfield+fld];
-                double rk = 1.0;
-                /* compute the limiter `psi` */
-                if(qval > qmax){
-                    rk = (qmax - qmean)/(qval - qmean);
-                }else if(qval < qmin){
-                    rk = (qmin - qmean)/(qval - qmean);
-                }
-
-                t   = max(min(beta*rk, 1.0), min(rk, beta));
-                psi = min(psi, t);
-#if DEBUG
-                fprintf(fp, "k=%d, fld=%d, n=%d, rk=%f, psi=%f\n",k,fld,n,rk,psi);
+            fprintf(fp, "k=%d, fld=%d, wpx=%f, wpy=%f\n", k,fld,wpx[fld],wpy[fld]);
+        }
 #endif
+        /* 5. reconstruction */
+        for(n=0;n<Np;n++){
+            real dx = (real)(region->x[k][n] - xc);
+            real dy = (real)(region->y[k][n] - yc);
+            for(fld=0;fld<Nfield;fld++){
+                real qmean = phys->c_Q[k*Nfield+fld];
+                f_Q[n*Nfield+fld] = qmean + dx*wpx[fld] + dy*wpy[fld];
             }
-
-            /* compute the limited gradient */
-            real qx = px[k*Nfield+fld] * psi;
-            real qy = py[k*Nfield+fld] * psi;
-
-            /* reconstruction of each element */
-            for(n=0;n<Np;n++){
-                real dx = (real)(region->x[k][n] - xc);
-                real dy = (real)(region->y[k][n] - yc);
-
-                f_Q[n*Nfield+fld] = qmean + dx*qx + dy*qy;
-#if DEBUG
-                fprintf(fp, "k=%d, fld=%d, n=%d, px=%f, py=%f, dx=%f, dy=%f, f=%f\n",
-                        k,fld,n,qx,qy,dx,dy,f_Q[n*Nfield+fld]);
-#endif
-            }
-
         }
     }
-#if 0
-    k=1108; n=1, fld=1;
-    printf("procid=%d, qmax=%f, qmin=%f, qmean=%f\n", phys->mesh->procid,
-           cell_max[k*Nfield+fld], cell_min[k*Nfield+fld], phys->c_Q[k*Nfield+fld]);
-    int ind = 13302-3;
-    printf("procid=%d, var=[%f, %f, %f], var=[%f, %f, %f]\n",
-           phys->mesh->procid,
-           phys->f_Q[ind  ], phys->f_Q[ind+1], phys->f_Q[ind+2],
-           phys->f_Q[ind+3], phys->f_Q[ind+4], phys->f_Q[ind+5]);
-#endif
+    vector_real_free(px);
+    vector_real_free(py);
+
 #if DEBUG
     fclose(fp);
 #endif
-    return;
 }

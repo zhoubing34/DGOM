@@ -54,6 +54,7 @@ void swe_run(swe_solver *solver){
             swe_rhs(solver, fa, fb, fdt);
 
             pf_slloc2d(phys, 1.0);
+            //pf_vert_limit(phys);
             swe_ppreserve(solver);
         }
         /* increment current time */
@@ -141,7 +142,6 @@ double swe_time_interval(swe_solver *solver){
             c = max(c, sqrt(gra*h)+sqrt(u*u+v*v));
         }
         if(isdry){ continue; } // jump this cell
-
         dt = min(dt, len/(double)c);
 #if 0
         int procid;
