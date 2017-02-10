@@ -1,0 +1,7 @@
+./configure \
+--prefix=/Users/mac/Documents/Model/DGOM/thirdLibrary/ \
+--disable-cxx \
+--disable-fortran \
+MPICC=/usr/local/Cellar/mpich2/1.4.1/bin/mpicc \
+CC=/usr/local/Cellar/mpich2/1.4.1/bin/mpicc \
+CFLAGS='-O3'

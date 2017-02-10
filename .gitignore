@@ -10,6 +10,3 @@ lib
 *.xml
 .idea
 cmake-build-debug
-externlib/CLAPACK-3.1.1.1
-externlib/parallel-netcdf-1.7.0
-externlib/parmetis-4.0.3

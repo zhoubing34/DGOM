@@ -1,0 +1,93 @@
+#
+# Copyright (C) 2012, Northwestern University and Argonne National Laboratory
+# See COPYRIGHT notice in top-level directory.
+#
+# $Id: Makefile.in 2219 2015-12-11 22:30:03Z wkliao $
+#
+# benchmarks/FLASH-IO/Makefile.  Generated from Makefile.in by configure.
+
+.SUFFIXES:      .o .F90
+
+srcdir  = .
+
+
+RM           = rm
+F90          = 
+
+FPPFLAGS     =  /Users/mac/Documents/Model/DGOM/externlib/parallel-netcdf-1.7.0/src/libf90 -I$(srcdir) 
+FPPFLAGS    += N_DIM=3 MAXBLOCKS=100 IONMAX=13
+FPPFLAGS    += 
+
+FCFLAGS      = 
+COMPILE.F90  = $(F90) -c $(FCFLAGS) $(FPPFLAGS)
+FCLDFLAGS    = -L/Users/mac/Documents/Model/DGOM/externlib/parallel-netcdf-1.7.0/src/lib 
+FCLIBS       = -lpnetcdf  
+LINK.F90     = $(F90) $(FCFLAGS) -o $@
+
+TEST_MPIRUN  = mpiexec -n NP
+TEST_OUTDIR  = .
+
+PROGS        = flash_benchmark_io
+
+SRCS         = get_mfluid_property.F90 \
+               flash_release.F90 \
+               flash_benchmark_io.F90 \
+               checkpoint_ncmpi_parallel.F90 \
+               plotfile_ncmpi_parallel.F90
+
+HEADERS      = block_boundary_data.fh \
+               common.fh \
+               definitions.fh \
+               numfluids.fh \
+               physicaldata.fh \
+               tree.fh
+
+PACKING_LIST = $(SRCS) $(HEADERS) configure.in Makefile.in README
+
+GARBAGE      = $(PROGS) *.nc
+DIST_GARBAGE = config.log config.status config.cache autom4te.cache \
+               Makefile
+
+OBJS         = $(SRCS:.F90=.o)
+
+all: $(PROGS)
+
+.F90.o:
+	$(COMPILE.F90) $<
+
+$(PROGS): $(OBJS)
+	$(LINK.F90) $(OBJS) $(FCLDFLAGS) $(FCLIBS)
+
+TEST_MPIRUN_4  = $(subst NP,4,$(TEST_MPIRUN))
+
+ptest: $(PROGS)
+	$(TEST_MPIRUN_4) ./$(PROGS) $(TEST_OUTDIR)/flash_io_test_
+
+ptests:
+
+MANIFEST.echo: FORCE
+	echo $(PACKING_LIST) | fmt -1
+
+ensure_manifest:
+
+dist:
+	id=FLASH-IO-PnetCDF \
+	&& $(RM) -rf $$id \
+	&& mkdir $$id \
+        && cp $(PACKING_LIST) $$id \
+        && tar -c $$id | gzip > $$id.tar.gz \
+        && $(RM) -rf $$id
+
+install:
+
+uninstall:
+
+clean:
+	@$(RM) -f *.o core core.* $(GARBAGE) \
+        *.gcda *.gcno gmon.out
+
+distclean: clean
+	@$(RM) -rf $(DIST_GARBAGE)
+
+.PHONY: FORCE all clean distclean install uninstall dist ptest
+
