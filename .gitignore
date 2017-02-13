@@ -2,11 +2,16 @@
 .cproject
 .project
 .settings
-Makefile~
 build
 .DS_Store
 lib
 *.nc
 *.xml
+*.a
+*.o
 .idea
 cmake-build-debug
+externlib/install
+externlib/parmetis-4.0.3/build
+externlib/parmetis-4.0.3/metis/build
+externlib/parallel-netcdf-1.7.0

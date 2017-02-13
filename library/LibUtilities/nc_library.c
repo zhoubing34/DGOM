@@ -3,8 +3,6 @@
 
 #define NCNAMELEN 1024
 
-static void handle_error(int status, int lineno);
-
 nc_dim* nc_dim_create(char *namestr, int len){
     nc_dim *dim = (nc_dim*) calloc(1, sizeof(nc_dim));
 
@@ -182,14 +180,3 @@ void nc_file_close(nc_file *file){
     NC_ERROR( ncmpi_close(file->id) );
 
 }
-
-///**
-// * @brief pnetcdf error handle function
-// * @details
-// * @param[in] status error number
-// * @param[in] lineno line number
-// */
-//void handle_error(int status, int lineno){
-//    fprintf(stderr, "Error at line %d: %s\n", lineno, ncmpi_strerror(status));
-//    MPI_Abort(MPI_COMM_WORLD, 1);
-//}

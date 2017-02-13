@@ -11,11 +11,11 @@ typedef enum{
 
 typedef struct {
     int caseid; ///< indicator of problem case
+    sc_cellType celltype; ///< cell type
     int N; ///< order of polynomial
     int Ne; ///< number of elements in each coordinate
     double cfl; ///< CFL number
     double dt; ///< delta time
-    sc_cellType celltype; ///< cell type
     double finaltime; ///< final time
     double u; ///< const flow rate on x direction
     double v; ///< const flow rate on y direction

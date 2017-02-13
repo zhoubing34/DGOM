@@ -141,8 +141,9 @@ static arg_section** conv_create_section(){
 
     char timeinfo[] = HEADEND "time info (2 parameters)\n"
             HEADLINE "    1. CFL number\n"
-            HEADLINE "    2. final time\n";
-    var_num = 2;
+            HEADLINE "    2. dt\n"
+            HEADLINE "    3. final time\n";
+    var_num = 3;
     section_p[ind++] = section_create(timeinfo, var_num);
 
     char physinfo[] = HEADEND "physical parameter for advection-diffusion case (3 parameters)\n"
@@ -231,9 +232,11 @@ static void conv_read_input(){
     /// 3. time info
     sec = sec_p[3];
     sscanf(sec->arg_str[0], "%lf\n", &(solver.cfl));
-    sscanf(sec->arg_str[1], "%lf\n", &(solver.finaltime));
+    sscanf(sec->arg_str[1], "%lf\n", &(solver.dt));
+    sscanf(sec->arg_str[2], "%lf\n", &(solver.finaltime));
     if(!procid){
         printf(HEADLINE " cfl: %lf\n", solver.cfl);
+        printf(HEADLINE " dt: %lf\n", solver.dt);
         printf(HEADLINE " final time: %lf\n", solver.finaltime);
     }
 

@@ -3,11 +3,9 @@
 //
 
 #include <MultiRegions/mr_mesh.h>
-#include <StandCell/sc_stdcell.h>
 #include "pf_limiter.h"
 #include "pf_cellMean.h"
 #include "pf_fetchBuffer.h"
-#include "pf_phys.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -110,8 +108,9 @@ static void pf_weiface_mean(physField *phys, real *f_mean){
             int p = EToP[k][f];
             if(p!=procid) { continue; }
 
-            int v1 = phys->cell->Fmask[f][0];
-            int v2 = phys->cell->Fmask[f][Nfp-1];
+            int *fmask = phys->cell->Fmask[f];
+            int v1 = fmask[0];
+            int v2 = fmask[Nfp-1];
             double xf = (x[k][v1] + x[k][v2])*0.5;
             double yf = (y[k][v1] + y[k][v2])*0.5;
 
@@ -135,8 +134,9 @@ static void pf_weiface_mean(physField *phys, real *f_mean){
 
         real xc_next = xc_in[n];
         real yc_next = yc_in[n];
-        int v1 = phys->cell->Fmask[f][0];
-        int v2 = phys->cell->Fmask[f][Nfp-1];
+        int *fmask = phys->cell->Fmask[f];
+        int v1 = fmask[0];
+        int v2 = fmask[Nfp-1];
         double xf = (x[k][v1] + x[k][v2])*0.5;
         double yf = (y[k][v1] + y[k][v2])*0.5;
 
@@ -280,6 +280,14 @@ void pf_adjacent_cellinfo(physField *phys, real *cell_max, real *cell_min){
     }
 }
 
+/**
+ * @brief obtain Barth-Jeperson slope limiter.
+ * @param phys
+ * @param cell_max
+ * @param cell_min
+ * @param beta
+ * @param psi
+ */
 void pf_BJ_limiter(physField *phys, real *cell_max, real *cell_min,
                    double beta, real *psi){
 
@@ -316,19 +324,10 @@ void pf_BJ_limiter(physField *phys, real *cell_max, real *cell_min,
 /**
  * @brief
  * Slope limiter from Anastasiou and Chan (1997) for two dimensional problems.
- *
  * @details
  * The slope limiter will act on each physical variables and reconstruct the
  * scalar distribution.
- *
  * @param[in] phys
- *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * phys   |   PhysDomain2d*  | contains reconstruct values
- *
  */
 void pf_slloc2d(physField *phys, double beta){
 

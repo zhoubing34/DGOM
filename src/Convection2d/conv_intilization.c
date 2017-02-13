@@ -32,7 +32,7 @@ void conv_intilization(physField *phys){
     dt = cfl*gdt;
 
     /* assignment to global variable */
-    solver.dt = dt;
+    //solver.dt = dt;
 
     return;
 }
