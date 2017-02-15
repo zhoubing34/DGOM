@@ -64,7 +64,7 @@ void conv_rhs(physField *phys, real frka, real frkb, real fdt){
     MPI_Waitall(Nmess, mpi_send_requests, instatus);
 
     /* viscosity flux */
-    if(solver.caseid == conv_advection_diffusion) {
+    if(solver.viscosity > DIFF_THRESHOLD) {
         real c11 = (real) solver.LDG_parameter[0];
         real c12 = (real) solver.LDG_parameter[1];
         real c22 = (real) solver.LDG_parameter[2];

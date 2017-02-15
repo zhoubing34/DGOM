@@ -3,7 +3,6 @@
 //
 
 #include <PhysField/pf_phys.h>
-#include <MultiRegions/mr_mesh.h>
 #include "conv_driver2d.h"
 #include "PhysField/pf_add_LDG_solver.h"
 
@@ -32,7 +31,7 @@ void conv_intilization(physField *phys){
     dt = cfl*gdt;
 
     /* assignment to global variable */
-    //solver.dt = dt;
+    solver.dt = dt;
 
     return;
 }
@@ -53,13 +52,20 @@ static double conv_advectDiff(physField *phys){
     const double xc = -0.5;
     const double yc = -0.5;
     const double miu = solver.viscosity;
+    const double sigma = 125*1e3/(33*33);
 
     int sk = 0;
     for(k=0;k<K;++k){
         for(n=0;n<Np;++n){
             const double xt = x[k][n];
             const double yt = y[k][n];
-            double t = -( ( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ) )/miu;
+            double t;
+            if(miu > DIFF_THRESHOLD){
+                t = -( ( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ) )/miu;
+            }else{
+                t = -( ( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ) )*sigma;
+            }
+
             phys->f_Q[sk++] = (real) exp(t); // c field
             phys->f_Q[sk++] = (real) solver.u; // flow rate at x-coordinate
             phys->f_Q[sk++] = (real) solver.v; // flow rate at y-coordinate
@@ -74,7 +80,6 @@ static double conv_advectDiff(physField *phys){
             phys->viscosity->vis_Q[sk++] = (real) 0;
         }
     }
-
 
     /* time step */
     double dt = 1e6; // initial time step
@@ -131,6 +136,7 @@ static double conv_rotation(physField *phys){
     }
 
     extern conv_solver2d solver;
+    solver.viscosity = 0; // eliminate viscosity
     /* time step */
     double dt = 1e6; // initial time step
     const int N = solver.N;

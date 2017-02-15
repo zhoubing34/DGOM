@@ -46,10 +46,10 @@ void conv_run(physField *phys){
             conv_rhs(phys, fa, fb, fdt);
         }
 
-        printf("processing: %f%%\r", time/ftime);
+        //printf("processing: %f%%\r", time/ftime);
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
-        conv_putvar(phys, counter++, time);
+        //conv_putvar(phys, counter++, time);
     }
 
     double mpitime1 = MPI_Wtime();
@@ -58,7 +58,7 @@ void conv_run(physField *phys){
     MPI_Barrier(MPI_COMM_WORLD);
     const int procid = phys->mesh->procid;
     if(!procid)
-        printf("proc: %d,\t time taken: %lg\n", procid, elapsetime);
+        printf("proc: %d, time taken: %lg\n", procid, elapsetime);
 }
 
 /**

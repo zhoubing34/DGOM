@@ -16,19 +16,31 @@ extern conv_solver2d solver;
 static void advection_diffusion_ext(int Np, real *x, real *y, double *ext){
 
     const double t = solver.finaltime;
-    const double miu = 1.0/solver.viscosity;
     const double u = solver.u, v = solver.v;
     const double x0 = -0.5, y0 = -0.5;
 
     int register n;
-    const double tiff = 1.0/(4.0*t+1);
-    for(n=0;n<Np;n++){
-        double xiff = x[n]-x0-u*t;
-        double yiff = y[n]-y0-v*t;
-        double cx = sqrt(tiff)*exp(-tiff*xiff*xiff*miu);
-        double cy = sqrt(tiff)*exp(-tiff*yiff*yiff*miu);
-        ext[n] = cx*cy;
+    if(solver.viscosity>DIFF_THRESHOLD){
+        for(n=0;n<Np;n++){
+            const double miu = 1.0/solver.viscosity;
+            const double tiff = 1.0/(4.0*t+1);
+            double xiff = x[n]-x0-u*t;
+            double yiff = y[n]-y0-v*t;
+            double cx = sqrt(tiff)*exp(-tiff*xiff*xiff*miu);
+            double cy = sqrt(tiff)*exp(-tiff*yiff*yiff*miu);
+            ext[n] = cx*cy;
+        }
+    }else{
+        const double sigma = 125*1e3/(33*33);
+        for(n=0;n<Np;n++){
+            double xiff = x[n]-x0-u*t;
+            double yiff = y[n]-y0-v*t;
+            double cx = exp(-sigma*xiff*xiff);
+            double cy = exp(-sigma*yiff*yiff);
+            ext[n] = cx*cy;
+        }
     }
+
 
     return;
 }

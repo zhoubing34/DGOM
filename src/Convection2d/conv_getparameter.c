@@ -254,8 +254,8 @@ static void conv_read_input(){
     /// 5. LDG parameter
     sec = sec_p[5];
     sscanf(sec->arg_str[0], "%lf\n", &(solver.LDG_parameter[0]));
-    sscanf(sec->arg_str[1], "%lf\n", &(solver.LDG_parameter[0]));
-    sscanf(sec->arg_str[2], "%lf\n", &(solver.LDG_parameter[0]));
+    sscanf(sec->arg_str[1], "%lf\n", &(solver.LDG_parameter[1]));
+    sscanf(sec->arg_str[2], "%lf\n", &(solver.LDG_parameter[2]));
     if(!procid){
         printf(HEADLINE " c11 = %f\n", solver.LDG_parameter[0]);
         printf(HEADLINE " c12 = %f\n", solver.LDG_parameter[1]);

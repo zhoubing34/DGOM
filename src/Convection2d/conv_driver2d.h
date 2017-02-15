@@ -9,6 +9,8 @@ typedef enum{
     conv_advection_diffusion = 2,
 } conv_caseid;
 
+#define DIFF_THRESHOLD 1e-10
+
 typedef struct {
     int caseid; ///< indicator of problem case
     sc_cellType celltype; ///< cell type
