@@ -34,6 +34,7 @@
 #include "swe_output.h"
 #include "swe_run.h"
 #include "swe_extsol.h"
+static void swe_finalize(swe_solver*);
 
 int main(int argc, char **argv){
 
@@ -53,7 +54,6 @@ int main(int argc, char **argv){
     //swe_normerr(solver);
 
     /* finalize */
-    static void swe_finalize(swe_solver*);
     swe_finalize(solver);
 
     return 0;

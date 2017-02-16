@@ -49,7 +49,7 @@ void conv_run(physField *phys){
         //printf("processing: %f%%\r", time/ftime);
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
-        //conv_putvar(phys, counter++, time);
+        conv_putvar(phys, counter++, time);
     }
 
     double mpitime1 = MPI_Wtime();

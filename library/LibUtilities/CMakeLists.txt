@@ -14,16 +14,15 @@ set(LIBUTILITIES_SOURCE
         arg_section.h)
 
 add_library(libutility STATIC ${LIBUTILITIES_SOURCE})
-
-if(MKL_FOUND)
-    TARGET_LINK_LIBRARIES(libutility
-        iomp5 pthread m dl mkl_core mkl_intel_lp64 mkl_intel_thread # extern MKL library
-        pnetcdf)
-else(MKL_FOUND)
-    TARGET_LINK_LIBRARIES(libutility
-            lapack blas f2c # extern lapack library
-            pnetcdf)
-endif(MKL_FOUND)
+target_link_libraries(libutility m lapack blas f2c pnetcdf)# extern lapack library
+#if(MKL_FOUND)
+#    target_link_libraries(libutility
+#        iomp5 pthread m dl mkl_core mkl_intel_lp64 mkl_intel_thread # extern MKL library
+#        pnetcdf)
+#else(MKL_FOUND)
+#    target_link_libraries(libutility
+#            m lapack blas f2c pnetcdf)# extern lapack library
+#endif(MKL_FOUND)
 
 # install static libraries
 install(TARGETS libutility ARCHIVE DESTINATION lib)
