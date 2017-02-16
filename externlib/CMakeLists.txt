@@ -9,6 +9,7 @@ ExternalProject_Add(
         CONFIGURE_COMMAND ""
         BUILD_COMMAND make
         BUILD_IN_SOURCE 1
+        INSTALL_COMMAND ""
 )
 
 # parallel-netcdf-1.7.0

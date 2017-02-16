@@ -34,7 +34,7 @@ include_directories(
 LINK_DIRECTORIES("${THIRD_LIBRARY_PATH}/install/lib/")
 
 # set unit test
-set(UNITTEST_FOUND TRUE)
+set(UNITTEST_FOUND 0)
 # set precision: double/float
 add_definitions(-DDOUBLE_PRECISION)
 

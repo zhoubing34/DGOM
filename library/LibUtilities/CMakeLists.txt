@@ -21,7 +21,7 @@ if(MKL_FOUND)
         pnetcdf)
 else(MKL_FOUND)
     TARGET_LINK_LIBRARIES(libutility
-            f2c blas lapack # extern lapack library
+            lapack blas f2c # extern lapack library
             pnetcdf)
 endif(MKL_FOUND)
 
