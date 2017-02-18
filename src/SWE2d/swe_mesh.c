@@ -8,6 +8,9 @@
 #include "MultiRegions/mr_mesh_addBoundary.h"
 
 #define DEBUG 0
+#if DEBUG
+#include "Utility/UTest.h"
+#endif
 
 physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
                             double xmin, double xmax, double ymin, double ymax){
@@ -36,35 +39,53 @@ physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
     return phys;
 }
 
-// todo: create physField from input mesh
+/**
+ * @brief create physical field from input mesh file
+ * */
 physField* swe_file_mesh(swe_solver *solver, char *meshfile){
-    physField *phys = NULL;
+
+    stdCell *cell = sc_create(solver->N, solver->celltype);
+    geoGrid *grid = mr_grid_read_file2d(cell, meshfile);
+    multiReg *region = mr_reg_create(grid);
+    parallMesh *mesh = mr_mesh_create(region);
+    mr_mesh_addBoundary2d(mesh, 0, NULL);
+    physField *phys = pf_create(3, mesh);
+#if DEBUG
+    char casename[20] = "swe_triGrid_test";
+    FILE *fp = CreateLog(casename, grid->procid, grid->nprocs);
+    PrintIntMatrix2File(fp, "EToV", grid->EToV, grid->K, grid->cell->Nv);
+    PrintVector2File(fp, "vx", grid->vx, grid->Nv);
+    PrintVector2File(fp, "vy", grid->vy, grid->Nv);
+    PrintMatrix2File(fp, "J", region->J, grid->K, grid->cell->Np);
+    fclose(fp);
+#endif
     return phys;
 }
 
 real* swe_read_topography(swe_solver *solver, char *botfile){
     physField *phys = solver->phys;
-    int Nv;
+    int Nvert;
     FILE *fp = fopen(botfile, "r");
-    fscanf(fp, "%d\n", &Nv);
-    if( Nv != phys->grid->Nv ){
+    fscanf(fp, "%d\n", &Nvert);
+    if( Nvert != phys->grid->Nv ){
         fprintf(stderr, "%s (%d): Wrong number of vertex in botfile %s.\n",
                 __FILE__, __LINE__, botfile);
     }
     // read bottom topography data on vertex
-    int n,k;
-    double *bv = vector_double_create(Nv);
-    for(n=0;n>Nv;n++){
-        fscanf(fp, "%lf\n", bv+n);
+    int n,k,tmp;
+    double *bv = vector_double_create(Nvert);
+    for(n=0;n<Nvert;n++){
+        fscanf(fp, "%d", &tmp);
+        fscanf(fp, "%lf", bv+n);
     }
-
     const int Np = phys->cell->Np;
     const int K = phys->grid->K;
     stdCell *cell = phys->cell;
 
     // project to nodes
     real *bot = vector_real_create(Np*K);
-    double bloc[cell->Nv];
+    const int Nv = cell->Nv;
+    double bloc[Nv];
 
     for(k=0;k<K;k++){
         for(n=0;n<Nv;n++){

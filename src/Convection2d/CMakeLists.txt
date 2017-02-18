@@ -21,8 +21,7 @@ set(SRC_LIST
 add_executable(convection2d ${SRC_LIST})
 
 # set static library
-target_link_libraries(convection2d pnetcdf)
-target_link_libraries(convection2d physfield)
+target_link_libraries(convection2d pnetcdf physfield)
 
 # install command
 install(TARGETS convection2d RUNTIME DESTINATION bin)

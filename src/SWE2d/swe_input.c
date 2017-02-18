@@ -4,7 +4,8 @@
 
 #include "swe_input.h"
 #include "swe_mesh.h"
-#include "LibUtilities/arg_section.h"
+#include "Utility/arg_section.h"
+#include "swe_driver2d.h"
 
 #define DEBUG 0
 
@@ -40,7 +41,7 @@ static arg_section** swe_create_section(){
     char meshinfo[] = HEAD_TITLE "mesh info (2 parameters)\n"
             HEAD_LINE "    1. num of elements in x direction\n"
             HEAD_LINE "    2. num of elements in y direction\n"
-            HEAD_LINE "    3. user specific mesh name\n";
+            HEAD_LINE "    3. user specific case name\n";
     var_num = 3;
     section_p[ind++] = section_create(meshinfo, var_num);
     /// 3. section: time info
@@ -53,9 +54,8 @@ static arg_section** swe_create_section(){
     char physinfo[] = HEAD_TITLE "physical parameter (3 parameters)\n"
             HEAD_LINE "    1. gravity acceleration\n"
             HEAD_LINE "    2. hcrit -- minimum water depth of wet cell\n"
-            HEAD_LINE "    3. manning coefficient for friction\n"
-            HEAD_LINE "    4. file name of topography elevation\n";
-    var_num = 4;
+            HEAD_LINE "    3. manning coefficient for friction\n";
+    var_num = 3;
     section_p[ind++] = section_create(physinfo, var_num);
     /// 5. section: LDG info
     char LDGinfo[] = HEAD_TITLE "LDG parameter for viscosity term (1 parameters)\n"
@@ -149,7 +149,9 @@ swe_solver* swe_create_solver(){
     double xmin, xmax, ymin, ymax;
     sscanf(sec_p->arg_str[0], "%d\n", &(Mx));
     sscanf(sec_p->arg_str[1], "%d\n", &(My));
-    char *meshfile = sec_p->arg_str[2];
+    solver->casename = calloc(strlen(sec_p->arg_str[2]), sizeof(char));
+    strcpy(solver->casename, sec_p->arg_str[2]);
+    char *casename = solver->casename;
     switch (solver->caseid){
         case swe_dambreakwet:
             xmin=0, xmax=1000, ymin=-100, ymax=100;
@@ -167,8 +169,8 @@ swe_solver* swe_create_solver(){
             solver->phys = swe_uniform_mesh(solver, Mx, My, xmin, xmax, ymin, ymax);
             break;
         case swe_userset:
-            if(!procid){  printf(HEAD_LINE " mesh file: %s\n", meshfile); }
-            solver->phys = swe_file_mesh(solver, meshfile);
+            if(!procid){  printf(HEAD_LINE " case name: %s\n", casename); }
+            solver->phys = swe_file_mesh(solver, casename);
             break;
         default:
             MPI_Abort(MPI_COMM_WORLD, -1);
@@ -181,7 +183,6 @@ swe_solver* swe_create_solver(){
     if(!procid) printf(HEAD_LINE " final time = %f\n", solver->ftime);
     /// 4. section: phys info
     sec_p = arg[4];
-    char *botfile=NULL;
     sscanf(sec_p->arg_str[0], "%lf\n", &(solver->gra));
     sscanf(sec_p->arg_str[1], "%lf\n", &(solver->hcrit));
     sscanf(sec_p->arg_str[2], "%lf\n", &(solver->roughness));
@@ -190,20 +191,6 @@ swe_solver* swe_create_solver(){
     if(!procid) printf(HEAD_LINE " hcrit = %f\n", solver->hcrit);
     if(!procid) printf(HEAD_LINE " manning factor = %f\n", solver->roughness);
 
-
-    switch (solver->caseid){
-        case swe_dambreakwet:
-            solver->bot = swe_flat_topography(solver); break;
-        case swe_dambreakdry:
-            solver->bot = swe_flat_topography(solver); break;
-        case swe_parabolicbowl:
-            solver->bot = swe_parabolic_topography(solver); break;
-        case swe_userset:
-            sscanf(sec_p->arg_str[3], "%s\n", botfile);
-            printf(HEAD_LINE " topography file = %s\n", botfile);
-            solver->bot = swe_read_topography(solver, botfile);
-            break;
-    }
     /// 5. section: LDG info
     sec_p = arg[5];
     sscanf(sec_p->arg_str[0], "%lf\n", &(solver->c12));

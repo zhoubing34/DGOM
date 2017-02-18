@@ -1,6 +1,11 @@
 #include <StandCell/sc_stdcell.h>
 #include "mr_grid.h"
 
+#define DEBUG 0
+#if DEBUG
+#include "Utility/UTest.h"
+#endif
+
 /**
  * @brief
  * Generation of uniform triangle grid.
@@ -177,7 +182,7 @@ geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename){
     strcpy(vertex_file, casename);
     strcat(vertex_file, ".node");
 
-    /* read the EToV */
+    /* read the element file (EToV) */
     FILE *fp;
     if( (fp = fopen(element_file, "r")) == NULL ){
         fprintf(stderr, "mr_grid_read_file (%s): %d\n"
@@ -194,11 +199,12 @@ geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename){
     }
 
     int **EToV = matrix_int_create(K, Nv);
-    int k,n;
+    register int k,n;
     for(k=0;k<K;k++){
         fscanf(fp, "%d", &temp); //read index
         for(n=0;n<Nv;n++){
             fscanf(fp, "%d", EToV[0]+k*Nv+n);
+            EToV[k][n] -= 1;
         }
         fscanf(fp, "%d", &temp); //read region id
     }
@@ -210,10 +216,11 @@ geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename){
                         "Unable to open node file %s.\n",
                 __FILE__,__LINE__,vertex_file);
     }
-    fscanf(fp, "%d %d %d %d\n", &Nv, &temp, &temp, &temp);
-    double *vx = vector_double_create(Nv);
-    double *vy = vector_double_create(Nv);
-    for(n=0;n<Nv;n++){
+    int Nvert;
+    fscanf(fp, "%d %d %d %d\n", &Nvert, &temp, &temp, &temp);
+    double *vx = vector_double_create(Nvert);
+    double *vy = vector_double_create(Nvert);
+    for(n=0;n<Nvert;n++){
         fscanf(fp, "%d", &temp); //read vertex id
         fscanf(fp, "%lf", vx+n);
         fscanf(fp, "%lf", vy+n);
@@ -221,8 +228,19 @@ geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename){
     fclose(fp);
 
     /* initialize */
-    geoGrid* grid = mr_grid_create(shape, K, Nv, vx, vy, NULL, EToV);
+    geoGrid* grid = mr_grid_create(shape, K, Nvert, vx, vy, NULL, EToV);
 
+#if DEBUG
+    char filename[20] = "mr_grid_read_file2d";
+    int procid, nprocs;
+    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    fp = CreateLog(filename, procid, nprocs);
+    PrintIntMatrix2File(fp, "EToV", EToV, K, Nv);
+    PrintVector2File(fp, "vx", vx, Nvert);
+    PrintVector2File(fp, "vy", vy, Nvert);
+    fclose(fp);
+#endif
     /* free memory */
     matrix_int_free(EToV);
     vector_double_free(vx);

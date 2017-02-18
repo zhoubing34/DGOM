@@ -2,7 +2,7 @@
 #define CONVECTION2D_H
 
 #include "PhysField/pf_phys.h"
-#include "LibUtilities/nc_library.h"
+#include "Utility/nc_library.h"
 
 typedef enum{
     conv_rotational_convection = 1,

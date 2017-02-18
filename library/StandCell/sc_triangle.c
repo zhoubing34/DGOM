@@ -544,11 +544,12 @@ static void sc_rstoad(int Np, double *r, double *s, double *a, double *b){
  *
  */
 void sc_vertProj_tri(stdCell *cell, double *vertVal, double *nodeVal){
-    int i;
-    double ri, si;
+    register int i;
+    double *r = cell->r;
+    double *s = cell->s;
     for (i = 0; i < cell->Np; ++i) {
-        ri=cell->r[i];
-        si=cell->s[i];
+        double ri=r[i];
+        double si=s[i];
         nodeVal[i] = 0.5*( -vertVal[0]*(ri + si) + vertVal[1]*(1.+ri) + vertVal[2]*(1.+si));
     }
 }

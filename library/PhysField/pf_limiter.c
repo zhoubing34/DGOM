@@ -177,7 +177,7 @@ static void phys_gradient_Green(physField *phys, real *px, real *py){
     int **fmask = phys->cell->Fmask;
 
     real f_mean[K*Nfaces*Nfield];
-    pf_weiface_mean(phys, f_mean);
+    pf_face_mean(phys, f_mean);
 
     for(k=0;k<K;k++){
         double A = 1.0/phys->region->size[k];

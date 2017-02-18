@@ -7,8 +7,8 @@ set(STDREGIONS_SOURCE
         sc_quadrilateral.c)
 
 add_library(standcell STATIC ${STDREGIONS_SOURCE})
-add_dependencies(standcell libutility polylib)
-target_link_libraries(standcell libutility polylib)
+add_dependencies(standcell utility polylib)
+target_link_libraries(standcell utility polylib)
 
 install(TARGETS standcell ARCHIVE DESTINATION lib)
 

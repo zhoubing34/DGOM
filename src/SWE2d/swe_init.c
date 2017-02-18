@@ -1,5 +1,7 @@
+#include <PhysField/pf_phys.h>
 #include "swe_init.h"
 #include "swe_read_command.h"
+#include "swe_mesh.h"
 #include "swe_input.h"
 #include "swe_driver2d.h"
 
@@ -8,6 +10,8 @@ static void swe_initial_condition(swe_solver *solver);
 static void swe_dambreakdry_init(swe_solver *solver);
 static void swe_dambreakwet_init(swe_solver *solver);
 static void swe_parabolicbowl_init(swe_solver *solver);
+static void swe_userset_init(swe_solver *solver);
+static void swe_set_topography(swe_solver *solver);
 
 swe_solver* swe_init(int argc, char **argv){
     swe_command_type type = swe_read_command(argc, argv);
@@ -24,6 +28,7 @@ swe_solver* swe_init(int argc, char **argv){
         case swe_command_run:
             solver = swe_create_solver();
             swe_initial_condition(solver);
+            swe_set_topography(solver);
             break;
         default:
             fprintf(stderr, "Unknown run type %d\n", type);
@@ -43,8 +48,76 @@ static void swe_initial_condition(swe_solver *solver){
             swe_dambreakwet_init(solver); break;
         case swe_parabolicbowl:
             swe_parabolicbowl_init(solver); break;
+        case swe_userset:
+            swe_userset_init(solver); break;
+    }
+}
+
+static void swe_set_topography(swe_solver *solver){
+    char bot_filename[120];
+    strcpy(bot_filename, solver->casename);
+    strcat(bot_filename, ".bot");
+    switch (solver->caseid){
+        case swe_dambreakwet:
+            solver->bot = swe_flat_topography(solver); break;
+        case swe_dambreakdry:
+            solver->bot = swe_flat_topography(solver); break;
+        case swe_parabolicbowl:
+            solver->bot = swe_parabolic_topography(solver); break;
+        case swe_userset:
+            solver->bot = swe_read_topography(solver, bot_filename); break;
+    }
+}
+
+static void swe_userset_init(swe_solver *solver){
+    char init_filename[120];
+    strcpy(init_filename, solver->casename);
+    strcat(init_filename, ".int");
+    FILE *fp = fopen(init_filename, "r");
+
+    physField *phys = solver->phys;
+    int Nvert, Nfield;
+    fscanf(fp, "%d %d", &Nvert, &Nfield);
+    if( Nvert != phys->grid->Nv ){
+        fprintf(stderr, "%s (%d): Wrong number of vertex in initial file %s.\n",
+                __FILE__, __LINE__, init_filename);
+    }else if( Nfield != phys->Nfield ){
+        fprintf(stderr, "%s (%d): Wrong physical field number in initial file %s.\n",
+                __FILE__, __LINE__, init_filename);
     }
 
+    /* read vertex initial values */
+    register int n,fld,k;
+    int tmp;
+    real **intval = matrix_real_create(Nfield, Nvert);
+    for(n=0;n<Nvert;n++){
+        fscanf(fp, "%d", &tmp);
+        for(fld=0;fld<Nfield;fld++){
+            fscanf(fp, "%lf", intval[fld]+n);
+        }
+    }
+
+    /* assign to node fields */
+    stdCell *cell = phys->cell;
+    const int Nv = phys->cell->Nv;
+    const int K = phys->grid->K;
+    const int Np = phys->cell->Np;
+    int **EToV = phys->grid->EToV;
+    real floc_v[Nv], floc[Np];
+    real *f_Q = phys->f_Q;
+    for(k=0;k<K;k++){
+        for(fld=0;fld<Nfield;fld++){
+            for(n=0;n<Nv;n++){ // vertex initial values
+                floc_v[n] = intval[fld][ EToV[k][n] ];
+            }
+            /* map from vertex to nodes */
+            sc_vertProj(cell, floc_v, floc);
+            for(n=0;n<Np;n++){ // assign to node values
+                f_Q[(k*Np+n)*Nfield + fld] = floc[n];
+            }
+        }
+    }
+    matrix_real_free(intval);
 }
 
 static void swe_dambreakdry_init(swe_solver *solver){

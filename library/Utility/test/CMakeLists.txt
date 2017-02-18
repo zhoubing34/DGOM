@@ -7,8 +7,8 @@ set(LIBUTILITIES_TEST_SOURCE
         MatrixMultiply_test.c)
 
 add_executable(libutility_test ${LIBUTILITIES_TEST_SOURCE})
-add_dependencies(libutility_test libutility)
-target_link_libraries(libutility_test libutility)
+add_dependencies(libutility_test utility)
+target_link_libraries(libutility_test utility)
 
 install(TARGETS libutility_test
         RUNTIME DESTINATION test)

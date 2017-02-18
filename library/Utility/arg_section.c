@@ -124,6 +124,7 @@ void section_read_file(arg_section *section_p, FILE *fp){
     for(i=0;i<section_p->info_linenum;i++){ fgets(buffer, ARG_LEN, fp); }
     for(i=0;i<section_p->arg_num;i++){
         fgets(buffer, ARG_LEN, fp);
+        buffer[strlen(buffer)-1]='\0'; // delete "\n" character
         strcpy(section_p->arg_str[i], buffer);
     }
 }

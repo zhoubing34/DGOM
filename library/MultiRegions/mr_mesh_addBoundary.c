@@ -165,7 +165,7 @@ static int count_unique_integer(int len, int *list){
  *
  * @param [in]  Nsurf number of surface in SFToV
  * @param [in]  SFToV surface to vertex list
- * @param [in]  typeid the boundary type
+ * @param [in]  typeid the boundary type id
  */
 static mr_vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid){
 
@@ -183,6 +183,7 @@ static mr_vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid){
     vertlist2d->Nv = count_unique_integer(Nvert, vertlist);
     vertlist2d->list = vector_int_create(vertlist2d->Nv);
 
+    /* store the vertex index into list */
     int sk = 0;
     vertlist2d->list[sk++] = vertlist[0];
     for(f1=0;f1<(Nvert-1);f1++){

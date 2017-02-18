@@ -20,7 +20,7 @@ set(PHYSDOMAIN_SOURCE
 
 add_library(physfield STATIC ${PHYSDOMAIN_SOURCE})
 add_dependencies(physfield multiregions)
-target_link_libraries(physfield multiregions libutility)
+target_link_libraries(physfield multiregions)
 
 install(TARGETS physfield ARCHIVE DESTINATION lib)
 

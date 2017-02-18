@@ -2,9 +2,9 @@
 // Created by li12242 on 17/1/13.
 //
 
-#include "swe_read_command.h"
 #include <string.h>
-#include "LibUtilities/UTest.h"
+#include "swe_read_command.h"
+#include "Utility/UTest.h"
 
 swe_command_type swe_read_command(int argc, char **argv){
 

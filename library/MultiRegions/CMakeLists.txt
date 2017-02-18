@@ -24,11 +24,7 @@ set(MULTI_REGIONS_SOURCE
 
 add_library(multiregions STATIC ${MULTI_REGIONS_SOURCE})
 add_dependencies(multiregions standcell)
-target_link_libraries(multiregions
-        libutility
-        standcell
-        parmetis
-        metis)
+target_link_libraries(multiregions standcell parmetis metis)
 
 install(TARGETS multiregions ARCHIVE DESTINATION lib)
 

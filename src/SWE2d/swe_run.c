@@ -27,6 +27,8 @@ void swe_run(swe_solver *solver){
     double  dt;  /* delta time */
     /* save initial condition */
     swe_save_var(solver, tstep++, time);
+    pf_slloc2d(phys, 1.0);
+    swe_ppreserve(solver);
 
     double mpitime0 = MPI_Wtime();
 

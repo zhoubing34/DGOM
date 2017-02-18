@@ -1,4 +1,4 @@
-#include "LibUtilities/LibUtilities.h"
+#include "Utility/LibUtilities.h"
 
 typedef struct{
 	double x, y; // coordinate
@@ -39,15 +39,15 @@ static int pt_cmp2d(const void *p1, const void *p2){
  * @param[in,out] vertlist array of vertex index
  */
 void mr_resortEToV2d(int Nvert, double *vx, double *vy, int *vertlist){
-	int i;
 
+    register int i;
 	point2d vertex[Nvert];
 
 	for(i=0;i<Nvert;i++){
 		int t = vertlist[i];
 		vertex[i].x = vx[t];
 		vertex[i].y = vy[t];
-		vertex[i].ind = vertlist[i];
+		vertex[i].ind = t;
 	}
 	PRI_VERT2d.x  = vertex[0].x;
 	PRI_VERT2d.y  = vertex[0].y;

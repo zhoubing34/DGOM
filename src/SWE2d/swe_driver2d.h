@@ -6,8 +6,8 @@
 #define DGOM_SWEDRIVER2D_H
 
 #include "PhysField/pf_phys.h"
-#include "LibUtilities/nc_library.h"
-#include "LibUtilities/LibUtilities.h"
+#include "Utility/nc_library.h"
+#include "Utility/LibUtilities.h"
 
 typedef enum {
     swe_dambreakwet = 1,
@@ -18,6 +18,7 @@ typedef enum {
 
 typedef struct{
     swe_case caseid; ///< case id
+    char *casename;
     /* standard cell */
     sc_cellType celltype; ///< type id of standard cell
     int N; ///< degree of polynomial
@@ -29,7 +30,6 @@ typedef struct{
     double ftime; ///< final time
     /* physical parameters */
     double gra; ///< gravity acceleration
-//    char *botname; ///< file name of bottom topography
     double *bot; ///< bottom topography
     double hcrit; ///< minimum water depth
     double roughness; ///< manning roughness coefficient for friction term

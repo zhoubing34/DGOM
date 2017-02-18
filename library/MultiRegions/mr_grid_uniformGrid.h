@@ -13,4 +13,5 @@ geoGrid* mr_grid_createUniformGrid_quad
         (stdCell *shape, int Mx, int My,
          double xmin, double xmax, double ymin, double ymax);
 
+geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename);
 #endif // DGOM_UNIFORMMESH_H

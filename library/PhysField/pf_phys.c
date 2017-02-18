@@ -84,7 +84,6 @@ void pf_free(physField *phys){
 
     vector_int_free(phys->nodeIndexOut);
     vector_int_free(phys->cellIndexOut);
-    //IntVector_free(phys->cellIndexIn);
 }
 
 

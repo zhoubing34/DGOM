@@ -97,8 +97,9 @@ void mr_resortEToV(geoGrid *grid){
     int k;
     switch (dim){
         case 2:
-            for(k=0;k<K;k++)
+            for(k=0;k<K;k++){
                 mr_resortEToV2d(shape->Nv, grid->vx, grid->vy, grid->EToV[k]);
+            }
             break;
         case 3:
         default:

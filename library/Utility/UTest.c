@@ -281,7 +281,7 @@ void PrintIntMatrix_test(char *message, int **A, int Nrows, int Ncols){
 
 
 void PrintIntMatrix2File(FILE *fp, char *message, int **Mat, int row, int col){
-    _WRITE_MATRIX(fp, message, row, col, " %d, ", Mat);
+    _WRITE_MATRIX(fp, message, row, col, " %d ", Mat);
 }
 void PrintMatrix2File(FILE *fp, char *message, double **Mat, int row, int col){
     _WRITE_MATRIX(fp, message, row, col, " %f, ", Mat);
@@ -300,7 +300,7 @@ void PrintIntVector2File(FILE *fp, char *message, int *Mat, int len){
     _WRITE_VECTOR(fp, message, len, " %d, ", Mat);
 }
 void PrintVector2File(FILE *fp, char *message, double *Mat, int len){
-    _WRITE_VECTOR(fp, message, len, " %f, ", Mat);
+    _WRITE_VECTOR(fp, message, len, " %f ", Mat);
 }
 
 /**
