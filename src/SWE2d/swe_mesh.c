@@ -5,7 +5,8 @@
 #include <PhysField/pf_phys.h>
 #include "swe_mesh.h"
 #include "MultiRegions/mr_grid_uniformGrid.h"
-#include "MultiRegions/mr_mesh_addBoundary.h"
+#include "MultiRegions/mr_mesh_bc.h"
+#include "swe_driver2d.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -39,6 +40,10 @@ physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
     return phys;
 }
 
+static void swe_boundary_condition(swe_solver *solver, parallMesh *mesh){
+    mr_mesh_read_bcfile2d(mesh, solver->casename);
+}
+
 /**
  * @brief create physical field from input mesh file
  * */
@@ -48,7 +53,7 @@ physField* swe_file_mesh(swe_solver *solver, char *meshfile){
     geoGrid *grid = mr_grid_read_file2d(cell, meshfile);
     multiReg *region = mr_reg_create(grid);
     parallMesh *mesh = mr_mesh_create(region);
-    mr_mesh_addBoundary2d(mesh, 0, NULL);
+    swe_boundary_condition(solver, mesh);
     physField *phys = pf_create(3, mesh);
 #if DEBUG
     char casename[20] = "swe_triGrid_test";
@@ -65,7 +70,12 @@ physField* swe_file_mesh(swe_solver *solver, char *meshfile){
 real* swe_read_topography(swe_solver *solver, char *botfile){
     physField *phys = solver->phys;
     int Nvert;
-    FILE *fp = fopen(botfile, "r");
+    FILE *fp;
+    if( (fp = fopen(botfile, "r")) == NULL ){
+        fprintf(stderr, "swe_read_topography (%s): %d\n"
+                        "Unable to open topography file %s.\n",
+                __FILE__,__LINE__,botfile);
+    }
     fscanf(fp, "%d\n", &Nvert);
     if( Nvert != phys->grid->Nv ){
         fprintf(stderr, "%s (%d): Wrong number of vertex in botfile %s.\n",

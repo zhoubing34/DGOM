@@ -5,7 +5,7 @@
 #include "conv_driver2d.h"
 #include "conv_mesh.h"
 #include "MultiRegions/mr_grid_uniformGrid.h"
-#include "MultiRegions/mr_mesh_addBoundary.h"
+#include "MultiRegions/mr_mesh_bc.h"
 
 /* set open boundary condition */
 static void conv_setOBC(int *indicator, int **SFToV);

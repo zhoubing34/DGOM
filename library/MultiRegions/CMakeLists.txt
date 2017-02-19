@@ -19,8 +19,8 @@ set(MULTI_REGIONS_SOURCE
         mr_mesh_parallelPairs.h
         mr_mesh_nodeConnect.c
         mr_mesh_nodeConnect.h
-        mr_mesh_addBoundary.c
-        mr_mesh_addBoundary.h)
+        mr_mesh_bc.c
+        mr_mesh_bc.h)
 
 add_library(multiregions STATIC ${MULTI_REGIONS_SOURCE})
 add_dependencies(multiregions standcell)

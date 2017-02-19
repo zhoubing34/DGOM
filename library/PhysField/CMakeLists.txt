@@ -16,7 +16,9 @@ set(PHYSDOMAIN_SOURCE
         pf_cellMean.c
         pf_cellMean.h
         pf_limiter.c
-        pf_limiter.h)
+        pf_limiter.h
+        pf_init_file.c
+        pf_init_file.h)
 
 add_library(physfield STATIC ${PHYSDOMAIN_SOURCE})
 add_dependencies(physfield multiregions)

@@ -5,7 +5,7 @@
 #include <MultiRegions/mr_mesh.h>
 #include "MultiRegions/mr_grid_uniformGrid.h"
 #include "LibUtilities/UTest.h"
-#include "MultiRegions/mr_mesh_addBoundary.h"
+#include "MultiRegions/mr_mesh_bc.h"
 
 static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose);
 static int mr_quadMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose);

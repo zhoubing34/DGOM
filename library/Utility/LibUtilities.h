@@ -22,6 +22,9 @@ typedef float real; ///> user defined float type
 #define max(a,b)  ( (a>b)?a:b )
 #define min(a,b)  ( (a<b)?a:b )
 
+/* max character length */
+#define MAX_NAME_LENGTH 1024
+
 /* string to int */
 void str2int(char *str, int *N, char* errmessage);
 void str2double(char *str, double *scal, char* errmessage);

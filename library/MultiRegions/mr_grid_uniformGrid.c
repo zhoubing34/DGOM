@@ -46,11 +46,12 @@ geoGrid* mr_grid_createUniformGrid_tri
     double VX[Nv], VY[Nv];
 
     /* vertex coordinate */
+    /* the order of vertex is from left to right, and from bottom to the top */
     int ind; /* vertex index */
     int dim1, dim2;
     for (dim1 = 0; dim1<My+1; dim1++){
         for (dim2 = 0; dim2<Mx+1; dim2++){
-            ind = dim1*(Mx+1) + dim2; /* the order of vertex is from left to right, and from bottom to the top */
+            ind = dim1*(Mx+1) + dim2;
             VX[ind] = (double)dim2/Mx * (xmax - xmin) + xmin;
             VY[ind] = (double)dim1/My * (ymax - ymin) + ymin;
         }
@@ -173,10 +174,15 @@ geoGrid* mr_grid_createUniformGrid_quad
     return grid;
 }
 
-
+/**
+ * @brief create grid from mesh files
+ * @details the mesh files include 'casename.node' and 'casename.ele', while
+ * the 'casename' is defined as parameter. The node file contains the vertex
+ * value and the ele
+ * */
 geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename){
-    char element_file[1024];
-    char vertex_file[1024];
+    char element_file[MAX_NAME_LENGTH];
+    char vertex_file[MAX_NAME_LENGTH];
     strcpy(element_file, casename);
     strcat(element_file, ".ele");
     strcpy(vertex_file, casename);
@@ -204,7 +210,7 @@ geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename){
         fscanf(fp, "%d", &temp); //read index
         for(n=0;n<Nv;n++){
             fscanf(fp, "%d", EToV[0]+k*Nv+n);
-            EToV[k][n] -= 1;
+            EToV[k][n] -= 1; // change index start from 0 (C style)
         }
         fscanf(fp, "%d", &temp); //read region id
     }

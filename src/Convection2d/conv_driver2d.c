@@ -20,7 +20,7 @@
 #include "conv_intilization.h"
 #include "conv_mesh.h"
 #include "conv_output.h"
-#include "MultiRegions/mr_mesh_addBoundary.h"
+#include "MultiRegions/mr_mesh_bc.h"
 #include "conv_run.h"
 #include "conv_extsol.h"
 

@@ -30,7 +30,7 @@
 #include <PhysField/pf_phys.h>
 #include "swe_driver2d.h"
 #include "swe_init.h"
-#include "MultiRegions/mr_mesh_addBoundary.h"
+#include "MultiRegions/mr_mesh_bc.h"
 #include "swe_output.h"
 #include "swe_run.h"
 #include "swe_extsol.h"

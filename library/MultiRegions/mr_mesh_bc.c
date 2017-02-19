@@ -2,7 +2,13 @@
 // Created by li12242 on 12/21/16.
 //
 
-#include "mr_mesh_addBoundary.h"
+#include "mr_mesh_bc.h"
+
+#define DEBUG 0
+#if DEBUG
+#include "Utility/UTest.h"
+#include "mr_mesh.h"
+#endif
 
 /* count the number of uique elements in an array */
 static int count_unique_integer(int len, int *list);
@@ -20,6 +26,45 @@ static void mr_vertList2d_free(mr_vertlist *);
 #define _surfTypeId(mesh, ind, typeid) do{\
 typeid = ind;\
 }while(0)
+
+void mr_mesh_read_bcfile2d(parallMesh *mesh, char *casename){
+    char filename[MAX_NAME_LENGTH];
+    strcpy(filename, casename);
+    strcat(filename, ".edge");
+
+    FILE *fp;
+    if( (fp = fopen(filename, "r")) == NULL ){
+        fprintf(stderr, "mr_mesh_read_bcfile2d (%s): %d\n"
+                        "Unable to open boundary condition file %s.\n",
+                __FILE__,__LINE__,filename);
+    }
+    int Nsurf, tmp, n;
+    fscanf(fp, "%d %d\n", &Nsurf, &tmp);
+#if DEBUG
+    char testname[30] = "mr_mesh_read_bcfile2d_test";
+    FILE *fh = CreateLog(testname, mesh->grid->procid, mesh->grid->nprocs);
+    fprintf(fh, "Nsurf=%d\n", Nsurf);
+#endif
+    int **SFToV = NULL;
+    if(Nsurf>0){
+        SFToV = matrix_int_create(Nsurf, 3);
+        for(n=0;n<Nsurf;n++){
+            fscanf(fp, "%d", &tmp);
+            fscanf(fp, "%d %d %d", SFToV[n], SFToV[n]+1, SFToV[n]+2);
+        }
+        mr_mesh_addBoundary2d(mesh, Nsurf, SFToV);
+#if DEBUG
+        PrintIntMatrix2File(fh, "SFToV", SFToV, Nsurf, 3);
+        fclose(fh);
+#endif
+        matrix_int_free(SFToV);
+    }else{
+        mr_mesh_addBoundary2d(mesh, Nsurf, NULL);
+    }
+    fclose(fp);
+
+    return;
+}
 
 /**
  * @brief add boundary conditions into the 2d mesh object

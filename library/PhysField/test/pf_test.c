@@ -4,7 +4,7 @@
 
 
 #include "MultiRegions/mr_grid_uniformGrid.h"
-#include "MultiRegions/mr_mesh_addBoundary.h"
+#include "MultiRegions/mr_mesh_bc.h"
 #include "pf_test.h"
 #include "pf_nodeFetch_test.h"
 #include "pf_strong_volume_flux2d_test.h"
