@@ -113,6 +113,29 @@ int swe_hll_flux(real nx, real ny, real *varM, real *varP, real *Fhs){
     return 0;
 }
 
+int swe_slip_wall(real nx, real ny, real *varM, real *varP){
+    const real hM  = varM[0];
+    const real qxM = varM[1];
+    const real qyM = varM[2];
+    real qnM =  qxM*nx + qyM*ny; // outward normal flux
+    real qvM = -qxM*ny + qyM*nx; // outward tangential flux
+    // adjacent value
+    varP[0] = hM;
+    varP[1] = (-qnM)*nx - qvM*ny;
+    varP[2] = (-qnM)*ny + qvM*nx;
+    return 0;
+}
+
+int swe_nonslip_wall(real nx, real ny, real *varM, real *varP){
+    const real hM  = varM[0];
+    const real qxM = varM[1];
+    const real qyM = varM[2];
+    // adjacent value
+    varP[0] = hM;
+    varP[1] = -qxM;
+    varP[2] = -qyM;
+    return 0;
+}
 
 void swe_rhs(swe_solver *solver, real frka, real frkb, real fdt){
 
@@ -142,7 +165,7 @@ void swe_rhs(swe_solver *solver, real frka, real frkb, real fdt){
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
     /* surface integral */
-    pf_strong_surface_flux2d(phys, NULL, NULL, swe_flux_term, swe_hll_flux);
+    pf_strong_surface_flux2d(phys, swe_slip_wall, swe_nonslip_wall, swe_flux_term, swe_hll_flux);
 
     /* waite for finishing send buffer */
     MPI_Waitall(Nmess, mpi_send_requests, instatus);

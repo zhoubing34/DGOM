@@ -3,22 +3,19 @@
 //
 
 #include "mr_mesh_bc.h"
+#include "mr_mesh.h"
 
 #define DEBUG 0
 #if DEBUG
 #include "Utility/UTest.h"
-#include "mr_mesh.h"
 #endif
 
 /* count the number of uique elements in an array */
 static int count_unique_integer(int len, int *list);
-
 /* sort numbers from small to large */
 static int mr_mesh_cmp(const void *a, const void *b);
-
 /* create open boundary vertex list */
 static mr_vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid);
-
 /* free vertex list */
 static void mr_vertList2d_free(mr_vertlist *);
 
@@ -27,17 +24,18 @@ static void mr_vertList2d_free(mr_vertlist *);
 typeid = ind;\
 }while(0)
 
+/**
+ * @brief add boundary conditions from file.
+ * @param mesh
+ * @param casename
+ */
 void mr_mesh_read_bcfile2d(parallMesh *mesh, char *casename){
     char filename[MAX_NAME_LENGTH];
     strcpy(filename, casename);
     strcat(filename, ".edge");
 
     FILE *fp;
-    if( (fp = fopen(filename, "r")) == NULL ){
-        fprintf(stderr, "mr_mesh_read_bcfile2d (%s): %d\n"
-                        "Unable to open boundary condition file %s.\n",
-                __FILE__,__LINE__,filename);
-    }
+    dg_fopen(fp, filename, "Unable to open boundary condition file");
     int Nsurf, tmp, n;
     fscanf(fp, "%d %d\n", &Nsurf, &tmp);
 #if DEBUG
@@ -51,10 +49,13 @@ void mr_mesh_read_bcfile2d(parallMesh *mesh, char *casename){
         for(n=0;n<Nsurf;n++){
             fscanf(fp, "%d", &tmp);
             fscanf(fp, "%d %d %d", SFToV[n], SFToV[n]+1, SFToV[n]+2);
+            SFToV[n][0] -= 1;
+            SFToV[n][1] -= 1; // change to C type
         }
         mr_mesh_addBoundary2d(mesh, Nsurf, SFToV);
 #if DEBUG
         PrintIntMatrix2File(fh, "SFToV", SFToV, Nsurf, 3);
+        PrintIntMatrix2File(fh, "ETBS", mesh->EToBS, mesh->grid->K, mesh->cell->Nfaces);
         fclose(fh);
 #endif
         matrix_int_free(SFToV);
@@ -62,7 +63,6 @@ void mr_mesh_read_bcfile2d(parallMesh *mesh, char *casename){
         mr_mesh_addBoundary2d(mesh, Nsurf, NULL);
     }
     fclose(fp);
-
     return;
 }
 
@@ -88,8 +88,12 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
     int **EToV = mesh->grid->EToV;
 
     /* count obc number */
-    int surfList[Nsurf];
+    int surfList[Nsurf], v[2];
     for(f1=0;f1<Nsurf;f1++){
+        v[0] = SFToV[f1][0]; v[1] = SFToV[f1][1];
+        qsort(v, 2, sizeof(int), mr_mesh_cmp);
+        SFToV[f1][0] = v[0]; SFToV[f1][1] = v[1];
+
         surfList[f1] = SFToV[f1][2];
         if(SFToV[f1][2] == INNERLOC | SFToV[f1][2] == INNERBS ){
             printf("mr_mesh_addBoundary (%s): Error boundary type in SFToV[%d][3] = %d\n",
@@ -103,28 +107,31 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
             printf("   other ids - different open boundaries\n");
         }
     }
-    int Nobc = count_unique_integer(Nsurf, surfList);
-    mesh->Nbc = Nobc;
-
+    int Nbc = count_unique_integer(Nsurf, surfList);
+    mesh->Nbc = Nbc;
     /* store the boundary type indicator (from smallest to largest) */
-    mesh->bcIndList = vector_int_create(Nobc);
-    mesh->bcIndList[0] = surfList[0];
+    mesh->bcind = vector_int_create(Nbc);
+    mesh->bcind[0] = surfList[0];
     int sk = 1;
     for(f1=0;f1<(Nsurf-1);f1++){
         if(surfList[f1+1]-surfList[f1] != 0)
-            mesh->bcIndList[sk++] = surfList[f1+1];
+            mesh->bcind[sk++] = surfList[f1+1];
     }
 
-    /* allocate and initialize oblist */
-    mesh->obvertlist = (mr_vertlist**) malloc(Nobc*sizeof(mr_vertlist*));
-    for(k=0;k<Nobc;k++){
-        mesh->obvertlist[k] = mr_vertList2d_create(Nsurf, SFToV, mesh->bcIndList[k]);
+    mesh->Nobc = 0;
+    for(f1=0;f1<Nbc;f1++){
+        if( mesh->bcind[f1]>NSLIPWALL ){ mesh->Nobc += 1; }
+    }
+    mesh->obcind = vector_int_create(mesh->Nobc);
+    sk = 0;
+    for(f1=0;f1<Nbc;f1++){
+        if( mesh->bcind[f1]>NSLIPWALL ){ mesh->obcind[sk++] = mesh->bcind[f1]; }
     }
 
     /* now allocate the element to surface type matrix */
     mesh->EToBS = matrix_int_create(K, Nfaces);
 
-    int t[2], v[2];
+    int t[2];
     for(k=0;k<K;k++){
         for(f2=0; f2<Nfaces; f2++){ // loop through all element surface
             /* inner surface (default) */
@@ -142,7 +149,6 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
             t[0] = EToV[k][n1];
             t[1] = EToV[k][n2];
             qsort(t, 2, sizeof(int), mr_mesh_cmp);
-
             int t_temp = t[0]*Nvert + t[1];
 #if 0
             if(mesh->procid == 0)
@@ -151,8 +157,6 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
             for(f1=0; f1<Nsurf; f1++){
                 v[0] = SFToV[f1][0];
                 v[1] = SFToV[f1][1];
-                qsort(v, 2, sizeof(int), mr_mesh_cmp);
-
                 int v_temp = v[0]*Nvert + v[1];
 #if 0
                 if(mesh->procid == 0)
@@ -172,12 +176,8 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
  */
 void mr_mesh_deleteBoundary2d(parallMesh *mesh){
     matrix_int_free(mesh->EToBS);
-    vector_int_free(mesh->bcIndList);
-    int k, Nobc = mesh->Nbc;
-    for(k=0;k<Nobc;k++){
-        mr_vertList2d_free(mesh->obvertlist[k]);
-    }
-    free(mesh->obvertlist);
+    vector_int_free(mesh->bcind);
+    vector_int_free(mesh->obcind);
 }
 
 /* sort numbers from small to large */
@@ -193,56 +193,11 @@ static int mr_mesh_cmp(const void *a, const void *b){
  */
 static int count_unique_integer(int len, int *list){
 
-    if(len ==0 )
-        return 0;
-
+    if(len ==0) { return 0; }
     qsort(list, (size_t)len, sizeof(int), mr_mesh_cmp); // sort the list
-    int n = 1, i;
+    int n=1, i;
     for(i=0;i<(len-1);i++){
-        if(list[i+1]-list[i] != 0)
-            n++;
+        if(list[i+1]-list[i] != 0) { n++; }
     }
     return n;
-}
-
-/**
- * @brief create open boundary vertex list
- *
- * @param [in]  Nsurf number of surface in SFToV
- * @param [in]  SFToV surface to vertex list
- * @param [in]  typeid the boundary type id
- */
-static mr_vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid){
-
-    mr_vertlist *vertlist2d = (mr_vertlist*) malloc(sizeof(mr_vertlist));
-    /* count vertex number */
-    int f1, Nvert=0;
-    int vertlist[Nsurf*2];
-    for(f1=0; f1<Nsurf; f1++){
-        if( SFToV[f1][2] == typeid){
-            vertlist[Nvert++] = SFToV[f1][0];
-            vertlist[Nvert++] = SFToV[f1][1];
-        }
-    }
-
-    vertlist2d->Nv = count_unique_integer(Nvert, vertlist);
-    vertlist2d->list = vector_int_create(vertlist2d->Nv);
-
-    /* store the vertex index into list */
-    int sk = 0;
-    vertlist2d->list[sk++] = vertlist[0];
-    for(f1=0;f1<(Nvert-1);f1++){
-        if(vertlist[f1+1]-vertlist[f1] != 0)
-            vertlist2d->list[sk++] = vertlist[f1+1];
-    }
-
-    return vertlist2d;
-}
-
-/**
- * @brief free vertex list
- */
-static void mr_vertList2d_free(mr_vertlist* list){
-    vector_int_free(list->list);
-    free(list);
 }

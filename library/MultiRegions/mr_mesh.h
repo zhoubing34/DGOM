@@ -52,11 +52,10 @@ typedef struct {
 
     /* boudary condition */
     int **EToBS; ///< adjacent face type of each cell
-    int *bcIndList; ///< array of boundary type indicators
-//    surfType *bcTypeList; ///< array of boundary types
-
-    int Nbc;    ///< number of boundary surface
-    mr_vertlist **obvertlist; ///< list of open boundary vertex
+    int Nbc; ///< number of all boundary surface
+    int *bcind; ///< array of boundary type indicators
+    int Nobc;    ///< number of open boundary surface
+    int *obcind; ///< array of open boundary type indicators
 
 } parallMesh;
 

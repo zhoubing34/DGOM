@@ -18,7 +18,9 @@ set(PHYSDOMAIN_SOURCE
         pf_limiter.c
         pf_limiter.h
         pf_init_file.c
-        pf_init_file.h)
+        pf_init_file.h
+        pf_openbc.c
+        pf_openbc.h)
 
 add_library(physfield STATIC ${PHYSDOMAIN_SOURCE})
 add_dependencies(physfield multiregions)

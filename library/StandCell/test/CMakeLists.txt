@@ -13,8 +13,8 @@ set(STDREGIONS_SCR
 
 add_executable(standcell_test ${STDREGIONS_SCR})
 
-add_dependencies(standcell_test libutility standcell)
-target_link_libraries(standcell_test libutility standcell)
+add_dependencies(standcell_test utility standcell)
+target_link_libraries(standcell_test utility standcell)
 
 install(TARGETS standcell_test
         RUNTIME DESTINATION test)

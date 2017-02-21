@@ -3,7 +3,7 @@
 //
 
 
-#include "MultiRegions/mr_grid_uniformGrid.h"
+#include "MultiRegions/mr_grid_create.h"
 #include "MultiRegions/mr_mesh_bc.h"
 #include "pf_test.h"
 #include "pf_nodeFetch_test.h"
@@ -59,7 +59,7 @@ int main(int argc, char **argv){
 //    SFToV[0][2] = 0;
 
     stdCell *tri = sc_create(N, TRIANGLE);
-    geoGrid *tri_grid = mr_grid_createUniformGrid_tri(tri, Mx, My, -1, 1, -1, 1, 1);
+    geoGrid *tri_grid = mr_grid_create_uniform_tri(tri, Mx, My, -1, 1, -1, 1, 1);
 //    printf("procid=%d, finish set up tri-grid\n",procid);
     multiReg *tri_region = mr_reg_create(tri_grid);
     parallMesh *tri_mesh = mr_mesh_create(tri_region);
@@ -100,7 +100,7 @@ int main(int argc, char **argv){
 
 
     stdCell *quad = sc_create(N, QUADRIL);
-    geoGrid *quad_grid = mr_grid_createUniformGrid_quad(quad, Mx, My, -1, 1, -1, 1);
+    geoGrid *quad_grid = mr_grid_create_uniform_quad(quad, Mx, My, -1, 1, -1, 1);
     multiReg *quad_region = mr_reg_create(quad_grid);
     parallMesh *quad_mesh = mr_mesh_create(quad_region);
     mr_mesh_addBoundary2d(quad_mesh, 0, NULL);

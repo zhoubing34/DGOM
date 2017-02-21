@@ -12,7 +12,7 @@
 #ifndef DGOM_STDCELL_H
 #define DGOM_STDCELL_H
 
-#include "Utility/LibUtilities.h"
+#include "Utility/utility.h"
 
 typedef enum {
     TRIANGLE=0, ///< triangle

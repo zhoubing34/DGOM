@@ -7,8 +7,8 @@ set(MULTI_REGIONS_SOURCE
         mr_grid.h
         mr_grid_resortEToV.c
         mr_grid_resortEToV.h
-        mr_grid_uniformGrid.c
-        mr_grid_uniformGrid.h
+        mr_grid_create.c
+        mr_grid_create.h
         mr_reg.c
         mr_reg.h
         mr_mesh.c

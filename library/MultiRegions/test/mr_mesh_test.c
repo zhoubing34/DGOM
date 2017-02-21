@@ -3,8 +3,8 @@
 //
 
 #include <MultiRegions/mr_mesh.h>
-#include "MultiRegions/mr_grid_uniformGrid.h"
-#include "LibUtilities/UTest.h"
+#include "MultiRegions/mr_grid_create.h"
+#include "Utility/UTest.h"
 #include "MultiRegions/mr_mesh_bc.h"
 
 static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose);
@@ -21,7 +21,7 @@ int mr_mesh_test(int verbose){
 
     /* triangle regions */
     stdCell *shape = sc_create(N, TRIANGLE);
-    geoGrid *grid = mr_grid_createUniformGrid_tri(shape, Mx, My, -1, 1, -1, 1, 1);
+    geoGrid *grid = mr_grid_create_uniform_tri(shape, Mx, My, -1, 1, -1, 1, 1);
     multiReg *region = mr_reg_create(grid);
     clockT1 = MPI_Wtime();
     parallMesh *mesh = mr_mesh_create(region);
@@ -38,7 +38,7 @@ int mr_mesh_test(int verbose){
 
     /* quadrilateral regions */
     shape = sc_create(N, QUADRIL);
-    grid = mr_grid_createUniformGrid_quad(shape, Mx, My, -1, 1, -1, 1);
+    grid = mr_grid_create_uniform_quad(shape, Mx, My, -1, 1, -1, 1);
     region = mr_reg_create(grid);
     clockT1 = MPI_Wtime();
     mesh = mr_mesh_create(region);
@@ -119,8 +119,8 @@ static int mr_triMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose)
 
         fprintf(fp, "mesh->Nbc = %d\n", mesh->Nbc);
         PrintIntMatrix2File(fp, "mesh->EToBS", mesh->EToBS, K, Nfaces);
-        PrintIntVector2File(fp, "mesh->bcIndList", mesh->bcIndList, mesh->Nbc);
-
+        PrintIntVector2File(fp, "mesh->bcind", mesh->bcind, mesh->Nbc);
+        PrintIntVector2File(fp, "mesh->bcind", mesh->obcind, mesh->Nobc);
         fclose(fp);
     }
 
@@ -167,7 +167,8 @@ static int mr_quadMesh_cellConnect_test(parallMesh *mesh, double dt, int verbose
 
         fprintf(fp, "mesh->Nbc = %d\n", mesh->Nbc);
         PrintIntMatrix2File(fp, "mesh->EToBS", mesh->EToBS, K, Nfaces);
-        PrintIntVector2File(fp, "mesh->bcIndList", mesh->bcIndList, mesh->Nbc);
+        PrintIntVector2File(fp, "mesh->bcind", mesh->bcind, mesh->Nbc);
+        PrintIntVector2File(fp, "mesh->bcind", mesh->obcind, mesh->Nobc);
         fclose(fp);
     }
 

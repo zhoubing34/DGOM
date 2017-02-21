@@ -7,7 +7,7 @@
 
 #include "PhysField/pf_phys.h"
 #include "Utility/nc_library.h"
-#include "Utility/LibUtilities.h"
+#include "Utility/utility.h"
 
 typedef enum {
     swe_dambreakwet = 1,

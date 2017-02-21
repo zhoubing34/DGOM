@@ -12,6 +12,40 @@ void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
 double swe_time_interval(swe_solver *solver);
 void swe_ppreserve(swe_solver *solver);
 
+static void swe_h2eta(swe_solver *solver){
+    physField *phys = solver->phys;
+    const int K = phys->grid->K;
+    const int Np = phys->cell->Np;
+    const int Nfield = phys->Nfield;
+    real *f_Q = phys->f_Q;
+
+    register int k,n,sk;
+    for(k=0;k<K;k++){
+        for(n=0;n<Np;n++){
+            sk = k*Np+n;
+            real bot = solver->bot[sk];
+            f_Q[sk*Nfield] -= bot;
+        }
+    }
+}
+
+static void swe_eta2h(swe_solver *solver){
+    physField *phys = solver->phys;
+    const int K = phys->grid->K;
+    const int Np = phys->cell->Np;
+    const int Nfield = phys->Nfield;
+    real *f_Q = phys->f_Q;
+
+    register int k,n,sk;
+    for(k=0;k<K;k++){
+        for(n=0;n<Np;n++){
+            sk = k*Np+n;
+            real bot = solver->bot[sk];
+            f_Q[sk*Nfield] += bot;
+        }
+    }
+}
+
 void swe_run(swe_solver *solver){
     /* Runge-Kutta time evaluation coefficient */
     double rk4a[5], rk4b[5], rk4c[6];
@@ -54,8 +88,9 @@ void swe_run(swe_solver *solver){
             const real fa = (real)rk4a[INTRK-1];
             const real fb = (real)rk4b[INTRK-1];
             swe_rhs(solver, fa, fb, fdt);
-
+            //swe_h2eta(solver);
             pf_slloc2d(phys, 1.0);
+            //swe_eta2h(solver);
             //pf_vert_limit(phys);
             swe_ppreserve(solver);
         }

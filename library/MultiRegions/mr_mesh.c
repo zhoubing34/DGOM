@@ -32,8 +32,8 @@ parallMesh* mr_mesh_create(multiReg *region){
 
     /* initialize boundary condition */
     mesh->EToBS = NULL;
-    mesh->bcIndList = NULL;
-    mesh->obvertlist = NULL;
+    mesh->bcind = NULL;
+    mesh->obcind = NULL;
 
     return mesh;
 }

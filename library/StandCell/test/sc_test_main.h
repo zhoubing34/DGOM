@@ -6,7 +6,7 @@
 #define DGOM_STDREGIONS_TEST_H
 
 #include "StandCell/sc_stdcell.h"
-#include "LibUtilities/LibUtilities.h"
-#include "LibUtilities/UTest.h"
+#include "Utility/utility.h"
+#include "Utility/UTest.h"
 
 #endif //DGOM_STDREGIONS_TEST_H

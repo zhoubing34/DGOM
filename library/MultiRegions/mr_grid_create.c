@@ -25,15 +25,15 @@
  *
  * @return grid geometry grid object
  */
-geoGrid* mr_grid_createUniformGrid_tri
+geoGrid* mr_grid_create_uniform_tri
         (stdCell *shape, int Mx, int My,
          double xmin, double xmax,
          double ymin, double ymax, int type)
 {
     /* check stand element */
     if(shape->type !=  TRIANGLE){
-        printf("MultiRegions (mr_grid_createUniformGrid_tri): "
-                       "the input element type %d is not triangle!\n", shape->type);
+        fprintf(stderr, "%s (%s):%d\nthe input element type %d is not triangle!\n",
+               __FUNCTION__, __FILE__, __LINE__, shape->type);
         exit(-1);
     }
 
@@ -113,16 +113,15 @@ geoGrid* mr_grid_createUniformGrid_tri
  *
  * @return grid geometry grid object
  */
-geoGrid* mr_grid_createUniformGrid_quad
+geoGrid* mr_grid_create_uniform_quad
         (stdCell *shape, int Mx, int My,
          double xmin, double xmax,
          double ymin, double ymax)
 {
     /* check stand element */
-    if(shape->type !=  QUADRIL){
-        fprintf(stderr, "mr_grid_createUniformGrid_quad (%s): %d\n"
-                "the input element type %d is not quadrilateral!\n",
-                __FILE__, __LINE__, shape->type);
+    if(shape->type!= QUADRIL){
+        fprintf(stderr, "%s (%s):%d\nthe input element type %d is not quadrilateral!\n",
+                __FUNCTION__, __FILE__, __LINE__, shape->type);
         exit(-1);
     }
 

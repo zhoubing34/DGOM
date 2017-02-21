@@ -5,7 +5,7 @@
  * li12242, Tianjin University, li12242@tju.edu.cn
  */
 
-#include "LibUtilities.h"
+#include "utility.h"
 
 /* matrix operations */
 

@@ -2,9 +2,7 @@
 // Created by li12242 on 12/19/16.
 //
 
-#include "LibUtilities/UTest.h"
-//#include "LibUtilities/LibUtilities.h"
-#include "MultiRegions/mr_grid.h"
+#include "Utility/UTest.h"
 #include "mr_grid_test.h"
 #include "mr_reg_test.h"
 #include "mr_mesh_test.h"

@@ -4,7 +4,7 @@
 
 #include "conv_driver2d.h"
 #include "conv_mesh.h"
-#include "MultiRegions/mr_grid_uniformGrid.h"
+#include "MultiRegions/mr_grid_create.h"
 #include "MultiRegions/mr_mesh_bc.h"
 
 /* set open boundary condition */
@@ -20,10 +20,10 @@ parallMesh* conv_mesh(stdCell *shape){
 
     switch (solver.celltype){
         case TRIANGLE:
-            grid = mr_grid_createUniformGrid_tri(shape, Ne, Ne, -1, 1, -1, 1, 1);
+            grid = mr_grid_create_uniform_tri(shape, Ne, Ne, -1, 1, -1, 1, 1);
             break;
         case QUADRIL:
-            grid = mr_grid_createUniformGrid_quad(shape, Ne, Ne, -1, 1, -1, 1);
+            grid = mr_grid_create_uniform_quad(shape, Ne, Ne, -1, 1, -1, 1);
             break;
         default:
             printf("Error in %s line %d\n", __FILE__, __LINE__);

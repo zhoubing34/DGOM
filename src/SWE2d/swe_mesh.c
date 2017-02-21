@@ -4,9 +4,8 @@
 
 #include <PhysField/pf_phys.h>
 #include "swe_mesh.h"
-#include "MultiRegions/mr_grid_uniformGrid.h"
+#include "MultiRegions/mr_grid_create.h"
 #include "MultiRegions/mr_mesh_bc.h"
-#include "swe_driver2d.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -21,10 +20,10 @@ physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
 
     switch (solver->celltype){
         case TRIANGLE:
-            grid = mr_grid_createUniformGrid_tri(cell, Mx, My, xmin, xmax, ymin, ymax, 1);
+            grid = mr_grid_create_uniform_tri(cell, Mx, My, xmin, xmax, ymin, ymax, 1);
             break;
         case QUADRIL:
-            grid = mr_grid_createUniformGrid_quad(cell, Mx, My, xmin, xmax, ymin, ymax);
+            grid = mr_grid_create_uniform_quad(cell, Mx, My, xmin, xmax, ymin, ymax);
             break;
         default:
             printf("Error in %s line %d\n", __FILE__, __LINE__);

@@ -4,8 +4,8 @@
 
 #include <StandCell/sc_stdcell.h>
 #include <MultiRegions/mr_grid.h>
-#include "MultiRegions/mr_grid_uniformGrid.h"
-#include "LibUtilities/UTest.h"
+#include "MultiRegions/mr_grid_create.h"
+#include "Utility/UTest.h"
 
 static int mr_triDepartition_test(geoGrid *, double, int verbose);
 static int mr_quadDepartition_test(geoGrid *, double, int verbose);
@@ -22,7 +22,7 @@ int mr_grid_test(int verbose){
     /* triangular geometry grid */
     stdCell *tri = sc_create(N, TRIANGLE);
     clockT1 = MPI_Wtime();
-    geoGrid *triGrid = mr_grid_createUniformGrid_tri(tri, Mx, My, -1, 1, -1, 1, 1);
+    geoGrid *triGrid = mr_grid_create_uniform_tri(tri, Mx, My, -1, 1, -1, 1, 1);
     clockT2 = MPI_Wtime();
     fail = mr_triDepartition_test(triGrid, clockT2-clockT1, verbose);
 
@@ -32,7 +32,7 @@ int mr_grid_test(int verbose){
     /* quadrilateral geometry grid */
     stdCell *quad = sc_create(N, QUADRIL);
     clockT1 = MPI_Wtime();
-    geoGrid *quadGrid = mr_grid_createUniformGrid_quad(quad, Mx, My, -1, 1, -1, 1);
+    geoGrid *quadGrid = mr_grid_create_uniform_quad(quad, Mx, My, -1, 1, -1, 1);
     clockT2 = MPI_Wtime();
 
     fail = mr_quadDepartition_test(quadGrid, clockT2-clockT1, verbose);

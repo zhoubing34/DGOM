@@ -53,4 +53,13 @@ float  * vector_float_free(float *);
 real   **matrix_real_free(real **);
 real   * vector_real_free(real *);
 
+/* file I/O */
+/* open file and print error message and exit if fails */
+#define dg_fopen(fp, filename, errmessage) \
+if( (fp = fopen(filename, "r")) == NULL ){ \
+    fprintf(stderr, "%s (%s): %d\n%s: %s.\n", \
+            __FUNCTION__, __FILE__,__LINE__,errmessage,filename);\
+    exit(-1); \
+}
+
 #endif //LIBUTILITIES_H

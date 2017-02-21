@@ -151,7 +151,7 @@ void mr_grid_partition(geoGrid *grid){
 
     /* number of elements in each process */
     int p;
-    for(p=0; p<nprocs-1; ++p){
+    for(p=0; p<(nprocs-1); ++p){
         Kprocs[p] = Klocal;
     }
     /* the rest elements is distributed to the last process */
@@ -167,11 +167,10 @@ void mr_grid_partition(geoGrid *grid){
 
     int **newEToV = matrix_int_create(Klocal, grid->cell->Nv);
     /* Assignment of local mesh information */
-    int sk=0, n, i;
+    int sk=0,n,i;
     for (n=0; n<K; n++){
         if(n>=Kstart && n<Kstart+Klocal) {
-            for(i=0;i<Nv;i++)
-                newEToV[sk][i] = EToV[n][i];
+            for(i=0;i<Nv;i++) {newEToV[sk][i] = EToV[n][i];}
             ++sk;
         }
     }

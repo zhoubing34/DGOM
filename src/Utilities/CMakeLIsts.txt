@@ -1,5 +1,11 @@
-add_executable(GmshReader GmshReader.c)
+#
+add_executable(dg_gmsh2triangle dg_gmsh2triangle.c)
+target_link_libraries(dg_gmsh2triangle utility)
+install(TARGETS dg_gmsh2triangle
+        RUNTIME DESTINATION bin)
 
-target_link_libraries(GmshReader LibUtilities)
-install(TARGETS GmshReader
+#
+add_executable(dg_obc2nc dg_obc2nc.c)
+target_link_libraries(dg_obc2nc utility)
+install(TARGETS dg_obc2nc
         RUNTIME DESTINATION bin)

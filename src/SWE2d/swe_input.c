@@ -5,7 +5,6 @@
 #include "swe_input.h"
 #include "swe_mesh.h"
 #include "Utility/arg_section.h"
-#include "swe_driver2d.h"
 
 #define DEBUG 0
 

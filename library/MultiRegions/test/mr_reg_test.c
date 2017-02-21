@@ -3,8 +3,8 @@
 //
 
 #include <MultiRegions/mr_reg.h>
-#include "MultiRegions/mr_grid_uniformGrid.h"
-#include "LibUtilities/UTest.h"
+#include "MultiRegions/mr_grid_create.h"
+#include "Utility/UTest.h"
 
 static int mr_triRegion_test(multiReg *reg, double dt, int verbose);
 static int mr_quadRegion_test(multiReg *reg, double dt, int verbose);
@@ -18,7 +18,7 @@ int mr_reg_test(int verbose){
 
     /* triangle regions */
     stdCell *shape = sc_create(N, TRIANGLE);
-    geoGrid *grid = mr_grid_createUniformGrid_tri(shape, Mx, My, -1, 1, -1, 1, 1);
+    geoGrid *grid = mr_grid_create_uniform_tri(shape, Mx, My, -1, 1, -1, 1, 1);
     clockT1 = MPI_Wtime();
     multiReg *region = mr_reg_create(grid);
     clockT2 = MPI_Wtime();
@@ -32,7 +32,7 @@ int mr_reg_test(int verbose){
 
     /* quadrilateral regions */
     shape = sc_create(N, QUADRIL);
-    grid = mr_grid_createUniformGrid_quad(shape, Mx, My, -1, 1, -1, 1);
+    grid = mr_grid_create_uniform_quad(shape, Mx, My, -1, 1, -1, 1);
     clockT1 = MPI_Wtime();
     region = mr_reg_create(grid);
     clockT2 = MPI_Wtime();

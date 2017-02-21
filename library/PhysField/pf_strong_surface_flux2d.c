@@ -64,21 +64,15 @@ void pf_strong_surface_flux2d
             // adjacent nodal values
             switch (bstype){
                 case INNERLOC:
-                    for(fld=0;fld<Nfield;fld++)
-                        f_P[fld] = f_Q[idP++];
-                    break;
+                    for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_Q[idP++]; } break;
                 case INNERBS:
-                    for(fld=0;fld<Nfield;fld++)
-                        f_P[fld] = f_inQ[idP++];
-                    break;
+                    for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_inQ[idP++]; } break;
                 case SLIPWALL:
                     slipwall_condition(nx, ny, f_M, f_P); break;
                 case NSLIPWALL:
                     non_slipwall_condition(nx, ny, f_M, f_P); break;
                 default:
-                    for(fld=0;fld<Nfield;fld++)
-                        f_P[fld] = f_ext[idP++];
-                    break;
+                    for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_ext[idP++]; } break;
             }
 
 #if DEBUG

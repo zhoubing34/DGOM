@@ -1,7 +1,7 @@
 #ifndef DGOM_UTEST_H
 #define DGOM_UTEST_H
 
-#include "LibUtilities.h"
+#include "utility.h"
 #include <sys/time.h>
 
 #define HEADSTART   "\n\033[32m[   RUNING   ]\033[0m " // module reminder

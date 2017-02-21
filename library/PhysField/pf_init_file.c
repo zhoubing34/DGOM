@@ -4,18 +4,31 @@
 
 #include "pf_init_file.h"
 
+/***
+ * @brief initialize the physical fields with initial condition file.
+ * @param phys physical structure
+ * @param casename name of computational case
+ */
 void pf_init_file2d(physField *phys, char *casename){
     char init_filename[MAX_NAME_LENGTH];
     strcpy(init_filename, casename);
-    strcat(init_filename, ".int");
-    FILE *fp = fopen(init_filename, "r");
+    strcat(init_filename, ".init");
+    FILE *fp;
+    /* open the init file */
+    if( (fp = fopen(init_filename, "r")) == NULL ){
+        fprintf(stderr, "pf_init_file2d (%s): %d\n"
+                        "Unable to open initial condition file %s.\n",
+                __FILE__,__LINE__,init_filename);
+        exit(-1);
+    }
 
     int Nvert, Nfield;
     fscanf(fp, "%d %d", &Nvert, &Nfield);
     if( Nvert != phys->grid->Nv ){
         fprintf(stderr, "%s (%d): Wrong number of vertex in initial file %s.\n",
                 __FILE__, __LINE__, init_filename);
-    }else if( Nfield != phys->Nfield ){
+    }
+    if( Nfield != phys->Nfield ){
         fprintf(stderr, "%s (%d): Wrong physical field number in initial file %s.\n",
                 __FILE__, __LINE__, init_filename);
     }

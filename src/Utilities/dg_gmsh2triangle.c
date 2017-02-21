@@ -1,7 +1,6 @@
 #include <stdio.h>
-#include "LibUtilities/LibUtilities.h"
+#include "Utility/utility.h"
 
-#define MAXLEN 1024
 #define HEADLEN 20  // the length of title section in *.ele and *.edge files
 
 /* private function */
@@ -10,11 +9,9 @@ int WriteVertexFile(int ndim, FILE *fp, char *casename, char **argv);
 int WriteEleFile2d(int ndim, FILE *fp, char *casename, char **argv);
 
 /**
- * @brief
- * Read mesh file of Gmsh and write to the result files.
+ * @brief Read mesh file of Gmsh and write to the result files.
  *
  * @details
- *
  * Usages:
  *      GmshReader 2 data.msh
  *
@@ -25,9 +22,8 @@ int WriteEleFile2d(int ndim, FILE *fp, char *casename, char **argv);
  */
 int main(int argc, char **argv){
 
-    if(argc!=3){ // check input
-        printf("Wrong number of input arguments\n"); exit(-1);
-    }
+    // check input
+    if(argc!=3){ fprintf(stderr, "Wrong number of input arguments\n"); exit(-1); }
 
     int ndim; // get dimensions
     str2int(argv[1], &ndim, "Wrong value of dimensions.");
@@ -35,21 +31,15 @@ int main(int argc, char **argv){
     // open the mesh file and check exist
     FILE *fp = fopen(argv[2], "r");
     if(fp == NULL){
-        printf("Can't open Gmsh file %s\n", argv[2]); exit(-1);
+        fprintf(stderr, "Can't open gmsh file %s\n", argv[2]); exit(-1);
     }
 
-    char casename[MAXLEN]; // get the filename
-    if(RemoveSuffix(argv[2], casename) < 0)
-        exit(-1);
-
+    char casename[MAX_NAME_LENGTH]; // get the filename
+    if(RemoveSuffix(argv[2], casename) < 0) {exit(-1);}
     // read and write the vertex
-    if(WriteVertexFile(ndim, fp, casename, argv)<0)
-        exit(-1);
-
+    if(WriteVertexFile(ndim, fp, casename, argv)<0) {exit(-1);}
     // read and write the elements and boundaries
-    if( WriteEleFile2d(ndim, fp, casename, argv)<0)
-        exit(-1);
-
+    if( WriteEleFile2d(ndim, fp, casename, argv)<0) {exit(-1);}
     // close file
     fclose(fp);
 
@@ -59,7 +49,7 @@ int main(int argc, char **argv){
 /* read and write the *.ele and *.edge files */
 int WriteEleFile2d(int ndim, FILE *fp, char *casename, char **argv){
     // create output file
-    char fullname[MAXLEN];
+    char fullname[MAX_NAME_LENGTH];
     strcpy(fullname, casename);
     strncat(fullname, ".ele", strlen(".ele"));
 
@@ -78,9 +68,9 @@ int WriteEleFile2d(int ndim, FILE *fp, char *casename, char **argv){
 
     // read title
     int i;
-    char strbuff[MAXLEN];
+    char strbuff[MAX_NAME_LENGTH];
     for(i=0;i<2;i++)
-        fgets(strbuff, MAXLEN, fp);
+        fgets(strbuff, MAX_NAME_LENGTH, fp);
 
     for(i=0;i<HEADLEN;i++){
         fprintf(edgefp, " ");
@@ -95,14 +85,14 @@ int WriteEleFile2d(int ndim, FILE *fp, char *casename, char **argv){
 
     // read EToV
     int Ne;
-    fgets(strbuff, MAXLEN, fp);
+    fgets(strbuff, MAX_NAME_LENGTH, fp);
     if (sscanf(strbuff, "%d", &Ne) != 1){
         printf("Wrong No. of elements %s\n", strbuff); return -1;
     }
     int id,type,physid,triConunter,quadContour,edgeContour,temp;
     int node[4];
     for(triConunter=0,quadContour=0,edgeContour=0, i=0;i<Ne;i++){
-        fgets(strbuff, MAXLEN, fp);
+        fgets(strbuff, MAX_NAME_LENGTH, fp);
         sscanf(strbuff, "%d %d", &id, &type);
         if(type==1){ //edge
             edgeContour++;
@@ -174,7 +164,7 @@ int WriteEleFile2d(int ndim, FILE *fp, char *casename, char **argv){
 /* read the node coordinate and write to .node file */
 int WriteVertexFile(int ndim, FILE *fp, char *casename, char **argv){
     // create output file
-    char fullname[MAXLEN];
+    char fullname[MAX_NAME_LENGTH];
     strcpy(fullname, casename);
     strncat(fullname, ".node", strlen(".node"));
 
@@ -184,10 +174,10 @@ int WriteVertexFile(int ndim, FILE *fp, char *casename, char **argv){
     }
 
     // read the title of mesh file, tile 4th line
-    char strbuff[MAXLEN];
+    char strbuff[MAX_NAME_LENGTH];
     int i;
     for(i=0; i<4; i++)
-        fgets(strbuff, MAXLEN, fp);
+        fgets(strbuff, MAX_NAME_LENGTH, fp);
 
     if( !memcpy(strbuff, "$Nodes", strlen("$Nodes")) ){ // check file format
         printf("File format error, 4th line, %s", strbuff); return -1;
@@ -195,7 +185,7 @@ int WriteVertexFile(int ndim, FILE *fp, char *casename, char **argv){
 
     // # of vertex
     int Nv;
-    fgets(strbuff, MAXLEN, fp);
+    fgets(strbuff, MAX_NAME_LENGTH, fp);
     if (sscanf(strbuff, "%d", &Nv) != 1){
         printf("Wrong No. of vertex %s\n", strbuff); return -1;
     }
@@ -207,7 +197,7 @@ int WriteVertexFile(int ndim, FILE *fp, char *casename, char **argv){
         float coor[2];
         int k;
         for (i = 0; i < Nv; i++) {
-            fgets(strbuff, MAXLEN, fp);
+            fgets(strbuff, MAX_NAME_LENGTH, fp);
             sscanf(strbuff, "%d %f %f",&k,coor,coor+1);
             fprintf(outfp, "%d %f %f\n", k, coor[0], coor[1]);
         }
@@ -215,7 +205,7 @@ int WriteVertexFile(int ndim, FILE *fp, char *casename, char **argv){
         float coor[3];
         int k;
         for (i=0; i<Nv; i++) {
-            fgets(strbuff, MAXLEN, fp);
+            fgets(strbuff, MAX_NAME_LENGTH, fp);
             sscanf(strbuff, "%d %f %f %f",&k,coor,coor+1,coor+2);
             fprintf(outfp, "%d %f %f %f\n", k, coor[0], coor[1], coor[2]);
         }
