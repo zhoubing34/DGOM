@@ -50,9 +50,7 @@ int phys_strong_surface_flux2d_test(physField *phys, int verbose){
         }
     }
 
-    double clockT1 = MPI_Wtime();
     pf_strong_surface_flux2d(phys, NULL, NULL, nodal_flux, numerical_flux);
-    double clockT2 = MPI_Wtime();
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
@@ -63,5 +61,9 @@ int phys_strong_surface_flux2d_test(physField *phys, int verbose){
         PrintVector2File(fp, "f_rhsQ", phys->f_rhsQ, Nfield*Np*k);
     }
 
+    const int procid = region->procid;
+    if(!procid) {
+        if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
+    }
     return fail;
 }

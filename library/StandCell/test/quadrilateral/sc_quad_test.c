@@ -11,8 +11,8 @@ int sc_quadCoor_test(stdCell *quad, int verbose){
     extern double quad_r[NP];
     extern double quad_s[NP];
 
-    fail=Vector_test("sc_quadCoor_r_test", quad->r, quad_r, Np, 0);
-    fail=Vector_test("sc_quadCoor_s_test", quad->s, quad_s, Np, 0);
+    fail=Vector_test("sc_quadCoor_r_test", quad->r, quad_r, Np);
+    fail=Vector_test("sc_quadCoor_s_test", quad->s, quad_s, Np);
 
     if(verbose){
         FILE *fp = fopen("sc_quadCoor_test.txt","w");
@@ -33,7 +33,7 @@ int sc_quadVandMatrix_test(stdCell *quad, int verbose){
             V_ext[i][j] = quad_V[i][j];
         }
     }
-    fail = Matrix_test("sc_quadVandMatrix_test", quad->V, V_ext, NP, NP, 0);
+    fail = Matrix_test("sc_quadVandMatrix_test", quad->V, V_ext, NP, NP);
 
     if(verbose){
         FILE *fp = fopen("sc_quadVandMatrix_test.txt", "w");
@@ -55,7 +55,7 @@ int sc_quadMassMatrix_test(stdCell *quad, int verbose){
             M_ext[i][j] = quad_M[i][j];
         }
     }
-    fail = Matrix_test("sc_quadMassMatrix_test", quad->M, M_ext, NP, NP, 0);
+    fail = Matrix_test("sc_quadMassMatrix_test", quad->M, M_ext, NP, NP);
 
     if(verbose){
         FILE *fp = fopen("sc_quadMassMatrix_test.txt", "w");
@@ -81,8 +81,8 @@ int sc_quadDeriMatrix_test(stdCell *quad, int verbose){
         }
     }
 
-    fail = Matrix_test("sc_quadDr_test", quad->Dr, Dr_ext, NP, NP, 0);
-    fail = Matrix_test("sc_quadDs_test", quad->Ds, Ds_ext, NP, NP, 0);
+    fail = Matrix_test("sc_quadDr_test", quad->Dr, Dr_ext, NP, NP);
+    fail = Matrix_test("sc_quadDs_test", quad->Ds, Ds_ext, NP, NP);
 
     if(verbose){
         FILE *fp = fopen("sc_quadDeriMatrix_test.txt", "w");
@@ -108,7 +108,7 @@ int sc_quadLIFT_test(stdCell *quad, int verbose){
         }
     }
 
-    fail = Matrix_test("sc_quadLIFT_test", quad->LIFT, LIFT_ext, NP, NFP, 0);
+    fail = Matrix_test("sc_quadLIFT_test", quad->LIFT, LIFT_ext, NP, NFP);
 
     if(verbose){
         FILE *fp = fopen("sc_quadLIFT_test.txt", "w");
@@ -127,16 +127,10 @@ int sc_quadVertProj_test(stdCell *quad, int verbose){
     extern double quad_VY[NV];
 
     double x[quad->Np], y[quad->Np];
-    clock_t clockT1, clockT2;
-
-    clockT1 = clock();
     sc_vertProj(quad, quad_VX, x);
-    clockT2 = clock();
-    fail = Vector_test("sc_quadVertProj_test", x, quad->r, quad->Np, (clockT2-clockT1)/CLOCKS_PER_SEC);
+    fail = Vector_test("sc_quadVertProj_test", x, quad->r, quad->Np);
 
-    clockT1 = clock();
     sc_vertProj(quad, quad_VY, y);
-    clockT2 = clock();
-    fail = Vector_test("sc_quadVertProj_test", y, quad->s, quad->Np, (clockT2-clockT1)/CLOCKS_PER_SEC);
+    fail = Vector_test("sc_quadVertProj_test", y, quad->s, quad->Np);
     return fail;
 }

@@ -16,6 +16,8 @@ int mr_mesh_connet_test(parallMesh *mesh, int verbose){
         PrintIntVector2File(fp, "mesh->vmapP", mesh->vmapP, K*Nfaces*Nfp);
         fclose(fp);
     }
+    const int procid = mesh->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 
@@ -23,7 +25,6 @@ int mr_mesh_parallel_test(parallMesh *mesh, int verbose){
     int fail = 0;
     const int K = mesh->grid->K;
     const int Nfaces = mesh->cell->Nfaces;
-    const int Nfp = mesh->cell->Nfp;
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
         PrintIntMatrix2File(fp, "mesh->EToP", mesh->EToP, K, Nfaces);
@@ -37,6 +38,8 @@ int mr_mesh_parallel_test(parallMesh *mesh, int verbose){
 
         fclose(fp);
     }
+    const int procid = mesh->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 
@@ -53,5 +56,7 @@ int mr_mesh_bc_test(parallMesh *mesh, int verbose){
         PrintIntVector2File(fp, "mesh->obcind", mesh->obcind, mesh->Nobc);
         fclose(fp);
     }
+    const int procid = mesh->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }

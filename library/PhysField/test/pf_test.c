@@ -1,9 +1,6 @@
 //
 // Created by li12242 on 12/11/16.
 //
-
-#include "MultiRegions/mr_grid_create.h"
-#include "MultiRegions/mr_mesh_bc.h"
 #include "pf_test.h"
 #include "pf_nodeFetch_test.h"
 #include "pf_strong_volume_flux2d_test.h"
@@ -21,21 +18,21 @@ double xmin = -1, xmax = 1;
 double ymin = -1, ymax = 1;
 
 /** generation of physfield */
-physField *uniform_tri_nobc_physfield();
-physField *uniform_quad_nobc_physfield();
+physField *uniform_tri_physfield();
+physField *uniform_quad_physfield();
 
 #define Nphys 2
 typedef physField* (*phys_func)();
 static const phys_func phys_creator[Nphys] = {
-        uniform_tri_nobc_physfield,
-        uniform_quad_nobc_physfield
+        uniform_tri_physfield,
+        uniform_quad_physfield
 };
 
 /**
  * @brief create uniform triangle mesh of physField
  * @return physField
  */
-physField *uniform_tri_nobc_physfield(){
+physField *uniform_tri_physfield(){
     int type = 1;
     stdCell *tri = sc_create(N, TRIANGLE);
     geoGrid *tri_grid = mr_grid_create_uniform_tri(tri, Mx, My, xmin, xmax, ymin, ymax, type);
@@ -49,7 +46,7 @@ physField *uniform_tri_nobc_physfield(){
  * @brief create uniform quadrilateral mesh of physField
  * @return physField
  */
-physField *uniform_quad_nobc_physfield(){
+physField *uniform_quad_physfield(){
     stdCell *quad = sc_create(N, QUADRIL);
     geoGrid *quad_grid = mr_grid_create_uniform_quad(quad, Mx, My, xmin, xmax, ymin, ymax);
     multiReg *quad_region = mr_reg_create(quad_grid);
@@ -63,11 +60,11 @@ physField *uniform_quad_nobc_physfield(){
  * @brief deallocate the memory of physField
  * @param phys
  */
-void phys_nobc_free(physField *phys){
-    /* free memory */
+void phys_free(physField *phys){
     sc_free(phys->cell);
     mr_grid_free(phys->grid);
     mr_reg_free(phys->region);
+    mr_mesh_del_bc2d(phys->mesh);
     mr_mesh_free(phys->mesh);
     pf_free(phys);
 }
@@ -98,13 +95,14 @@ int main(int argc, char **argv){
 
     // print help information
     if(ishelp){
-        printf(HEADEND "DGOM\n" HEADLINE "Unit tests for PhysField library\n"
-                       HEADLINE "Example usages:\n"
-                       HEADLINE "   mpirun -n 2 -host localhost ./physfield_test\n"
-                       HEADLINE "\n"
-                       HEADLINE "Optional features:\n"
-                       HEADLINE "   -help     print help information\n"
-                       HEADEND  "   -verbose  print variables to log files\n\n");
+        char helpstr[] = HEADEND "DGOM\n" HEADLINE "Unit tests for PhysField library\n"
+                HEADLINE "Example usages:\n"
+                HEADLINE "   mpirun -n 2 -host localhost ./physfield_test\n"
+                HEADLINE "\n"
+                HEADLINE "Optional features:\n"
+                HEADLINE "   -help     print help information\n"
+                HEADEND  "   -verbose  print variables to log files\n\n";
+        printf("%s",helpstr);
         return 0;
     }
 
@@ -114,7 +112,7 @@ int main(int argc, char **argv){
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     if(!procid){
         printf(HEADSTART "Running %d test for %d physField from %s.\n",
-               Ntest, Nphys, __FILE__);
+               Ntest, Nphys, __FUNCTION__);
     }
 
     physField *phys;
@@ -130,7 +128,7 @@ int main(int argc, char **argv){
             tmp = phys_test_func[m](phys, isverbose);
             if(tmp){ Nfail++; }
         }
-        phys_nobc_free(phys);
+        phys_free(phys);
         if(Nfail){
             if(!procid){ printf(HEADEND "%d test failed for physField[%d]\n\n", Nfail, n); }
         } else{

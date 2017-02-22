@@ -2,11 +2,7 @@
 // Created by li12242 on 17/1/9.
 //
 
-#include <StandCell/sc_stdcell.h>
-#include <MultiRegions/mr_mesh.h>
 #include "pf_cellFetch_test.h"
-#include "PhysField/pf_fetchBuffer.h"
-
 
 int phys_cellFetch_test(physField *phys, int verbose){
     int fail = 0;
@@ -60,7 +56,7 @@ int phys_cellFetch_test(physField *phys, int verbose){
     }
 
     if(!procid)
-        fail = Vector_test(__FUNCTION__, par_coor, phys->c_inQ, phys->parallCellNum, 0);
+        fail = Vector_test(__FUNCTION__, par_coor, phys->c_inQ, phys->parallCellNum);
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
@@ -73,5 +69,8 @@ int phys_cellFetch_test(physField *phys, int verbose){
         PrintVector2File(fp, "c_outQ", phys->c_outQ, phys->parallCellNum);
     }
 
+    if(!procid) {
+        if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
+    }
     return fail;
 }

@@ -2,7 +2,7 @@
 // Created by li12242 on 12/10/16.
 //
 #include "MatrixInverse_data.cc"
-#include "LibUtilities_test.h"
+#include "utility_test.h"
 
 int MatrixInverse_test(){
 
@@ -13,7 +13,6 @@ int MatrixInverse_test(){
     int fail = 0;
     double temp[Nrow*Nrow];
     int i;
-    clock_t clockT1, clockT2;
 
     // assignment
     for(i = 0; i<Nrow*Nrow; i++){
@@ -21,12 +20,10 @@ int MatrixInverse_test(){
     }
 
     // call
-    clockT1 = clock();
     Matrix_inverse(temp, Nrow);
-    clockT2 = clock();
 
     // check
-    fail = Vector_test("Matrix_Inverse", temp, invCt, Nrow*Nrow, (double)((clockT2-clockT1)/CLOCKS_PER_SEC) );
+    fail = Vector_test("Matrix_Inverse", temp, invCt, Nrow*Nrow);
 
     return fail;
 }

@@ -11,8 +11,8 @@ int sc_triCoor_test(stdCell *tri, int verbose){
     extern double tri_r[NP];
     extern double tri_s[NP];
 
-    fail=Vector_test("sc_triCoor_r_test", tri->r, tri_r, tri->Np, 0);
-    fail=Vector_test("sc_triCoor_s_test", tri->s, tri_s, tri->Np, 0);
+    fail=Vector_test("sc_triCoor_r_test", tri->r, tri_r, tri->Np);
+    fail=Vector_test("sc_triCoor_s_test", tri->s, tri_s, tri->Np);
 
     if(verbose){
         FILE *fp = fopen("sc_triCoor_test.txt","w");
@@ -38,7 +38,7 @@ int sc_triVandMatrix_test(stdCell *tri, int verbose){
             V_ext[i][j] = tri_V[i][j];
         }
     }
-    fail = Matrix_test("sc_triVandMatrix_test", tri->V, V_ext, NP, NP, 0);
+    fail = Matrix_test("sc_triVandMatrix_test", tri->V, V_ext, NP, NP);
 
     if(verbose){
         FILE *fp = fopen("sc_triVandMatrix_test.txt", "w");
@@ -60,7 +60,7 @@ int sc_triMassMatrix_test(stdCell *tri, int verbose){
             M_ext[i][j] = tri_M[i][j];
         }
     }
-    fail = Matrix_test("sc_triMassMatrix_test", tri->M, M_ext, NP, NP, 0);
+    fail = Matrix_test("sc_triMassMatrix_test", tri->M, M_ext, NP, NP);
 
     if(verbose){
         FILE *fp = fopen("sc_triMassMatrix_test.txt", "w");
@@ -86,8 +86,8 @@ int sc_triDeriMatrix_test(stdCell *tri, int verbose){
         }
     }
 
-    fail = Matrix_test("sc_triDr_test", tri->Dr, Dr_ext, NP, NP, 0);
-    fail = Matrix_test("sc_triDs_test", tri->Ds, Ds_ext, NP, NP, 0);
+    fail = Matrix_test("sc_triDr_test", tri->Dr, Dr_ext, NP, NP);
+    fail = Matrix_test("sc_triDs_test", tri->Ds, Ds_ext, NP, NP);
 
     if(verbose){
         FILE *fp = fopen("sc_triDeriMatrix_test.txt", "w");
@@ -112,7 +112,7 @@ int sc_triLIFT_test(stdCell *tri, int verbose){
         }
     }
 
-    fail = Matrix_test("sc_triLIFT_test", tri->LIFT, LIFT_ext, NP, NFP, 0);
+    fail = Matrix_test("sc_triLIFT_test", tri->LIFT, LIFT_ext, NP, NFP);
 
     if(verbose){
         FILE *fp = fopen("sc_triLIFT_test.txt", "w");
@@ -131,17 +131,12 @@ int sc_triVertProj_test(stdCell *tri, int verbose){
     extern double tri_VY[NV];
 
     double x[tri->Np], y[tri->Np];
-    clock_t clockT1, clockT2;
 
-    clockT1 = clock();
     sc_vertProj(tri, tri_VX, x);
-    clockT2 = clock();
-    fail = Vector_test("sc_triVertProj_x_test", x, tri->r, tri->Np, (clockT2-clockT1)/CLOCKS_PER_SEC);
+    fail = Vector_test("sc_triVertProj_x_test", x, tri->r, tri->Np);
 
-    clockT1 = clock();
     sc_vertProj(tri, tri_VY, y);
-    clockT2 = clock();
-    fail = Vector_test("sc_triVertProj_y_test", y, tri->s, tri->Np, (clockT2-clockT1)/CLOCKS_PER_SEC);
+    fail = Vector_test("sc_triVertProj_y_test", y, tri->s, tri->Np);
 
     return fail;
 }

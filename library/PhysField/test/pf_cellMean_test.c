@@ -25,11 +25,7 @@ int phys_cellMean_test(physField *phys, int verbose){
             phys->f_Q[sk++] = region->y[k][i];
         }
     }
-
-    double clockT1, clockT2;
-    clockT1 = MPI_Wtime();
     pf_cellMean(phys);
-    clockT2 = MPI_Wtime();
 
     if(verbose) {
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
@@ -38,5 +34,9 @@ int phys_cellMean_test(physField *phys, int verbose){
         fclose(fp);
     }
 
+    const int procid = mesh->procid;
+    if(!procid) {
+        if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
+    }
     return fail;
 }

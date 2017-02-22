@@ -1,7 +1,7 @@
 //
 // Created by li12242 on 12/10/16.
 //
-#include "LibUtilities_test.h"
+#include "utility_test.h"
 
 int main(){
     int i, flag[2];

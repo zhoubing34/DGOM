@@ -89,8 +89,8 @@ int phys_nodeFetch_test(physField *phys, int verbose){
     }
 
     if(!mesh->procid) {
-        fail = Vector_test(__FUNCTION__, xM, xP, Nnode, (clockT2 - clockT1));
-        fail = Vector_test(__FUNCTION__, yM, yP, Nnode, (clockT2 - clockT1));
+        fail = Vector_test(__FUNCTION__, xM, xP, Nnode);
+        fail = Vector_test(__FUNCTION__, yM, yP, Nnode);
     }
 
     if(verbose){
@@ -109,5 +109,9 @@ int phys_nodeFetch_test(physField *phys, int verbose){
         fclose(fp);
     }
 
+    const int procid = region->procid;
+    if(!procid) {
+        if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
+    }
     return fail;
 }

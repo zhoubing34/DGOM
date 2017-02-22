@@ -48,7 +48,10 @@ parallMesh *uniform_quad_mesh(){
     mr_mesh_add_bc2d(mesh, 0, NULL);
     return mesh;
 }
-
+/**
+ * @brief create triangle mesh from files
+ * @return
+ */
 parallMesh *user_set_tri_mesh(){
     stdCell *shape = sc_create(N, TRIANGLE);
     char casename[] = "example/FlowOver3Bumps2d/tri/FlowOver3Bump";

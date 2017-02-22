@@ -18,6 +18,8 @@ int mr_grid_Ktol_test(geoGrid *grid, int verbose){
         PrintIntVector2File(fp, "K", &(grid->K), 1);
         fclose(fp);
     }
+    const int procid = grid->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 
@@ -35,6 +37,8 @@ int mr_grid_EToV_test(geoGrid *grid, int verbose){
         PrintIntMatrix2File(fp, "EToV", grid->EToV, grid->K, grid->cell->Nv);
         fclose(fp);
     }
+    const int procid = grid->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 /**
@@ -52,5 +56,7 @@ int mr_grid_vertex_test(geoGrid *grid, int verbose){
         PrintVector2File(fp, "vy", grid->vy, grid->cell->Nv);
         fclose(fp);
     }
+    const int procid = grid->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }

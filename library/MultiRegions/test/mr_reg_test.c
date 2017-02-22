@@ -20,6 +20,8 @@ int mr_reg_node_test(multiReg *reg, int verbose){
         PrintMatrix2File(fp, "region->y", reg->y, K, Np);
         fclose(fp);
     }
+    const int procid = reg->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 /**
@@ -41,6 +43,8 @@ int mr_reg_volume_factor_test(multiReg *reg, int verbose){
         PrintMatrix2File(fp, "region->J", reg->J, K, Np);
         fclose(fp);
     }
+    const int procid = reg->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 /**
@@ -60,6 +64,8 @@ int mr_reg_face_factor_test(multiReg *reg, int verbose){
         PrintMatrix2File(fp, "region->sJ", reg->sJ, K, Nfaces);
         fclose(fp);
     }
+    const int procid = reg->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 /**
@@ -77,5 +83,7 @@ int mr_reg_scale_test(multiReg *reg, int verbose){
         PrintVector2File(fp, "region->size", reg->size, K);
         fclose(fp);
     }
+    const int procid = reg->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }

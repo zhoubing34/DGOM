@@ -65,9 +65,9 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose){
     pf_strong_viscosity_LDG_flux2d(phys, NULL, NULL, 0, 0, 0);
 
     if(!phys->mesh->procid){
-        Vector_test(__FUNCTION__, phys->viscosity->px_Q, px_ext, Np*Nfield*K, clockT2-clockT1);
-        Vector_test(__FUNCTION__, phys->viscosity->py_Q, py_ext, Np*Nfield*K, clockT2-clockT1);
-        Vector_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np*Nfield*K, clockT2-clockT1);
+        Vector_test(__FUNCTION__, phys->viscosity->px_Q, px_ext, Np*Nfield*K);
+        Vector_test(__FUNCTION__, phys->viscosity->py_Q, py_ext, Np*Nfield*K);
+        Vector_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np*Nfield*K);
     }
 
     if(verbose){
@@ -87,5 +87,9 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose){
 
     pf_delete_LDG_solver(phys);
 
+    const int procid = region->procid;
+    if(!procid) {
+        if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
+    }
     return fail;
 }

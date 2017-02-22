@@ -1,8 +1,8 @@
 include_directories(${CMAKE_SOURCE_DIR}/library)
 
 set(UTILITIES_TEST_SOURCE
-        LibUtilities_test.c
-        LibUtilities_test.h
+        utility_test.c
+        utility_test.h
         MatrixInverse_test.c
         MatrixMultiply_test.c)
 

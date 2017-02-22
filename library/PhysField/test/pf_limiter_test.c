@@ -3,7 +3,6 @@
 //
 
 #include "pf_limiter_test.h"
-#include "PhysField/pf_limiter.h"
 
 int phys_limiter_test(physField *phys, int verbose){
 
@@ -13,21 +12,17 @@ int phys_limiter_test(physField *phys, int verbose){
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
 
-    int k,i;
+    int k,n;
     // assignment
     int sk = 0;
     for(k=0;k<K;k++){
-        for(i=0;i<Np;i++){
-            phys->f_Q[sk++] = region->x[k][i];
-            phys->f_Q[sk++] = region->y[k][i];
+        for(n=0;n<Np;n++){
+            phys->f_Q[sk++] = region->x[k][n];
+            phys->f_Q[sk++] = region->y[k][n];
         }
     }
 
-    double clockT1, clockT2;
-    clockT1 = MPI_Wtime();
     pf_slloc2d(phys, 1.0);
-    clockT2 = MPI_Wtime();
-
     if(verbose) {
         FILE *fp = create_log(__FUNCTION__, phys->mesh->procid, phys->mesh->nprocs);
         PrintVector2File(fp, "f_Q", phys->f_Q, K*Np*phys->Nfield);
@@ -35,5 +30,9 @@ int phys_limiter_test(physField *phys, int verbose){
         fclose(fp);
     }
 
+    const int procid = region->procid;
+    if(!procid) {
+        if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
+    }
     return fail;
 }

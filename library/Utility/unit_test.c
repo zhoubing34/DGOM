@@ -47,8 +47,7 @@ void UTest_Command(int argc, char** argv, int *ishelp, int *isverbose){
  * -------- |----------|----------------------
  * fail  | int      | 0 - success; 1 - fail
  */
-int IntMatrix_test
-        (const char *message, int **A, int **ExactA, int Nrows, int Ncols, double elapsedTime)
+int IntMatrix_test(const char *message, int **A, int **ExactA, int Nrows, int Ncols)
 {
 
     double error=0.0, relativeErr;
@@ -56,8 +55,6 @@ int IntMatrix_test
     int fail=0, i, j;
 
     double **errorMatrix = matrix_double_create(Nrows, Ncols);
-
-    printf(HEADLINE "1 test from %s\n", message);
     for(i=0;i<Nrows;i++){
         for(j=0;j<Ncols;j++){
             errorMatrix[i][j] = A[i][j] - ExactA[i][j];
@@ -75,8 +72,6 @@ int IntMatrix_test
         printf("Relative Err = %e\n", relativeErr);
         PrintIntMatrix_test("The input Matrix", A, Nrows, Ncols);
         PrintIntMatrix_test("The exact Matrix", ExactA, Nrows, Ncols);
-    }else{
-        printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
     matrix_double_free(errorMatrix);
     return fail;
@@ -97,18 +92,13 @@ int IntMatrix_test
  * -------- |----------|----------------------
  * fail  | int      | 0 - success; 1 - fail
  */
-int Matrix_test
-        (const char *message, double **A, double **ExactA, int Nrows, int Ncols,
-         double elapsedTime)
+int Matrix_test(const char *message, double **A, double **ExactA, int Nrows, int Ncols)
 {
     double error=0.0, relativeErr;
     double total=0.0;
     int fail=0, i, j;
 
     double **errorMatrix = matrix_double_create(Nrows, Ncols);
-
-    printf(HEADLINE "1 test from %s\n", message);
-
     for(i=0;i<Nrows;i++){
         for(j=0;j<Ncols;j++){
             errorMatrix[i][j] = A[i][j] - ExactA[i][j];
@@ -134,8 +124,6 @@ int Matrix_test
 
         PrintMatrix_test("The input Matrix", A, Nrows, Ncols);
         PrintMatrix_test("The exact Matrix", ExactA, Nrows, Ncols);
-    }else{
-        printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
     matrix_double_free(errorMatrix);
     return fail;
@@ -155,9 +143,7 @@ int Matrix_test
  * -------- |----------|----------------------
  * success  | int      | 0 - success; 1 - fail
  */
-int Vector_test(
-        const char *message, double *A, double *ExactA, int Ncols,
-        double elapsedTime)
+int Vector_test(const char *message, double *A, double *ExactA, int Ncols)
 {
 
     double error=0.0, relativeErr;
@@ -165,9 +151,6 @@ int Vector_test(
     int fail=0, i;
 
     double *errorVector = vector_double_create(Ncols);
-
-    printf(HEADLINE "1 test from %s\n", message);
-
     for(i=0;i<Ncols;i++){
         errorVector[i] = A[i] - ExactA[i];
         error += fabs( errorVector[i] );
@@ -185,25 +168,19 @@ int Vector_test(
         printf("Relative Err = %e\n", relativeErr);
         PrintVector("The input Vector =", A, Ncols);
         PrintVector("The exact Vector =", ExactA, Ncols);
-    }else{
-        printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
 
     vector_double_free(errorVector);
     return fail;
 }
 
-int IntVector_test(
-        const char *message, int *A, int *ExactA, int Ncols, double elapsedTime)
+int IntVector_test(const char *message, int *A, int *ExactA, int Ncols)
 {
     double error=0.0, relativeErr;
     double total=0.0;
     int fail=0, i;
 
     double *errorVector = vector_double_create(Ncols);
-
-    printf(HEADLINE "1 test from %s\n", message);
-
     for(i=0;i<Ncols;i++){
         errorVector[i] = A[i] - ExactA[i];
         error += fabs( errorVector[i] );
@@ -221,10 +198,7 @@ int IntVector_test(
         printf("Relative Err = %e\n", relativeErr);
         PrintIntVector("The input Vector =", A, Ncols);
         PrintIntVector("The exact Vector =", ExactA, Ncols);
-    }else{
-        printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
-
     vector_double_free(errorVector);
     return fail;
 }

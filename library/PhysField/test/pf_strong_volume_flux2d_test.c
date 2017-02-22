@@ -51,7 +51,7 @@ int phys_strong_volume_flux2d_test(physField *phys, int verbose){
     double clockT2 = MPI_Wtime();
 
     if(!phys->mesh->procid)
-        Vector_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np*Nfield*K, clockT2-clockT1);
+        Vector_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np*Nfield*K);
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
@@ -62,5 +62,9 @@ int phys_strong_volume_flux2d_test(physField *phys, int verbose){
         PrintVector2File(fp, "f_rhsQ", phys->f_rhsQ, Nfield*Np*k);
     }
 
+    const int procid = region->procid;
+    if(!procid) {
+        if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
+    }
     return fail;
 }
