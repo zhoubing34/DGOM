@@ -7,8 +7,7 @@
 #include "PhysField/pf_fetchBuffer.h"
 #include "pf_test.h"
 
-
-int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filename){
+int phys_nodeFetch_test(physField *phys, int verbose){
     // local variable
     int fail = 0;
 
@@ -33,14 +32,11 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
     int sk = 0;
     for(k=0;k<K;k++){
         for(i=0;i<Np;i++){
-            phys->f_Q[sk++] = region->x[k][i];
-            phys->f_Q[sk++] = region->y[k][i];
-        }
-    }
+            phys->f_Q[sk] = region->x[k][i];
+            phys->f_ext[sk] = phys->f_Q[sk];
+            sk++;
 
-    sk = 0;
-    for(k=0;k<K;k++){
-        for(i=0;i<Np*phys->Nfield;i++){
+            phys->f_Q[sk] = region->y[k][i];
             phys->f_ext[sk] = phys->f_Q[sk];
             sk++;
         }
@@ -61,8 +57,6 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
     MPI_Waitall(Nmess, mpi_send_requests, instatus);
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
-//    printf("procid=%d, finish MPI_Waitall\n", mesh->procid);
-
     sk = 0;
     for(k=0;k<K;k++){
         int surfid = k*phys->Nsurfinfo*Nfp*Nfaces;
@@ -73,12 +67,6 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
             int bsType = (int)phys->surfinfo[surfid++];
             surfid++;
             surfid++;
-
-#if 0
-            if(mesh->procid)
-                printf("p=%d, k=%d, i=%d, bcType=%d, idM=%d, idP=%d\n",mesh->procid, k,i,bsType,idM,idP);
-#endif
-
             xM[sk] = phys->f_Q[idM++];
             yM[sk] = phys->f_Q[idM++];
 
@@ -100,15 +88,13 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
         }
     }
 
-//    printf("procid=%d, finish xP,yP assignment\n", mesh->procid);
-
     if(!mesh->procid) {
-        fail = Vector_test(message, xM, xP, Nnode, (clockT2 - clockT1));
-        fail = Vector_test(message, yM, yP, Nnode, (clockT2 - clockT1));
+        fail = Vector_test(__FUNCTION__, xM, xP, Nnode, (clockT2 - clockT1));
+        fail = Vector_test(__FUNCTION__, yM, yP, Nnode, (clockT2 - clockT1));
     }
 
     if(verbose){
-        FILE *fp = CreateLog(filename, mesh->procid, mesh->nprocs);
+        FILE *fp = CreateLog(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
         fprintf(fp, "dim = %d\n", phys->dim);
         fprintf(fp, "Nsurfinfo = %d\n", phys->Nsurfinfo);
@@ -122,8 +108,6 @@ int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filen
         PrintVector2File(fp, "yP", yP, Nnode);
         fclose(fp);
     }
-
-//    printf("step out phys_nodeFetch_test\n");
 
     return fail;
 }

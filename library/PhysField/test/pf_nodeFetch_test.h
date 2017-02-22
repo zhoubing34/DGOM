@@ -7,6 +7,6 @@
 
 #include "pf_test.h"
 
-int phys_nodeFetch_test(physField *phys, int verbose, char *message, char *filename);
+int phys_nodeFetch_test(physField *phys, int verbose);
 
 #endif //DGOM_NODEFETCH_TEST_H

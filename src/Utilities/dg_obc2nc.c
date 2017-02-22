@@ -110,7 +110,7 @@ nc_file * create_ncfile(char *file_name){
     /* creating dimensions */
     nc_dim *nfld = nc_dim_create("Nfield", Nfield);
     nc_dim *nv = nc_dim_create("Nv", Nv);
-    nc_dim *nt = nc_dim_create("time", 0);
+    nc_dim *nt = nc_dim_create("Nt", 0);
     /* creating variables */
     int ndim = 3;
     nc_dim **dimarray = (nc_dim**) calloc(ndim, sizeof(nc_dim*));
@@ -118,7 +118,7 @@ nc_file * create_ncfile(char *file_name){
     dimarray[1] = nv;
     dimarray[2] = nfld; /* the inner loop dimension comes the last */
     nc_var *time = nc_var_create("time", 1, dimarray, NC_DOUBLE);
-    nc_var *vert = nc_var_create("vert", 1, dimarray+1, NC_DOUBLE);
+    nc_var *vert = nc_var_create("vert", 1, dimarray+1, NC_INT);
     nc_var *data = nc_var_create("obc", 3, dimarray, NC_DOUBLE);
     /* creating nc files */
     int nvar = 3;

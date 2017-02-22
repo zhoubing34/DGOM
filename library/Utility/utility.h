@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <float.h>
 #include "pnetcdf.h"
 
 /* float type */
@@ -24,6 +25,7 @@ typedef float real; ///> user defined float type
 
 /* max character length */
 #define MAX_NAME_LENGTH 1024
+#define EPS 100*DBL_EPSILON
 
 /* string to int */
 void str2int(char *str, int *N, char* errmessage);

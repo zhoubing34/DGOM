@@ -5,7 +5,7 @@
 #include "pf_cellMean_test.h"
 #include "PhysField/pf_cellMean.h"
 
-int phys_cellMean_test(physField *phys, int verbose, char *message, char *filename){
+int phys_cellMean_test(physField *phys, int verbose){
 
     // local variable
     int fail = 0;
@@ -32,7 +32,7 @@ int phys_cellMean_test(physField *phys, int verbose, char *message, char *filena
     clockT2 = MPI_Wtime();
 
     if(verbose) {
-        FILE *fp = CreateLog(filename, mesh->procid, mesh->nprocs);
+        FILE *fp = CreateLog(__FUNCTION__, mesh->procid, mesh->nprocs);
         PrintVector2File(fp, "f_Q", phys->f_Q, K*Np*phys->Nfield);
         PrintVector2File(fp, "c_Q", phys->c_Q, K*phys->Nfield);
         fclose(fp);

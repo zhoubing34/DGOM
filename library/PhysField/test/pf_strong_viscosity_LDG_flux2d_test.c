@@ -9,7 +9,7 @@
 #include "PhysField/pf_add_LDG_solver.h"
 #include "PhysField/pf_fetchBuffer.h"
 
-int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose, char *message, char *filename){
+int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose){
     int fail = 0;
     extern int Nfield;
 
@@ -65,13 +65,13 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose, char *me
     pf_strong_viscosity_LDG_flux2d(phys, NULL, NULL, 0, 0, 0);
 
     if(!phys->mesh->procid){
-        Vector_test(message, phys->viscosity->px_Q, px_ext, Np*Nfield*K, clockT2-clockT1);
-        Vector_test(message, phys->viscosity->py_Q, py_ext, Np*Nfield*K, clockT2-clockT1);
-        Vector_test(message, phys->f_rhsQ, rhs_ext, Np*Nfield*K, clockT2-clockT1);
+        Vector_test(__FUNCTION__, phys->viscosity->px_Q, px_ext, Np*Nfield*K, clockT2-clockT1);
+        Vector_test(__FUNCTION__, phys->viscosity->py_Q, py_ext, Np*Nfield*K, clockT2-clockT1);
+        Vector_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np*Nfield*K, clockT2-clockT1);
     }
 
     if(verbose){
-        FILE *fp = CreateLog(filename, mesh->procid, mesh->nprocs);
+        FILE *fp = CreateLog(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "K = %d\n", phys->grid->K);
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
         fprintf(fp, "Np = %d\n", phys->cell->Np);

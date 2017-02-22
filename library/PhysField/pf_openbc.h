@@ -6,7 +6,7 @@
 #define DGOM_PF_OPENBC_H
 
 typedef enum{
-    linear=0
+    time_interp_linear=0
 } time_interp_method;
 #include "pf_phys.h"
 

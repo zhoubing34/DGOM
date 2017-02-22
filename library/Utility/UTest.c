@@ -33,7 +33,6 @@ void UTest_Command(int argc, char** argv, int *ishelp, int *isverbose){
     return;
 }
 
-
 /**
  * @brief
  * Compare Matrix variable with exact solution
@@ -48,10 +47,9 @@ void UTest_Command(int argc, char** argv, int *ishelp, int *isverbose){
  * -------- |----------|----------------------
  * fail  | int      | 0 - success; 1 - fail
  */
-int IntMatrix_test(char *message,
-                   int **A, int **ExactA,
-                   int Nrows, int Ncols,
-                   double elapsedTime) {
+int IntMatrix_test
+        (const char *message, int **A, int **ExactA, int Nrows, int Ncols, double elapsedTime)
+{
 
     double error=0.0, relativeErr;
     double total=0.0;
@@ -99,11 +97,10 @@ int IntMatrix_test(char *message,
  * -------- |----------|----------------------
  * fail  | int      | 0 - success; 1 - fail
  */
-int Matrix_test(char *message,
-                double **A, double **ExactA,
-                int Nrows, int Ncols,
-                double elapsedTime){
-
+int Matrix_test
+        (const char *message, double **A, double **ExactA, int Nrows, int Ncols,
+         double elapsedTime)
+{
     double error=0.0, relativeErr;
     double total=0.0;
     int fail=0, i, j;
@@ -158,9 +155,10 @@ int Matrix_test(char *message,
  * -------- |----------|----------------------
  * success  | int      | 0 - success; 1 - fail
  */
-int Vector_test(char *message,
-                double *A, double *ExactA, int Ncols,
-                double elapsedTime){
+int Vector_test(
+        const char *message, double *A, double *ExactA, int Ncols,
+        double elapsedTime)
+{
 
     double error=0.0, relativeErr;
     double total=0.0;
@@ -185,8 +183,8 @@ int Vector_test(char *message,
         printf("Total    Err = %f\n", error);
         printf("Total        = %f\n", total);
         printf("Relative Err = %e\n", relativeErr);
-        PrintVector_test("The input Vector =", A, Ncols);
-        PrintVector_test("The exact Vector =", ExactA, Ncols);
+        PrintVector("The input Vector =", A, Ncols);
+        PrintVector("The exact Vector =", ExactA, Ncols);
     }else{
         printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
@@ -195,11 +193,9 @@ int Vector_test(char *message,
     return fail;
 }
 
-int IntVector_test(char *message,
-                    int *A, int *ExactA,
-                    int Ncols,
-                    double elapsedTime){
-
+int IntVector_test(
+        const char *message, int *A, int *ExactA, int Ncols, double elapsedTime)
+{
     double error=0.0, relativeErr;
     double total=0.0;
     int fail=0, i;
@@ -223,8 +219,8 @@ int IntVector_test(char *message,
         printf("Total    Err = %f\n", error);
         printf("Total        = %f\n", total);
         printf("Relative Err = %e\n", relativeErr);
-        PrintIntVector_test("The input Vector =", A, Ncols);
-        PrintIntVector_test("The exact Vector =", ExactA, Ncols);
+        PrintIntVector("The input Vector =", A, Ncols);
+        PrintIntVector("The exact Vector =", ExactA, Ncols);
     }else{
         printf(HEADPASS "1 test passed from %s (%f sec)\n", message, elapsedTime);
     }
@@ -233,7 +229,9 @@ int IntVector_test(char *message,
     return fail;
 }
 
-/* @brief marco for print vector */
+/**
+ * @brief marco to print vector value
+ * */
 #define _PRINT_VECTOR(message, Ncol, fmt, A) do{\
     int _dim1;\
     printf("%s\n", message);\
@@ -242,14 +240,22 @@ int IntVector_test(char *message,
     printf("\n");\
 }while(0)
 
-void PrintVector_test(char *message, double *A, int Ncols){
+/**
+ * @brief print vector of double type
+ * @param message message heading
+ * @param A vector
+ * @param Ncols vector length
+ */
+void PrintVector(char *message, double *A, int Ncols){
     _PRINT_VECTOR(message, Ncols, " %e ", A);
 }
-void PrintIntVector_test(char *message, int *A, int Ncols){
+void PrintIntVector(char *message, int *A, int Ncols){
     _PRINT_VECTOR(message, Ncols, " %d ", A);
 }
 
-/* @brief macros for print matrix */
+/**
+ * @brief macros to print matrix
+ * */
 #define _PRINT_MATRIX(message, Nrow, Ncol, fmt, A) do{\
     int _dim1, _dim2;\
     printf("%s\n", message);\
@@ -268,7 +274,9 @@ void PrintIntMatrix_test(char *message, int **A, int Nrows, int Ncols){
 }
 
 
-/* @brief macros for write matrix to file */
+/**
+ * @brief macros for write matrix to file
+ * */
 #define _WRITE_MATRIX(fp, message, Nrow, Ncol, fmt, A) do{\
     int _dim1, _dim2;\
     fprintf(fp, "%s=\n", message);\
@@ -287,7 +295,9 @@ void PrintMatrix2File(FILE *fp, char *message, double **Mat, int row, int col){
     _WRITE_MATRIX(fp, message, row, col, " %f, ", Mat);
 }
 
-/* @brief marco for write vector to file */
+/**
+ * @brief marco for write vector to file
+ * */
 #define _WRITE_VECTOR(fp, message, Ncol, fmt, A) do{\
     int _dim1;\
     fprintf(fp, "%s=\n", message);\
@@ -310,27 +320,24 @@ void PrintVector2File(FILE *fp, char *message, double *Mat, int len){
  * @param[in] funname   Function name
  * @param[in] rank      Index of local process
  * @param[in] nprocs    Number of process
- *
  * @return fig file handle of log file.
- *
  */
-FILE* CreateLog(char *funname, int rank, int nprocs){
+FILE* CreateLog(const char *funname, int rank, int nprocs){
 
 #ifndef DSET_NAME_LEN
 #define DSET_NAME_LEN 1024
 #endif
-
     int ret;
     char filename[DSET_NAME_LEN];
 
     ret = snprintf(filename, DSET_NAME_LEN, "%s%d-%d.txt", funname, rank, nprocs);
     if (ret >= DSET_NAME_LEN) {
-        fprintf(stderr, "name too long \n");
+        fprintf(stderr, "%s (%s): %d\nthe function name %s is too long \n",
+                __FUNCTION__, __FILE__, __LINE__, funname);
         exit(-1);
     }
 
 #undef DSET_NAME_LEN
     FILE *fig = fopen(filename, "w+");
-
     return fig;
 }

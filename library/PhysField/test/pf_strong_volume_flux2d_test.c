@@ -20,7 +20,7 @@ static int nodal_flux(real *var, real *Eflux, real *Gflux){
     return 0;
 }
 
-int phys_strong_volume_flux2d_test(physField *phys, int verbose, char *message, char *filename){
+int phys_strong_volume_flux2d_test(physField *phys, int verbose){
     int fail = 0;
     extern int Nfield;
 
@@ -51,10 +51,10 @@ int phys_strong_volume_flux2d_test(physField *phys, int verbose, char *message, 
     double clockT2 = MPI_Wtime();
 
     if(!phys->mesh->procid)
-        Vector_test(message, phys->f_rhsQ, rhs_ext, Np*Nfield*K, clockT2-clockT1);
+        Vector_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np*Nfield*K, clockT2-clockT1);
 
     if(verbose){
-        FILE *fp = CreateLog(filename, mesh->procid, mesh->nprocs);
+        FILE *fp = CreateLog(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "K = %d\n", phys->grid->K);
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
         fprintf(fp, "Np = %d\n", phys->cell->Np);

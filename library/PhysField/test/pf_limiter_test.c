@@ -5,7 +5,7 @@
 #include "pf_limiter_test.h"
 #include "PhysField/pf_limiter.h"
 
-int phys_limiter_test(physField *phys, int verbose, char *message, char *filename){
+int phys_limiter_test(physField *phys, int verbose){
 
     int fail = 0;
 
@@ -18,21 +18,18 @@ int phys_limiter_test(physField *phys, int verbose, char *message, char *filenam
     int sk = 0;
     for(k=0;k<K;k++){
         for(i=0;i<Np;i++){
-            phys->f_Q[sk++] =      region->x[k][i];
-            phys->f_Q[sk++] =     (region->y[k][i]);
+            phys->f_Q[sk++] = region->x[k][i];
+            phys->f_Q[sk++] = region->y[k][i];
         }
     }
 
     double clockT1, clockT2;
     clockT1 = MPI_Wtime();
-    printf("step into pf_limiter_test\n");
     pf_slloc2d(phys, 1.0);
     clockT2 = MPI_Wtime();
 
     if(verbose) {
-        FILE *fp = CreateLog(filename, phys->mesh->procid, phys->mesh->nprocs);
-//        PrintVector2File(fp, "x", region->x[0], K*Np);
-//        PrintVector2File(fp, "y", region->y[0], K*Np);
+        FILE *fp = CreateLog(__FUNCTION__, phys->mesh->procid, phys->mesh->nprocs);
         PrintVector2File(fp, "f_Q", phys->f_Q, K*Np*phys->Nfield);
         PrintVector2File(fp, "c_Q", phys->c_Q, K*phys->Nfield);
         fclose(fp);

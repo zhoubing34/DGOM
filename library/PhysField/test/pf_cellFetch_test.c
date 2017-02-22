@@ -8,7 +8,7 @@
 #include "PhysField/pf_fetchBuffer.h"
 
 
-int phys_cellFetch_test(physField *phys, int verbose, char *message, char *filename){
+int phys_cellFetch_test(physField *phys, int verbose){
     int fail = 0;
 
     geoGrid *grid = phys->grid;
@@ -60,10 +60,10 @@ int phys_cellFetch_test(physField *phys, int verbose, char *message, char *filen
     }
 
     if(!procid)
-        fail = Vector_test(message, par_coor, phys->c_inQ, phys->parallCellNum, 0);
+        fail = Vector_test(__FUNCTION__, par_coor, phys->c_inQ, phys->parallCellNum, 0);
 
     if(verbose){
-        FILE *fp = CreateLog(filename, mesh->procid, mesh->nprocs);
+        FILE *fp = CreateLog(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "parallCellNum = %d\n", phys->parallCellNum);
         PrintIntVector2File(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->faceIndexIn", mesh->faceIndexIn, mesh->parallCellNum);

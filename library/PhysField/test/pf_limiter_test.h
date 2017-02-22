@@ -6,6 +6,6 @@
 #define DGOM_PHYS_LIMITER_TEST_H
 
 #include "pf_test.h"
-int phys_limiter_test(physField *phys, int verbose, char *message, char *filename);
+int phys_limiter_test(physField *phys, int verbose);
 
 #endif //DGOM_PHYS_LIMITER_TEST_H

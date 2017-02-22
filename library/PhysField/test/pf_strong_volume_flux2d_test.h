@@ -6,6 +6,6 @@
 #define DGOM_PHYS_STRONG_VOLUME_FLUX2D_TEST_H
 
 #include "PhysField/pf_phys.h"
-int phys_strong_volume_flux2d_test(physField *phys, int verbose, char *message, char *filename);
+int phys_strong_volume_flux2d_test(physField *phys, int verbose);
 
 #endif //DGOM_PHYS_STRONG_VOLUME_FLUX2D_TEST_H

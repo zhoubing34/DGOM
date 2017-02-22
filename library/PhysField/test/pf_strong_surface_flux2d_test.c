@@ -25,7 +25,7 @@ static int numerical_flux(real nx, real ny, real *varM, real *varP, real *Fhs){
     return 0;
 }
 
-int phys_strong_surface_flux2d_test(physField *phys, int verbose, char *message, char *filename){
+int phys_strong_surface_flux2d_test(physField *phys, int verbose){
     int fail = 0;
 
     parallMesh *mesh = phys->mesh;
@@ -55,7 +55,7 @@ int phys_strong_surface_flux2d_test(physField *phys, int verbose, char *message,
     double clockT2 = MPI_Wtime();
 
     if(verbose){
-        FILE *fp = CreateLog(filename, mesh->procid, mesh->nprocs);
+        FILE *fp = CreateLog(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "K = %d\n", phys->grid->K);
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
         fprintf(fp, "Np = %d\n", phys->cell->Np);
