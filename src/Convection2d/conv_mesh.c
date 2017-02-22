@@ -39,7 +39,7 @@ parallMesh* conv_mesh(stdCell *shape){
     int **SFToV = matrix_int_create(Nsurf, 3);
     conv_setOBC(indicator, SFToV);
 
-    mr_mesh_addBoundary2d(mesh, Nsurf, SFToV);
+    mr_mesh_add_bc2d(mesh, Nsurf, SFToV);
 
     matrix_int_free(SFToV);
 

@@ -29,7 +29,7 @@ int phys_limiter_test(physField *phys, int verbose){
     clockT2 = MPI_Wtime();
 
     if(verbose) {
-        FILE *fp = CreateLog(__FUNCTION__, phys->mesh->procid, phys->mesh->nprocs);
+        FILE *fp = create_log(__FUNCTION__, phys->mesh->procid, phys->mesh->nprocs);
         PrintVector2File(fp, "f_Q", phys->f_Q, K*Np*phys->Nfield);
         PrintVector2File(fp, "c_Q", phys->c_Q, K*phys->Nfield);
         fclose(fp);

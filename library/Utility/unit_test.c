@@ -4,7 +4,7 @@
  * @author li12242, Tianjin University, li12242@tju.edu.cn
  */
 
-#include "UTest.h"
+#include "unit_test.h"
 
 #define _TOTAL_ERR 1.0e-6
 #define _RELATIVE_EER 1.0e-8
@@ -322,7 +322,7 @@ void PrintVector2File(FILE *fp, char *message, double *Mat, int len){
  * @param[in] nprocs    Number of process
  * @return fig file handle of log file.
  */
-FILE* CreateLog(const char *funname, int rank, int nprocs){
+FILE* create_log(const char *funname, int rank, int nprocs){
 
 #ifndef DSET_NAME_LEN
 #define DSET_NAME_LEN 1024

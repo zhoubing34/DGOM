@@ -2,105 +2,79 @@
 // Created by li12242 on 12/19/16.
 //
 
-#include <MultiRegions/mr_reg.h>
-#include "MultiRegions/mr_grid_create.h"
-#include "Utility/UTest.h"
+#include "mr_reg_test.h"
 
-static int mr_triRegion_test(multiReg *reg, double dt, int verbose);
-static int mr_quadRegion_test(multiReg *reg, double dt, int verbose);
-
-int mr_reg_test(int verbose){
-    int fail = 0, N = 2;
-
-    extern int Mx, My;
-
-    double clockT1, clockT2;
-
-    /* triangle regions */
-    stdCell *shape = sc_create(N, TRIANGLE);
-    geoGrid *grid = mr_grid_create_uniform_tri(shape, Mx, My, -1, 1, -1, 1, 1);
-    clockT1 = MPI_Wtime();
-    multiReg *region = mr_reg_create(grid);
-    clockT2 = MPI_Wtime();
-
-    fail = mr_triRegion_test(region, clockT2 - clockT1, verbose);
-
-    /* free memory */
-    sc_free(shape);
-    mr_grid_free(grid);
-    mr_reg_free(region);
-
-    /* quadrilateral regions */
-    shape = sc_create(N, QUADRIL);
-    grid = mr_grid_create_uniform_quad(shape, Mx, My, -1, 1, -1, 1);
-    clockT1 = MPI_Wtime();
-    region = mr_reg_create(grid);
-    clockT2 = MPI_Wtime();
-
-    fail = mr_quadRegion_test(region, clockT2 - clockT1, verbose);
-
-    /* free memory */
-    sc_free(shape);
-    mr_grid_free(grid);
-    mr_reg_free(region);
-
-    return fail;
-}
-
-static int mr_triRegion_test(multiReg *reg, double dt, int verbose){
-
+/**
+ * @brief print the node coordinate
+ * @param reg
+ * @param verbose
+ * @return
+ */
+int mr_reg_node_test(multiReg *reg, int verbose){
     int fail = 0;
-    geoGrid *grid = reg->grid;
-
-    const int K = grid->K;
-    const int Np = grid->cell->Np;
-    const int Nfaces = grid->cell->Nfaces;
-
-
+    const int K = reg->grid->K;
+    const int Np = reg->grid->cell->Np;
     if(verbose){
-        /* gen log filename */
-        char casename[32] = "mr_triRegion_test";
-        FILE *fp = CreateLog(casename, reg->procid, reg->nprocs);
-
-        PrintMatrix2File(fp, "triReg->x", reg->x, K, Np);
-        PrintMatrix2File(fp, "triReg->y", reg->y, K, Np);
-        PrintMatrix2File(fp, "triReg->drdx", reg->drdx, K, Np);
-        PrintMatrix2File(fp, "triReg->drdy", reg->drdy, K, Np);
-        PrintMatrix2File(fp, "triReg->dsdx", reg->dsdx, K, Np);
-        PrintMatrix2File(fp, "triReg->dsdy", reg->dsdy, K, Np);
-        PrintMatrix2File(fp, "triReg->J", reg->J, K, Np);
-        PrintMatrix2File(fp, "triReg->nx", reg->nx, K, Nfaces);
-        PrintMatrix2File(fp, "triReg->ny", reg->ny, K, Nfaces);
+        FILE *fp = create_log(__FUNCTION__, reg->procid, reg->nprocs);
+        PrintMatrix2File(fp, "region->x", reg->x, K, Np);
+        PrintMatrix2File(fp, "region->y", reg->y, K, Np);
         fclose(fp);
     }
-
     return fail;
 }
-
-static int mr_quadRegion_test(multiReg *reg, double dt, int verbose){
-
+/**
+ * @brief print the volume factors
+ * @param reg
+ * @param verbose
+ * @return
+ */
+int mr_reg_volume_factor_test(multiReg *reg, int verbose){
     int fail = 0;
-    geoGrid *grid = reg->grid;
-
-    const int K = grid->K;
-    const int Np = grid->cell->Np;
-    const int Nfaces = grid->cell->Nfaces;
-
-
+    const int K = reg->grid->K;
+    const int Np = reg->grid->cell->Np;
     if(verbose){
-        /* gen log filename */
-        char casename[32] = "mr_quadRegion_test";
-        FILE *fp = CreateLog(casename, reg->procid, reg->nprocs);
-
-        PrintMatrix2File(fp, "quadReg->x", reg->x, grid->K, reg->cell->Np);
-        PrintMatrix2File(fp, "quadReg->y", reg->y, grid->K, reg->cell->Np);
-        PrintMatrix2File(fp, "triReg->drdx", reg->drdx, K, Np);
-        PrintMatrix2File(fp, "triReg->drdy", reg->drdy, K, Np);
-        PrintMatrix2File(fp, "triReg->dsdx", reg->dsdx, K, Np);
-        PrintMatrix2File(fp, "triReg->dsdy", reg->dsdy, K, Np);
-        PrintMatrix2File(fp, "triReg->J", reg->J, K, Np);
-        PrintMatrix2File(fp, "triReg->nx", reg->nx, K, Nfaces);
-        PrintMatrix2File(fp, "triReg->ny", reg->ny, K, Nfaces);
+        FILE *fp = create_log(__FUNCTION__, reg->procid, reg->nprocs);
+        PrintMatrix2File(fp, "region->drdx", reg->drdx, K, Np);
+        PrintMatrix2File(fp, "region->drdy", reg->drdy, K, Np);
+        PrintMatrix2File(fp, "region->dsdx", reg->dsdx, K, Np);
+        PrintMatrix2File(fp, "region->dsdy", reg->dsdy, K, Np);
+        PrintMatrix2File(fp, "region->J", reg->J, K, Np);
+        fclose(fp);
+    }
+    return fail;
+}
+/**
+ * @brief print the face factors
+ * @param reg
+ * @param verbose
+ * @return
+ */
+int mr_reg_face_factor_test(multiReg *reg, int verbose){
+    int fail = 0;
+    const int K = reg->grid->K;
+    const int Nfaces = reg->grid->cell->Nfaces;
+    if(verbose){
+        FILE *fp = create_log(__FUNCTION__, reg->procid, reg->nprocs);
+        PrintMatrix2File(fp, "region->nx", reg->nx, K, Nfaces);
+        PrintMatrix2File(fp, "region->ny", reg->ny, K, Nfaces);
+        PrintMatrix2File(fp, "region->sJ", reg->sJ, K, Nfaces);
+        fclose(fp);
+    }
+    return fail;
+}
+/**
+ * @brief print the length scale of regions
+ * @param reg
+ * @param verbose
+ * @return
+ */
+int mr_reg_scale_test(multiReg *reg, int verbose){
+    int fail = 0;
+    const int K = reg->grid->K;
+    if(verbose){
+        FILE *fp = create_log(__FUNCTION__, reg->procid, reg->nprocs);
+        PrintVector2File(fp, "region->len", reg->len, K);
+        PrintVector2File(fp, "region->size", reg->size, K);
         fclose(fp);
     }
     return fail;

@@ -14,10 +14,6 @@
 static int count_unique_integer(int len, int *list);
 /* sort numbers from small to large */
 static int mr_mesh_cmp(const void *a, const void *b);
-/* create open boundary vertex list */
-static mr_vertlist* mr_vertList2d_create(int Nsurf, int **SFToV, int typeid);
-/* free vertex list */
-static void mr_vertList2d_free(mr_vertlist *);
 
 /* find the boundary type id, in bcTypeList */
 #define _surfTypeId(mesh, ind, typeid) do{\
@@ -52,7 +48,7 @@ void mr_mesh_read_bcfile2d(parallMesh *mesh, char *casename){
             SFToV[n][0] -= 1;
             SFToV[n][1] -= 1; // change to C type
         }
-        mr_mesh_addBoundary2d(mesh, Nsurf, SFToV);
+        mr_mesh_add_bc2d(mesh, Nsurf, SFToV);
 #if DEBUG
         PrintIntMatrix2File(fh, "SFToV", SFToV, Nsurf, 3);
         PrintIntMatrix2File(fh, "ETBS", mesh->EToBS, mesh->grid->K, mesh->cell->Nfaces);
@@ -60,7 +56,7 @@ void mr_mesh_read_bcfile2d(parallMesh *mesh, char *casename){
 #endif
         matrix_int_free(SFToV);
     }else{
-        mr_mesh_addBoundary2d(mesh, Nsurf, NULL);
+        mr_mesh_add_bc2d(mesh, Nsurf, NULL);
     }
     fclose(fp);
     return;
@@ -77,7 +73,7 @@ void mr_mesh_read_bcfile2d(parallMesh *mesh, char *casename){
  * @param[in] Nsurf number of surface
  * @param[in] SFToV surface to vertex list
  */
-void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
+void mr_mesh_add_bc2d(parallMesh *mesh, int Nsurf, int **SFToV){
     int k,f1,f2;
 
     const int K = mesh->grid->K;
@@ -174,7 +170,7 @@ void mr_mesh_addBoundary2d(parallMesh *mesh, int Nsurf, int **SFToV){
 /**
  * @brief delete the boundary relative properties
  */
-void mr_mesh_deleteBoundary2d(parallMesh *mesh){
+void mr_mesh_del_bc2d(parallMesh *mesh){
     matrix_int_free(mesh->EToBS);
     vector_int_free(mesh->bcind);
     vector_int_free(mesh->obcind);
@@ -187,9 +183,9 @@ static int mr_mesh_cmp(const void *a, const void *b){
 
 /**
  * @brief count the number of uique elements in an array
- * @param [in]     len length of the array
- * @param [in,out] list array of integer
- * @param [out]    n number of unique elements
+ * @param len length of the array
+ * @param list array of integer
+ * @return n number of unique elements
  */
 static int count_unique_integer(int len, int *list){
 

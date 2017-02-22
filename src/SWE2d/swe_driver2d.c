@@ -66,7 +66,7 @@ static void swe_finalize(swe_solver *solver){
     sc_free(solver->phys->cell);
     mr_grid_free(solver->phys->grid);
     mr_reg_free(solver->phys->region);
-    mr_mesh_deleteBoundary2d(solver->phys->mesh);
+    mr_mesh_del_bc2d(solver->phys->mesh);
     mr_mesh_free(solver->phys->mesh);
     pf_free(solver->phys);
 

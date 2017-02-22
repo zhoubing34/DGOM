@@ -31,7 +31,7 @@ physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
     }
     multiReg *region = mr_reg_create(grid);
     parallMesh *mesh = mr_mesh_create(region);
-    mr_mesh_addBoundary2d(mesh, 0, NULL);
+    mr_mesh_add_bc2d(mesh, 0, NULL);
 
     /* add boundary condition */
     physField *phys = pf_create(3, mesh);

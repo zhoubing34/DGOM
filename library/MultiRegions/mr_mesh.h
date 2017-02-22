@@ -15,13 +15,6 @@ typedef enum {
     OPENBS   // 4-open boundary
 } mr_surfType;
 
-/* vertex index list for open boundaries */
-typedef struct{
-    int Nv; ///< number of vertex
-    int *list; ///< index list
-} mr_vertlist;
-
-
 typedef struct {
 
     int dim; ///< dimension
@@ -52,7 +45,7 @@ typedef struct {
 
     /* boudary condition */
     int **EToBS; ///< adjacent face type of each cell
-    int Nbc; ///< number of all boundary surface
+    int Nbc; ///< number of boundary surface (except INNERLOC and INNERBS)
     int *bcind; ///< array of boundary type indicators
     int Nobc;    ///< number of open boundary surface
     int *obcind; ///< array of open boundary type indicators

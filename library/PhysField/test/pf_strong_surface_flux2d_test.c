@@ -55,7 +55,7 @@ int phys_strong_surface_flux2d_test(physField *phys, int verbose){
     double clockT2 = MPI_Wtime();
 
     if(verbose){
-        FILE *fp = CreateLog(__FUNCTION__, mesh->procid, mesh->nprocs);
+        FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "K = %d\n", phys->grid->K);
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
         fprintf(fp, "Np = %d\n", phys->cell->Np);

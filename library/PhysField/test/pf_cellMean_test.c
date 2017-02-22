@@ -32,7 +32,7 @@ int phys_cellMean_test(physField *phys, int verbose){
     clockT2 = MPI_Wtime();
 
     if(verbose) {
-        FILE *fp = CreateLog(__FUNCTION__, mesh->procid, mesh->nprocs);
+        FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
         PrintVector2File(fp, "f_Q", phys->f_Q, K*Np*phys->Nfield);
         PrintVector2File(fp, "c_Q", phys->c_Q, K*phys->Nfield);
         fclose(fp);

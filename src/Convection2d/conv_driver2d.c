@@ -68,7 +68,7 @@ void conv_finalize(physField *phys){
 
     mr_grid_free(phys->grid);
     mr_reg_free(phys->region);
-    mr_mesh_deleteBoundary2d(phys->mesh);
+    mr_mesh_del_bc2d(phys->mesh);
     mr_mesh_free(phys->mesh);
     pf_free(phys);
     MPI_Finalize();

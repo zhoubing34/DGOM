@@ -5,6 +5,10 @@
 #ifndef DGOM_MR_REG_TEST_H
 #define DGOM_MR_REG_TEST_H
 
-int mr_reg_test(int verbose);
+#include "mr_test.h"
+int mr_reg_node_test(multiReg *reg, int verbose);
+int mr_reg_volume_factor_test(multiReg *reg, int verbose);
+int mr_reg_face_factor_test(multiReg *reg, int verbose);
+int mr_reg_scale_test(multiReg *reg, int verbose);
 
 #endif //DGOM_MR_REG_TEST_H

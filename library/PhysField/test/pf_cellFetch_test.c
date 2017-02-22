@@ -63,7 +63,7 @@ int phys_cellFetch_test(physField *phys, int verbose){
         fail = Vector_test(__FUNCTION__, par_coor, phys->c_inQ, phys->parallCellNum, 0);
 
     if(verbose){
-        FILE *fp = CreateLog(__FUNCTION__, mesh->procid, mesh->nprocs);
+        FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "parallCellNum = %d\n", phys->parallCellNum);
         PrintIntVector2File(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
         PrintIntVector2File(fp, "mesh->faceIndexIn", mesh->faceIndexIn, mesh->parallCellNum);

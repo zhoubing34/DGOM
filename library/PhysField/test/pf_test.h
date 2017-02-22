@@ -6,6 +6,6 @@
 #define DGOM_PHYSDOMAIN_TEST_H
 
 #include "PhysField/pf_phys.h"
-#include "Utility/UTest.h"
+#include "Utility/unit_test.h"
 
 #endif //DGOM_PHYSDOMAIN_TEST_H

@@ -4,7 +4,7 @@
 
 #include <string.h>
 #include "swe_read_command.h"
-#include "Utility/UTest.h"
+#include "Utility/unit_test.h"
 
 swe_command_type swe_read_command(int argc, char **argv){
 

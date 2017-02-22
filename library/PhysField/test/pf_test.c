@@ -2,7 +2,6 @@
 // Created by li12242 on 12/11/16.
 //
 
-
 #include "MultiRegions/mr_grid_create.h"
 #include "MultiRegions/mr_mesh_bc.h"
 #include "pf_test.h"
@@ -42,7 +41,7 @@ physField *uniform_tri_nobc_physfield(){
     geoGrid *tri_grid = mr_grid_create_uniform_tri(tri, Mx, My, xmin, xmax, ymin, ymax, type);
     multiReg *tri_region = mr_reg_create(tri_grid);
     parallMesh *tri_mesh = mr_mesh_create(tri_region);
-    mr_mesh_addBoundary2d(tri_mesh, 0, NULL);
+    mr_mesh_add_bc2d(tri_mesh, 0, NULL);
     physField *tri_phys = pf_create(Nfield, tri_mesh);
     return tri_phys;
 }
@@ -55,7 +54,7 @@ physField *uniform_quad_nobc_physfield(){
     geoGrid *quad_grid = mr_grid_create_uniform_quad(quad, Mx, My, xmin, xmax, ymin, ymax);
     multiReg *quad_region = mr_reg_create(quad_grid);
     parallMesh *quad_mesh = mr_mesh_create(quad_region);
-    mr_mesh_addBoundary2d(quad_mesh, 0, NULL);
+    mr_mesh_add_bc2d(quad_mesh, 0, NULL);
     physField *quad_phys = pf_create(Nfield, quad_mesh);
     return quad_phys;
 }
@@ -126,14 +125,14 @@ int main(int argc, char **argv){
         phys = phys_creator[n]();
         if(!procid){ printf(HEADLINE "%d test for physField[%d]\n", Ntest, n); }
 
-        int failNum=0;
+        int Nfail=0;
         for(m=0;m<Ntest;m++){
             tmp = phys_test_func[m](phys, isverbose);
-            if(tmp){ failNum++; }
+            if(tmp){ Nfail++; }
         }
         phys_nobc_free(phys);
-        if(failNum){
-            if(!procid){ printf(HEADEND "%d test failed for physField[%d]\n\n", failNum, n); }
+        if(Nfail){
+            if(!procid){ printf(HEADEND "%d test failed for physField[%d]\n\n", Nfail, n); }
         } else{
             if(!procid){ printf(HEADEND "%d test passed for physField[%d]\n\n", Ntest, n);}
         }

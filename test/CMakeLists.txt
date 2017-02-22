@@ -1,0 +1,1 @@
+install(DIRECTORY example DESTINATION test)

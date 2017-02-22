@@ -15,13 +15,10 @@
 
 /* set the surface information of physField object */
 static void phys_surfInfo2d(physField *phys);
-
 /* set the volume geometry information `vgeo` */
 static void phys_volumeInfo2d(physField *phys);
-
 /* permute the nodal buffers to send/recv */
 static void permuteNodalBuffer(physField *phys);
-
 /* permute the cell buffers to send/recv */
 static void permuteCellBuffer(physField *phys);
 
@@ -228,10 +225,9 @@ static void phys_surfInfo2d(physField *phys){
     phys->surfinfo = surfinfo;
 
     if( mesh->EToBS == NULL ){
-        fprintf(stderr, "phys_surfInfo2d(%s): %d\n "
-                "mesh->EToBS is not allocated, "
-                "please call mr_mesh_addBoundary to set surface types\n",
-                __FILE__, __LINE__);
+        fprintf(stderr, "%s(%s): %d\n "
+                "mesh->EToBS is not allocated, please set surface types\n",
+                __FUNCTION__,__FILE__, __LINE__);
     }
     for(k=0;k<K;++k){
 

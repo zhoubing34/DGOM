@@ -6,8 +6,8 @@ set(LIBUTILITIES_SOURCE
         mat_utils.c
         mat_arith.c
         mat_arith.h
-        UTest.h
-        UTest.c
+        unit_test.h
+        unit_test.c
         nc_library.c
         nc_library.h
         arg_section.c

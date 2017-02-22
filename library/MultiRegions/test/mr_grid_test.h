@@ -5,6 +5,10 @@
 #ifndef DGOM_MR_GRID_TEST_H
 #define DGOM_MR_GRID_TEST_H
 
-int mr_grid_test(int verbose);
+#include "mr_test.h"
+
+int mr_grid_Ktol_test(geoGrid *grid, int verbose);
+int mr_grid_EToV_test(geoGrid *grid, int verbose);
+int mr_grid_vertex_test(geoGrid *grid, int verbose);
 
 #endif //DGOM_MR_GRID_TEST_H

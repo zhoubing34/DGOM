@@ -94,7 +94,7 @@ int phys_nodeFetch_test(physField *phys, int verbose){
     }
 
     if(verbose){
-        FILE *fp = CreateLog(__FUNCTION__, mesh->procid, mesh->nprocs);
+        FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
         fprintf(fp, "dim = %d\n", phys->dim);
         fprintf(fp, "Nsurfinfo = %d\n", phys->Nsurfinfo);

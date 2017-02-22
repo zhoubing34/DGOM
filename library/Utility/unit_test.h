@@ -27,6 +27,6 @@ int Matrix_test(const char *message, double **A, double **ExactA, int Nrows, int
 int Vector_test(const char *message, double *A, double *ExactA, int Ncols, double elapsedTime);
 int IntVector_test(const char *message, int *A, int *ExactA, int Ncols, double elapsedTime);
 
-FILE* CreateLog(const char *funname, int nprocs, int rank);
+FILE* create_log(const char *funname, int nprocs, int rank);
 
 #endif //DGOM_UTEST_H

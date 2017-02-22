@@ -7,6 +7,6 @@
 
 #include "StandCell/sc_stdcell.h"
 #include "Utility/utility.h"
-#include "Utility/UTest.h"
+#include "Utility/unit_test.h"
 
 #endif //DGOM_STDREGIONS_TEST_H
