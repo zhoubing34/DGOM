@@ -4,6 +4,7 @@
 #include "swe_output.h"
 #include "PhysField/pf_limiter.h"
 #include "swe_rhs.h"
+#include "PhysField/pf_openbc.h"
 
 #define DEBUG 0
 
@@ -57,6 +58,7 @@ void swe_run(swe_solver *solver){
     int     INTRK, tstep=0;
     int     procid = phys->mesh->procid;
     double  time    = 0.0;
+    double  tloc = 0.0;
     double  ftime   = solver->ftime;
     double  dt;  /* delta time */
     /* save initial condition */
@@ -87,6 +89,7 @@ void swe_run(swe_solver *solver){
             const real fdt = (real)dt;
             const real fa = (real)rk4a[INTRK-1];
             const real fb = (real)rk4b[INTRK-1];
+            pf_set_openbc(phys, time+rk4c[INTRK-1]*dt, time_interp_linear);
             swe_rhs(solver, fa, fb, fdt);
             //swe_h2eta(solver);
             pf_slloc2d(phys, 1.0);

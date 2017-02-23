@@ -9,6 +9,17 @@
 #include "PhysField/pf_add_LDG_solver.h"
 #include "PhysField/pf_fetchBuffer.h"
 
+static int wall_func(real nx, real ny, real *varM, real *varP,
+              real *pxM, real *pxP, real *pyM, real *pyP){
+    varP[0] = varM[0];
+    varP[1] = varM[1];
+    pxP[0] = pxM[0];
+    pxP[1] = pxM[1];
+    pyP[0] = pyM[0];
+    pyP[1] = pyM[1];
+    return 0;
+}
+
 int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose){
     int fail = 0;
     extern int Nfield;
@@ -60,14 +71,14 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose){
     MPI_Waitall(Nmess, mpi_in_requests, instatus);
 
     double clockT1 = MPI_Wtime();
-    pf_strong_viscosity_LDG_flux2d(phys, NULL, NULL, 0, 0, 0);
+    pf_strong_viscosity_LDG_flux2d(phys, wall_func, wall_func, 0, 0, 0);
     double clockT2 = MPI_Wtime();
-    pf_strong_viscosity_LDG_flux2d(phys, NULL, NULL, 0, 0, 0);
+    pf_strong_viscosity_LDG_flux2d(phys, wall_func, wall_func, 0, 0, 0);
 
     if(!phys->mesh->procid){
-        Vector_test(__FUNCTION__, phys->viscosity->px_Q, px_ext, Np*Nfield*K);
-        Vector_test(__FUNCTION__, phys->viscosity->py_Q, py_ext, Np*Nfield*K);
-        Vector_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np*Nfield*K);
+        vector_double_test(__FUNCTION__, phys->viscosity->px_Q, px_ext, Np * Nfield * K);
+        vector_double_test(__FUNCTION__, phys->viscosity->py_Q, py_ext, Np * Nfield * K);
+        vector_double_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np * Nfield * K);
     }
 
     if(verbose){

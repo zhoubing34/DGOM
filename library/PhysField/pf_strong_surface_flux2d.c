@@ -2,7 +2,6 @@
 // Created by li12242 on 12/27/16.
 //
 
-#include <StandCell/sc_stdcell.h>
 #include "pf_strong_surface_flux2d.h"
 
 #define DEBUG 0

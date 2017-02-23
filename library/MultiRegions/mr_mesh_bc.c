@@ -49,6 +49,18 @@ void mr_mesh_read_bcfile2d(parallMesh *mesh, char *casename){
             SFToV[n][1] -= 1; // change to C type
         }
         mr_mesh_add_bc2d(mesh, Nsurf, SFToV);
+        int Nobc = mesh->Nobc;
+        mesh->obcfilename = (char**) calloc(Nobc, sizeof(char *));
+        for(n=0;n<Nobc;n++){
+            mesh->obcfilename[n] = (char*) calloc(MAX_NAME_LENGTH, sizeof(char));
+            int ind = mesh->obcind[n];
+            char indstr[20];
+            sprintf(indstr, "%d", ind);
+            strcpy(mesh->obcfilename[n], casename);
+            strcat(mesh->obcfilename[n], ".obc");
+            strcat(mesh->obcfilename[n], indstr);
+            strcat(mesh->obcfilename[n], ".nc");
+        }
 #if DEBUG
         PrintIntMatrix2File(fh, "SFToV", SFToV, Nsurf, 3);
         PrintIntMatrix2File(fh, "ETBS", mesh->EToBS, mesh->grid->K, mesh->cell->Nfaces);

@@ -11,6 +11,6 @@
 #include "PhysField/pf_phys.h"
 #include "PhysField/pf_fetchBuffer.h"
 #include "PhysField/pf_limiter.h"
-
+#include "PhysField/pf_openbc.h"
 
 #endif //DGOM_PHYSDOMAIN_TEST_H

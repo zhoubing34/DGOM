@@ -54,7 +54,7 @@ parallMesh *uniform_quad_mesh(){
  */
 parallMesh *user_set_tri_mesh(){
     stdCell *shape = sc_create(N, TRIANGLE);
-    char casename[] = "example/FlowOver3Bumps2d/tri/FlowOver3Bump";
+    char casename[] = "example/Rectangle/tri/Rectangle";
     geoGrid *grid = mr_grid_read_file2d(shape, casename);
     multiReg *region = mr_reg_create(grid);
     parallMesh *mesh = mr_mesh_create(region);

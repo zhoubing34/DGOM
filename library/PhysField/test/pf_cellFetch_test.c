@@ -56,7 +56,7 @@ int phys_cellFetch_test(physField *phys, int verbose){
     }
 
     if(!procid)
-        fail = Vector_test(__FUNCTION__, par_coor, phys->c_inQ, phys->parallCellNum);
+        fail = vector_double_test(__FUNCTION__, par_coor, phys->c_inQ, phys->parallCellNum);
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);

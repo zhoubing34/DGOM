@@ -49,6 +49,7 @@ typedef struct {
     int *bcind; ///< array of boundary type indicators
     int Nobc;    ///< number of open boundary surface
     int *obcind; ///< array of open boundary type indicators
+    char **obcfilename; ///< filename of open boundary files
 
 } parallMesh;
 

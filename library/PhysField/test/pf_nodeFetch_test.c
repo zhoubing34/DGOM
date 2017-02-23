@@ -89,8 +89,8 @@ int phys_nodeFetch_test(physField *phys, int verbose){
     }
 
     if(!mesh->procid) {
-        fail = Vector_test(__FUNCTION__, xM, xP, Nnode);
-        fail = Vector_test(__FUNCTION__, yM, yP, Nnode);
+        fail = vector_double_test(__FUNCTION__, xM, xP, Nnode);
+        fail = vector_double_test(__FUNCTION__, yM, yP, Nnode);
     }
 
     if(verbose){

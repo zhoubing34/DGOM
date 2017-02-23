@@ -25,6 +25,12 @@ static int numerical_flux(real nx, real ny, real *varM, real *varP, real *Fhs){
     return 0;
 }
 
+static int wall_func(real nx, real ny, real *varM, real *varP){
+    varP[0] = varM[0];
+    varP[1] = varM[1];
+    return 0;
+}
+
 int phys_strong_surface_flux2d_test(physField *phys, int verbose){
     int fail = 0;
 
@@ -50,7 +56,7 @@ int phys_strong_surface_flux2d_test(physField *phys, int verbose){
         }
     }
 
-    pf_strong_surface_flux2d(phys, NULL, NULL, nodal_flux, numerical_flux);
+    pf_strong_surface_flux2d(phys, wall_func, wall_func, nodal_flux, numerical_flux);
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);

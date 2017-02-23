@@ -6,7 +6,7 @@
 
 #include "unit_test.h"
 
-#define _TOTAL_ERR 1.0e-6
+#define _TOTAL_ERR 1.0e-10
 #define _RELATIVE_EER 1.0e-8
 
 /**
@@ -34,178 +34,121 @@ void UTest_Command(int argc, char** argv, int *ishelp, int *isverbose){
 }
 
 /**
- * @brief
- * Compare Matrix variable with exact solution
- *
- * @param [in]  message Test name
- * @param [in]  A
- * @param [in]  ExactA
- * @param [in]  Nrows
- * @param [in]  Ncols
+ * @brief Compare matrix with exact solution
+ * @param message
+ * @param A
+ * @param ExactA
+ * @param Nrows
+ * @param Ncols
  * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * fail  | int      | 0 - success; 1 - fail
  */
-int IntMatrix_test(const char *message, int **A, int **ExactA, int Nrows, int Ncols)
+int matrix_int_test(const char *message, int **A, int **ExactA, int Nrows, int Ncols)
 {
-
-    double error=0.0, relativeErr;
-    double total=0.0;
-    int fail=0, i, j;
-
-    double **errorMatrix = matrix_double_create(Nrows, Ncols);
+    int fail=0,i,j;
+    double tmp, abserr;
     for(i=0;i<Nrows;i++){
         for(j=0;j<Ncols;j++){
-            errorMatrix[i][j] = A[i][j] - ExactA[i][j];
-            error += fabs( errorMatrix[i][j] );
-            total += fabs( ExactA[i][j] );
+            tmp = A[i][j] - ExactA[i][j];
+            abserr = fabs( tmp );
+            if (abserr > _TOTAL_ERR){
+                fail = 1; // error flag
+                printf(HEADFAIL "1 test failed from %s\n", message);
+                printf("element [%d, %d] = %d is different from the exact value %d\n",
+                       i, j, A[i][j], ExactA[i][j]);
+                return fail;
+            }
         }
     }
-    relativeErr = error/total;
-
-    if(error > _TOTAL_ERR | relativeErr > _RELATIVE_EER) {
-        fail = 1; // error flag
-        printf(HEADFAIL "1 test failed from %s\n", message);
-        printf("Total Err    = %f\n", error);
-        printf("Total Value  = %f\n", total);
-        printf("Relative Err = %e\n", relativeErr);
-        PrintIntMatrix_test("The input Matrix", A, Nrows, Ncols);
-        PrintIntMatrix_test("The exact Matrix", ExactA, Nrows, Ncols);
-    }
-    matrix_double_free(errorMatrix);
     return fail;
 }
 
 
 /**
- * @brief
- * Compare Matrix variable with exact solution
- *
- * @param [char*]   message
- * @param [double]  A
- * @param [double]  ExactA
- * @param [int]
- * @param [int]
+ * @brief Compare matrix variable with exact solution
+ * @param message
+ * @param A
+ * @param ExactA
+ * @param Nrows
+ * @param Ncols
  * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * fail  | int      | 0 - success; 1 - fail
  */
-int Matrix_test(const char *message, double **A, double **ExactA, int Nrows, int Ncols)
+int matrix_double_test(const char *message, double **A, double **ExactA, int Nrows, int Ncols)
 {
-    double error=0.0, relativeErr;
-    double total=0.0;
-    int fail=0, i, j;
-
-    double **errorMatrix = matrix_double_create(Nrows, Ncols);
+    int fail=0,i,j;
+    double tmp, abserr;
     for(i=0;i<Nrows;i++){
         for(j=0;j<Ncols;j++){
-            errorMatrix[i][j] = A[i][j] - ExactA[i][j];
-            error = fabs( errorMatrix[i][j] );
-            if (error > _TOTAL_ERR){
+            tmp = A[i][j] - ExactA[i][j];
+            abserr = fabs( tmp );
+            if (abserr > _TOTAL_ERR){
                 fail = 1; // error flag
                 printf(HEADFAIL "1 test failed from %s\n", message);
                 printf("element [%d, %d] = %f is different from the exact value %f\n",
-                       i+1, j+1, A[i][j], ExactA[i][j]);
+                       i, j, A[i][j], ExactA[i][j]);
                 return fail;
             }
-            total += fabs( ExactA[i][j] );
         }
     }
-    relativeErr = error/total;
-
-    if(relativeErr > _RELATIVE_EER) {
-        fail = 1; // error flag
-        printf(HEADFAIL "1 test failed from %s\n", message);
-        printf("Total Err    = %f\n", error);
-        printf("Total Value  = %f\n", total);
-        printf("Relative Err = %e\n", relativeErr);
-
-        PrintMatrix_test("The input Matrix", A, Nrows, Ncols);
-        PrintMatrix_test("The exact Matrix", ExactA, Nrows, Ncols);
-    }
-    matrix_double_free(errorMatrix);
     return fail;
 }
 
 /**
  * @brief
- * Compare Matrix variable with exact solution
- *
- * @param [char*]   message
- * @param [double]  A
- * @param [double]  ExactA
- * @param [int]
- * @param [int]
+ * @param message
+ * @param A
+ * @param ExactA
+ * @param Ncols
  * @return
- * name     | type     | description of value
- * -------- |----------|----------------------
- * success  | int      | 0 - success; 1 - fail
  */
-int Vector_test(const char *message, double *A, double *ExactA, int Ncols)
+int vector_double_test(const char *message, double *A, double *ExactA, int Ncols)
 {
 
-    double error=0.0, relativeErr;
-    double total=0.0;
-    int fail=0, i;
+    double abserr,tmp;
+    int fail=0,i;
 
-    double *errorVector = vector_double_create(Ncols);
     for(i=0;i<Ncols;i++){
-        errorVector[i] = A[i] - ExactA[i];
-        error += fabs( errorVector[i] );
-        total += fabs( ExactA[i] );
-
+        tmp = A[i] - ExactA[i];
+        abserr = fabs( tmp );
+        if (abserr > _TOTAL_ERR){
+            fail = 1; // error flag
+            printf(HEADFAIL "1 test failed from %s\n", message);
+            printf("element [%d] = %f is different from the exact value %f\n",
+                   i, A[i], ExactA[i]);
+            return fail;
+        }
     }
-    relativeErr = error/total;
-
-    if(error > _TOTAL_ERR | relativeErr > _RELATIVE_EER) {
-        fail = 1; // error flag
-        printf(HEADFAIL "1 test failed from %s\n", message);
-
-        printf("Total    Err = %f\n", error);
-        printf("Total        = %f\n", total);
-        printf("Relative Err = %e\n", relativeErr);
-        PrintVector("The input Vector =", A, Ncols);
-        PrintVector("The exact Vector =", ExactA, Ncols);
-    }
-
-    vector_double_free(errorVector);
     return fail;
 }
-
-int IntVector_test(const char *message, int *A, int *ExactA, int Ncols)
+/**
+ * @brief
+ * @param message
+ * @param A
+ * @param ExactA
+ * @param Ncols
+ * @return
+ */
+int vector_int_test(const char *message, int *A, int *ExactA, int Ncols)
 {
-    double error=0.0, relativeErr;
-    double total=0.0;
-    int fail=0, i;
+    double abserr,tmp;
+    int fail=0,i;
 
-    double *errorVector = vector_double_create(Ncols);
     for(i=0;i<Ncols;i++){
-        errorVector[i] = A[i] - ExactA[i];
-        error += fabs( errorVector[i] );
-        total += fabs( ExactA[i] );
-
+        tmp = A[i] - ExactA[i];
+        abserr = fabs( tmp );
+        if (abserr > _TOTAL_ERR){
+            fail = 1; // error flag
+            printf(HEADFAIL "1 test failed from %s\n", message);
+            printf("element [%d] = %d is different from the exact value %d\n",
+                   i, A[i], ExactA[i]);
+            return fail;
+        }
     }
-    relativeErr = error/total;
-
-    if(error > _TOTAL_ERR | relativeErr > _RELATIVE_EER) {
-        fail = 1; // error flag
-        printf(HEADFAIL "1 test failed from %s\n", message);
-
-        printf("Total    Err = %f\n", error);
-        printf("Total        = %f\n", total);
-        printf("Relative Err = %e\n", relativeErr);
-        PrintIntVector("The input Vector =", A, Ncols);
-        PrintIntVector("The exact Vector =", ExactA, Ncols);
-    }
-    vector_double_free(errorVector);
     return fail;
 }
 
 /**
  * @brief marco to print vector value
- * */
+ */
 #define _PRINT_VECTOR(message, Ncol, fmt, A) do{\
     int _dim1;\
     printf("%s\n", message);\

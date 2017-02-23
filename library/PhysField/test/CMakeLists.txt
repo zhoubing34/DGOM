@@ -16,7 +16,9 @@ set(PHYSDOMAIN_TEST_SRC
         pf_cellFetch_test.c
         pf_cellFetch_test.h
         pf_limiter_test.c
-        pf_limiter_test.h)
+        pf_limiter_test.h
+        pf_openbc_test.c
+        pf_openbc_test.h)
 
 add_executable(physfield_test ${PHYSDOMAIN_TEST_SRC})
 add_dependencies(physfield_test physfield)

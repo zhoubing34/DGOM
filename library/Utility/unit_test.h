@@ -22,10 +22,10 @@ void PrintMatrix2File(FILE *fp, char *message, double **Mat, int row, int col);
 void PrintIntVector2File(FILE *fp, char *message, int *Mat, int len);
 void PrintVector2File(FILE *fp, char *message, double *Mat, int len);
 
-int IntMatrix_test(const char *message, int **A, int **ExactA, int Nrows, int Ncols);
-int Matrix_test(const char *message, double **A, double **ExactA, int Nrows, int Ncols);
-int Vector_test(const char *message, double *A, double *ExactA, int Ncols);
-int IntVector_test(const char *message, int *A, int *ExactA, int Ncols);
+int matrix_int_test(const char *message, int **A, int **ExactA, int Nrows, int Ncols);
+int matrix_double_test(const char *message, double **A, double **ExactA, int Nrows, int Ncols);
+int vector_double_test(const char *message, double *A, double *ExactA, int Ncols);
+int vector_int_test(const char *message, int *A, int *ExactA, int Ncols);
 
 FILE* create_log(const char *funname, int nprocs, int rank);
 

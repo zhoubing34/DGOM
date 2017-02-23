@@ -52,8 +52,8 @@ int mr_grid_vertex_test(geoGrid *grid, int verbose){
     if(verbose){
         /* gen log filename */
         FILE *fp = create_log(__FUNCTION__, grid->procid, grid->nprocs);
-        PrintVector2File(fp, "vx", grid->vx, grid->cell->Nv);
-        PrintVector2File(fp, "vy", grid->vy, grid->cell->Nv);
+        PrintVector2File(fp, "vx", grid->vx, grid->Nv);
+        PrintVector2File(fp, "vy", grid->vy, grid->Nv);
         fclose(fp);
     }
     const int procid = grid->procid;

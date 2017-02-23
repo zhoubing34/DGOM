@@ -23,7 +23,7 @@ int MatrixInverse_test(){
     Matrix_inverse(temp, Nrow);
 
     // check
-    fail = Vector_test("Matrix_Inverse", temp, invCt, Nrow*Nrow);
+    fail = vector_double_test("Matrix_Inverse", temp, invCt, Nrow * Nrow);
 
     return fail;
 }

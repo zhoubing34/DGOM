@@ -17,7 +17,7 @@ int MatrixMultiply_test(){
     Matrix_multiply(M, K, N, A, B, Ct);
 
     // check Ct equals to C
-    fail = Vector_test("MatrixMultiply_test", Ct, C, M*N);
+    fail = vector_double_test("MatrixMultiply_test", Ct, C, M * N);
 
     return fail;
 }

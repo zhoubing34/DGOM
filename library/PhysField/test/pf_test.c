@@ -9,6 +9,7 @@
 #include "pf_cellMean_test.h"
 #include "pf_cellFetch_test.h"
 #include "pf_limiter_test.h"
+#include "pf_openbc_test.h"
 
 int Mx = 4;
 int My = 2;
@@ -20,12 +21,14 @@ double ymin = -1, ymax = 1;
 /** generation of physfield */
 physField *uniform_tri_physfield();
 physField *uniform_quad_physfield();
+physField *rectangle_tri_physfield();
 
-#define Nphys 2
+#define Nphys 3
 typedef physField* (*phys_func)();
 static const phys_func phys_creator[Nphys] = {
         uniform_tri_physfield,
-        uniform_quad_physfield
+        uniform_quad_physfield,
+        rectangle_tri_physfield,
 };
 
 /**
@@ -56,6 +59,17 @@ physField *uniform_quad_physfield(){
     return quad_phys;
 }
 
+physField *rectangle_tri_physfield(){
+    stdCell *tri = sc_create(N, TRIANGLE);
+    char casename[] = "example/Rectangle/tri/Rectangle";
+    geoGrid *tri_grid = mr_grid_read_file2d(tri, casename);
+    multiReg *tri_region = mr_reg_create(tri_grid);
+    parallMesh *tri_mesh = mr_mesh_create(tri_region);
+    mr_mesh_read_bcfile2d(tri_mesh, casename);
+    physField *tri_phys = pf_create(Nfield, tri_mesh);
+    return tri_phys;
+}
+
 /**
  * @brief deallocate the memory of physField
  * @param phys
@@ -70,7 +84,7 @@ void phys_free(physField *phys){
 }
 
 /** test functions */
-#define Ntest 7
+#define Ntest 8
 typedef int (*test_func)(physField *, int verbose);
 static const test_func phys_test_func[Ntest] = {
         phys_cellMean_test,
@@ -79,7 +93,8 @@ static const test_func phys_test_func[Ntest] = {
         phys_strong_volume_flux2d_test,
         phys_strong_surface_flux2d_test,
         phys_strong_viscosity_LDG_flux2d_test,
-        phys_limiter_test
+        phys_limiter_test,
+        pf_openbc_test
 };
 
 /**

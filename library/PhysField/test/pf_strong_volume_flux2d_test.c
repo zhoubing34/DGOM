@@ -51,7 +51,7 @@ int phys_strong_volume_flux2d_test(physField *phys, int verbose){
     double clockT2 = MPI_Wtime();
 
     if(!phys->mesh->procid)
-        Vector_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np*Nfield*K);
+        vector_double_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np * Nfield * K);
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
