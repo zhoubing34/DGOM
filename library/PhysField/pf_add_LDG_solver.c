@@ -13,16 +13,16 @@ void pf_add_LDG_solver(physField *phys){
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
 
-    phys->viscosity->px_Q = (real *) calloc((size_t) Nfield*K*Np, sizeof(real));
-    phys->viscosity->py_Q = (real *) calloc((size_t) Nfield*K*Np, sizeof(real));
-    phys->viscosity->vis_Q = (real *) calloc((size_t) Nfield*K*Np, sizeof(real));
+    phys->viscosity->px_Q = (dg_real *) calloc((size_t) Nfield*K*Np, sizeof(dg_real));
+    phys->viscosity->py_Q = (dg_real *) calloc((size_t) Nfield*K*Np, sizeof(dg_real));
+    phys->viscosity->vis_Q = (dg_real *) calloc((size_t) Nfield*K*Np, sizeof(dg_real));
 
     const int parallNodeNum = phys->parallNodeNum;
 
-    phys->viscosity->px_inQ = (real *) calloc((size_t) parallNodeNum, sizeof(real));
-    phys->viscosity->py_inQ = (real *) calloc((size_t) parallNodeNum, sizeof(real));
-    phys->viscosity->px_outQ = (real *) calloc((size_t) parallNodeNum, sizeof(real));
-    phys->viscosity->py_outQ = (real *) calloc((size_t) parallNodeNum, sizeof(real));
+    phys->viscosity->px_inQ = (dg_real *) calloc((size_t) parallNodeNum, sizeof(dg_real));
+    phys->viscosity->py_inQ = (dg_real *) calloc((size_t) parallNodeNum, sizeof(dg_real));
+    phys->viscosity->px_outQ = (dg_real *) calloc((size_t) parallNodeNum, sizeof(dg_real));
+    phys->viscosity->py_outQ = (dg_real *) calloc((size_t) parallNodeNum, sizeof(dg_real));
 
     return;
 }

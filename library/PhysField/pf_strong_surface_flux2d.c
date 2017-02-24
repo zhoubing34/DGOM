@@ -34,16 +34,16 @@ void pf_strong_surface_flux2d
     const int Np = phys->cell->Np;
     const int Nfield = phys->Nfield;
 
-    real *surfinfo = phys->surfinfo;
-    real *f_Q = phys->f_Q;
-    real *f_inQ = phys->f_inQ;
-    real *f_ext = phys->f_ext;
-    real *f_LIFT  = phys->cell->f_LIFT;
+    dg_real *surfinfo = phys->surfinfo;
+    dg_real *f_Q = phys->f_Q;
+    dg_real *f_inQ = phys->f_inQ;
+    dg_real *f_ext = phys->f_ext;
+    dg_real *f_LIFT  = phys->cell->f_LIFT;
 
-    real f_M[Nfield];
-    real f_P[Nfield];
-    real Eflux[Nfield], Gflux[Nfield], Fhs[Nfield];
-    real flux_Q[Nfp*Nfaces*Nfield];
+    dg_real f_M[Nfield];
+    dg_real f_P[Nfield];
+    dg_real Eflux[Nfield], Gflux[Nfield], Fhs[Nfield];
+    dg_real flux_Q[Nfp*Nfaces*Nfield];
 
     register int k,m,n,fld,surfid=0;
 
@@ -51,10 +51,10 @@ void pf_strong_surface_flux2d
         for(m=0; m<Nfp*Nfaces; ++m){
             int  idM = (int)surfinfo[surfid++];
             int  idP = (int)surfinfo[surfid++];
-            const real fsc = surfinfo[surfid++];
+            const dg_real fsc = surfinfo[surfid++];
             const int  bstype = (int)surfinfo[surfid++];
-            const real nx = surfinfo[surfid++];
-            const real ny = surfinfo[surfid++];
+            const dg_real nx = surfinfo[surfid++];
+            const dg_real ny = surfinfo[surfid++];
 
             // local face values
             for(fld=0;fld<Nfield;fld++)
@@ -86,18 +86,18 @@ void pf_strong_surface_flux2d
             nodal_flux(f_M, Eflux, Gflux);
             numerical_flux(nx, ny, f_M, f_P, Fhs);
 #endif
-            real *t = flux_Q + m*Nfield;
+            dg_real *t = flux_Q + m*Nfield;
             for(fld=0;fld<Nfield;fld++){
                 t[fld] = fsc*( nx*Eflux[fld] + ny*Gflux[fld] - Fhs[fld] );
             }
         }
 
         for(n=0;n<Np;n++){
-            const real *ptLIFT = f_LIFT + n*Nfp*Nfaces;
-            real *f_rhsQ = phys->f_rhsQ + Nfield*(n+k*Np);
+            const dg_real *ptLIFT = f_LIFT + n*Nfp*Nfaces;
+            dg_real *f_rhsQ = phys->f_rhsQ + Nfield*(n+k*Np);
             for(m=0;m<Nfp*Nfaces;m++){
-                const real L = ptLIFT[m];
-                const real *t = flux_Q+m*Nfield;
+                const dg_real L = ptLIFT[m];
+                const dg_real *t = flux_Q+m*Nfield;
 
                 for(fld=0;fld<Nfield;fld++)
                     f_rhsQ[fld] += L*t[fld];

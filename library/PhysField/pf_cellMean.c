@@ -16,9 +16,9 @@ void pf_cellMean(physField *phys){
 
     register int k,n,fld,sk;
 
-    real *f_Q = phys->f_Q;
-    real *c_Q = phys->c_Q;
-    real var[Np];
+    dg_real *f_Q = phys->f_Q;
+    dg_real *c_Q = phys->c_Q;
+    dg_real var[Np];
     for(k=0;k<K;k++){
         const double Area = 1.0/phys->region->size[k];
         for(fld=0;fld<Nfield;fld++){

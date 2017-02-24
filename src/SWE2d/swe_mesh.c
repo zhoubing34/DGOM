@@ -66,7 +66,7 @@ physField* swe_file_mesh(swe_solver *solver, char *meshfile){
     return phys;
 }
 
-real* swe_read_topography(swe_solver *solver, char *botfile){
+dg_real* swe_read_topography(swe_solver *solver, char *botfile){
     physField *phys = solver->phys;
     int Nvert;
     FILE *fp;
@@ -92,7 +92,7 @@ real* swe_read_topography(swe_solver *solver, char *botfile){
     stdCell *cell = phys->cell;
 
     // project to nodes
-    real *bot = vector_real_create(Np*K);
+    dg_real *bot = vector_real_create(Np*K);
     const int Nv = cell->Nv;
     double bloc[Nv];
 
@@ -107,13 +107,13 @@ real* swe_read_topography(swe_solver *solver, char *botfile){
     return bot;
 }
 
-real* swe_flat_topography(swe_solver *solver){
+dg_real* swe_flat_topography(swe_solver *solver){
     physField *phys = solver->phys;
 
     const int Np = phys->cell->Np;
     const int K = phys->grid->K;
 
-    real *bot = vector_real_create(Np*K);
+    dg_real *bot = vector_real_create(Np*K);
     int n;
     for(n=0;n<K*Np;n++){
         bot[n] = 0.0;
@@ -121,7 +121,7 @@ real* swe_flat_topography(swe_solver *solver){
     return bot;
 }
 
-real* swe_parabolic_topography(swe_solver *solver){
+dg_real* swe_parabolic_topography(swe_solver *solver){
     physField *phys = solver->phys;
 
     const int Np = phys->cell->Np;
@@ -133,7 +133,7 @@ real* swe_parabolic_topography(swe_solver *solver){
 //    double X = 1;
 //    double Y = -0.41884;
 //    double T = 2*M_PI/w;
-    real *bot = vector_real_create(Np*K);
+    dg_real *bot = vector_real_create(Np*K);
 
     int n,k,sk=0;
     for(k=0;k<K;k++){

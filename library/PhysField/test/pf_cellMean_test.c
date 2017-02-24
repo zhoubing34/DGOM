@@ -29,8 +29,8 @@ int phys_cellMean_test(physField *phys, int verbose){
 
     if(verbose) {
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
-        PrintVector2File(fp, "f_Q", phys->f_Q, K*Np*phys->Nfield);
-        PrintVector2File(fp, "c_Q", phys->c_Q, K*phys->Nfield);
+        print_double_vector2file(fp, "f_Q", phys->f_Q, K * Np * phys->Nfield);
+        print_double_vector2file(fp, "c_Q", phys->c_Q, K * phys->Nfield);
         fclose(fp);
     }
 

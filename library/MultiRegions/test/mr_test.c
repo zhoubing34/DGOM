@@ -79,7 +79,7 @@ int main(int argc, char **argv){
 
     // get settings
     int ishelp, isverbose;
-    UTest_Command(argc, argv, &ishelp, &isverbose);
+    test_command(argc, argv, &ishelp, &isverbose);
 
     MPI_Init(&argc, &argv);
     int procid, nprocs;

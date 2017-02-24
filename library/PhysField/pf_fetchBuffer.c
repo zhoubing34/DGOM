@@ -130,7 +130,7 @@ void pf_fetchCellBuffer(physField *phys,
  *
  */
 void pf_fetchBuffer(int procid, int nprocs, int *pout,
-                    real *send_buffer, real *recv_buffer,
+                    dg_real *send_buffer, dg_real *recv_buffer,
                     MPI_Request *mpi_send_requests,
                     MPI_Request *mpi_recv_requests,
                     int *Nmessage){

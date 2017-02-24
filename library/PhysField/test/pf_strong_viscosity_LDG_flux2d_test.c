@@ -9,8 +9,8 @@
 #include "PhysField/pf_add_LDG_solver.h"
 #include "PhysField/pf_fetchBuffer.h"
 
-static int wall_func(real nx, real ny, real *varM, real *varP,
-              real *pxM, real *pxP, real *pyM, real *pyP){
+static int wall_func(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP,
+              dg_real *pxM, dg_real *pxP, dg_real *pyM, dg_real *pyP){
     varP[0] = varM[0];
     varP[1] = varM[1];
     pxP[0] = pxM[0];
@@ -33,10 +33,10 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose){
     const int nprocs = phys->mesh->nprocs;
 
     int k,i;
-    real miu = 0.5;
-    real px_ext[Np*Nfield*K];
-    real py_ext[Np*Nfield*K];
-    real rhs_ext[Np*Nfield*K];
+    dg_real miu = 0.5;
+    dg_real px_ext[Np*Nfield*K];
+    dg_real py_ext[Np*Nfield*K];
+    dg_real rhs_ext[Np*Nfield*K];
 
     pf_add_LDG_solver(phys);
 
@@ -44,8 +44,8 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose){
     int sk = 0;
     for(k=0;k<K;k++){
         for(i=0;i<Np;i++){
-            real u = region->x[k][i];
-            real v = region->y[k][i];
+            dg_real u = region->x[k][i];
+            dg_real v = region->y[k][i];
 
             phys->f_rhsQ[sk] = 0;
             phys->f_Q[sk] = u*u; //
@@ -86,13 +86,13 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose){
         fprintf(fp, "K = %d\n", phys->grid->K);
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
         fprintf(fp, "Np = %d\n", phys->cell->Np);
-        PrintIntMatrix2File(fp, "EToV", phys->grid->EToV, K, phys->cell->Nv);
-        PrintVector2File(fp, "vx", phys->grid->vx, phys->grid->Nv);
-        PrintVector2File(fp, "vy", phys->grid->vy, phys->grid->Nv);
-        PrintVector2File(fp, "f_Q", phys->f_Q, Nfield*Np*k);
-        PrintVector2File(fp, "px_Q", phys->viscosity->px_Q, Nfield*Np*K);
-        PrintVector2File(fp, "py_Q", phys->viscosity->py_Q, Nfield*Np*K);
-        PrintVector2File(fp, "f_rhsQ", phys->f_rhsQ, Nfield*Np*k);
+        print_int_matrix2file(fp, "EToV", phys->grid->EToV, K, phys->cell->Nv);
+        print_double_vector2file(fp, "vx", phys->grid->vx, phys->grid->Nv);
+        print_double_vector2file(fp, "vy", phys->grid->vy, phys->grid->Nv);
+        print_double_vector2file(fp, "f_Q", phys->f_Q, Nfield * Np * k);
+        print_double_vector2file(fp, "px_Q", phys->viscosity->px_Q, Nfield * Np * K);
+        print_double_vector2file(fp, "py_Q", phys->viscosity->py_Q, Nfield * Np * K);
+        print_double_vector2file(fp, "f_rhsQ", phys->f_rhsQ, Nfield * Np * k);
         fclose(fp);
     }
 

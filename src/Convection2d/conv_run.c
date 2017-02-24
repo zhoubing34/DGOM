@@ -39,9 +39,9 @@ void conv_run(physField *phys){
         for (intrk=1; intrk<=5; ++intrk) {
 
             /* compute rhs of equations */
-            const real fdt = (real)dt;
-            const real fa = (real)rk4a[intrk-1];
-            const real fb = (real)rk4b[intrk-1];
+            const dg_real fdt = (dg_real)dt;
+            const dg_real fa = (dg_real)rk4a[intrk-1];
+            const dg_real fb = (dg_real)rk4b[intrk-1];
 
             conv_rhs(phys, fa, fb, fdt);
         }

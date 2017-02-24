@@ -31,26 +31,22 @@ void write_obc2nc(char *file_name, nc_file *obcfile){
     char buffer[MAX_NAME_LENGTH];
     fgets(buffer, MAX_NAME_LENGTH, fp);
     fgets(buffer, MAX_NAME_LENGTH, fp);
-    int Nv = obcfile->dimarray[1]->len;
-    int Nfield = obcfile->dimarray[2]->len;
+    int Nv = obcfile->dim_vec_p[1]->len;
+    int Nfield = obcfile->dim_vec_p[2]->len;
 
     double *p_Q = vector_double_create(Nv*Nfield);
     double time;
 
-    MPI_Offset start_v[3], count_v[3];
+
     MPI_Offset start_t, count_t;
     start_t = 0; count_t = 1;
-    start_v[0] = start_t;
-    start_v[1] = 0;
-    start_v[2] = 0;
-    count_v[0] = 1;
-    count_v[1] = Nv;
-    count_v[2] = Nfield;
+    MPI_Offset start_v[3] = {start_t, 0, 0};
+    MPI_Offset count_v[3] = {1, Nv, Nfield};
     int i,fld,tmp, fend=0;
 
     int fid = obcfile->id;
-    int time_id = obcfile->vararray[1]->id;
-    int obc_id = obcfile->vararray[2]->id;
+    int time_id = obcfile->var_vec_p[1]->id;
+    int obc_id = obcfile->var_vec_p[2]->id;
     while(1){
         for(i=0;i<Nv;i++){
             if(fscanf(fp, "%d", &tmp) != 1){ fend = 1; break; }
@@ -134,7 +130,7 @@ nc_file * create_ncfile(char *file_name){
     nc_file_init(obcfile);
 
     /* assignment */
-    ncmpi_put_var_int_all(obcfile->id, obcfile->vararray[0]->id, vertlist);
+    ncmpi_put_var_int_all(obcfile->id, obcfile->var_vec_p[0]->id, vertlist);
 
     vector_int_free(vertlist);
     fclose(fp);

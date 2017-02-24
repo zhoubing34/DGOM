@@ -66,8 +66,8 @@ void conv_setoutput(physField *phys){
     nc_file_init(file);
 
     /* set coordinate */
-    NC_ERROR( ncmpi_put_var_double_all(file->id, file->vararray[0]->id, phys->region->x[0]) );
-    NC_ERROR( ncmpi_put_var_double_all(file->id, file->vararray[1]->id, phys->region->y[0]) );
+    nc_error( ncmpi_put_var_double_all(file->id, file->var_vec_p[0]->id, phys->region->x[0]) );
+    nc_error( ncmpi_put_var_double_all(file->id, file->var_vec_p[1]->id, phys->region->y[0]) );
 
     extern conv_solver2d solver;
     solver.outfile = file;
@@ -88,11 +88,11 @@ void conv_putvar(physField *phys, int timestep, double time){
     MPI_Offset start_v[3], count_v[3];
     MPI_Offset start_t, count_t;
 
-    nc_var *ncvar = file->vararray[2];
+    nc_var *ncvar = file->var_vec_p[2];
     /* put time */
     start_t = timestep; // start index
     count_t = 1;       // length
-    NC_ERROR( ncmpi_put_vara_double_all(file->id, ncvar->id, &start_t, &count_t, &time) );
+    nc_error( ncmpi_put_vara_double_all(file->id, ncvar->id, &start_t, &count_t, &time) );
 
     /* put variable c */
     start_v[0] = timestep;
@@ -103,7 +103,7 @@ void conv_putvar(physField *phys, int timestep, double time){
     count_v[1] = K;
     count_v[2] = Np;
 
-    ncvar = file->vararray[3];
+    ncvar = file->var_vec_p[3];
     float var[K*Np];
     /* put variable c */
     int k,n,sk=0,ind=0;
@@ -113,7 +113,7 @@ void conv_putvar(physField *phys, int timestep, double time){
             ind += Nfield;
         }
     }
-    NC_ERROR( ncmpi_put_vara_float_all(file->id, ncvar->id, start_v, count_v, var) );
+    nc_error( ncmpi_put_vara_float_all(file->id, ncvar->id, start_v, count_v, var) );
 
     return;
 }

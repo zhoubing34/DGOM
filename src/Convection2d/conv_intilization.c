@@ -66,18 +66,18 @@ static double conv_advectDiff(physField *phys){
                 t = -( ( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ) )*sigma;
             }
 
-            phys->f_Q[sk++] = (real) exp(t); // c field
-            phys->f_Q[sk++] = (real) solver.u; // flow rate at x-coordinate
-            phys->f_Q[sk++] = (real) solver.v; // flow rate at y-coordinate
+            phys->f_Q[sk++] = (dg_real) exp(t); // c field
+            phys->f_Q[sk++] = (dg_real) solver.u; // flow rate at x-coordinate
+            phys->f_Q[sk++] = (dg_real) solver.v; // flow rate at y-coordinate
         }
     }
 
     sk = 0;
     for(k=0;k<K;++k){
         for(n=0;n<Np;++n){
-            phys->viscosity->vis_Q[sk++] = (real) miu; // viscosity parameter for c field
-            phys->viscosity->vis_Q[sk++] = (real) 0;
-            phys->viscosity->vis_Q[sk++] = (real) 0;
+            phys->viscosity->vis_Q[sk++] = (dg_real) miu; // viscosity parameter for c field
+            phys->viscosity->vis_Q[sk++] = (dg_real) 0;
+            phys->viscosity->vis_Q[sk++] = (dg_real) 0;
         }
     }
 
@@ -91,8 +91,8 @@ static double conv_advectDiff(physField *phys){
         double r = len[k]/(N+1);
         for(n=0;n<Np;n++){
             sk++; // jump c field
-            const real u = phys->f_Q[sk++];
-            const real v = phys->f_Q[sk++];
+            const dg_real u = phys->f_Q[sk++];
+            const dg_real v = phys->f_Q[sk++];
             double spe = sqrt(u*u+v*v);
             dt = min(dt, r/spe);
             dt = min(dt, r*r/sqrt(miu));
@@ -129,9 +129,9 @@ static double conv_rotation(physField *phys){
             const double xt = x[k][n];
             const double yt = y[k][n];
             double t = -sigma * ( ( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ) );
-            phys->f_Q[sk++] = (real) exp(t); // c field
-            phys->f_Q[sk++] = (real)(-w * yt); // flow rate at x-coordinate
-            phys->f_Q[sk++] = (real)( w * xt); // flow rate at y-coordinate
+            phys->f_Q[sk++] = (dg_real) exp(t); // c field
+            phys->f_Q[sk++] = (dg_real)(-w * yt); // flow rate at x-coordinate
+            phys->f_Q[sk++] = (dg_real)( w * xt); // flow rate at y-coordinate
         }
     }
 
@@ -147,8 +147,8 @@ static double conv_rotation(physField *phys){
         double r = len[k]/(N+1);
         for(n=0;n<Np;n++){
             sk++; // jump c field
-            const real u = phys->f_Q[sk++];
-            const real v = phys->f_Q[sk++];
+            const dg_real u = phys->f_Q[sk++];
+            const dg_real v = phys->f_Q[sk++];
             double spe = sqrt(u*u+v*v);
             dt = min(dt, r/spe);
         }

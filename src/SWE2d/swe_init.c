@@ -82,7 +82,7 @@ static void swe_dambreakdry_init(swe_solver *solver){
     const double x0 = 500; // dam position
     register int k,n,sk=0;
 
-    real *f_Q = phys->f_Q;
+    dg_real *f_Q = phys->f_Q;
     for(k=0;k<K;k++){
         double *xt = phys->region->x[k];
         double area = phys->region->size[k];
@@ -111,7 +111,7 @@ static void swe_dambreakwet_init(swe_solver *solver){
     const double x0 = 500; // dam position
     register int k,n,sk=0;
 
-    real *f_Q = phys->f_Q;
+    dg_real *f_Q = phys->f_Q;
     for(k=0;k<K;k++){
         double *xt = phys->region->x[k];
         double area = phys->region->size[k];
@@ -141,7 +141,7 @@ static void swe_parabolicbowl_init(swe_solver *solver){
     const double X = 1;
     const double Y = -0.41884;
 
-    real *f_Q = phys->f_Q;
+    dg_real *f_Q = phys->f_Q;
     register int k,n,sk=0;
     for(k=0;k<K;k++){
         for(n=0;n<Np;n++){

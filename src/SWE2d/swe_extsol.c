@@ -4,11 +4,11 @@
 
 #include "swe_extsol.h"
 
-typedef void (*extsol_fun)(real x, real y, double t, real *ext);
+typedef void (*extsol_fun)(dg_real x, dg_real y, double t, dg_real *ext);
 
 static double gra;
 
-void swe_parabolicbowl_ext(real x, real y, double t, real *ext){
+void swe_parabolicbowl_ext(dg_real x, dg_real y, double t, dg_real *ext){
 
     //extern double gra;
     const double alpha = 1.6*1e-7;
@@ -58,7 +58,7 @@ void swe_normerr(swe_solver *solver){
 
     int register k,n,fld,sk=0;
     const double ftime = solver->ftime;
-    real *f_Q = phys->f_Q;
+    dg_real *f_Q = phys->f_Q;
     double ext_Q[Nfield], var, Aloc=0;
     double **err1 = matrix_double_create(Nfield, Np);
     double **err2 = matrix_double_create(Nfield, Np);

@@ -28,7 +28,7 @@ Advanced debugging related options:
   assert=1    - Enable asserts [off by default]
   assert2=1   - Enable very expensive asserts [off by default]
 
-METIS' index and real data type size can be configured by editing
+METIS' index and dg_real data type size can be configured by editing
 include/metis.h.
 
 

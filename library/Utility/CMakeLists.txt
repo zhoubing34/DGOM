@@ -1,11 +1,11 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
 
 set(LIBUTILITIES_SOURCE
+        utility.c
         utility.h
+        mat_utils.hh
         mat_utils.h
         mat_utils.c
-        mat_arith.c
-        mat_arith.h
         unit_test.h
         unit_test.c
         nc_library.c

@@ -106,7 +106,7 @@ static const test_func phys_test_func[Ntest] = {
 int main(int argc, char **argv){
     // get settings
     int ishelp, isverbose;
-    UTest_Command(argc, argv, &ishelp, &isverbose);
+    test_command(argc, argv, &ishelp, &isverbose);
 
     // print help information
     if(ishelp){

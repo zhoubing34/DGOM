@@ -98,14 +98,14 @@ int phys_nodeFetch_test(physField *phys, int verbose){
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
         fprintf(fp, "dim = %d\n", phys->dim);
         fprintf(fp, "Nsurfinfo = %d\n", phys->Nsurfinfo);
-        PrintVector2File(fp, "surinfo", phys->surfinfo, K*phys->Nsurfinfo*Nfp*Nfaces);
+        print_double_vector2file(fp, "surinfo", phys->surfinfo, K * phys->Nsurfinfo * Nfp * Nfaces);
         fprintf(fp, "Nvgeo = %d\n", phys->Nvgeo);
-        PrintVector2File(fp, "vgeo", phys->vgeo, K*phys->Nvgeo);
-        PrintVector2File(fp, "f_Q", phys->f_Q, K*Np*phys->Nfield);
-        PrintVector2File(fp, "xM", xM, Nnode);
-        PrintVector2File(fp, "xP", xP, Nnode);
-        PrintVector2File(fp, "yM", yM, Nnode);
-        PrintVector2File(fp, "yP", yP, Nnode);
+        print_double_vector2file(fp, "vgeo", phys->vgeo, K * phys->Nvgeo);
+        print_double_vector2file(fp, "f_Q", phys->f_Q, K * Np * phys->Nfield);
+        print_double_vector2file(fp, "xM", xM, Nnode);
+        print_double_vector2file(fp, "xP", xP, Nnode);
+        print_double_vector2file(fp, "yM", yM, Nnode);
+        print_double_vector2file(fp, "yP", yP, Nnode);
         fclose(fp);
     }
 

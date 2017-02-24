@@ -21,18 +21,18 @@ void pf_strong_volume_flux2d(physField *phys, nodal_flux_func nodal_flux){
     const int Np = phys->cell->Np;
     const int Nfield = phys->Nfield;
 
-    real *f_Q = phys->f_Q;
-    real *f_rhsQ = phys->f_rhsQ;
-    real *f_Dr = phys->cell->f_Dr;
-    real *f_Ds = phys->cell->f_Ds;
-    real *vgeo = phys->vgeo;
+    dg_real *f_Q = phys->f_Q;
+    dg_real *f_rhsQ = phys->f_rhsQ;
+    dg_real *f_Dr = phys->cell->f_Dr;
+    dg_real *f_Ds = phys->cell->f_Ds;
+    dg_real *vgeo = phys->vgeo;
 
     register unsigned int k,n,m,fld,geoid=0, rhsid=0;
 
-    real Eflux[Np*Nfield], Gflux[Np*Nfield], rhs[Nfield];
+    dg_real Eflux[Np*Nfield], Gflux[Np*Nfield], rhs[Nfield];
 
     for(k=0;k<K;k++){
-        real *var = f_Q + k*Np*Nfield; // variable in k-th element
+        dg_real *var = f_Q + k*Np*Nfield; // variable in k-th element
 
         // calculate flux term
         for(n=0;n<Np;n++){
@@ -52,13 +52,13 @@ void pf_strong_volume_flux2d(physField *phys, nodal_flux_func nodal_flux){
 
         for(n=0;n<Np;++n){ // rhs for n-th point
 
-            const real *ptDr = f_Dr+n*Np; // n-th row of Dr
-            const real *ptDs = f_Ds+n*Np; // n-th row of Ds
+            const dg_real *ptDr = f_Dr+n*Np; // n-th row of Dr
+            const dg_real *ptDs = f_Ds+n*Np; // n-th row of Ds
 
-            const real drdx = vgeo[geoid++]; // volume geometry for n-th point
-            const real drdy = vgeo[geoid++]; // volume geometry for n-th point
-            const real dsdx = vgeo[geoid++]; // volume geometry for n-th point
-            const real dsdy = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real drdx = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real drdy = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real dsdx = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real dsdy = vgeo[geoid++]; // volume geometry for n-th point
 
             // initialize rhs
             for(m=0;m<Nfield;m++){
@@ -69,13 +69,13 @@ void pf_strong_volume_flux2d(physField *phys, nodal_flux_func nodal_flux){
                 printf("k=%d, n=%d, drdx=%f, drdy=%f, dsdx=%f, dsdy=%f\n", k, n, drdx, drdy, dsdx, dsdy);
 #endif
             for(m=0;m<Np;++m){
-                const real dr = ptDr[m]; // m-th column for Dr
-                const real ds = ptDs[m]; // m-th column for Ds
-                const real dx = drdx*dr+dsdx*ds;
-                const real dy = drdy*dr+dsdy*ds;
+                const dg_real dr = ptDr[m]; // m-th column for Dr
+                const dg_real ds = ptDs[m]; // m-th column for Ds
+                const dg_real dx = drdx*dr+dsdx*ds;
+                const dg_real dy = drdy*dr+dsdy*ds;
 
-                const real *eflux = Eflux + m*Nfield;
-                const real *gflux = Gflux + m*Nfield;
+                const dg_real *eflux = Eflux + m*Nfield;
+                const dg_real *gflux = Gflux + m*Nfield;
 
 #if DEBUG
                 if(!phys->grid->procid)

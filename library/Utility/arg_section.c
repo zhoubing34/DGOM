@@ -1,15 +1,6 @@
 //
 // Created by li12242 on 17/1/16.
 //
-/**
- * @file argument section
- * @brief pre-process structure for input argument
- * @details
- * 1. call `section_create` to allocate argument section.
- * 2. call `section_write_file` with initialized argument section to generate input file.
- * 3. `section_read_file` can read argument from user specific input file.
- * 4. call `section_free` to deallocate argument section structure.
- */
 
 #include "arg_section.h"
 #define ARG_LEN 120
@@ -46,14 +37,13 @@ void section_print(arg_section *section_p){
     int i;
     printf("%s", section_p->info_str);
     for(i=0;i<section_p->arg_num;i++){
-        printf("%s", section_p->arg_str[i]);
+        printf("%s", section_p->arg_vec_p[i]);
     }
     return;
 }
 
 /**
  * @brief create argument section for input parameters.
- *
  * @param[in] info_str information string of argument.
  * @param[in] arg_num number of input argument.
  * @return arg_section argument section structure.
@@ -84,7 +74,7 @@ arg_section* section_create(char *info_str, int arg_num){
     }
     /* allocate the arguments */
     section_p->arg_num = arg_num;
-    section_p->arg_str = arg_create(arg_num);
+    section_p->arg_vec_p = arg_create(arg_num);
 
     return section_p;
 }
@@ -96,7 +86,7 @@ arg_section* section_create(char *info_str, int arg_num){
  */
 void section_free(arg_section* section_p){
     free(section_p->info_str);
-    arg_free(section_p->arg_str);
+    arg_free(section_p->arg_vec_p);
     free(section_p);
     return;
 }
@@ -110,7 +100,7 @@ void section_write_file(arg_section *section_p, FILE *fp){
     int i;
     fprintf(fp, "%s", section_p->info_str);
     for(i=0;i<section_p->arg_num;i++){
-        fprintf(fp, "%s\n", section_p->arg_str[i]);
+        fprintf(fp, "%s\n", section_p->arg_vec_p[i]);
     }
 }
 /**
@@ -125,6 +115,6 @@ void section_read_file(arg_section *section_p, FILE *fp){
     for(i=0;i<section_p->arg_num;i++){
         fgets(buffer, ARG_LEN, fp);
         buffer[strlen(buffer)-1]='\0'; // delete "\n" character
-        strcpy(section_p->arg_str[i], buffer);
+        strcpy(section_p->arg_vec_p[i], buffer);
     }
 }

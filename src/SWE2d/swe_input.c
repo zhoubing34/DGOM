@@ -113,7 +113,7 @@ swe_solver* swe_create_solver(){
 
     /// 0. section: case info
     arg_section *sec_p = arg[0];
-    sscanf(sec_p->arg_str[0], "%d\n", &(solver->caseid));
+    sscanf(sec_p->arg_vec_p[0], "%d\n", &(solver->caseid));
 
     if(!procid){
         if( (solver->caseid==swe_dambreakdry) || (solver->caseid==swe_dambreakwet)
@@ -128,8 +128,8 @@ swe_solver* swe_create_solver(){
     }
     /// 1. section: cell info
     sec_p = arg[1];
-    sscanf(sec_p->arg_str[0], "%d\n", &(solver->celltype));
-    sscanf(sec_p->arg_str[1], "%d\n", &(solver->N));
+    sscanf(sec_p->arg_vec_p[0], "%d\n", &(solver->celltype));
+    sscanf(sec_p->arg_vec_p[1], "%d\n", &(solver->N));
 
     if(!procid){
         if( solver->celltype==TRIANGLE ){
@@ -146,10 +146,10 @@ swe_solver* swe_create_solver(){
     sec_p = arg[2];
     int Mx, My;
     double xmin, xmax, ymin, ymax;
-    sscanf(sec_p->arg_str[0], "%d\n", &(Mx));
-    sscanf(sec_p->arg_str[1], "%d\n", &(My));
-    solver->casename = calloc(strlen(sec_p->arg_str[2]), sizeof(char));
-    strcpy(solver->casename, sec_p->arg_str[2]);
+    sscanf(sec_p->arg_vec_p[0], "%d\n", &(Mx));
+    sscanf(sec_p->arg_vec_p[1], "%d\n", &(My));
+    solver->casename = calloc(strlen(sec_p->arg_vec_p[2]), sizeof(char));
+    strcpy(solver->casename, sec_p->arg_vec_p[2]);
     char *casename = solver->casename;
     switch (solver->caseid){
         case swe_dambreakwet:
@@ -176,15 +176,15 @@ swe_solver* swe_create_solver(){
     }
     /// 3. section: time info
     sec_p = arg[3];
-    sscanf(sec_p->arg_str[0], "%lf\n", &(solver->cfl));
-    sscanf(sec_p->arg_str[1], "%lf\n", &(solver->ftime));
+    sscanf(sec_p->arg_vec_p[0], "%lf\n", &(solver->cfl));
+    sscanf(sec_p->arg_vec_p[1], "%lf\n", &(solver->ftime));
     if(!procid) printf(HEAD_LINE " cfl = %f\n", solver->cfl);
     if(!procid) printf(HEAD_LINE " final time = %f\n", solver->ftime);
     /// 4. section: phys info
     sec_p = arg[4];
-    sscanf(sec_p->arg_str[0], "%lf\n", &(solver->gra));
-    sscanf(sec_p->arg_str[1], "%lf\n", &(solver->hcrit));
-    sscanf(sec_p->arg_str[2], "%lf\n", &(solver->roughness));
+    sscanf(sec_p->arg_vec_p[0], "%lf\n", &(solver->gra));
+    sscanf(sec_p->arg_vec_p[1], "%lf\n", &(solver->hcrit));
+    sscanf(sec_p->arg_vec_p[2], "%lf\n", &(solver->roughness));
 
     if(!procid) printf(HEAD_LINE " gra = %f\n", solver->gra);
     if(!procid) printf(HEAD_LINE " hcrit = %f\n", solver->hcrit);
@@ -192,7 +192,7 @@ swe_solver* swe_create_solver(){
 
     /// 5. section: LDG info
     sec_p = arg[5];
-    sscanf(sec_p->arg_str[0], "%lf\n", &(solver->c12));
+    sscanf(sec_p->arg_vec_p[0], "%lf\n", &(solver->c12));
     if(!procid) printf(HEAD_LINE " c12 = %f\n", solver->c12);
 
     swe_free_section(arg);

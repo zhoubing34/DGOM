@@ -18,13 +18,13 @@ static void swe_h2eta(swe_solver *solver){
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
     const int Nfield = phys->Nfield;
-    real *f_Q = phys->f_Q;
+    dg_real *f_Q = phys->f_Q;
 
     register int k,n,sk;
     for(k=0;k<K;k++){
         for(n=0;n<Np;n++){
             sk = k*Np+n;
-            real bot = solver->bot[sk];
+            dg_real bot = solver->bot[sk];
             f_Q[sk*Nfield] -= bot;
         }
     }
@@ -35,13 +35,13 @@ static void swe_eta2h(swe_solver *solver){
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
     const int Nfield = phys->Nfield;
-    real *f_Q = phys->f_Q;
+    dg_real *f_Q = phys->f_Q;
 
     register int k,n,sk;
     for(k=0;k<K;k++){
         for(n=0;n<Np;n++){
             sk = k*Np+n;
-            real bot = solver->bot[sk];
+            dg_real bot = solver->bot[sk];
             f_Q[sk*Nfield] += bot;
         }
     }
@@ -86,9 +86,9 @@ void swe_run(swe_solver *solver){
 
         for (INTRK=1; INTRK<=5; ++INTRK) {
             /* compute rhs of equations */
-            const real fdt = (real)dt;
-            const real fa = (real)rk4a[INTRK-1];
-            const real fb = (real)rk4b[INTRK-1];
+            const dg_real fdt = (dg_real)dt;
+            const dg_real fa = (dg_real)rk4a[INTRK-1];
+            const dg_real fb = (dg_real)rk4b[INTRK-1];
             pf_set_openbc(phys, time+rk4c[INTRK-1]*dt, time_interp_linear);
             swe_rhs(solver, fa, fb, fdt);
             //swe_h2eta(solver);
@@ -164,7 +164,7 @@ double swe_time_interval(swe_solver *solver){
 
     register int k,n;
     double gdt;
-    real h,u,v;
+    dg_real h,u,v;
 
     for(k=0;k<K;k++){
         double len = phys->region->len[k];
@@ -221,9 +221,9 @@ void swe_ppreserve(swe_solver *solver){
 
     for(k=0;k<K;k++){
         ind = k*Nfield; /* index of k-th cell */
-        real hmean  = phys->c_Q[ind];
-        real qxmean = phys->c_Q[ind+1];
-        real qymean = phys->c_Q[ind+2];
+        dg_real hmean  = phys->c_Q[ind];
+        dg_real qxmean = phys->c_Q[ind+1];
+        dg_real qymean = phys->c_Q[ind+2];
         /* correct negative water depth */
         if(hmean<0.0){
             for(i=0;i<Np;i++) {
@@ -238,14 +238,14 @@ void swe_ppreserve(swe_solver *solver){
         }
 
         ind = k*Np*Nfield; /* index of first node */
-        real hmin = phys->f_Q[ind];
+        dg_real hmin = phys->f_Q[ind];
         /* compute minimum water depth */
         for(i=1;i<Np;i++){
             ind += Nfield;
             hmin = min(hmin, phys->f_Q[ind]);
         }
         /* positive operator */
-        real theta;
+        dg_real theta;
         if(hmean > hmin){ /* in case for `hmean = hmin` */
             theta = min(1, hmean/(hmean-hmin));
         }else{ /* for hmean = hmin */

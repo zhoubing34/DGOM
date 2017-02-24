@@ -16,12 +16,15 @@ stdCell* sc_create(int N, sc_cellType type){
     switch (type){
         case TRIANGLE:
             std = sc_create_tri(N);
-            std->dim = 2; break;
+            std->dim = 2;
+            break;
         case QUADRIL:
             std = sc_createQuad(N);
-            std->dim = 2; break;
+            std->dim = 2;
+            break;
         default:
-            fprintf(stderr, "StandCell (sc_create): Unknown cell type %d\n", type);
+            fprintf(stderr, "%s (%d): Unknown cell type %d\n",
+                    __FUNCTION__, __LINE__, type);
             exit(-1);
     }
     return std;
@@ -142,7 +145,7 @@ double** sc_massMatrix(stdCell *cell){
     for(i=0;i<Np*Np;i++) // copy matrix to a vector
         inv[sk++] = V[0][i];
 
-    Matrix_inverse(inv, Np);
+    matrix_inverse(inv, Np);
 
     // transpose of invV
     for(i=0;i<Np;i++){
@@ -151,7 +154,7 @@ double** sc_massMatrix(stdCell *cell){
         }
     }
 
-    Matrix_multiply(Np, Np, Np, invt, inv, M[0]);
+    matrix_multiply(Np, Np, Np, invt, inv, M[0]);
     return M;
 }
 
@@ -208,15 +211,15 @@ void sc_deriMatrix2d(stdCell *cell, void (*derorthfunc)
     for(i=0;i<Np*Np;i++) // copy matrix to a vector
         inv[sk++] = V[0][i];
 
-    Matrix_inverse(inv, Np);
+    matrix_inverse(inv, Np);
 
     // get derivative Vandermonde matrix
     sc_deriVandMatrix2d(cell, derorthfunc, Vr, Vs);
 
     /* \f$ \mathbf{Dr} = \mathbf{Vr}*\mathbf{V}^{-1} \f$ */
-    Matrix_multiply(Np, Np, Np, Vr[0], inv, cell->Dr[0]);
+    matrix_multiply(Np, Np, Np, Vr[0], inv, cell->Dr[0]);
     /* \f$ \mathbf{Ds} = \mathbf{Vs}*\mathbf{V}^{-1} \f$ */
-    Matrix_multiply(Np, Np, Np, Vs[0], inv, cell->Ds[0]);
+    matrix_multiply(Np, Np, Np, Vs[0], inv, cell->Ds[0]);
 
     matrix_double_free(Vr);
     matrix_double_free(Vs);
@@ -245,14 +248,14 @@ void sc_surfMassMatrix2d(stdCell *cell, double **Mes){
             inv[j*Nfp+i] = w[j];
         }
     }
-    Matrix_inverse(inv, Nfp);
+    matrix_inverse(inv, Nfp);
     /* transform of vandermonde matrix */
     for(i=0;i<Nfp;i++){
         for(j=0;j<Nfp;j++)
             invt[j+Nfp*i] = inv[j*Nfp+i];
     }
     /* get M = inv(V)'*inv(V) */
-    Matrix_multiply(Nfp, Nfp, Nfp, invt, inv, m);
+    matrix_multiply(Nfp, Nfp, Nfp, invt, inv, m);
 
     int k, sr, sk;
     for(i=0;i<Nfaces;i++){
@@ -287,12 +290,12 @@ double** sc_liftMatrix2d(stdCell *cell){
     }
     double invM[Np*Np];
     // get the inverse mass matrix M^{-1} = V*V'
-    Matrix_multiply(Np, Np, Np, V[0], vt, invM);
+    matrix_multiply(Np, Np, Np, V[0], vt, invM);
     // get surface mass matrix Mes
     double **Mes = matrix_double_create(Np, Nfaces * Nfp);
     sc_surfMassMatrix2d(cell, Mes);
     /* LIFT = M^{-1}*Mes */
-    Matrix_multiply(Np, Np, Nfp * Nfaces, invM, Mes[0], LIFT[0]);
+    matrix_multiply(Np, Np, Nfp * Nfaces, invM, Mes[0], LIFT[0]);
 
     // free surface mass matrix
     matrix_double_free(Mes);

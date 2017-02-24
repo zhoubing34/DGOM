@@ -13,7 +13,7 @@ extern conv_solver2d solver;
  * @param [in] y coordinate
  * @param [in,out] ext exact solution
  */
-static void advection_diffusion_ext(int Np, real *x, real *y, double *ext){
+static void advection_diffusion_ext(int Np, dg_real *x, dg_real *y, double *ext){
 
     const double t = solver.finaltime;
     const double u = solver.u, v = solver.v;
@@ -52,7 +52,7 @@ static void advection_diffusion_ext(int Np, real *x, real *y, double *ext){
  * @param [in] y coordinate
  * @param [in,out] ext exact solution
  */
-static void rotation_ext(int Np, real *x, real *y, double *ext){
+static void rotation_ext(int Np, dg_real *x, dg_real *y, double *ext){
 
     const double t = solver.finaltime;
     const double r = 0.6, phase = M_PI_2, T = 2.4;
@@ -73,7 +73,7 @@ static void rotation_ext(int Np, real *x, real *y, double *ext){
 }
 
 
-typedef void (*extsol_fun)(int Np, real *x, real *y, double *ext);
+typedef void (*extsol_fun)(int Np, dg_real *x, dg_real *y, double *ext);
 /**
  * @brief
  * @details
@@ -98,7 +98,7 @@ void conv_normerr(physField *phys){
     }
 
     int register k,n,sk=0;
-    real *f_Q = phys->f_Q;
+    dg_real *f_Q = phys->f_Q;
     double var[Np], ext_Q[Np];
     double err1[Np], err2[Np];
     double Aloc=0; /* total area */

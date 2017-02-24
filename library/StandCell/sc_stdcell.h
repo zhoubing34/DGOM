@@ -45,7 +45,7 @@ typedef struct {
     double **LIFT; ///< lift matrix
 
     /* float version coefficient */
-    real *f_Dr, *f_Ds, *f_LIFT; ///< user specific version
+    dg_real *f_Dr, *f_Ds, *f_LIFT; ///< user specific version
 
 } stdCell;
 

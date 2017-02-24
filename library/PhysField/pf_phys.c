@@ -38,13 +38,13 @@ physField* pf_create(int Nfields, parallMesh *mesh){
     const int Np = phys->cell->Np;
 
     /* nodal array */
-    phys->f_Q    = (real *) calloc((size_t) K*Np*Nfields, sizeof(real));
-    phys->f_rhsQ = (real *) calloc((size_t) K*Np*Nfields, sizeof(real));
-    phys->f_resQ = (real *) calloc((size_t) K*Np*Nfields, sizeof(real));
-    phys->f_ext  = (real *) calloc((size_t) K*Np*Nfields, sizeof(real)); ///> external data
+    phys->f_Q    = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));
+    phys->f_rhsQ = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));
+    phys->f_resQ = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));
+    phys->f_ext  = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real)); ///> external data
 
     /* volume array */
-    phys->c_Q = (real *) calloc((size_t) K*Nfields, sizeof(real));
+    phys->c_Q = (dg_real *) calloc((size_t) K*Nfields, sizeof(dg_real));
 
     /* send/recv buffer */
     permuteNodalBuffer(phys);
@@ -98,8 +98,8 @@ static void permuteNodalBuffer(physField *phys){
     phys->nodeIndexOut = nodeIndexOut;
 
     size_t sz = (size_t) parallNodalNum;
-    phys->f_inQ  = (real *) calloc(sz, sizeof(real));
-    phys->f_outQ = (real *) calloc(sz, sizeof(real));
+    phys->f_inQ  = (dg_real *) calloc(sz, sizeof(dg_real));
+    phys->f_outQ = (dg_real *) calloc(sz, sizeof(dg_real));
 
     parallMesh *mesh = phys->mesh;
     int p2,n1,m,fld;
@@ -142,8 +142,8 @@ static void permuteCellBuffer(physField *phys){
     phys->cellIndexOut = cellIndexOut;
 
     size_t sz = (size_t) phys_parallCellNum;
-    phys->c_inQ  = (real *) calloc(sz, sizeof(real));
-    phys->c_outQ = (real *) calloc(sz, sizeof(real));
+    phys->c_inQ  = (dg_real *) calloc(sz, sizeof(dg_real));
+    phys->c_outQ = (dg_real *) calloc(sz, sizeof(dg_real));
 
     parallMesh *mesh = phys->mesh;
 
@@ -179,7 +179,7 @@ static void phys_volumeInfo2d(physField *phys){
 
     int Nvgeo = 4;
     size_t sz = (size_t) K*Np*Nvgeo;
-    real *vgeo = (real*) calloc(sz, sizeof(real));
+    dg_real *vgeo = (dg_real*) calloc(sz, sizeof(dg_real));
 
     phys->Nvgeo = Nvgeo;
     phys->vgeo = vgeo;
@@ -220,7 +220,7 @@ static void phys_surfInfo2d(physField *phys){
     // allocation of surfinfo
     int Nsurfinfo = 6;
     size_t sz = (size_t) K*Nfp*Nfaces*Nsurfinfo;
-    real *surfinfo = (real*) calloc(sz, sizeof(real));
+    dg_real *surfinfo = (dg_real*) calloc(sz, sizeof(dg_real));
     phys->Nsurfinfo = Nsurfinfo;
     phys->surfinfo = surfinfo;
 
@@ -260,10 +260,10 @@ static void phys_surfInfo2d(physField *phys){
 
                 surfinfo[sk++] = idM; ///< local node index
                 surfinfo[sk++] = idP; ///< adjacent node index
-                surfinfo[sk++] = (real)(sJk[f]/(J[ Fmask[f][m] ])); ///< face scale
+                surfinfo[sk++] = (dg_real)(sJk[f]/(J[ Fmask[f][m] ])); ///< face scale
                 surfinfo[sk++] = bcType; ///< boundary type indicator
-                surfinfo[sk++] = (real)nxk[f]; ///< outward vector, nx
-                surfinfo[sk++] = (real)nyk[f]; ///< outward vector, ny
+                surfinfo[sk++] = (dg_real)nxk[f]; ///< outward vector, nx
+                surfinfo[sk++] = (dg_real)nyk[f]; ///< outward vector, ny
             }
         }
     }

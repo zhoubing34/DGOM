@@ -6,6 +6,6 @@
 #define DGOM_SWE_RHS_H
 
 #include "swe_driver2d.h"
-void swe_rhs(swe_solver *solver, real frka, real frkb, real fdt);
+void swe_rhs(swe_solver *solver, dg_real frka, dg_real frkb, dg_real fdt);
 
 #endif //DGOM_SWE_RHS_H

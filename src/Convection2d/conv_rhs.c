@@ -5,10 +5,10 @@
 #include "PhysField/pf_strong_surface_flux2d.h"
 #include "PhysField/pf_strong_viscosity_LDG_flux2d.h"
 
-int conv_fluxTerm(real *var, real *Eflux, real *Gflux){
-    const real c = var[0];
-    const real u = var[1];
-    const real v = var[2];
+int conv_fluxTerm(dg_real *var, dg_real *Eflux, dg_real *Gflux){
+    const dg_real c = var[0];
+    const dg_real u = var[1];
+    const dg_real v = var[2];
 
     Eflux[0] = u*c; Eflux[1] = 0; Eflux[2] = 0;
     Gflux[0] = v*c; Gflux[1] = 0; Gflux[2] = 0;
@@ -16,10 +16,10 @@ int conv_fluxTerm(real *var, real *Eflux, real *Gflux){
     return 0;
 }
 
-int conv_upWindFlux(real nx, real ny, real *varM, real *varP, real *Fhs){
-    const real cM = varM[0], cP = varP[0];
-    const real uM = varM[1], uP = varP[1];
-    const real vM = varM[2], vP = varP[2];
+int conv_upWindFlux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_real *Fhs){
+    const dg_real cM = varM[0], cP = varP[0];
+    const dg_real uM = varM[1], uP = varP[1];
+    const dg_real vM = varM[2], vP = varP[2];
 
     if( (uM*nx+vM*ny) > 0.0 ){
         Fhs[0] = nx*cM*uM + ny*cM*vM;
@@ -32,7 +32,7 @@ int conv_upWindFlux(real nx, real ny, real *varM, real *varP, real *Fhs){
 }
 
 
-void conv_rhs(physField *phys, real frka, real frkb, real fdt){
+void conv_rhs(physField *phys, dg_real frka, dg_real frkb, dg_real fdt){
 
     parallMesh *mesh = phys->mesh;
     const int K = mesh->grid->K;
@@ -65,15 +65,15 @@ void conv_rhs(physField *phys, real frka, real frkb, real fdt){
 
     /* viscosity flux */
     if(solver.viscosity > DIFF_THRESHOLD) {
-        real c11 = (real) solver.LDG_parameter[0];
-        real c12 = (real) solver.LDG_parameter[1];
-        real c22 = (real) solver.LDG_parameter[2];
+        dg_real c11 = (dg_real) solver.LDG_parameter[0];
+        dg_real c12 = (dg_real) solver.LDG_parameter[1];
+        dg_real c22 = (dg_real) solver.LDG_parameter[2];
         pf_strong_viscosity_LDG_flux2d(phys, NULL, NULL, c11, c12, c22);
     }
 
-    real *f_resQ = phys->f_resQ;
-    real *f_Q = phys->f_Q;
-    const real *f_rhsQ = phys->f_rhsQ;
+    dg_real *f_resQ = phys->f_resQ;
+    dg_real *f_Q = phys->f_Q;
+    const dg_real *f_rhsQ = phys->f_rhsQ;
     int t;
     for(t=0;t<K*Np*Nfield;++t){
         f_resQ[t] = frka*f_resQ[t]+fdt*f_rhsQ[t];   // calculate the resdiual of the equation

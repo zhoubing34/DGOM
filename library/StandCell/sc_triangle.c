@@ -1,12 +1,7 @@
 /**
- * @file
- * Standard triangle element
- *
- * @brief
- * Functions related with standard triangle elements
- *
- * @author
- * li12242, Tianjin University, li12242@tju.edu.cn
+ * @file Standard triangle element
+ * @brief Functions related with standard triangle elements
+ * @author li12242, Tianjin University, li12242@tju.edu.cn
  */
 
 #include "sc_stdcell.h"
@@ -14,7 +9,6 @@
 
 /* transform the index of orthogonal function to [ti,tj] */
 static void sc_transInd_tri(int N, int ind, int *ti, int *tj);
-
 /* transfer coordinate [x,y] on equilateral triangle to natural coordinate [r,s] */
 static void sc_xytors_tri(int Np, double *x, double *y, double *r, double *s);
 
@@ -22,7 +16,9 @@ static void sc_xytors_tri(int Np, double *x, double *y, double *r, double *s);
 static void sc_rstoad(int Np, double *r, double *s, double *a, double *b);
 
 /* get the gradient of the modal basis (id,jd) on the 2D simplex at (a,b). */
-static void sc_gradSimplex2DP_tri(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds);
+static void sc_gradSimplex2DP_tri(
+        int Np, double *a, double *b, int id, int jd,
+        double *dmodedr, double *dmodeds);
 
 /* build the nodes index matrix on each faces */
 static int** sc_fmask_tri(stdCell *tri);
@@ -135,23 +131,23 @@ stdCell* sc_create_tri(int N){
 
     /* float version */
     size_t sz = (size_t) Np*Nfp*Nfaces;
-    tri->f_LIFT = (real *) calloc(sz, sizeof(real));
+    tri->f_LIFT = (dg_real *) calloc(sz, sizeof(dg_real));
 
     int sk = 0, n, m;
     for(n=0;n<Np;++n){
         for(m=0;m<Nfp*Nfaces;++m){
-            tri->f_LIFT[sk++] = (real) tri->LIFT[n][m];
+            tri->f_LIFT[sk++] = (dg_real) tri->LIFT[n][m];
         }
     }
 
     sz = (size_t) Np*Np;
-    tri->f_Dr = (real*) calloc(sz, sizeof(real));
-    tri->f_Ds = (real*) calloc(sz, sizeof(real));
+    tri->f_Dr = (dg_real*) calloc(sz, sizeof(dg_real));
+    tri->f_Ds = (dg_real*) calloc(sz, sizeof(dg_real));
     sk = 0;
     for(n=0;n<Np;++n){
         for(m=0;m<Np;++m){
-            tri->f_Dr[sk  ] = (real) tri->Dr[n][m];
-            tri->f_Ds[sk++] = (real) tri->Ds[n][m];
+            tri->f_Dr[sk  ] = (dg_real) tri->Dr[n][m];
+            tri->f_Ds[sk++] = (dg_real) tri->Ds[n][m];
         }
     }
     return tri;
@@ -200,9 +196,12 @@ static void sc_deriOrthogFunc_tri(stdCell *tri, int ind, double *dr, double *ds)
  * @param [out] dmodedr
  * @param [out] dmodeds
  * @note
- * precondition: dmodedr and dmodeds should be allocated before calling @ref sc_gradSimplex2DP_tri
+ * precondition: dmodedr and dmodeds should be allocated before
+ * calling @ref sc_gradSimplex2DP_tri
  */
-static void sc_gradSimplex2DP_tri(int Np, double *a, double *b, int id, int jd, double *dmodedr, double *dmodeds){
+static void sc_gradSimplex2DP_tri(
+        int Np, double *a, double *b, int id, int jd,
+        double *dmodedr, double *dmodeds){
 
     double fa[Np],dfa[Np],gb[Np],dgb[Np],temp[Np];
     int i;

@@ -1,3 +1,12 @@
+/**
+ * @file
+ * utility functions
+ * @details
+ * 1. `str2int` transfer string to integer;
+ * 2. `str2double` transfer string to double;
+ * 3. utility function in Utility library.
+ */
+
 #ifndef LIBUTILITIES_H
 #define LIBUTILITIES_H
 
@@ -10,50 +19,20 @@
 
 /* float type */
 #ifdef DOUBLE_PRECISION
-typedef double real; ///> user defined float type
-#define MPI_TYPE MPI_DOUBLE ///> variable type for MPI subroutines
-#define NC_TYPE NC_DOUBLE ///> variable type for netCDF subroutines
+typedef double dg_real; ///< user specific float type
+#define MPI_TYPE MPI_DOUBLE ///< variable type for MPI subroutines
+#define NC_TYPE NC_DOUBLE ///< variable type for netCDF subroutines
 #else
-typedef float real; ///> user defined float type
-#define MPI_SIZE MPI_FLOAT ///> variable type for MPI subroutines
-#define NC_TYPE NC_FLOAT ///> variable type for netCDF subroutines
+typedef float dg_real; ///< user specific float type
+#define MPI_TYPE MPI_FLOAT ///< variable type for MPI subroutines
+#define NC_TYPE NC_FLOAT ///< variable type for netCDF subroutines
 #endif
-
-/* min and max function */
-#define max(a,b)  ( (a>b)?a:b )
-#define min(a,b)  ( (a<b)?a:b )
 
 /* max character length */
 #define MAX_NAME_LENGTH 1024
 #define EPS 100*DBL_EPSILON
 
-/* string to int */
-void str2int(char *str, int *N, char* errmessage);
-void str2double(char *str, double *scal, char* errmessage);
-
-/* matrix operation */
-void Matrix_inverse(double *A, int N);
-void Matrix_multiply(const int M, const int K, const int N,
-                     const double *A, const double *B, double *C);
-
-/* allocation */
-double **matrix_double_create(int Nrows, int Ncols);
-double * vector_double_create(int Nrows);
-int    **matrix_int_create(int Nrows, int Ncols);
-int    * vector_int_create(int Nrows);
-float  **matrix_float_create(int Nrows, int Ncols);
-float  * vector_float_create(int Nrows);
-real   **matrix_real_create(int Nrows, int Ncols);
-real   * vector_real_create(int Nrows);
-
-double **matrix_double_free(double **);
-double * vector_double_free(double *);
-int    **matrix_int_free(int **);
-int    * vector_int_free(int *);
-float  **matrix_float_free(float **);
-float  * vector_float_free(float *);
-real   **matrix_real_free(real **);
-real   * vector_real_free(real *);
+#include "mat_utils.h"
 
 /* file I/O */
 /* open file and print error message and exit if fails */
@@ -63,5 +42,9 @@ if( (fp = fopen(filename, "r")) == NULL ){ \
             __FUNCTION__, __FILE__,__LINE__,errmessage,filename);\
     exit(-1); \
 }
+
+/* string to int */
+void str2int(char *str, int *N, char* errmessage);
+void str2double(char *str, double *scal, char* errmessage);
 
 #endif //LIBUTILITIES_H

@@ -7,12 +7,12 @@
 #include "pf_test.h"
 #include "PhysField/pf_strong_volume_flux2d.h"
 
-real t = 3.0f;
-real s = 4.0f;
+dg_real t = 3.0f;
+dg_real s = 4.0f;
 
-static int nodal_flux(real *var, real *Eflux, real *Gflux){
-    real u = var[0];
-    real v = var[1];
+static int nodal_flux(dg_real *var, dg_real *Eflux, dg_real *Gflux){
+    dg_real u = var[0];
+    dg_real v = var[1];
 
     Eflux[0] = u*v;   Gflux[0] = u+t*v; // field 0
     Eflux[1] = s*u+v;   Gflux[1] = -t*u*v; // field 1
@@ -32,13 +32,13 @@ int phys_strong_volume_flux2d_test(physField *phys, int verbose){
     const int Np = shape->Np;
 
     int k,i;
-    real rhs_ext[Np*Nfield*K];
+    dg_real rhs_ext[Np*Nfield*K];
     // assignment
     int sk = 0;
     for(k=0;k<K;k++){
         for(i=0;i<Np;i++){
-            real u = region->x[k][i];
-            real v = region->y[k][i];
+            dg_real u = region->x[k][i];
+            dg_real v = region->y[k][i];
             phys->f_Q[sk] = u; // field 0 of -(dEdx + dGdy)
             rhs_ext[sk++] = -(v + t);
             phys->f_Q[sk] = v; // field 1 of -(dEdx + dGdy)
@@ -58,8 +58,8 @@ int phys_strong_volume_flux2d_test(physField *phys, int verbose){
         fprintf(fp, "K = %d\n", phys->grid->K);
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
         fprintf(fp, "Np = %d\n", phys->cell->Np);
-        PrintVector2File(fp, "f_Q", phys->f_Q, Nfield*Np*k);
-        PrintVector2File(fp, "f_rhsQ", phys->f_rhsQ, Nfield*Np*k);
+        print_double_vector2file(fp, "f_Q", phys->f_Q, Nfield * Np * k);
+        print_double_vector2file(fp, "f_rhsQ", phys->f_rhsQ, Nfield * Np * k);
     }
 
     const int procid = region->procid;

@@ -16,8 +16,8 @@ int sc_triCoor_test(stdCell *tri, int verbose){
 
     if(verbose){
         FILE *fp = fopen("sc_triCoor_test.txt","w");
-        PrintVector2File(fp, "r", tri->r, tri->Np);
-        PrintVector2File(fp, "s", tri->s, tri->Np);
+        print_double_vector2file(fp, "r", tri->r, tri->Np);
+        print_double_vector2file(fp, "s", tri->s, tri->Np);
         fclose(fp);
     }
     return fail;
@@ -42,7 +42,7 @@ int sc_triVandMatrix_test(stdCell *tri, int verbose){
 
     if(verbose){
         FILE *fp = fopen("sc_triVandMatrix_test.txt", "w");
-        PrintMatrix2File(fp, "V", tri->V, NP, NP);
+        print_double_matrix2file(fp, "V", tri->V, NP, NP);
         fclose(fp);
     }
 
@@ -64,7 +64,7 @@ int sc_triMassMatrix_test(stdCell *tri, int verbose){
 
     if(verbose){
         FILE *fp = fopen("sc_triMassMatrix_test.txt", "w");
-        PrintMatrix2File(fp, "M", tri->M, NP, NP);
+        print_double_matrix2file(fp, "M", tri->M, NP, NP);
         fclose(fp);
     }
     matrix_double_free(M_ext);
@@ -91,8 +91,8 @@ int sc_triDeriMatrix_test(stdCell *tri, int verbose){
 
     if(verbose){
         FILE *fp = fopen("sc_triDeriMatrix_test.txt", "w");
-        PrintMatrix2File(fp, "Dr", tri->Dr, NP, NP);
-        PrintMatrix2File(fp, "Ds", tri->Ds, NP, NP);
+        print_double_matrix2file(fp, "Dr", tri->Dr, NP, NP);
+        print_double_matrix2file(fp, "Ds", tri->Ds, NP, NP);
         fclose(fp);
     }
 
@@ -116,7 +116,7 @@ int sc_triLIFT_test(stdCell *tri, int verbose){
 
     if(verbose){
         FILE *fp = fopen("sc_triLIFT_test.txt", "w");
-        PrintMatrix2File(fp, "LIFT", tri->LIFT, NP, NFP);
+        print_double_matrix2file(fp, "LIFT", tri->LIFT, NP, NFP);
         fclose(fp);
     }
 

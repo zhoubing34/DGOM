@@ -44,27 +44,27 @@ nc_file* swe_output(swe_solver *solver){
     nc_var *x   = nc_var_create("x", ndim, dimarray, NC_DOUBLE);
     nc_var *y   = nc_var_create("y", ndim, dimarray, NC_DOUBLE);
     nc_var *bot = nc_var_create("bot", ndim, dimarray, NC_DOUBLE);
-//    free(dimarray);
+//    free(dim_vec_p);
 
     ndim        = 1;
-//    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
+//    dim_vec_p    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = t;
     nc_var *time = nc_var_create("time", ndim, dimarray, NC_DOUBLE);
-//    free(dimarray);
+//    free(dim_vec_p);
 
     ndim        = 3;
-//    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
+//    dim_vec_p    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = t;    /* inner loop */
     dimarray[1] = ne;
     dimarray[2] = np;
     nc_var *h   = nc_var_create("h", ndim, dimarray, NC_DOUBLE);
     nc_var *qx  = nc_var_create("qx", ndim, dimarray, NC_DOUBLE);
     nc_var *qy  = nc_var_create("qy", ndim, dimarray, NC_DOUBLE);
-//    free(dimarray);
+//    free(dim_vec_p);
 
     /* define files */
     ndim        = 3;
-//    dimarray    = (NcDim**) calloc(ndim, sizeof(NcDim*));
+//    dim_vec_p    = (NcDim**) calloc(ndim, sizeof(NcDim*));
     dimarray[0] = np;
     dimarray[1] = ne;
     dimarray[2] = t;
@@ -82,11 +82,11 @@ nc_file* swe_output(swe_solver *solver){
     nc_file_init(file);
 
     /* set coordinate */
-    ncmpi_put_var_double_all(file->id, file->vararray[0]->id, phys->region->x[0]);
-    ncmpi_put_var_double_all(file->id, file->vararray[1]->id, phys->region->y[0]);
+    ncmpi_put_var_double_all(file->id, file->var_vec_p[0]->id, phys->region->x[0]);
+    ncmpi_put_var_double_all(file->id, file->var_vec_p[1]->id, phys->region->y[0]);
 
     /* set bottom topography */
-    ncmpi_put_var_double_all(file->id, file->vararray[6]->id, solver->bot);
+    ncmpi_put_var_double_all(file->id, file->var_vec_p[6]->id, solver->bot);
     return file;
 }
 
@@ -121,7 +121,7 @@ void swe_save_var(swe_solver *solver, int tstep, double time){
     /* put time */
     start_t = tstep; // start index
     count_t = 1;       // length
-    ncmpi_put_vara_double_all(file->id, file->vararray[2]->id, &start_t, &count_t, &time);
+    ncmpi_put_vara_double_all(file->id, file->var_vec_p[2]->id, &start_t, &count_t, &time);
 
     /* put var h */
     start_v[0] = tstep;
@@ -140,7 +140,7 @@ void swe_save_var(swe_solver *solver, int tstep, double time){
             var[sk++] = (float) phys->f_Q[ind];
         }
     }
-    ncmpi_put_vara_float_all(file->id, file->vararray[3]->id, start_v, count_v, var);
+    ncmpi_put_vara_float_all(file->id, file->var_vec_p[3]->id, start_v, count_v, var);
 
     /* put variable qx */
     sk = 0;
@@ -150,7 +150,7 @@ void swe_save_var(swe_solver *solver, int tstep, double time){
             var[sk++] = (float) phys->f_Q[ind];
         }
     }
-    ncmpi_put_vara_float_all(file->id, file->vararray[4]->id, start_v, count_v, var);
+    ncmpi_put_vara_float_all(file->id, file->var_vec_p[4]->id, start_v, count_v, var);
 
     /* put variable qy */
     sk = 0;
@@ -160,7 +160,7 @@ void swe_save_var(swe_solver *solver, int tstep, double time){
             var[sk++] = (float) phys->f_Q[ind];
         }
     }
-    ncmpi_put_vara_float_all(file->id, file->vararray[5]->id, start_v, count_v, var);
+    ncmpi_put_vara_float_all(file->id, file->var_vec_p[5]->id, start_v, count_v, var);
 
 }
 

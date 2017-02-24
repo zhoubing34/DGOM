@@ -28,7 +28,7 @@ void pf_set_openbc(physField *phys, double timeloc, time_interp_method method){
     const int Nv = cell->Nv;
     const int Np = cell->Np;
     int **EToV = phys->grid->EToV;
-    real *f_ext = phys->f_ext;
+    dg_real *f_ext = phys->f_ext;
 
     /* open boundary nc files */
     int *ncfile = vector_int_create(Nobc);

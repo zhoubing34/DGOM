@@ -180,7 +180,7 @@ static void conv_read_input(){
     extern conv_solver2d solver;
     /// 0. section: case info
     arg_section *sec = sec_p[0];
-    sscanf(sec->arg_str[0], "%d\n", &(solver.caseid));
+    sscanf(sec->arg_vec_p[0], "%d\n", &(solver.caseid));
 
     if(!procid){
         printf(HEADEND "--------------------------------\n");
@@ -202,8 +202,8 @@ static void conv_read_input(){
     }
     /// 1. cell info
     sec = sec_p[1];
-    sscanf(sec->arg_str[0], "%d\n", &(solver.celltype));
-    sscanf(sec->arg_str[1], "%d\n", &(solver.N));
+    sscanf(sec->arg_vec_p[0], "%d\n", &(solver.celltype));
+    sscanf(sec->arg_vec_p[1], "%d\n", &(solver.N));
     if(!procid){
         switch (solver.celltype){
             case TRIANGLE:
@@ -222,17 +222,17 @@ static void conv_read_input(){
     }
     /// 2. mesh info
     sec = sec_p[2];
-    sscanf(sec->arg_str[0], "%d\n", &(solver.Ne));
-    sscanf(sec->arg_str[1], "%d\n", &(solver.Ne));
+    sscanf(sec->arg_vec_p[0], "%d\n", &(solver.Ne));
+    sscanf(sec->arg_vec_p[1], "%d\n", &(solver.Ne));
     if(!procid){
         printf(HEADLINE " Ne on x: %d\n", solver.Ne);
         printf(HEADLINE " Ne on y: %d\n", solver.Ne);
     }
     /// 3. time info
     sec = sec_p[3];
-    sscanf(sec->arg_str[0], "%lf\n", &(solver.cfl));
-    sscanf(sec->arg_str[1], "%lf\n", &(solver.dt));
-    sscanf(sec->arg_str[2], "%lf\n", &(solver.finaltime));
+    sscanf(sec->arg_vec_p[0], "%lf\n", &(solver.cfl));
+    sscanf(sec->arg_vec_p[1], "%lf\n", &(solver.dt));
+    sscanf(sec->arg_vec_p[2], "%lf\n", &(solver.finaltime));
     if(!procid){
         printf(HEADLINE " cfl: %lf\n", solver.cfl);
         printf(HEADLINE " dt: %lf\n", solver.dt);
@@ -241,9 +241,9 @@ static void conv_read_input(){
 
     /// 4. physical info
     sec = sec_p[4];
-    sscanf(sec->arg_str[0], "%lf\n", &(solver.u));
-    sscanf(sec->arg_str[1], "%lf\n", &(solver.v));
-    sscanf(sec->arg_str[2], "%lf\n", &(solver.viscosity));
+    sscanf(sec->arg_vec_p[0], "%lf\n", &(solver.u));
+    sscanf(sec->arg_vec_p[1], "%lf\n", &(solver.v));
+    sscanf(sec->arg_vec_p[2], "%lf\n", &(solver.viscosity));
     if(!procid){
         printf(HEADLINE " u = %f\n", solver.u);
         printf(HEADLINE " v = %f\n", solver.v);
@@ -252,9 +252,9 @@ static void conv_read_input(){
 
     /// 5. LDG parameter
     sec = sec_p[5];
-    sscanf(sec->arg_str[0], "%lf\n", &(solver.LDG_parameter[0]));
-    sscanf(sec->arg_str[1], "%lf\n", &(solver.LDG_parameter[1]));
-    sscanf(sec->arg_str[2], "%lf\n", &(solver.LDG_parameter[2]));
+    sscanf(sec->arg_vec_p[0], "%lf\n", &(solver.LDG_parameter[0]));
+    sscanf(sec->arg_vec_p[1], "%lf\n", &(solver.LDG_parameter[1]));
+    sscanf(sec->arg_vec_p[2], "%lf\n", &(solver.LDG_parameter[2]));
     if(!procid){
         printf(HEADLINE " c11 = %f\n", solver.LDG_parameter[0]);
         printf(HEADLINE " c12 = %f\n", solver.LDG_parameter[1]);

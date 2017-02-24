@@ -10,8 +10,8 @@
 physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
                             double xmin, double xmax, double ymin, double ymax);
 physField* swe_file_mesh(swe_solver *solver, char *meshfile);
-real* swe_read_topography(swe_solver *solver, char *botfile);
-real* swe_flat_topography(swe_solver *solver);
-real* swe_parabolic_topography(swe_solver *solver);
+dg_real* swe_read_topography(swe_solver *solver, char *botfile);
+dg_real* swe_flat_topography(swe_solver *solver);
+dg_real* swe_parabolic_topography(swe_solver *solver);
 
 #endif //DGOM_SWE_MESH_H

@@ -21,7 +21,7 @@ int phys_cellFetch_test(physField *phys, int verbose){
     double *vx = grid->vx;
     double *vy = grid->vy;
     double par_coor[phys->parallCellNum];
-    real *c_Q = phys->c_Q;
+    dg_real *c_Q = phys->c_Q;
 
     for(k=0;k<K;k++){
         for(f=0;f<Nfaces;f++){
@@ -61,12 +61,12 @@ int phys_cellFetch_test(physField *phys, int verbose){
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "parallCellNum = %d\n", phys->parallCellNum);
-        PrintIntVector2File(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
-        PrintIntVector2File(fp, "mesh->faceIndexIn", mesh->faceIndexIn, mesh->parallCellNum);
-        PrintVector2File(fp, "c_Q", phys->c_Q, K*Nfield);
-        PrintIntVector2File(fp, "cellIndexOut", phys->cellIndexOut, phys->parallCellNum);
-        PrintVector2File(fp, "c_inQ", phys->c_inQ, phys->parallCellNum);
-        PrintVector2File(fp, "c_outQ", phys->c_outQ, phys->parallCellNum);
+        print_int_vector2file(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
+        print_int_vector2file(fp, "mesh->faceIndexIn", mesh->faceIndexIn, mesh->parallCellNum);
+        print_double_vector2file(fp, "c_Q", phys->c_Q, K * Nfield);
+        print_int_vector2file(fp, "cellIndexOut", phys->cellIndexOut, phys->parallCellNum);
+        print_double_vector2file(fp, "c_inQ", phys->c_inQ, phys->parallCellNum);
+        print_double_vector2file(fp, "c_outQ", phys->c_outQ, phys->parallCellNum);
     }
 
     if(!procid) {

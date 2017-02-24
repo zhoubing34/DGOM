@@ -28,7 +28,7 @@ int pf_openbc_test(physField *phys, int verbose){
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, procid, nprocs);
-        PrintVector2File(fp, "f_ext=", phys->f_ext, Nfield*Np*K);
+        print_double_vector2file(fp, "f_ext=", phys->f_ext, Nfield * Np * K);
         fclose(fp);
     }
 

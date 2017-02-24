@@ -17,17 +17,17 @@
 static void phys_viscosityflux2d(physField *phys,
                                  viscosity_wall_condition_func slipwall_condition,
                                  viscosity_wall_condition_func non_slipwall_condition,
-                                 real c11, real c12, real c22);
+                                 dg_real c11, dg_real c12, dg_real c22);
 
 static void phys_auxiliaryflux2d(physField *phys,
                                  viscosity_wall_condition_func slipwall_condition,
                                  viscosity_wall_condition_func non_slipwall_condition,
-                                 real c11, real c12, real c22);
+                                 dg_real c11, dg_real c12, dg_real c22);
 
 void pf_strong_viscosity_LDG_flux2d(physField *phys,
                                     viscosity_wall_condition_func slipwall_condition,
                                     viscosity_wall_condition_func non_slipwall_condition,
-                                    real c11, real c12, real c22){
+                                    dg_real c11, dg_real c12, dg_real c22){
 
     // check LDG solver is initialized
     if(phys->viscosity == NULL){
@@ -40,12 +40,12 @@ void pf_strong_viscosity_LDG_flux2d(physField *phys,
     const int Nfp = phys->cell->Nfp;
     const int Nfield = phys->Nfield;
 
-    real *p_Q = phys->viscosity->px_Q;
-    real *q_Q = phys->viscosity->py_Q;
-    real *p_inQ = phys->viscosity->px_inQ;
-    real *q_inQ = phys->viscosity->py_inQ;
-    real *p_outQ = phys->viscosity->px_outQ;
-    real *q_outQ = phys->viscosity->py_outQ;
+    dg_real *p_Q = phys->viscosity->px_Q;
+    dg_real *q_Q = phys->viscosity->py_Q;
+    dg_real *p_inQ = phys->viscosity->px_inQ;
+    dg_real *q_inQ = phys->viscosity->py_inQ;
+    dg_real *p_outQ = phys->viscosity->px_outQ;
+    dg_real *q_outQ = phys->viscosity->py_outQ;
 
     register int n;
 
@@ -91,7 +91,7 @@ void pf_strong_viscosity_LDG_flux2d(physField *phys,
 static void phys_auxiliaryflux2d(physField *phys,
                                  viscosity_wall_condition_func slipwall_condition,
                                  viscosity_wall_condition_func non_slipwall_condition,
-                                 real c11, real c12, real c22){
+                                 dg_real c11, dg_real c12, dg_real c22){
 
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
@@ -99,29 +99,29 @@ static void phys_auxiliaryflux2d(physField *phys,
     const int Nfaces = phys->cell->Nfaces;
     const int Nfield = phys->Nfield;
 
-    real *p_Q = phys->viscosity->px_Q;
-    real *q_Q = phys->viscosity->py_Q;
-    real *p_inQ = phys->viscosity->px_inQ;
-    real *q_inQ = phys->viscosity->py_inQ;
+    dg_real *p_Q = phys->viscosity->px_Q;
+    dg_real *q_Q = phys->viscosity->py_Q;
+    dg_real *p_inQ = phys->viscosity->px_inQ;
+    dg_real *q_inQ = phys->viscosity->py_inQ;
 
-    real *f_inQ = phys->f_inQ;
-    real *f_ext = phys->f_ext;
+    dg_real *f_inQ = phys->f_inQ;
+    dg_real *f_ext = phys->f_ext;
 
-    real *f_Q = phys->f_Q;
-    real *f_Dr = phys->cell->f_Dr;
-    real *f_Ds = phys->cell->f_Ds;
-    real *f_LIFT = phys->cell->f_LIFT;
-    real *vgeo = phys->vgeo;
-    real *surfinfo = phys->surfinfo;
+    dg_real *f_Q = phys->f_Q;
+    dg_real *f_Dr = phys->cell->f_Dr;
+    dg_real *f_Ds = phys->cell->f_Ds;
+    dg_real *f_LIFT = phys->cell->f_LIFT;
+    dg_real *vgeo = phys->vgeo;
+    dg_real *surfinfo = phys->surfinfo;
 
-    real *vis_Q = phys->viscosity->vis_Q;
+    dg_real *vis_Q = phys->viscosity->vis_Q;
 
     register int m,n,k,fld,geoid=0,surfid=0;
 
-    real f_varM[Nfield], f_varP[Nfield];
-    real p_varM[Nfield], p_varP[Nfield], p_dflux[Nfp*Nfaces*Nfield];
-    real q_varM[Nfield], q_varP[Nfield], q_dflux[Nfp*Nfaces*Nfield];
-    real vis_varM[Nfield];
+    dg_real f_varM[Nfield], f_varP[Nfield];
+    dg_real p_varM[Nfield], p_varP[Nfield], p_dflux[Nfp*Nfaces*Nfield];
+    dg_real q_varM[Nfield], q_varP[Nfield], q_dflux[Nfp*Nfaces*Nfield];
+    dg_real vis_varM[Nfield];
 
 #if DEBUG
     FILE *fp = CreateLog("phys_auxiliaryflux2d_log",
@@ -131,17 +131,17 @@ static void phys_auxiliaryflux2d(physField *phys,
     for(k=0;k<K;k++){
         // volume integral for p and q
         for(n=0;n<Np;n++){
-            const real *ptDr = f_Dr+n*Np; // n-th row of Dr
-            const real *ptDs = f_Ds+n*Np; // n-th row of Ds
+            const dg_real *ptDr = f_Dr+n*Np; // n-th row of Dr
+            const dg_real *ptDs = f_Ds+n*Np; // n-th row of Ds
 
-            const real drdx = vgeo[geoid++]; // volume geometry for n-th point
-            const real drdy = vgeo[geoid++]; // volume geometry for n-th point
-            const real dsdx = vgeo[geoid++]; // volume geometry for n-th point
-            const real dsdy = vgeo[geoid++]; // volume geometry for n-th point
-            const real *visc = phys->viscosity->vis_Q+(k*Np+n)*Nfield;
+            const dg_real drdx = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real drdy = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real dsdx = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real dsdy = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real *visc = phys->viscosity->vis_Q+(k*Np+n)*Nfield;
 
-            real *p = p_Q + (n+k*Np)*Nfield;
-            real *q = q_Q + (n+k*Np)*Nfield;
+            dg_real *p = p_Q + (n+k*Np)*Nfield;
+            dg_real *q = q_Q + (n+k*Np)*Nfield;
 
             // initialization: set px and py to zero
             for(fld=0;fld<Nfield;fld++){
@@ -150,12 +150,12 @@ static void phys_auxiliaryflux2d(physField *phys,
             }
 
             for(m=0;m<Np;++m){
-                const real dr = ptDr[m]; // m-th column for Dr
-                const real ds = ptDs[m]; // m-th column for Ds
-                const real dx = drdx*dr+dsdx*ds;
-                const real dy = drdy*dr+dsdy*ds;
+                const dg_real dr = ptDr[m]; // m-th column for Dr
+                const dg_real ds = ptDs[m]; // m-th column for Ds
+                const dg_real dx = drdx*dr+dsdx*ds;
+                const dg_real dy = drdy*dr+dsdy*ds;
 
-                const real *c = f_Q + (m+k*Np)*Nfield;
+                const dg_real *c = f_Q + (m+k*Np)*Nfield;
 
                 for(fld=0;fld<Nfield;fld++){
                     p[fld] += visc[fld]*dx*c[fld];
@@ -168,10 +168,10 @@ static void phys_auxiliaryflux2d(physField *phys,
         for(n=0;n<Nfp*Nfaces;n++){
             int  idM = (int)surfinfo[surfid++];
             int  idP = (int)surfinfo[surfid++];
-            const real fsc = surfinfo[surfid++];
+            const dg_real fsc = surfinfo[surfid++];
             const int  bstype = (int)surfinfo[surfid++];
-            const real nx = surfinfo[surfid++];
-            const real ny = surfinfo[surfid++];
+            const dg_real nx = surfinfo[surfid++];
+            const dg_real ny = surfinfo[surfid++];
 
             // local face values
             for(fld=0;fld<Nfield;fld++){
@@ -218,12 +218,12 @@ static void phys_auxiliaryflux2d(physField *phys,
                     break;
             }
 
-            real *flux_P = p_dflux + n*Nfield;
-            real *flux_Q = q_dflux + n*Nfield;
+            dg_real *flux_P = p_dflux + n*Nfield;
+            dg_real *flux_Q = q_dflux + n*Nfield;
 
             for(fld=0;fld<Nfield;fld++){
-                const real df = (f_varM[fld] - f_varP[fld]);
-                const real dp = nx*(p_varM[fld] - p_varP[fld]) + ny*(q_varM[fld] - q_varP[fld]);
+                const dg_real df = (f_varM[fld] - f_varP[fld]);
+                const dg_real dp = nx*(p_varM[fld] - p_varP[fld]) + ny*(q_varM[fld] - q_varP[fld]);
 #if DEBUG
                 fprintf(fp, "%f, ", df);
 #endif
@@ -238,14 +238,14 @@ static void phys_auxiliaryflux2d(physField *phys,
 #endif
 
         for(n=0;n<Np;n++){
-            const real *ptLIFT = f_LIFT + n*Nfp*Nfaces;
+            const dg_real *ptLIFT = f_LIFT + n*Nfp*Nfaces;
 
-            real *p_rhsQ = p_Q + Nfield*(n+k*Np);
-            real *q_rhsQ = q_Q + Nfield*(n+k*Np);
+            dg_real *p_rhsQ = p_Q + Nfield*(n+k*Np);
+            dg_real *q_rhsQ = q_Q + Nfield*(n+k*Np);
             for(m=0;m<Nfp*Nfaces;m++){
-                const real L = ptLIFT[m];
-                real *flux_P = p_dflux+m*Nfield;
-                real *flux_Q = q_dflux+m*Nfield;
+                const dg_real L = ptLIFT[m];
+                dg_real *flux_P = p_dflux+m*Nfield;
+                dg_real *flux_Q = q_dflux+m*Nfield;
 
                 for(fld=0;fld<Nfield;fld++){
                     p_rhsQ[fld] += L*flux_P[fld];
@@ -264,34 +264,34 @@ static void phys_auxiliaryflux2d(physField *phys,
 static void phys_viscosityflux2d(physField *phys,
                                  viscosity_wall_condition_func slipwall_condition,
                                  viscosity_wall_condition_func non_slipwall_condition,
-                                 real c11, real c12, real c22){
+                                 dg_real c11, dg_real c12, dg_real c22){
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
     const int Nfp = phys->cell->Nfp;
     const int Nfaces = phys->cell->Nfaces;
     const int Nfield = phys->Nfield;
 
-    real *f_Q = phys->f_Q;
-    real *f_Dr = phys->cell->f_Dr;
-    real *f_Ds = phys->cell->f_Ds;
-    real *f_LIFT = phys->cell->f_LIFT;
-    real *f_rhs = phys->f_rhsQ;
-    real *vgeo = phys->vgeo;
-    real *surfinfo = phys->surfinfo;
+    dg_real *f_Q = phys->f_Q;
+    dg_real *f_Dr = phys->cell->f_Dr;
+    dg_real *f_Ds = phys->cell->f_Ds;
+    dg_real *f_LIFT = phys->cell->f_LIFT;
+    dg_real *f_rhs = phys->f_rhsQ;
+    dg_real *vgeo = phys->vgeo;
+    dg_real *surfinfo = phys->surfinfo;
 
-    real *p_Q = phys->viscosity->px_Q;
-    real *q_Q = phys->viscosity->py_Q;
-    real *p_inQ = phys->viscosity->px_inQ;
-    real *q_inQ = phys->viscosity->py_inQ;
+    dg_real *p_Q = phys->viscosity->px_Q;
+    dg_real *q_Q = phys->viscosity->py_Q;
+    dg_real *p_inQ = phys->viscosity->px_inQ;
+    dg_real *q_inQ = phys->viscosity->py_inQ;
 
-    real *f_inQ = phys->f_inQ;
-    real *f_ext = phys->f_ext;
+    dg_real *f_inQ = phys->f_inQ;
+    dg_real *f_ext = phys->f_ext;
 
     register int k,n,m,fld,geoid=0,surfid=0;
 
-    real f_varM[Nfield], f_varP[Nfield], f_dflux[Nfp*Nfaces*Nfield];
-    real p_varM[Nfield], p_varP[Nfield];
-    real q_varM[Nfield], q_varP[Nfield];
+    dg_real f_varM[Nfield], f_varP[Nfield], f_dflux[Nfp*Nfaces*Nfield];
+    dg_real p_varM[Nfield], p_varP[Nfield];
+    dg_real q_varM[Nfield], q_varP[Nfield];
 
 #if DEBUG
     FILE *fp = CreateLog("phys_viscosityflux2d_log",
@@ -301,24 +301,24 @@ static void phys_viscosityflux2d(physField *phys,
     for(k=0;k<K;k++){
         // volume integral for p and q
         for(n=0;n<Np;n++){
-            const real *ptDr = f_Dr+n*Np; // n-th row of Dr
-            const real *ptDs = f_Ds+n*Np; // n-th row of Ds
+            const dg_real *ptDr = f_Dr+n*Np; // n-th row of Dr
+            const dg_real *ptDs = f_Ds+n*Np; // n-th row of Ds
 
-            const real drdx = vgeo[geoid++]; // volume geometry for n-th point
-            const real drdy = vgeo[geoid++]; // volume geometry for n-th point
-            const real dsdx = vgeo[geoid++]; // volume geometry for n-th point
-            const real dsdy = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real drdx = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real drdy = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real dsdx = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real dsdy = vgeo[geoid++]; // volume geometry for n-th point
 
-            real *rhs = f_rhs + (k*Np+n)*Nfield;
+            dg_real *rhs = f_rhs + (k*Np+n)*Nfield;
 
             for(m=0;m<Np;++m){
-                const real dr = ptDr[m]; // m-th column for Dr
-                const real ds = ptDs[m]; // m-th column for Ds
-                const real dx = drdx*dr+dsdx*ds;
-                const real dy = drdy*dr+dsdy*ds;
+                const dg_real dr = ptDr[m]; // m-th column for Dr
+                const dg_real ds = ptDs[m]; // m-th column for Ds
+                const dg_real dx = drdx*dr+dsdx*ds;
+                const dg_real dy = drdy*dr+dsdy*ds;
 
-                const real *p = p_Q + (m+k*Np)*Nfield;
-                const real *q = q_Q + (m+k*Np)*Nfield;
+                const dg_real *p = p_Q + (m+k*Np)*Nfield;
+                const dg_real *q = q_Q + (m+k*Np)*Nfield;
 
                 for(fld=0;fld<Nfield;fld++){
                     rhs[fld] += dx*p[fld] + dy*q[fld];
@@ -329,10 +329,10 @@ static void phys_viscosityflux2d(physField *phys,
         for(n=0;n<Nfaces*Nfp;n++){
             int  idM = (int)surfinfo[surfid++];
             int  idP = (int)surfinfo[surfid++];
-            const real fsc = surfinfo[surfid++];
+            const dg_real fsc = surfinfo[surfid++];
             const int  bstype = (int)surfinfo[surfid++];
-            const real nx = surfinfo[surfid++];
-            const real ny = surfinfo[surfid++];
+            const dg_real nx = surfinfo[surfid++];
+            const dg_real ny = surfinfo[surfid++];
 
             // local face values
             for(fld=0;fld<Nfield;fld++){
@@ -378,13 +378,13 @@ static void phys_viscosityflux2d(physField *phys,
                     break;
             }
 
-            real *flux = f_dflux + n*Nfield;
+            dg_real *flux = f_dflux + n*Nfield;
 
             for(fld=0;fld<Nfield;fld++){
-                const real df = (f_varM[fld] - f_varP[fld]);
-                const real dp = (p_varM[fld] - p_varP[fld]);
-                const real dq = (q_varM[fld] - q_varP[fld]);
-                const real dpn = nx*dp + ny*dq;
+                const dg_real df = (f_varM[fld] - f_varP[fld]);
+                const dg_real dp = (p_varM[fld] - p_varP[fld]);
+                const dg_real dq = (q_varM[fld] - q_varP[fld]);
+                const dg_real dpn = nx*dp + ny*dq;
 
 #if DEBUG
                 fprintf(fp, "%f, %f, %f, ", df, dp, dq);
@@ -398,11 +398,11 @@ static void phys_viscosityflux2d(physField *phys,
 #endif
 
         for(n=0;n<Np;n++){
-            const real *ptLIFT = f_LIFT + n*Nfp*Nfaces;
+            const dg_real *ptLIFT = f_LIFT + n*Nfp*Nfaces;
             for(m=0;m<Nfp*Nfaces;m++){
-                const real L = ptLIFT[m];
-                real *flux_Q = f_dflux+m*Nfield;
-                real *f_rhsQ = phys->f_rhsQ + Nfield*(n+k*Np);
+                const dg_real L = ptLIFT[m];
+                dg_real *flux_Q = f_dflux+m*Nfield;
+                dg_real *f_rhsQ = phys->f_rhsQ + Nfield*(n+k*Np);
 
                 for(fld=0;fld<Nfield;fld++)
                     f_rhsQ[fld] += L*flux_Q[fld];

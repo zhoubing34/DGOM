@@ -276,16 +276,16 @@ static void mr_reg_volumInfo2d(multiReg *region){
     double **dsdy = region->dsdy;
 //    region->Nvgeo = 4;
 //    size_t sz = (size_t)region->Nvgeo*K*Np;
-//    region->vgeo = (real*) calloc(sz, sizeof(real));
-//    real *vgeo = region->vgeo;
+//    region->vgeo = (dg_real*) calloc(sz, sizeof(dg_real));
+//    dg_real *vgeo = region->vgeo;
 
     for(k=0;k<K;k++){
 
         // calculate the dxdr,dxds,dydr,dyds
-        Matrix_multiply(Np, Np, 1, Dr[0], region->x[k], dxdr);
-        Matrix_multiply(Np, Np, 1, Ds[0], region->x[k], dxds);
-        Matrix_multiply(Np, Np, 1, Dr[0], region->y[k], dydr);
-        Matrix_multiply(Np, Np, 1, Ds[0], region->y[k], dyds);
+        matrix_multiply(Np, Np, 1, Dr[0], region->x[k], dxdr);
+        matrix_multiply(Np, Np, 1, Ds[0], region->x[k], dxds);
+        matrix_multiply(Np, Np, 1, Dr[0], region->y[k], dydr);
+        matrix_multiply(Np, Np, 1, Ds[0], region->y[k], dyds);
 
         for(n=0;n<Np;n++){
             double jtemp = -dxds[n]*dydr[n] + dxdr[n]*dyds[n];

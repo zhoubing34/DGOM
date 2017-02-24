@@ -7,9 +7,9 @@
 
 #include "pf_phys.h"
 
-typedef int (* wall_condition_func)(real nx, real ny, real *varM, real *varP);
-typedef int (*nodal_flux_func)(real *var, real *Eflux, real *Gflux);
-typedef int (*numerical_flux_func)(real nx, real ny, real *varM, real *varP, real *Fhs);
+typedef int (* wall_condition_func)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP);
+typedef int (*nodal_flux_func)(dg_real *var, dg_real *Eflux, dg_real *Gflux);
+typedef int (*numerical_flux_func)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_real *Fhs);
 
 void pf_strong_surface_flux2d
         (physField *phys,

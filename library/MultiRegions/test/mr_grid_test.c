@@ -15,7 +15,7 @@ int mr_grid_Ktol_test(geoGrid *grid, int verbose){
     if(verbose){
         /* gen log filename */
         FILE *fp = create_log(__FUNCTION__, grid->procid, grid->nprocs);
-        PrintIntVector2File(fp, "K", &(grid->K), 1);
+        print_int_vector2file(fp, "K", &(grid->K), 1);
         fclose(fp);
     }
     const int procid = grid->procid;
@@ -34,7 +34,7 @@ int mr_grid_EToV_test(geoGrid *grid, int verbose){
     if(verbose){
         /* gen log filename */
         FILE *fp = create_log(__FUNCTION__, grid->procid, grid->nprocs);
-        PrintIntMatrix2File(fp, "EToV", grid->EToV, grid->K, grid->cell->Nv);
+        print_int_matrix2file(fp, "EToV", grid->EToV, grid->K, grid->cell->Nv);
         fclose(fp);
     }
     const int procid = grid->procid;
@@ -52,8 +52,8 @@ int mr_grid_vertex_test(geoGrid *grid, int verbose){
     if(verbose){
         /* gen log filename */
         FILE *fp = create_log(__FUNCTION__, grid->procid, grid->nprocs);
-        PrintVector2File(fp, "vx", grid->vx, grid->Nv);
-        PrintVector2File(fp, "vy", grid->vy, grid->Nv);
+        print_double_vector2file(fp, "vx", grid->vx, grid->Nv);
+        print_double_vector2file(fp, "vy", grid->vy, grid->Nv);
         fclose(fp);
     }
     const int procid = grid->procid;

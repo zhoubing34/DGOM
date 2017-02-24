@@ -21,7 +21,7 @@
  * @param[in] phys physical field structure.
  * @param[in,out] f_mean integral averaged values of each faces
  */
-static void pf_face_mean(physField *phys, real *f_mean){
+static void pf_face_mean(physField *phys, dg_real *f_mean){
 
     const int Nfield = phys->Nfield;
     const int Nfaces = phys->cell->Nfaces;
@@ -32,7 +32,7 @@ static void pf_face_mean(physField *phys, real *f_mean){
     double *ws = phys->cell->ws;
     register int k,f,n,m,fld;
     for(k=0;k<K;k++){
-        real *f_Q = phys->f_Q + k*Np*Nfield;
+        dg_real *f_Q = phys->f_Q + k*Np*Nfield;
         for(f=0;f<Nfaces;f++){
             int sk = k*Nfaces*Nfield + f*Nfield;
             /* initialization */
@@ -52,7 +52,7 @@ static void pf_face_mean(physField *phys, real *f_mean){
     return;
 }
 
-static void pf_weiface_mean(physField *phys, real *f_mean){
+static void pf_weiface_mean(physField *phys, dg_real *f_mean){
     const int Nfield = phys->Nfield;
     const int Nfaces = phys->cell->Nfaces;
     const int K = phys->grid->K;
@@ -63,18 +63,18 @@ static void pf_weiface_mean(physField *phys, real *f_mean){
     multiReg *region = phys->region;
     parallMesh *mesh = phys->mesh;
     register int k,f,n,fld;
-    real *xc = vector_real_create(K);
-    real *yc = vector_real_create(K);
+    dg_real *xc = vector_real_create(K);
+    dg_real *yc = vector_real_create(K);
     for(k=0;k<K;k++){
         const double Area = 1.0/region->size[k];
         xc[k] = Area * mr_reg_integral(region, k, region->x[k]);
         yc[k] = Area * mr_reg_integral(region, k, region->y[k]);
     }
     const int parallCellNum = phys->mesh->parallCellNum;
-    real *xc_out = vector_real_create(parallCellNum);
-    real *xc_in = vector_real_create(parallCellNum);
-    real *yc_out = vector_real_create(parallCellNum);
-    real *yc_in = vector_real_create(parallCellNum);
+    dg_real *xc_out = vector_real_create(parallCellNum);
+    dg_real *xc_in = vector_real_create(parallCellNum);
+    dg_real *yc_out = vector_real_create(parallCellNum);
+    dg_real *yc_in = vector_real_create(parallCellNum);
 
     for(n=0;n<parallCellNum;++n){
         int sk = mesh->cellIndexOut[n];
@@ -91,7 +91,7 @@ static void pf_weiface_mean(physField *phys, real *f_mean){
     pf_fetchBuffer(procid, nprocs, mesh->Npar, yc_out, yc_in,
                    yc_out_requests, yc_in_requests, &Nmess);
 
-    real *c_Q = phys->c_Q;
+    dg_real *c_Q = phys->c_Q;
     int **EToE = mesh->EToE;
     int **EToP = mesh->EToP;
     double **x = phys->region->x;
@@ -116,8 +116,8 @@ static void pf_weiface_mean(physField *phys, real *f_mean){
 
             double d1 = (xf - xc[k])*(xf - xc[k]) + (yf - yc[k])*(yf - yc[k]);
             double d2 = (xf - xc[e])*(xf - xc[e]) + (yf - yc[e])*(yf - yc[e]);
-            real w1 = d2/(d1 + d2);
-            real w2 = d1/(d1 + d2);
+            dg_real w1 = d2/(d1 + d2);
+            dg_real w2 = d1/(d1 + d2);
             for(fld=0;fld<Nfield;fld++)
                 f_mean[sk+fld] = (c_Q[k*Nfield+fld]*w1 + c_Q[e*Nfield+fld]*w2);
         }
@@ -132,8 +132,8 @@ static void pf_weiface_mean(physField *phys, real *f_mean){
         k = mesh->cellIndexIn[n];
         f = mesh->faceIndexIn[n];
 
-        real xc_next = xc_in[n];
-        real yc_next = yc_in[n];
+        dg_real xc_next = xc_in[n];
+        dg_real yc_next = yc_in[n];
         int *fmask = phys->cell->Fmask[f];
         int v1 = fmask[0];
         int v2 = fmask[Nfp-1];
@@ -142,8 +142,8 @@ static void pf_weiface_mean(physField *phys, real *f_mean){
 
         double d1 = (xf - xc[k])*(xf - xc[k]) + (yf - yc[k])*(yf - yc[k]);
         double d2 = (xf - xc_next)*(xf - xc_next) + (yf - yc_next)*(yf - yc_next);
-        real w1 = d2/(d1 + d2);
-        real w2 = d1/(d1 + d2);
+        dg_real w1 = d2/(d1 + d2);
+        dg_real w2 = d1/(d1 + d2);
 
         int sk = k*Nfaces*Nfield + f*Nfield;
         for(fld=0;fld<Nfield;fld++){
@@ -167,7 +167,7 @@ static void pf_weiface_mean(physField *phys, real *f_mean){
  * @param[out] px
  * @param[out] py
  */
-static void phys_gradient_Green(physField *phys, real *px, real *py){
+static void phys_gradient_Green(physField *phys, dg_real *px, dg_real *py){
     const int K = phys->grid->K;
     const int Nfield = phys->Nfield;
     const int Nfaces = phys->cell->Nfaces;
@@ -176,7 +176,7 @@ static void phys_gradient_Green(physField *phys, real *px, real *py){
     register int k,f,fld,sk;
     int **fmask = phys->cell->Fmask;
 
-    real f_mean[K*Nfaces*Nfield];
+    dg_real f_mean[K*Nfaces*Nfield];
     pf_face_mean(phys, f_mean);
 
     for(k=0;k<K;k++){
@@ -214,7 +214,7 @@ static void phys_gradient_Green(physField *phys, real *px, real *py){
 }
 
 
-void pf_adjacent_cellinfo(physField *phys, real *cell_max, real *cell_min){
+void pf_adjacent_cellinfo(physField *phys, dg_real *cell_max, dg_real *cell_min){
     const int K = phys->grid->K;
     const int Nfield = phys->Nfield;
     const int procid = phys->mesh->procid;
@@ -234,9 +234,9 @@ void pf_adjacent_cellinfo(physField *phys, real *cell_max, real *cell_min){
     int **EToE = phys->mesh->EToE;
     int **EToP = phys->mesh->EToP;
     for(k=0;k<K;k++){
-        real *c_mean = phys->c_Q + k*Nfield; // mean value of k-th cell
-        real c_max[Nfield];
-        real c_min[Nfield];
+        dg_real *c_mean = phys->c_Q + k*Nfield; // mean value of k-th cell
+        dg_real c_max[Nfield];
+        dg_real c_min[Nfield];
         /* initialize of c_max & c_min */
         for(fld=0;fld<Nfield;fld++){
             c_max[fld] = c_mean[fld];
@@ -250,7 +250,7 @@ void pf_adjacent_cellinfo(physField *phys, real *cell_max, real *cell_min){
             if(p!=procid) continue;
 
             for(fld=0;fld<Nfield;fld++){
-                real c_next = phys->c_Q[e*Nfield+fld];
+                dg_real c_next = phys->c_Q[e*Nfield+fld];
                 c_max[fld] = max(c_max[fld], c_next);
                 c_min[fld] = min(c_min[fld], c_next);
             }
@@ -272,7 +272,7 @@ void pf_adjacent_cellinfo(physField *phys, real *cell_max, real *cell_min){
     for(n=0;n<mesh->parallCellNum;n++){
         k = mesh->cellIndexIn[n];
         for(fld=0;fld<Nfield;fld++){
-            real c_next = phys->c_inQ[n*Nfield+fld];
+            dg_real c_next = phys->c_inQ[n*Nfield+fld];
             int sk = k*Nfield+fld;
             cell_max[sk] = max(cell_max[sk], c_next);
             cell_min[sk] = min(cell_min[sk], c_next);
@@ -288,8 +288,8 @@ void pf_adjacent_cellinfo(physField *phys, real *cell_max, real *cell_min){
  * @param beta
  * @param psi
  */
-void pf_BJ_limiter(physField *phys, real *cell_max, real *cell_min,
-                   double beta, real *psi){
+void pf_BJ_limiter(physField *phys, dg_real *cell_max, dg_real *cell_min,
+                   double beta, dg_real *psi){
 
     const int K = phys->grid->K;
     const int Nfield = phys->Nfield;
@@ -297,15 +297,15 @@ void pf_BJ_limiter(physField *phys, real *cell_max, real *cell_min,
 
     register int k,fld,n;
     for(k=0;k<K;k++){
-        real *f_Q = phys->f_Q + k*Np*Nfield; // variable of k-th cell
+        dg_real *f_Q = phys->f_Q + k*Np*Nfield; // variable of k-th cell
         for(fld=0;fld<Nfield;fld++){
             int sk = k*Nfield+fld;
-            real qmax = cell_max[sk];
-            real qmin = cell_min[sk];
-            real qmean = phys->c_Q[sk];
+            dg_real qmax = cell_max[sk];
+            dg_real qmin = cell_min[sk];
+            dg_real qmean = phys->c_Q[sk];
             psi[sk] = 1.0;
             for(n=0;n<Np;n++){
-                real qval = f_Q[n*Nfield+fld];
+                dg_real qval = f_Q[n*Nfield+fld];
                 double rk = 1.0;
                 /* compute the limiter `psi` */
                 if(qval > qmax){
@@ -313,7 +313,7 @@ void pf_BJ_limiter(physField *phys, real *cell_max, real *cell_min,
                 }else if(qval < qmin){
                     rk = (qmin - qmean)/(qval - qmean);
                 }
-                real t = max(min(beta*rk, 1.0), min(rk, beta));
+                dg_real t = max(min(beta*rk, 1.0), min(rk, beta));
                 psi[sk] = min(psi[sk], t);
             }
         }
@@ -344,15 +344,15 @@ void pf_slloc2d(physField *phys, double beta){
     pf_cellMean(phys);
 
     /* 2. fetch cell info with other processes */
-    real cell_max[K*Nfield], cell_min[K*Nfield];
+    dg_real cell_max[K*Nfield], cell_min[K*Nfield];
     pf_adjacent_cellinfo(phys, cell_max, cell_min);
 
     /* 3. calculate the unlimited gradient */
-    real px[K*Nfield], py[K*Nfield];
+    dg_real px[K*Nfield], py[K*Nfield];
     phys_gradient_Green(phys, px, py);
 
     /* 4. calculate the limited results */
-    real psi[K*Nfield];
+    dg_real psi[K*Nfield];
     pf_BJ_limiter(phys, cell_max, cell_min, beta, psi);
 
     /* 5. reconstruction */
@@ -362,18 +362,18 @@ void pf_slloc2d(physField *phys, double beta){
         double xc = A * mr_reg_integral(region, k, region->x[k]);
         double yc = A * mr_reg_integral(region, k, region->y[k]);
 
-        real *f_Q = phys->f_Q + k*Np*Nfield; // variable of k-th cell
+        dg_real *f_Q = phys->f_Q + k*Np*Nfield; // variable of k-th cell
         for(fld=0;fld<Nfield;fld++){
             int sk = k*Nfield+fld;
             /* compute the limited gradient */
-            real qx = px[sk] * psi[sk];
-            real qy = py[sk] * psi[sk];
+            dg_real qx = px[sk] * psi[sk];
+            dg_real qy = py[sk] * psi[sk];
 
             /* reconstruction of each element */
-            real qmean = phys->c_Q[sk];
+            dg_real qmean = phys->c_Q[sk];
             for(n=0;n<Np;n++){
-                real dx = (real)(region->x[k][n] - xc);
-                real dy = (real)(region->y[k][n] - yc);
+                dg_real dx = (dg_real)(region->x[k][n] - xc);
+                dg_real dy = (dg_real)(region->y[k][n] - yc);
 
                 f_Q[n*Nfield+fld] = qmean + dx*qx + dy*qy;
             }
@@ -386,27 +386,27 @@ void pf_slloc2d(physField *phys, double beta){
 }
 
 
-static void triGradient(real *x, real *y, real *f, real *px, real *py){
-    real a[4], b[2];
+static void triGradient(dg_real *x, dg_real *y, dg_real *f, dg_real *px, dg_real *py){
+    dg_real a[4], b[2];
     a[0] = x[1] - x[0]; a[1] = y[1] - y[0];
     a[2] = x[2] - x[0]; a[3] = y[2] - y[0];
     b[0] = f[1] - f[0]; b[1] = f[2] - f[0];
 
-    real det = a[0]*a[3] - a[1]*a[2];
+    dg_real det = a[0]*a[3] - a[1]*a[2];
     *px = ( b[0]*a[3] - b[1]*a[1])/det;
     *py = (-b[0]*a[2] + b[1]*a[0])/det;
 }
 
 static void VA_weigrad(
         const int Nfaces, const int Nfield,
-        real *px, real *py,
-        real *wpx, real *wpy){
+        dg_real *px, dg_real *py,
+        dg_real *wpx, dg_real *wpy){
 
     register int i,j,fld;
-    real EPSILON = 1.0e-12;
-    real gra_x[Nfaces], gra_y[Nfaces], gra_det[Nfaces];
+    dg_real EPSILON = 1.0e-12;
+    dg_real gra_x[Nfaces], gra_y[Nfaces], gra_det[Nfaces];
     for(fld=0;fld<Nfield;fld++){
-        real frac=Nfaces*EPSILON;
+        dg_real frac=Nfaces*EPSILON;
         wpx[fld] = 0.0;
         wpy[fld] = 0.0;
         for(i=0;i<Nfaces;i++){
@@ -415,7 +415,7 @@ static void VA_weigrad(
             gra_det[i] = gra_x[i]*gra_x[i] + gra_y[i]*gra_y[i];
         }
         for(i=0;i<Nfaces;i++){
-            real w = 1.0;
+            dg_real w = 1.0;
             for(j=0;j<Nfaces;j++){
                 if(i==j){ continue; }
                 w = w*gra_det[j];
@@ -444,7 +444,7 @@ void pf_vert_limit(physField *phys){
 
     parallMesh *mesh = phys->mesh;
     multiReg *region = phys->region;
-    real *f_Q = phys->f_Q;
+    dg_real *f_Q = phys->f_Q;
 
     register int k,n,f,fld;
     /** 1. calculate the cell average value */
@@ -464,8 +464,8 @@ void pf_vert_limit(physField *phys){
     /** 2. limited vertex value  */
     int **EToV = phys->grid->EToV;
     /* maximum and minimum of each vertex */
-    real *vmax = vector_real_create(Nvert * Nfield);
-    real *vmin = vector_real_create(Nvert * Nfield);
+    dg_real *vmax = vector_real_create(Nvert * Nfield);
+    dg_real *vmin = vector_real_create(Nvert * Nfield);
     for(n=0;n<Nvert*Nfield;n++){
         vmax[n] = -INFTY;
         vmin[n] =  INFTY;
@@ -522,9 +522,9 @@ void pf_vert_limit(physField *phys){
     vector_real_free(vmax);
     vector_real_free(vmin);
 
-    real xt[3], yt[3], ft[3];
-    real *px = vector_real_create(Nfaces*Nfield);
-    real *py = vector_real_create(Nfaces*Nfield);
+    dg_real xt[3], yt[3], ft[3];
+    dg_real *px = vector_real_create(Nfaces*Nfield);
+    dg_real *py = vector_real_create(Nfaces*Nfield);
     for(k=0;k<K;k++){
         double A = 1.0/phys->region->size[k];
         double xc = A * mr_reg_integral(region, k, region->x[k]);
@@ -553,7 +553,7 @@ void pf_vert_limit(physField *phys){
             }
         }
         /* 4. weighted gradient */
-        real wpx[Nfield], wpy[Nfield];
+        dg_real wpx[Nfield], wpy[Nfield];
         VA_weigrad(Nfaces, Nfield, px, py, wpx, wpy);
 #if DEBUG
         for(fld=0;fld<Nfield;fld++){
@@ -562,10 +562,10 @@ void pf_vert_limit(physField *phys){
 #endif
         /* 5. reconstruction */
         for(n=0;n<Np;n++){
-            real dx = (real)(region->x[k][n] - xc);
-            real dy = (real)(region->y[k][n] - yc);
+            dg_real dx = (dg_real)(region->x[k][n] - xc);
+            dg_real dy = (dg_real)(region->y[k][n] - yc);
             for(fld=0;fld<Nfield;fld++){
-                real qmean = phys->c_Q[k*Nfield+fld];
+                dg_real qmean = phys->c_Q[k*Nfield+fld];
                 f_Q[n*Nfield+fld] = qmean + dx*wpx[fld] + dy*wpy[fld];
             }
         }

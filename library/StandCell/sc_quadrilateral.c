@@ -71,24 +71,24 @@ stdCell* sc_createQuad(int N){
     sc_GaussQuadrature2d(quad);
 
     /* float version */
-    size_t sz = Np*Nfp*Nfaces*sizeof(real);
-    quad->f_LIFT = (real *) malloc(sz);
-    sz = Np*Np*sizeof(real);
-    quad->f_Dr = (real*) malloc(sz);
-    quad->f_Ds = (real*) malloc(sz);
+    size_t sz = Np*Nfp*Nfaces*sizeof(dg_real);
+    quad->f_LIFT = (dg_real *) malloc(sz);
+    sz = Np*Np*sizeof(dg_real);
+    quad->f_Dr = (dg_real*) malloc(sz);
+    quad->f_Ds = (dg_real*) malloc(sz);
 
     int sk = 0, n, m;
     for(n=0;n<Np;++n){
         for(m=0;m<Nfp*Nfaces;++m){
-            quad->f_LIFT[sk++] = (real) quad->LIFT[n][m];
+            quad->f_LIFT[sk++] = (dg_real) quad->LIFT[n][m];
         }
     }
 
     sk = 0;
     for(n=0;n<Np;++n){
         for(m=0;m<Np;++m){
-            quad->f_Dr[sk] = (real) quad->Dr[n][m];
-            quad->f_Ds[sk] = (real) quad->Ds[n][m];
+            quad->f_Dr[sk] = (dg_real) quad->Dr[n][m];
+            quad->f_Ds[sk] = (dg_real) quad->Ds[n][m];
             ++sk;
         }
     }

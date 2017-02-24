@@ -20,7 +20,7 @@ int MatrixInverse_test(){
     }
 
     // call
-    Matrix_inverse(temp, Nrow);
+    matrix_inverse(temp, Nrow);
 
     // check
     fail = vector_double_test("Matrix_Inverse", temp, invCt, Nrow * Nrow);

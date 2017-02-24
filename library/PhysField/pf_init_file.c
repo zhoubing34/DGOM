@@ -36,7 +36,7 @@ void pf_init_file2d(physField *phys, char *casename){
     /* read vertex initial values */
     register int n,fld,k;
     int tmp;
-    real **intval = matrix_real_create(Nfield, Nvert);
+    dg_real **intval = matrix_real_create(Nfield, Nvert);
     for(n=0;n<Nvert;n++){
         fscanf(fp, "%d", &tmp);
         for(fld=0;fld<Nfield;fld++){
@@ -50,8 +50,8 @@ void pf_init_file2d(physField *phys, char *casename){
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
     int **EToV = phys->grid->EToV;
-    real floc_v[Nv], floc[Np];
-    real *f_Q = phys->f_Q;
+    dg_real floc_v[Nv], floc[Np];
+    dg_real *f_Q = phys->f_Q;
     for(k=0;k<K;k++){
         for(fld=0;fld<Nfield;fld++){
             for(n=0;n<Nv;n++){ // vertex initial values

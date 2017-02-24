@@ -10,10 +10,10 @@ int mr_mesh_connet_test(parallMesh *mesh, int verbose){
     const int Nfp = mesh->cell->Nfp;
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
-        PrintIntMatrix2File(fp, "mesh->EToE", mesh->EToE, K, Nfaces);
-        PrintIntMatrix2File(fp, "mesh->EToF", mesh->EToF, K, Nfaces);
-        PrintIntVector2File(fp, "mesh->vmapM", mesh->vmapM, K*Nfaces*Nfp);
-        PrintIntVector2File(fp, "mesh->vmapP", mesh->vmapP, K*Nfaces*Nfp);
+        print_int_matrix2file(fp, "mesh->EToE", mesh->EToE, K, Nfaces);
+        print_int_matrix2file(fp, "mesh->EToF", mesh->EToF, K, Nfaces);
+        print_int_vector2file(fp, "mesh->vmapM", mesh->vmapM, K * Nfaces * Nfp);
+        print_int_vector2file(fp, "mesh->vmapP", mesh->vmapP, K * Nfaces * Nfp);
         fclose(fp);
     }
     const int procid = mesh->procid;
@@ -27,14 +27,14 @@ int mr_mesh_parallel_test(parallMesh *mesh, int verbose){
     const int Nfaces = mesh->cell->Nfaces;
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
-        PrintIntMatrix2File(fp, "mesh->EToP", mesh->EToP, K, Nfaces);
-        PrintIntVector2File(fp, "mesh->Npar", mesh->Npar, mesh->nprocs);
+        print_int_matrix2file(fp, "mesh->EToP", mesh->EToP, K, Nfaces);
+        print_int_vector2file(fp, "mesh->Npar", mesh->Npar, mesh->nprocs);
         fprintf(fp, "mesh->parallCellNum: %d\n", mesh->parallCellNum);
-        PrintIntVector2File(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
-        PrintIntVector2File(fp, "mesh->faceIndexIn", mesh->faceIndexIn, mesh->parallCellNum);
-        PrintIntVector2File(fp, "mesh->cellIndexOut", mesh->cellIndexOut, mesh->parallCellNum);
+        print_int_vector2file(fp, "mesh->cellIndexIn", mesh->cellIndexIn, mesh->parallCellNum);
+        print_int_vector2file(fp, "mesh->faceIndexIn", mesh->faceIndexIn, mesh->parallCellNum);
+        print_int_vector2file(fp, "mesh->cellIndexOut", mesh->cellIndexOut, mesh->parallCellNum);
         fprintf(fp, "mesh->parallNodeNum: %d\n", mesh->parallNodeNum);
-        PrintIntVector2File(fp, "mesh->nodeIndexOut", mesh->nodeIndexOut, mesh->parallNodeNum);
+        print_int_vector2file(fp, "mesh->nodeIndexOut", mesh->nodeIndexOut, mesh->parallNodeNum);
 
         fclose(fp);
     }
@@ -49,11 +49,11 @@ int mr_mesh_bc_test(parallMesh *mesh, int verbose){
     const int Nfaces = mesh->cell->Nfaces;
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
-        PrintIntMatrix2File(fp, "mesh->EToBS", mesh->EToBS, K, Nfaces);
+        print_int_matrix2file(fp, "mesh->EToBS", mesh->EToBS, K, Nfaces);
         fprintf(fp, "mesh->Nbc: %d\n", mesh->Nbc);
-        PrintIntVector2File(fp, "mesh->bcind", mesh->bcind, mesh->Nbc);
+        print_int_vector2file(fp, "mesh->bcind", mesh->bcind, mesh->Nbc);
         fprintf(fp, "mesh->Nobc: %d\n", mesh->Nobc);
-        PrintIntVector2File(fp, "mesh->obcind", mesh->obcind, mesh->Nobc);
+        print_int_vector2file(fp, "mesh->obcind", mesh->obcind, mesh->Nobc);
         fclose(fp);
     }
     const int procid = mesh->procid;

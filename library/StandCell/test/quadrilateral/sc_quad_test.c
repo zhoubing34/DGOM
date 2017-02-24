@@ -16,8 +16,8 @@ int sc_quadCoor_test(stdCell *quad, int verbose){
 
     if(verbose){
         FILE *fp = fopen("sc_quadCoor_test.txt","w");
-        PrintVector2File(fp, "r", quad->r, Np);
-        PrintVector2File(fp, "s", quad->s, Np);
+        print_double_vector2file(fp, "r", quad->r, Np);
+        print_double_vector2file(fp, "s", quad->s, Np);
         fclose(fp);
     }
     return fail;
@@ -37,7 +37,7 @@ int sc_quadVandMatrix_test(stdCell *quad, int verbose){
 
     if(verbose){
         FILE *fp = fopen("sc_quadVandMatrix_test.txt", "w");
-        PrintMatrix2File(fp, "V", quad->V, NP, NP);
+        print_double_matrix2file(fp, "V", quad->V, NP, NP);
         fclose(fp);
     }
 
@@ -59,7 +59,7 @@ int sc_quadMassMatrix_test(stdCell *quad, int verbose){
 
     if(verbose){
         FILE *fp = fopen("sc_quadMassMatrix_test.txt", "w");
-        PrintMatrix2File(fp, "M", quad->M, NP, NP);
+        print_double_matrix2file(fp, "M", quad->M, NP, NP);
         fclose(fp);
     }
     matrix_double_free(M_ext);
@@ -86,8 +86,8 @@ int sc_quadDeriMatrix_test(stdCell *quad, int verbose){
 
     if(verbose){
         FILE *fp = fopen("sc_quadDeriMatrix_test.txt", "w");
-        PrintMatrix2File(fp, "Dr", quad->Dr, NP, NP);
-        PrintMatrix2File(fp, "Ds", quad->Ds, NP, NP);
+        print_double_matrix2file(fp, "Dr", quad->Dr, NP, NP);
+        print_double_matrix2file(fp, "Ds", quad->Ds, NP, NP);
         fclose(fp);
     }
 
@@ -112,7 +112,7 @@ int sc_quadLIFT_test(stdCell *quad, int verbose){
 
     if(verbose){
         FILE *fp = fopen("sc_quadLIFT_test.txt", "w");
-        PrintMatrix2File(fp, "LIFT", quad->LIFT, NP, NFP);
+        print_double_matrix2file(fp, "LIFT", quad->LIFT, NP, NFP);
         fclose(fp);
     }
 
