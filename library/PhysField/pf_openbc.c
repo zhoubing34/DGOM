@@ -56,7 +56,7 @@ void pf_set_openbc(physField *phys, double timeloc, time_interp_method method){
                         int v1 = EToV[k][m];
                         vertbc[m] = bc[v1*Nfield + fld];
                     }
-                    sc_vertProj(cell, vertbc, nodebc);
+                    sc_proj_vert2node(cell, vertbc, nodebc);
 
                     sk = k*Np*Nfield+fld;
                     for(m=0;m<Np;m++){

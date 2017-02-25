@@ -5,6 +5,7 @@
  */
 
 #include "sc_stdcell.h"
+#include "sc_stdcell2d.h"
 #include "Polylib/polylib.h"
 
 /* transform the index of orthogonal function to [ti,tj] */
@@ -16,9 +17,8 @@ static void sc_xytors_tri(int Np, double *x, double *y, double *r, double *s);
 static void sc_rstoad(int Np, double *r, double *s, double *a, double *b);
 
 /* get the gradient of the modal basis (id,jd) on the 2D simplex at (a,b). */
-static void sc_gradSimplex2DP_tri(
-        int Np, double *a, double *b, int id, int jd,
-        double *dmodedr, double *dmodeds);
+static void sc_gradSimplex2DP_tri(int Np, double *a, double *b, int id, int jd,
+                                  double *dmodedr, double *dmodeds);
 
 /* build the nodes index matrix on each faces */
 static int** sc_fmask_tri(stdCell *tri);
@@ -41,7 +41,8 @@ static void sc_orthogFunc_tri(stdCell *cell, int ind, double *func);
 
 
 /**
- * @brief transform the index of orthogonal function to [ti,tj] for triangle elements
+ * @brief
+ * transform the index of orthogonal function to [ti,tj] for triangle elements
  * @details the index is arranged as
  * \f[ [i,j] = \left\{ \begin{array}{lllll}
  * (0,0) & (0,1) & \cdots & (0,N-1) & (0, N) \cr
@@ -68,8 +69,8 @@ static void sc_transInd_tri(int N, int ind, int *ti, int *tj){
 }
 
 /**
- * @brief get orthogonal function value at interpolation nodes
- *
+ * @brief
+ * get orthogonal function value at interpolation nodes
  * @param [in] cell triangle cell
  * @param [in] ind index of orthogonal function
  * @param [out] func value of orthogonal function
@@ -88,10 +89,10 @@ static void sc_orthogFunc_tri(stdCell *cell, int ind, double *func){
 }
 
 /**
- * @brief create standard triangle element
+ * @brief return a pointer to a new standard triangle element
  * @param[in] N polynomial order
  * @note
- * postcondition: the stdCell object should be free manually with @ref sc_free
+ * the stdCell object should be free manually with @ref sc_free
  */
 stdCell* sc_create_tri(int N){
     stdCell *tri = (stdCell *) calloc(1, sizeof(stdCell));
@@ -116,7 +117,7 @@ stdCell* sc_create_tri(int N){
     /* coordinate, r and s */
     sc_coord_tri(tri);
     /* vandermonde matrix, V */
-    tri->V = sc_VandMatrix2d(tri, sc_orthogFunc_tri);
+    tri->V = sc_VandMatrix(tri, sc_orthogFunc_tri);
     /* mass matrix, M */
     tri->M = sc_massMatrix(tri);
 
@@ -124,7 +125,7 @@ stdCell* sc_create_tri(int N){
     sc_deriMatrix2d(tri, sc_deriOrthogFunc_tri);
 
     /* suface LIFT matrix, LIFT */
-    tri->LIFT = sc_liftMatrix2d(tri);
+    tri->LIFT = sc_liftMatrix(tri, sc_surfMassMatrix2d);
 
     /* integration coefficients, ws and wv */
     sc_GaussQuadrature2d(tri);
@@ -542,7 +543,7 @@ static void sc_rstoad(int Np, double *r, double *s, double *a, double *b){
  * @param[in] nodeVal value of nodes
  *
  */
-void sc_vertProj_tri(stdCell *cell, double *vertVal, double *nodeVal){
+void sc_proj_vert2node_tri(stdCell *cell, double *vertVal, double *nodeVal){
     register int i;
     double *r = cell->r;
     double *s = cell->s;

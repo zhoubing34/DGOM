@@ -154,9 +154,9 @@ static void mr_reg_nodeCoor3d(multiReg *region){
             gy[i] = vy[EToV[k][i]];
             gz[i] = vz[EToV[k][i]];
         }
-        sc_vertProj(cell, gx, region->x[k]);
-        sc_vertProj(cell, gy, region->y[k]);
-        sc_vertProj(cell, gz, region->z[k]);
+        sc_proj_vert2node(cell, gx, region->x[k]);
+        sc_proj_vert2node(cell, gy, region->y[k]);
+        sc_proj_vert2node(cell, gz, region->z[k]);
     }
     return;
 }
@@ -185,8 +185,8 @@ static void mr_reg_nodeCoor2d(multiReg *region){
             gx[i] = vx[EToV[k][i]];
             gy[i] = vy[EToV[k][i]];
         }
-        sc_vertProj(cell, gx, region->x[k]);
-        sc_vertProj(cell, gy, region->y[k]);
+        sc_proj_vert2node(cell, gx, region->x[k]);
+        sc_proj_vert2node(cell, gy, region->y[k]);
     }
     return;
 }

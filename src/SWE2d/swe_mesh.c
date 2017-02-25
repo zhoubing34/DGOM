@@ -100,7 +100,7 @@ dg_real* swe_read_topography(swe_solver *solver, char *botfile){
         for(n=0;n<Nv;n++){
             bloc[n] = bv[phys->grid->EToV[k][n]];
         }
-        sc_vertProj(cell, bloc, bot+k*Np);
+        sc_proj_vert2node(cell, bloc, bot + k * Np);
     }
     fclose(fp);
     vector_double_free(bv);

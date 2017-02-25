@@ -127,10 +127,10 @@ int sc_quadVertProj_test(stdCell *quad, int verbose){
     extern double quad_VY[NV];
 
     double x[quad->Np], y[quad->Np];
-    sc_vertProj(quad, quad_VX, x);
+    sc_proj_vert2node(quad, quad_VX, x);
     fail = vector_double_test("sc_quadVertProj_test", x, quad->r, quad->Np);
 
-    sc_vertProj(quad, quad_VY, y);
+    sc_proj_vert2node(quad, quad_VY, y);
     fail = vector_double_test("sc_quadVertProj_test", y, quad->s, quad->Np);
     return fail;
 }

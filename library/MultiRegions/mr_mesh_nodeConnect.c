@@ -1,8 +1,4 @@
-#include <StandCell/sc_stdcell.h>
 #include "mr_mesh_nodeConnect.h"
-#include "mr_mesh.h"
-
-#define NODETOL 1e-10
 
 /**
  * @brief Setup node connection
@@ -94,7 +90,7 @@ void mr_mesh_nodeConnect2d(parallMesh *mesh){
 
                         d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
                         /* judge adjacent node */
-                        if(d12<NODETOL){
+                        if(d12<EPS){
                             vmapP[id1] = k2*Np + Fmask[f2][n2];
                         }
                     }
@@ -231,7 +227,7 @@ void mr_mesh_nodeConnect2d(parallMesh *mesh){
                 x1 = x[k1][Fmask[f1][n1]];
                 y1 = y[k1][Fmask[f1][n1]];
                 d12 = ((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
-                if(d12<NODETOL){
+                if(d12<EPS){
                     /* sk and node index determine the map relationship */
                     parmapOUT[sk++] = (k1*Np+Fmask[f1][n1]);
                 }

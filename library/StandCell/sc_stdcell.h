@@ -1,6 +1,6 @@
 /**
  * @file
- * Public function from standard element library
+ * Public function for standard element
  *
  * @brief
  * Basic element structure definition
@@ -41,7 +41,8 @@ typedef struct {
     double **V; ///< Vandermonde matrix
     double **M; ///< mass matrix
 
-    double **Dr, **Ds; ///< nodal basis derivative matrix
+    double **Dr; ///< nodal basis derivative matrix
+    double **Ds; ///< nodal basis derivative matrix
     double **LIFT; ///< lift matrix
 
     /* float version coefficient */
@@ -54,21 +55,14 @@ typedef struct {
 stdCell* sc_create(int N, sc_cellType type);
 /* free stdCell object */
 void sc_free(stdCell *);
+/* project the vertex value to interpolation nodes */
+void sc_proj_vert2node(stdCell *cell, double *vertVal, double *nodeVal);
+
+/* calculate the Vandermonde matrix */
+double** sc_VandMatrix(stdCell *cell, void (*orthfunc)(stdCell *, int ind, double *func));
 /* calculate the mass matrix */
 double** sc_massMatrix(stdCell *cell);
-/* project the vertex value to interpolation nodes */
-void sc_vertProj(stdCell *cell, double *vertVal, double *nodeVal);
-
-
-/* ======================== functions for 2d elements (tri and quad) ======================== */
-/* get the gradient matrix Dr and Ds of Lagrange basis at (r,s) at order N */
-void sc_deriMatrix2d(stdCell *cell, void (*derorthfunc)(stdCell *, int ind, double *dr, double *ds));
-/* calculate the Vandermonde matrix */
-double** sc_VandMatrix2d(stdCell *cell, void (*orthfunc)(stdCell *, int ind, double *func));
-/* create LIFT matrix for 2d elements (triangle or quadrilateral) */
-double** sc_liftMatrix2d(stdCell *cell);
-/* calculate the Gauss quadrature weights for faces (ws) and volume (wv) integral */
-void sc_GaussQuadrature2d(stdCell *cell);
-
+/* create LIFT matrix */
+double** sc_liftMatrix(stdCell *cell, void (*surf_mass_matrix)(stdCell *, double **));
 
 #endif //DGOM_STDCELL_H

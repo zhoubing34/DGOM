@@ -10,20 +10,17 @@
  */
 
 #include "sc_stdcell.h"
+#include "sc_stdcell2d.h"
 #include "Polylib/polylib.h"
 
 /* build the nodes index matrix on each faces */
 int** sc_fmask_quad(stdCell *quad);
-
 /* get the nature coordinate of interpolation nodes in standard quadrilateral element */
 void sc_coord_quad(stdCell *quad);
-
 /* transform the index of orthogonal function to [ti,tj] for quadrilateral elements */
 void sc_transInd_quad(int N, int ind, int *ti, int *tj);
-
 /* get orthogonal function value at interpolation nodes */
 void sc_orthogFunc_quad(stdCell *quad, int ind, double *func);
-
 /* calculate the value of derivative function at interpolation points */
 void sc_deriOrthogFunc_quad(stdCell *quad, int ind, double *dr, double *ds);
 
@@ -32,7 +29,7 @@ void sc_deriOrthogFunc_quad(stdCell *quad, int ind, double *dr, double *ds);
  * @param[in] N polynomial order
  * @return quad standard quadrilateral element
  */
-stdCell* sc_createQuad(int N){
+stdCell* sc_create_quad(int N){
     stdCell *quad = (stdCell *) calloc(1, sizeof(stdCell));
 
     /* cell type */
@@ -56,7 +53,7 @@ stdCell* sc_createQuad(int N){
     sc_coord_quad(quad);
 
     /* Vandermonde matrix, V */
-    quad->V = sc_VandMatrix2d(quad, sc_orthogFunc_quad);
+    quad->V = sc_VandMatrix(quad, sc_orthogFunc_quad);
 
     /* mass matrix, M */
     quad->M = sc_massMatrix(quad);
@@ -65,7 +62,7 @@ stdCell* sc_createQuad(int N){
     sc_deriMatrix2d(quad, sc_deriOrthogFunc_quad);
 
     /* suface LIFT matrix, LIFT */
-    quad->LIFT = sc_liftMatrix2d(quad);
+    quad->LIFT = sc_liftMatrix(quad, sc_surfMassMatrix2d);
 
     /* integration coefficients, ws and wv */
     sc_GaussQuadrature2d(quad);
@@ -271,13 +268,14 @@ int** sc_fmask_quad(stdCell *quad){
  * @param[in] nodeVal value of nodes
  *
  */
-void sc_vertProj_quad(stdCell *cell, double *vertVal, double *nodeVal){
+void sc_proj_vert2node_quad(stdCell *cell, double *vertVal, double *nodeVal){
     int i;
-    double ri, si;
     for (i=0;i<cell->Np;++i) {
-        ri = cell->r[i];
-        si = cell->s[i];
-        nodeVal[i] = 0.25 * (vertVal[0] * (1. - ri) * (1. - si) + vertVal[1] * (1. + ri) * (1. - si)
-                             + vertVal[2] * (1. + ri) * (1. + si) + vertVal[3] * (1. - ri)*(1. + si));
+        double ri = cell->r[i];
+        double si = cell->s[i];
+        nodeVal[i] = 0.25 * (vertVal[0] * (1. - ri) * (1. - si)
+                             + vertVal[1] * (1. + ri) * (1. - si)
+                             + vertVal[2] * (1. + ri) * (1. + si)
+                             + vertVal[3] * (1. - ri)*(1. + si));
     }
 }

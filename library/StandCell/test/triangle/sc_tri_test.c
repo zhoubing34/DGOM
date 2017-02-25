@@ -132,10 +132,10 @@ int sc_triVertProj_test(stdCell *tri, int verbose){
 
     double x[tri->Np], y[tri->Np];
 
-    sc_vertProj(tri, tri_VX, x);
+    sc_proj_vert2node(tri, tri_VX, x);
     fail = vector_double_test("sc_triVertProj_x_test", x, tri->r, tri->Np);
 
-    sc_vertProj(tri, tri_VY, y);
+    sc_proj_vert2node(tri, tri_VY, y);
     fail = vector_double_test("sc_triVertProj_y_test", y, tri->s, tri->Np);
 
     return fail;
