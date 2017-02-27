@@ -148,7 +148,7 @@ swe_solver* swe_create_solver(){
     double xmin, xmax, ymin, ymax;
     sscanf(sec_p->arg_vec_p[0], "%d\n", &(Mx));
     sscanf(sec_p->arg_vec_p[1], "%d\n", &(My));
-    solver->casename = calloc(strlen(sec_p->arg_vec_p[2]), sizeof(char));
+    solver->casename = calloc(strlen(sec_p->arg_vec_p[2])+1, sizeof(char));
     strcpy(solver->casename, sec_p->arg_vec_p[2]);
     char *casename = solver->casename;
     switch (solver->caseid){

@@ -7,12 +7,14 @@
 typedef enum{
     conv_rotational_convection = 1,
     conv_advection_diffusion = 2,
+    conv_userset = 3,
 } conv_caseid;
 
 #define DIFF_THRESHOLD 1e-10
 
 typedef struct {
     int caseid; ///< indicator of problem case
+    char *casename; ///< case name
     sc_cellType celltype; ///< cell type
     int N; ///< order of polynomial
     int Ne; ///< number of elements in each coordinate

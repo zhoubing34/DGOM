@@ -121,7 +121,8 @@ static arg_section** conv_create_section(){
     char probleminfo[] = HEADEND "DGOM: 2d convection problem\n"
             HEADLINE "case indicator (1 parameter)\n"
             HEADLINE "    1. case indicator  |-- 1. rotational convection\n"
-            HEADLINE "                       |-- 2. advection-diffusion\n";
+            HEADLINE "                       |-- 2. advection-diffusion\n"
+            HEADLINE "                       |-- 3. user specific\n";
     int var_num = 1;
     section_p[ind++] = section_create(probleminfo, var_num);
 
@@ -132,13 +133,14 @@ static arg_section** conv_create_section(){
     var_num = 2;
     section_p[ind++] = section_create(scinfo, var_num);
 
-    char meshinfo[] = HEADEND "mesh info (2 parameters)\n"
+    char meshinfo[] = HEADEND "mesh info (3 parameters)\n"
             HEADLINE "    1. num of elements in x direction\n"
-            HEADLINE "    2. num of elements in y direction\n";
-    var_num = 2;
+            HEADLINE "    2. num of elements in y direction\n"
+            HEADLINE "    3. case name\n";
+    var_num = 3;
     section_p[ind++] = section_create(meshinfo, var_num);
 
-    char timeinfo[] = HEADEND "time info (2 parameters)\n"
+    char timeinfo[] = HEADEND "time info (3 parameters)\n"
             HEADLINE "    1. CFL number\n"
             HEADLINE "    2. dt\n"
             HEADLINE "    3. final time\n";
@@ -191,12 +193,16 @@ static void conv_read_input(){
                 printf(HEADLINE " case: rotational convection\n"); break;
             case conv_advection_diffusion:
                 printf(HEADLINE " case: advection diffusion\n"); break;
+            case conv_userset:
+                printf(HEADLINE " case: user specific\n"); break;
             default:
                 fprintf(stderr, HEADEND "%s:\n"
                                 HEADLINE " The input type indicator should be one of \n"
                                 HEADLINE "   %d - rotational convection\n"
-                                HEADLINE "   %d - advection-diffusion\n",
-                        __FILE__, conv_rotational_convection, conv_advection_diffusion);
+                                HEADLINE "   %d - advection-diffusion\n"
+                                HEADLINE "   %d - user set\n",
+                        __FILE__, conv_rotational_convection, conv_advection_diffusion,
+                        conv_userset);
                 MPI_Abort(MPI_COMM_WORLD, -1);
         }
     }
@@ -224,9 +230,12 @@ static void conv_read_input(){
     sec = sec_p[2];
     sscanf(sec->arg_vec_p[0], "%d\n", &(solver.Ne));
     sscanf(sec->arg_vec_p[1], "%d\n", &(solver.Ne));
+    solver.casename = (char *) calloc( strlen(sec->arg_vec_p[2])+1, sizeof(char));
+    strcpy(solver.casename, sec->arg_vec_p[2]);
     if(!procid){
         printf(HEADLINE " Ne on x: %d\n", solver.Ne);
         printf(HEADLINE " Ne on y: %d\n", solver.Ne);
+        printf(HEADLINE " casename: %s\n", solver.casename);
     }
     /// 3. time info
     sec = sec_p[3];

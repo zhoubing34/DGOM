@@ -190,9 +190,9 @@ geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename){
     /* read the element file (EToV) */
     FILE *fp;
     if( (fp = fopen(element_file, "r")) == NULL ){
-        fprintf(stderr, "mr_grid_read_file (%s): %d\n"
+        fprintf(stderr, "%s: %d\n"
                         "Unable to open element file %s.\n",
-                __FILE__,__LINE__,element_file);
+                __FUNCTION__,__LINE__,element_file);
     }
     int Nv, K, temp;
     fscanf(fp, "%d %d %d\n", &K, &Nv, &temp);

@@ -2,6 +2,8 @@
 // Created by li12242 on 17/1/6.
 //
 
+#include <PhysField/pf_phys.h>
+#include <MultiRegions/mr_grid.h>
 #include "conv_extsol.h"
 
 extern conv_solver2d solver;
@@ -83,6 +85,7 @@ void conv_normerr(physField *phys){
     const int K = phys->grid->K;
     const int Nfield = phys->Nfield;
     const int Np = phys->cell->Np;
+    const int procid = phys->grid->procid;
 
     double Linf=0, L2=0, L1=0;
 
@@ -93,8 +96,8 @@ void conv_normerr(physField *phys){
         case conv_advection_diffusion:
             extsolFun = advection_diffusion_ext; break;
         default:
-            fprintf(stderr, "%s (line %d): Unknown case id", __FILE__, __LINE__);
-            exit(-1);
+            if(!procid) { printf("%s: %d\nUnknown exact solution, exit\n", __FUNCTION__, __LINE__);}
+            return;
     }
 
     int register k,n,sk=0;
@@ -128,7 +131,6 @@ void conv_normerr(physField *phys){
     gL2 = sqrt(gL2/Atol);
     gL1 /= Atol;
 
-    const int procid = phys->mesh->procid;
     if(!procid)
         printf("proc: %d,\t L1: %lg,\t L2: %lg,\t Linf: %lg\n",
                procid, gL1, gL2, gLinf);

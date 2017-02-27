@@ -8,16 +8,44 @@
 #include "MultiRegions/mr_mesh_bc.h"
 
 /* set open boundary condition */
-static void conv_setOBC(int *indicator, int **SFToV);
+static void conv_uniform_bc(int *indicator, int **SFToV);
+static parallMesh* conv_uniform_mesh(stdCell *shape);
+static parallMesh* conv_userset_mesh(stdCell *shape);
 
 /* set parallel mesh object */
 parallMesh* conv_mesh(stdCell *shape){
 
-    extern conv_solver2d solver;
+    parallMesh *mesh = NULL;
 
+    extern conv_solver2d solver;
+    switch (solver.caseid){
+        case conv_advection_diffusion:
+            mesh = conv_uniform_mesh(shape); break;
+        case conv_rotational_convection:
+            mesh = conv_uniform_mesh(shape); break;
+        case conv_userset:
+            mesh = conv_userset_mesh(shape); break;
+        default:
+            fprintf(stderr, "%s: %d\nUnknown test case %d\n",
+                    __FUNCTION__, __LINE__, solver.caseid);
+            exit(-1);
+    }
+    return mesh;
+}
+
+static parallMesh* conv_userset_mesh(stdCell *shape){
+    extern conv_solver2d solver;
+    geoGrid *grid = mr_grid_read_file2d(shape, solver.casename);
+    multiReg *region = mr_reg_create(grid);
+    parallMesh *mesh = mr_mesh_create(region);
+    mr_mesh_read_bcfile2d(mesh, solver.casename);
+    return mesh;
+}
+
+static parallMesh* conv_uniform_mesh(stdCell *shape){
+    extern conv_solver2d solver;
     const int Ne = solver.Ne;
     geoGrid *grid = NULL;
-
     switch (solver.celltype){
         case TRIANGLE:
             grid = mr_grid_create_uniform_tri(shape, Ne, Ne, -1, 1, -1, 1, 1);
@@ -26,28 +54,25 @@ parallMesh* conv_mesh(stdCell *shape){
             grid = mr_grid_create_uniform_quad(shape, Ne, Ne, -1, 1, -1, 1);
             break;
         default:
-            printf("Error in %s line %d\n", __FILE__, __LINE__);
+            fprintf(stderr, "%s: %d\nUnknown cell type %d\n",
+                    __FUNCTION__, __LINE__, solver.celltype);
             MPI_Abort(MPI_COMM_WORLD, -1);
     }
-
     multiReg *region = mr_reg_create(grid);
     parallMesh *mesh = mr_mesh_create(region);
 
+    // boundary condition
     /* add boundary condition */
     int indicator[4] = {5,5,5,5};
     int Nsurf = 2*(Ne+Ne);
     int **SFToV = matrix_int_create(Nsurf, 3);
-    conv_setOBC(indicator, SFToV);
-
+    conv_uniform_bc(indicator, SFToV);
     mr_mesh_add_bc2d(mesh, Nsurf, SFToV);
-
     matrix_int_free(SFToV);
-
     return mesh;
 }
 
-
-static void conv_setOBC(int *indicator, int **SFToV){
+static void conv_uniform_bc(int *indicator, int **SFToV){
 
     extern conv_solver2d solver;
     const int Mx=solver.Ne, My=solver.Ne;

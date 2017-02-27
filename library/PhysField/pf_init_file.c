@@ -15,12 +15,7 @@ void pf_init_file2d(physField *phys, char *casename){
     strcat(init_filename, ".init");
     FILE *fp;
     /* open the init file */
-    if( (fp = fopen(init_filename, "r")) == NULL ){
-        fprintf(stderr, "pf_init_file2d (%s): %d\n"
-                        "Unable to open initial condition file %s.\n",
-                __FILE__,__LINE__,init_filename);
-        exit(-1);
-    }
+    dg_fopen(fp, init_filename, "Unable to open initial condition file");
 
     int Nvert, Nfield;
     fscanf(fp, "%d %d", &Nvert, &Nfield);

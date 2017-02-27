@@ -2,14 +2,15 @@
 // Created by li12242 on 16/12/27.
 //
 
-#include <PhysField/pf_phys.h>
 #include "conv_driver2d.h"
 #include "PhysField/pf_add_LDG_solver.h"
+#include "PhysField/pf_init_file.h"
 
 #define DEBUG 0
 
-static double conv_advectDiff(physField *phys);
-static double conv_rotation(physField *phys);
+static double conv_advect_diff_init(physField *phys);
+static double conv_rotation_init(physField *phys);
+static double conv_userset_init(physField *phys);
 
 void conv_intilization(physField *phys){
 
@@ -19,10 +20,14 @@ void conv_intilization(physField *phys){
 
     switch (solver.caseid){
         case conv_rotational_convection:
-            dt = conv_rotation(phys); break;
+            dt = conv_rotation_init(phys); break;
         case conv_advection_diffusion:
-            dt = conv_advectDiff(phys); break;
+            dt = conv_advect_diff_init(phys); break;
+        case conv_userset:
+            dt = conv_userset_init(phys); break;
         default:
+            fprintf(stderr, "%s: %d\nUnknown test case %d\n",
+                    __FUNCTION__, __LINE__, solver.caseid);
             exit(-1);
     }
 
@@ -36,7 +41,38 @@ void conv_intilization(physField *phys){
     return;
 }
 
-static double conv_advectDiff(physField *phys){
+static double conv_userset_init(physField *phys){
+    extern conv_solver2d solver;
+    pf_init_file2d(phys, solver.casename);
+    double dt = 1e6; // initial time step
+    const int N = solver.N;
+    double *len = phys->region->len;
+
+    const int K = phys->grid->K;
+    const int Np = phys->cell->Np;
+    const double miu = solver.viscosity;
+
+    int k,n, sk = 0;
+    for(k=0;k<K;++k){
+        double r = len[k]/(N+1);
+        for(n=0;n<Np;n++){
+            sk++; // jump c field
+            const dg_real u = phys->f_Q[sk++];
+            const dg_real v = phys->f_Q[sk++];
+            double spe = sqrt(u*u+v*v);
+            dt = min(dt, r/spe);
+            if(miu > EPS){ dt = min(dt, r*r/sqrt(miu)); }
+#if DEBUG
+            int procid = phys->mesh->procid;
+            if(!procid)
+                printf("k=%d, n=%d, r=%f, spe=%f, mu=%f, dt=%f\n", k,n,r,spe,miu,dt);
+#endif
+        }
+    }
+    return dt;
+}
+
+static double conv_advect_diff_init(physField *phys){
 
     extern conv_solver2d solver;
     register int k,n;
@@ -106,7 +142,7 @@ static double conv_advectDiff(physField *phys){
     return dt;
 }
 
-static double conv_rotation(physField *phys){
+static double conv_rotation_init(physField *phys){
 
     register int k,n;
 

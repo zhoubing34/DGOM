@@ -46,7 +46,7 @@ void conv_run(physField *phys){
             conv_rhs(phys, fa, fb, fdt);
         }
 
-        //printf("processing: %f%%\r", time/ftime);
+        printf("processing: %f%%\r", time/ftime);
         time += dt;     /* increment current time */
         tstep++;        /* increment timestep    */
         conv_putvar(phys, counter++, time);
