@@ -22,8 +22,8 @@ typedef struct {
     int nprocs; ///< number of process
 
     multiReg *region; ///< multi-region object
-    geoGrid *grid; ///< geometry grid object
-    stdCell *cell; ///< standard element object
+    dg_grid *grid; ///< geometry grid object
+    dg_cell *cell; ///< standard element object
 
     /* adjacent cell id of each cell */
     int **EToE; ///< adjacent element id in each element

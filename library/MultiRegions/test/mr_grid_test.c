@@ -10,7 +10,7 @@
  * @param verbose
  * @return
  */
-int mr_grid_Ktol_test(geoGrid *grid, int verbose){
+int mr_grid_Ktol_test(dg_grid *grid, int verbose){
     int fail = 0;
     if(verbose){
         /* gen log filename */
@@ -29,7 +29,7 @@ int mr_grid_Ktol_test(geoGrid *grid, int verbose){
  * @param verbose
  * @return
  */
-int mr_grid_EToV_test(geoGrid *grid, int verbose){
+int mr_grid_EToV_test(dg_grid *grid, int verbose){
     int fail = 0;
     if(verbose){
         /* gen log filename */
@@ -47,7 +47,7 @@ int mr_grid_EToV_test(geoGrid *grid, int verbose){
  * @param verbose
  * @return
  */
-int mr_grid_vertex_test(geoGrid *grid, int verbose){
+int mr_grid_vertex_test(dg_grid *grid, int verbose){
     int fail = 0;
     if(verbose){
         /* gen log filename */

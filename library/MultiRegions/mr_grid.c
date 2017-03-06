@@ -1,29 +1,29 @@
-#include <StandCell/sc_stdcell.h>
+#include <StandCell/dg_cell.h>
 #include "mr_grid.h"
 #include "mr_grid_resortEToV.h"
 #include "mr_grid_loadBalance2d.h"
 
-/* allocate and assignment the vertex coordinate in 2d geoGrid object */
-void mr_copyVertex2d(geoGrid *grid, double *vx, double *vy);
+/* allocate and assignment the vertex coordinate in 2d dg_grid object */
+void mr_copyVertex2d(dg_grid *grid, double *vx, double *vy);
 
-/* allocate and assignment the vertex coordinate in 3d geoGrid object */
-void mr_copyVertex3d(geoGrid *grid, double *vx, double *vy, double *vz);
+/* allocate and assignment the vertex coordinate in 3d dg_grid object */
+void mr_copyVertex3d(dg_grid *grid, double *vx, double *vy, double *vz);
 
 /* partition of the whole grid into each process */
-void mr_grid_partition(geoGrid *grid);
+void mr_grid_partition(dg_grid *grid);
 
 /* copy the vertex vx,vy,vz into geometry grid object */
-void mr_copyVertex(geoGrid *grid, double *vx, double *vy, double *vz);
+void mr_copyVertex(dg_grid *grid, double *vx, double *vy, double *vz);
 
 /* resort the vertex list in EToV */
-void mr_resortEToV(geoGrid *grid);
+void mr_resortEToV(dg_grid *grid);
 
 
 /**
  * @brief
  * Deallocate unstructured grid structure.
  */
-void mr_grid_free(geoGrid *grid) {
+void mr_grid_free(dg_grid *grid) {
 
     const int dim = grid->dim;
     matrix_int_free(grid->EToV);
@@ -52,13 +52,13 @@ void mr_grid_free(geoGrid *grid) {
  * Create and allocate geometry grid object.
  *
  */
-geoGrid* mr_grid_create(stdCell *shape, int K, int Nv, double *vx, double *vy, double *vz, int **EToV){
+dg_grid* mr_grid_create(dg_cell *shape, int K, int Nv, double *vx, double *vy, double *vz, int **EToV){
 
-    geoGrid *grid = (geoGrid*) calloc(1, sizeof(geoGrid));
+    dg_grid *grid = (dg_grid*) calloc(1, sizeof(dg_grid));
 
     grid->dim = shape->dim;
     grid->cell = shape;
-    grid->type = shape->type;
+    //grid->type = shape->type;
     grid->K  = K;
     grid->Nv  = Nv;
 
@@ -90,10 +90,10 @@ geoGrid* mr_grid_create(stdCell *shape, int K, int Nv, double *vx, double *vy, d
  * @brief resort the vertex list in EToV
  * @param[in,out] grid geometry grid object
  */
-void mr_resortEToV(geoGrid *grid){
+void mr_resortEToV(dg_grid *grid){
     const int K = grid->K;
     const int dim = grid->cell->dim;
-    stdCell *shape = grid->cell;
+    dg_cell *shape = grid->cell;
     int k;
     switch (dim){
         case 2:
@@ -117,7 +117,7 @@ void mr_resortEToV(geoGrid *grid){
  * @param[in] vy coordinate y of vertex
  * @param[in] vz coordinate z of vertex
  */
-void mr_copyVertex(geoGrid *grid, double *vx, double *vy, double *vz){
+void mr_copyVertex(dg_grid *grid, double *vx, double *vy, double *vz){
     const int dim = grid->cell->dim;
     switch (dim){
         case 2:
@@ -137,7 +137,7 @@ void mr_copyVertex(geoGrid *grid, double *vx, double *vy, double *vz){
  * The elements will be distributed into each process according to their index.
  * @param[in,out] grid geometry grid object
  */
-void mr_grid_partition(geoGrid *grid){
+void mr_grid_partition(dg_grid *grid){
 
     const int nprocs = grid->nprocs;
     const int procid = grid->procid;
@@ -186,7 +186,7 @@ void mr_grid_partition(geoGrid *grid){
  * @param[in] vx coordinate of vertex
  * @param[in] vy coordinate of vertex
  */
-void mr_copyVertex2d(geoGrid *grid, double *vx, double *vy){
+void mr_copyVertex2d(dg_grid *grid, double *vx, double *vy){
     const int Nv = grid->Nv;
     int i;
     grid->vx  = vector_double_create(Nv);
@@ -206,7 +206,7 @@ void mr_copyVertex2d(geoGrid *grid, double *vx, double *vy){
  * @param[in] vy coordinate of vertex
  * @param[in] vz coordinate of vertex
  */
-void mr_copyVertex3d(geoGrid *grid, double *vx, double *vy, double *vz){
+void mr_copyVertex3d(dg_grid *grid, double *vx, double *vy, double *vz){
     const int Nv = grid->Nv;
     int i;
     grid->vx  = vector_double_create(Nv);

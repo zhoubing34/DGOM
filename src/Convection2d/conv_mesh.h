@@ -6,6 +6,6 @@
 #define DGOM_CONV_MESH_H
 
 #include "MultiRegions/mr_mesh.h"
-parallMesh* conv_mesh(stdCell *shape);
+parallMesh* conv_mesh(dg_cell *shape);
 
 #endif //DGOM_CONV_MESH_H

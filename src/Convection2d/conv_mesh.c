@@ -9,11 +9,11 @@
 
 /* set open boundary condition */
 static void conv_uniform_bc(int *indicator, int **SFToV);
-static parallMesh* conv_uniform_mesh(stdCell *shape);
-static parallMesh* conv_userset_mesh(stdCell *shape);
+static parallMesh* conv_uniform_mesh(dg_cell *shape);
+static parallMesh* conv_userset_mesh(dg_cell *shape);
 
 /* set parallel mesh object */
-parallMesh* conv_mesh(stdCell *shape){
+parallMesh* conv_mesh(dg_cell *shape){
 
     parallMesh *mesh = NULL;
 
@@ -33,19 +33,19 @@ parallMesh* conv_mesh(stdCell *shape){
     return mesh;
 }
 
-static parallMesh* conv_userset_mesh(stdCell *shape){
+static parallMesh* conv_userset_mesh(dg_cell *shape){
     extern conv_solver2d solver;
-    geoGrid *grid = mr_grid_read_file2d(shape, solver.casename);
+    dg_grid *grid = mr_grid_read_file2d(shape, solver.casename);
     multiReg *region = mr_reg_create(grid);
     parallMesh *mesh = mr_mesh_create(region);
     mr_mesh_read_bcfile2d(mesh, solver.casename);
     return mesh;
 }
 
-static parallMesh* conv_uniform_mesh(stdCell *shape){
+static parallMesh* conv_uniform_mesh(dg_cell *shape){
     extern conv_solver2d solver;
     const int Ne = solver.Ne;
-    geoGrid *grid = NULL;
+    dg_grid *grid = NULL;
     switch (solver.celltype){
         case TRIANGLE:
             grid = mr_grid_create_uniform_tri(shape, Ne, Ne, -1, 1, -1, 1, 1);

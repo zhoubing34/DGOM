@@ -13,7 +13,7 @@
  * @param [in,out] grid geometry grid object
  * @note The properties of EToV and K is updated.
  */
-void mr_grid_loadBalance2d(geoGrid *grid){
+void mr_grid_loadBalance2d(dg_grid *grid){
 
     int n,p,k,v;
     /* MPI process */

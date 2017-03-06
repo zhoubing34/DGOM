@@ -4,41 +4,53 @@
  * @author li12242, Tianjin University, li12242@tju.edu.cn
  */
 
-#include "sc_stdcell.h"
-#include "sc_stdcell2d.h"
+#include "dg_cell.h"
 #include "Polylib/polylib.h"
 
 /* transform the index of orthogonal function to [ti,tj] */
-static void sc_transInd_tri(int N, int ind, int *ti, int *tj);
+static void dg_tri_transInd(int N, int ind, int *ti, int *tj);
 /* transfer coordinate [x,y] on equilateral triangle to natural coordinate [r,s] */
-static void sc_xytors_tri(int Np, double *x, double *y, double *r, double *s);
-
+static void dg_tri_xytors(int Np, double *x, double *y, double *r, double *s);
 /* transform natural coordinate to collapse coordinate */
-static void sc_rstoad(int Np, double *r, double *s, double *a, double *b);
-
+static void dg_tri_rstoad(int Np, double *r, double *s, double *a, double *b);
 /* get the gradient of the modal basis (id,jd) on the 2D simplex at (a,b). */
-static void sc_gradSimplex2DP_tri(int Np, double *a, double *b, int id, int jd,
+static void dg_tri_gradSimplex2DP(int Np, double *a, double *b, int id, int jd,
                                   double *dmodedr, double *dmodeds);
-
-/* build the nodes index matrix on each faces */
-static int** sc_fmask_tri(stdCell *tri);
-
 /* Warp factor to connnect the Legendre-Gauss-Lobatto and equidistant nodes */
-static void sc_warpfactor_tri(int, double *, int, double *);
-
-/* get the coordinate of interpolations points on standard triangle element */
-static void sc_coord_tri(stdCell *);
-
+static void dg_tri_warpfactor(int, double *, int, double *);
 /* evaluate 2D orthonormal polynomial on simplex at (a,b) of order (i,j). */
-static void sc_simplex2DP_tri(int Np, double *a, double *b, int i, int j, double *poly);
-
-/* derivative of orthogonal function */
-static void sc_deriOrthogFunc_tri(stdCell *tri, int ind, double *dr, double *ds);
-
-/* get orthogonal function value at interpolation nodes */
-static void sc_orthogFunc_tri(stdCell *cell, int ind, double *func);
+static void dg_tri_simplex2DP(int Np, double *a, double *b, int i, int j, double *poly);
 
 
+void dg_tri_free(dg_cell *cell){
+
+    matrix_int_free(cell->Fmask);
+    vector_double_free(cell->r);
+    vector_double_free(cell->s);
+    /* vandermonde matrix */
+    matrix_double_free(cell->V);
+    /* mass matrix */
+    matrix_double_free(cell->M);
+    /* Derivative Matrix */
+    matrix_double_free(cell->Dr);
+    matrix_double_free(cell->Ds);
+    matrix_double_free(cell->Dt);
+
+    /* LIFT */
+    matrix_double_free(cell->LIFT);
+
+    /* Gauss quadrature */
+    vector_double_free(cell->ws);
+    vector_double_free(cell->wv);
+
+    /* float version */
+    free(cell->f_LIFT);
+    free(cell->f_Dr);
+    free(cell->f_Ds);
+
+    free(cell);
+    return;
+}
 
 /**
  * @brief
@@ -55,7 +67,7 @@ static void sc_orthogFunc_tri(stdCell *cell, int ind, double *func);
  * @param [out] ti
  * @param [out] tj
  */
-static void sc_transInd_tri(int N, int ind, int *ti, int *tj){
+static void dg_tri_transInd(int N, int ind, int *ti, int *tj){
     int i,j,sk=0;
     for(i=0;i<N+1;i++){
         for(j=0;j<N-i+1;j++){
@@ -75,83 +87,106 @@ static void sc_transInd_tri(int N, int ind, int *ti, int *tj){
  * @param [in] ind index of orthogonal function
  * @param [out] func value of orthogonal function
  */
-static void sc_orthogFunc_tri(stdCell *cell, int ind, double *func){
+void dg_tri_orthog_func(dg_cell *cell, int ind, double *func){
     const int N = cell->N;
     const int Np = cell->Np;
     double *r = cell->r;
     double *s = cell->s;
 
     double a[Np], b[Np];
-    sc_rstoad(Np, r, s, a, b);
+    dg_tri_rstoad(Np, r, s, a, b);
     int i,j;
-    sc_transInd_tri(N, ind, &i, &j);
-    sc_simplex2DP_tri(Np, a, b, i, j, func);
+    dg_tri_transInd(N, ind, &i, &j);
+    dg_tri_simplex2DP(Np, a, b, i, j, func);
 }
 
 /**
- * @brief return a pointer to a new standard triangle element
- * @param[in] N polynomial order
- * @note
- * the stdCell object should be free manually with @ref sc_free
+ * @brief
+ * basic information for standard triangle element.
+ * @param cell
+ * @param N
  */
-stdCell* sc_create_tri(int N){
-    stdCell *tri = (stdCell *) calloc(1, sizeof(stdCell));
+void dg_tri_info(dg_cell *cell, int N){
 
-    /* cell type */
-    tri->type = TRIANGLE;
-
+    cell->type = TRIANGLE;
     const int Np = ((N+1)*(N+2)/2);
     const int Nv = 3;
     const int Nfaces = 3;
     const int Nfp = N+1;
     /* basic info */
-    tri->N      = N;
-    tri->Np     = Np;
-    tri->Nv     = Nv;
-    tri->Nfaces = Nfaces;
-    tri->Nfp    = Nfp;
+    cell->N      = N;
+    cell->Np     = Np;
+    cell->Nv     = Nv;
+    cell->Nfaces = Nfaces;
+    cell->Nfp    = Nfp;
 
-    /* nodes at faces, Fmask */
-    tri->Fmask = sc_fmask_tri(tri);
+    return;
+}
 
-    /* coordinate, r and s */
-    sc_coord_tri(tri);
-    /* vandermonde matrix, V */
-    tri->V = sc_VandMatrix(tri, sc_orthogFunc_tri);
-    /* mass matrix, M */
-    tri->M = sc_massMatrix(tri);
+double ** dg_tri_surf_mass_matrix(dg_cell *cell){
+    const int Np = cell->Np;
+    const int Nfaces = cell->Nfaces;
+    const int Nfp = cell->Nfp;
 
-    /* Derivative Matrix, Dr and Ds */
-    sc_deriMatrix2d(tri, sc_deriOrthogFunc_tri);
+    double **Mes = matrix_double_create(Np, Nfaces * Nfp);
 
-    /* suface LIFT matrix, LIFT */
-    tri->LIFT = sc_liftMatrix(tri, sc_surfMassMatrix2d);
-
-    /* integration coefficients, ws and wv */
-    sc_GaussQuadrature2d(tri);
-
-    /* float version */
-    size_t sz = (size_t) Np*Nfp*Nfaces;
-    tri->f_LIFT = (dg_real *) calloc(sz, sizeof(dg_real));
-
-    int sk = 0, n, m;
-    for(n=0;n<Np;++n){
-        for(m=0;m<Nfp*Nfaces;++m){
-            tri->f_LIFT[sk++] = (dg_real) tri->LIFT[n][m];
+    int **Fmask = cell->Fmask;
+    /* coefficients for faces */
+    double r[Nfp], w[Nfp];
+    double invt[Nfp*Nfp], inv[Nfp*Nfp], m[Nfp*Nfp];
+    /* get mass matrix of line */
+    zwglj(r, w, Nfp, 0, 0); /* get coordinate */
+    int i,j;
+    for(i=0;i<Nfp;i++){
+        /* get vandermonde matrix of line */
+        jacobiP(Nfp, r, w, i, 0, 0);
+        for(j=0;j<Nfp;j++){
+            inv[j*Nfp+i] = w[j];
         }
     }
+    matrix_inverse(inv, Nfp);
+    /* transform of vandermonde matrix */
+    for(i=0;i<Nfp;i++){
+        for(j=0;j<Nfp;j++)
+            invt[j+Nfp*i] = inv[j*Nfp+i];
+    }
+    /* get M = inv(V)'*inv(V) */
+    matrix_multiply(Nfp, Nfp, Nfp, invt, inv, m);
 
-    sz = (size_t) Np*Np;
-    tri->f_Dr = (dg_real*) calloc(sz, sizeof(dg_real));
-    tri->f_Ds = (dg_real*) calloc(sz, sizeof(dg_real));
-    sk = 0;
-    for(n=0;n<Np;++n){
-        for(m=0;m<Np;++m){
-            tri->f_Dr[sk  ] = (dg_real) tri->Dr[n][m];
-            tri->f_Ds[sk++] = (dg_real) tri->Ds[n][m];
+    int k, sr, sk;
+    for(i=0;i<Nfaces;i++){
+        for(j=0;j<Nfp;j++){         /* row index of M */
+            for(k=0;k<Nfp;k++){     /* column index of M */
+                sr = Fmask[i][j];   /* row index of Mes */
+                sk = i*Nfp + k;     /* columns index of Mes */
+                Mes[sr][sk] = m[j*Nfp + k];
+            }
         }
     }
-    return tri;
+    return Mes;
+}
+
+/**
+ * @brief calculate the Gauss quadrature weights
+ * @param [in] cell 2d standard elements
+ */
+void dg_tri_gauss_weight(dg_cell *cell){
+    const int Nfp = cell->Nfp;
+    const int Np = cell->Np;
+    double r[Nfp];
+    // Gauss quadrature weights for face
+    cell->ws = vector_double_create(Nfp);
+    zwglj(r, cell->ws, Nfp, 0, 0);
+
+    // Gauss quadrature weights for volume
+    cell->wv = vector_double_create(Np);
+    int i,j;
+    for(i=0;i<Np;i++){
+        for(j=0;j<Np;j++){
+            cell->wv[j] += cell->M[i][j];
+        }
+    }
+    return;
 }
 
 /**
@@ -164,13 +199,14 @@ stdCell* sc_create_tri(int N){
  * @note
  * precondition: dr and ds should be allocated before calling @ref sc_deriOrthogFunc_tri
  */
-static void sc_deriOrthogFunc_tri(stdCell *tri, int ind, double *dr, double *ds){
+void dg_tri_deriorthog_func(dg_cell *tri, int ind, double *dr, double *ds, double *dt){
     const int Np = tri->Np;
     double a[Np], b[Np];
-    sc_rstoad(Np, tri->r, tri->s, a, b);
+    dg_tri_rstoad(Np, tri->r, tri->s, a, b);
     int ti, tj;
-    sc_transInd_tri(tri->N, ind, &ti, &tj);
-    sc_gradSimplex2DP_tri(Np, a, b, ti, tj, dr, ds);
+    dg_tri_transInd(tri->N, ind, &ti, &tj);
+    dg_tri_gradSimplex2DP(Np, a, b, ti, tj, dr, ds);
+    return;
 }
 
 /**
@@ -200,9 +236,9 @@ static void sc_deriOrthogFunc_tri(stdCell *tri, int ind, double *dr, double *ds)
  * precondition: dmodedr and dmodeds should be allocated before
  * calling @ref sc_gradSimplex2DP_tri
  */
-static void sc_gradSimplex2DP_tri(
-        int Np, double *a, double *b, int id, int jd,
-        double *dmodedr, double *dmodeds){
+static void dg_tri_gradSimplex2DP(int Np, double *a, double *b,
+                                  int id, int jd,
+                                  double *dmodedr, double *dmodeds){
 
     double fa[Np],dfa[Np],gb[Np],dgb[Np],temp[Np];
     int i;
@@ -266,7 +302,7 @@ static void sc_gradSimplex2DP_tri(
  * @param [out] poly value of orthogonal basis function value
  *
  */
-static void sc_simplex2DP_tri(int Np, double *a, double *b, int i, int j, double *poly){
+static void dg_tri_simplex2DP(int Np, double *a, double *b, int i, int j, double *poly){
     double *h1 = vector_double_create(Np);
     double *h2 = vector_double_create(Np);
     int n;
@@ -288,7 +324,7 @@ static void sc_simplex2DP_tri(int Np, double *a, double *b, int i, int j, double
  * @param[in,out] s coordinate
  *
  */
-static void sc_coord_tri(stdCell *tri){
+void dg_tri_coord(dg_cell *tri){
 
     // local
     double alpopt[15] =  {0.0000, 0.0000, 1.4152, 0.1001, 0.2751, 0.9800, 1.0999, 1.2832,
@@ -327,7 +363,7 @@ static void sc_coord_tri(stdCell *tri){
     for(i=0;i<Np;i++){
         dL[i] = L3[i] - L2[i];
     }
-    sc_warpfactor_tri(N, dL, Np, warpf1);
+    dg_tri_warpfactor(N, dL, Np, warpf1);
 
     for(i=0;i<Np;i++){
         temp = alpha*L1[i];
@@ -339,7 +375,7 @@ static void sc_coord_tri(stdCell *tri){
     for(i=0;i<Np;i++){
         dL[i] = L1[i] - L3[i];
     }
-    sc_warpfactor_tri(N, dL, Np, warpf1);
+    dg_tri_warpfactor(N, dL, Np, warpf1);
 
     for(i=0;i<Np;i++){
         temp = alpha*L2[i];
@@ -352,7 +388,7 @@ static void sc_coord_tri(stdCell *tri){
     for(i=0;i<Np;i++){
         dL[i] = L2[i] - L1[i];
     }
-    sc_warpfactor_tri(N, dL, Np, warpf1);
+    dg_tri_warpfactor(N, dL, Np, warpf1);
 
     for(i=0;i<Np;i++){
         temp = alpha*L3[i];
@@ -362,7 +398,7 @@ static void sc_coord_tri(stdCell *tri){
     }
 
     /* coordinate transfer */
-    sc_xytors_tri(Np, x, y, tri->r, tri->s);
+    dg_tri_xytors(Np, x, y, tri->r, tri->s);
 }
 
 /**
@@ -385,7 +421,7 @@ static void sc_coord_tri(stdCell *tri){
  * @note
  * precondition: w shuold be allocated before calling sc_warpfactor_tri
  */
-static void sc_warpfactor_tri(int N, double *r, int Nr, double *w){
+static void dg_tri_warpfactor(int N, double *r, int Nr, double *w){
     int i, j, Np = N+1;
     double *ye, *l, *re, *rlgl, *wlgl;
     double temp;
@@ -445,7 +481,7 @@ static void sc_warpfactor_tri(int N, double *r, int Nr, double *w){
  * @return int Fmask[Nfaces][Nfp]
  *
  */
-static int** sc_fmask_tri(stdCell *tri){
+int** dg_tri_fmask(dg_cell *tri){
 
     const int Nfp = tri->Nfp;
     const int Nfaces = tri->Nfaces;
@@ -456,12 +492,10 @@ static int** sc_fmask_tri(stdCell *tri){
     int i;
 
     /* face 1, s=-1 */
-    for(i=0;i<Nfp;i++)
-        Fmask[0][i] = i;
+    for(i=0;i<Nfp;i++) {Fmask[0][i] = i;}
 
     /* face 3, r=-1 */
-    for(i=0;i<Nfp;i++)
-        nrp[i] = Nfp - i;
+    for(i=0;i<Nfp;i++) {nrp[i] = Nfp - i;}
 
     temp[0] = 1; /* node index on r=-1 from s=-1 to s=1 */
     for(i=1;i<Nfp;i++){
@@ -473,8 +507,7 @@ static int** sc_fmask_tri(stdCell *tri){
     }
     /* face 2, r+s=0 */
     nrp[0] = Nfp;
-    for(i=1;i<Nfp-1;i++)
-        nrp[i] = temp[i+1]-1;
+    for(i=1;i<Nfp-1;i++) { nrp[i] = temp[i+1]-1; }
     nrp[Nfp-1] = temp[Nfp-1];
     for(i=0;i<Nfp;i++){
         Fmask[1][i] = nrp[i] - 1;
@@ -497,7 +530,7 @@ static int** sc_fmask_tri(stdCell *tri){
  * @note
  * precondition: [x, y] and [r, s] should be allocated before calling @ref sc_xytors_tri
  */
-static void sc_xytors_tri(int Np, double *x, double *y, double *r, double *s){
+static void dg_tri_xytors(int Np, double *x, double *y, double *r, double *s){
     double L1, L2, L3;
     int i;
 
@@ -523,7 +556,7 @@ static void sc_xytors_tri(int Np, double *x, double *y, double *r, double *s){
  * precondition: a and b should be allocated before calling @ref sc_rstoad
  */
 
-static void sc_rstoad(int Np, double *r, double *s, double *a, double *b){
+static void dg_tri_rstoad(int Np, double *r, double *s, double *a, double *b){
     int i;
     for(i=0;i<Np;i++){
         if( fabs(s[i] - 1.0) > 1.0e-10){
@@ -543,7 +576,7 @@ static void sc_rstoad(int Np, double *r, double *s, double *a, double *b){
  * @param[in] nodeVal value of nodes
  *
  */
-void sc_proj_vert2node_tri(stdCell *cell, double *vertVal, double *nodeVal){
+void dg_tri_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal){
     register int i;
     double *r = cell->r;
     double *s = cell->s;

@@ -23,7 +23,7 @@ int phys_limiter_test(physField *phys, int verbose){
             phys->f_Q[sk++] = region->y[k][n];
         }
     }
-    pf_slloc2d(phys, 1.0);
+    pf_limit_BJ2d(phys, 1.0);
     if(verbose) {
         FILE *fp = create_log(__FUNCTION__, phys->mesh->procid, phys->mesh->nprocs);
         print_double_vector2file(fp, "f_Q", phys->f_Q, K * Np * phys->Nfield);

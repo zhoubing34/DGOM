@@ -9,88 +9,124 @@
  * li12242, Tianjin University, li12242@tju.edu.cn
  */
 
-#include "sc_stdcell.h"
-#include "sc_stdcell2d.h"
+#include "dg_cell.h"
 #include "Polylib/polylib.h"
 
-/* build the nodes index matrix on each faces */
-int** sc_fmask_quad(stdCell *quad);
-/* get the nature coordinate of interpolation nodes in standard quadrilateral element */
-void sc_coord_quad(stdCell *quad);
 /* transform the index of orthogonal function to [ti,tj] for quadrilateral elements */
 void sc_transInd_quad(int N, int ind, int *ti, int *tj);
-/* get orthogonal function value at interpolation nodes */
-void sc_orthogFunc_quad(stdCell *quad, int ind, double *func);
-/* calculate the value of derivative function at interpolation points */
-void sc_deriOrthogFunc_quad(stdCell *quad, int ind, double *dr, double *ds);
 
-/**
- * @brief create standard quadrilateral element
- * @param[in] N polynomial order
- * @return quad standard quadrilateral element
- */
-stdCell* sc_create_quad(int N){
-    stdCell *quad = (stdCell *) calloc(1, sizeof(stdCell));
-
+void dg_quad_info(dg_cell *cell, int N){
     /* cell type */
-    quad->type = QUADRIL;
+    cell->type = QUADRIL;
 
     const int Np = (N+1)*(N+1);
     const int Nfaces = 4;
     const int Nfp = N+1;
     const int Nv = 4;
     /* basic info */
-    quad->N      = N;
-    quad->Np     = Np;
-    quad->Nfaces = Nfaces;
-    quad->Nfp    = Nfp;
-    quad->Nv     = Nv;
+    cell->N      = N;
+    cell->Np     = Np;
+    cell->Nfaces = Nfaces;
+    cell->Nfp    = Nfp;
+    cell->Nv     = Nv;
 
-    /* nodes at faces, Fmask */
-    quad->Fmask = sc_fmask_quad(quad);
+    return;
+}
 
-    /* coordinate, r and s */
-    sc_coord_quad(quad);
+/**
+ * @brief calculate the Gauss quadrature weights
+ * @param [in] cell 2d standard elements
+ */
+void dg_quad_gauss_weight(dg_cell *cell){
+    const int Nfp = cell->Nfp;
+    const int Np = cell->Np;
+    double r[Nfp];
+    // Gauss quadrature weights for face
+    cell->ws = vector_double_create(Nfp);
+    zwglj(r, cell->ws, Nfp, 0, 0);
 
-    /* Vandermonde matrix, V */
-    quad->V = sc_VandMatrix(quad, sc_orthogFunc_quad);
+    // Gauss quadrature weights for volume
+    cell->wv = vector_double_create(Np);
+    int i,j;
+    for(i=0;i<Np;i++){
+        for(j=0;j<Np;j++){
+            cell->wv[j] += cell->M[i][j];
+        }
+    }
+    return;
+}
 
-    /* mass matrix, M */
-    quad->M = sc_massMatrix(quad);
+double ** dg_quad_surf_mass_matrix(dg_cell *cell){
+    const int Np = cell->Np;
+    const int Nfaces = cell->Nfaces;
+    const int Nfp = cell->Nfp;
 
-    /* Derivative Matrix, Dr and Ds */
-    sc_deriMatrix2d(quad, sc_deriOrthogFunc_quad);
+    double **Mes = matrix_double_create(Np, Nfaces * Nfp);
 
-    /* suface LIFT matrix, LIFT */
-    quad->LIFT = sc_liftMatrix(quad, sc_surfMassMatrix2d);
+    int **Fmask = cell->Fmask;
+    /* coefficients for faces */
+    double r[Nfp], w[Nfp];
+    double invt[Nfp*Nfp], inv[Nfp*Nfp], m[Nfp*Nfp];
+    /* get mass matrix of line */
+    zwglj(r, w, Nfp, 0, 0); /* get coordinate */
+    int i,j;
+    for(i=0;i<Nfp;i++){
+        /* get vandermonde matrix of line */
+        jacobiP(Nfp, r, w, i, 0, 0);
+        for(j=0;j<Nfp;j++){
+            inv[j*Nfp+i] = w[j];
+        }
+    }
+    matrix_inverse(inv, Nfp);
+    /* transform of vandermonde matrix */
+    for(i=0;i<Nfp;i++){
+        for(j=0;j<Nfp;j++)
+            invt[j+Nfp*i] = inv[j*Nfp+i];
+    }
+    /* get M = inv(V)'*inv(V) */
+    matrix_multiply(Nfp, Nfp, Nfp, invt, inv, m);
 
-    /* integration coefficients, ws and wv */
-    sc_GaussQuadrature2d(quad);
+    int k, sr, sk;
+    for(i=0;i<Nfaces;i++){
+        for(j=0;j<Nfp;j++){         /* row index of M */
+            for(k=0;k<Nfp;k++){     /* column index of M */
+                sr = Fmask[i][j];   /* row index of Mes */
+                sk = i*Nfp + k;     /* columns index of Mes */
+                Mes[sr][sk] = m[j*Nfp + k];
+            }
+        }
+    }
+    return Mes;
+}
+
+void dg_quad_free(dg_cell *cell){
+
+    matrix_int_free(cell->Fmask);
+    vector_double_free(cell->r);
+    vector_double_free(cell->s);
+    /* vandermonde matrix */
+    matrix_double_free(cell->V);
+    /* mass matrix */
+    matrix_double_free(cell->M);
+    /* Derivative Matrix */
+    matrix_double_free(cell->Dr);
+    matrix_double_free(cell->Ds);
+    matrix_double_free(cell->Dt);
+
+    /* LIFT */
+    matrix_double_free(cell->LIFT);
+
+    /* Gauss quadrature */
+    vector_double_free(cell->ws);
+    vector_double_free(cell->wv);
 
     /* float version */
-    size_t sz = Np*Nfp*Nfaces*sizeof(dg_real);
-    quad->f_LIFT = (dg_real *) malloc(sz);
-    sz = Np*Np*sizeof(dg_real);
-    quad->f_Dr = (dg_real*) malloc(sz);
-    quad->f_Ds = (dg_real*) malloc(sz);
+    free(cell->f_LIFT);
+    free(cell->f_Dr);
+    free(cell->f_Ds);
 
-    int sk = 0, n, m;
-    for(n=0;n<Np;++n){
-        for(m=0;m<Nfp*Nfaces;++m){
-            quad->f_LIFT[sk++] = (dg_real) quad->LIFT[n][m];
-        }
-    }
-
-    sk = 0;
-    for(n=0;n<Np;++n){
-        for(m=0;m<Np;++m){
-            quad->f_Dr[sk] = (dg_real) quad->Dr[n][m];
-            quad->f_Ds[sk] = (dg_real) quad->Ds[n][m];
-            ++sk;
-        }
-    }
-
-    return quad;
+    free(cell);
+    return;
 }
 
 /**
@@ -130,7 +166,7 @@ void sc_transInd_quad(int N, int ind, int *ti, int *tj){
  * @note
  * precondition: dr and ds should be allocated before calling @ref sc_deriOrthogFunc_quad
  */
-void sc_deriOrthogFunc_quad(stdCell *quad, int ind, double *dr, double *ds){
+void dg_quad_deri_orthog_func(dg_cell *quad, int ind, double *dr, double *ds, double *dt){
     const int N = quad->N;
     const int Np = quad->Np;
 
@@ -145,18 +181,18 @@ void sc_deriOrthogFunc_quad(stdCell *quad, int ind, double *dr, double *ds){
     GradjacobiP(Np, r, temp, ti, 0, 0);
     jacobiP(Np, s, dr, tj, 0, 0);
     int i;
-    for(i=0;i<Np;i++)
-        dr[i] *= temp[i];
+    for(i=0;i<Np;i++) {dr[i] *= temp[i];}
 
     /* Vs */
     jacobiP(Np, r, temp, ti, 0.0, 0.0);
     GradjacobiP(Np, s, ds, tj, 0.0, 0.0);
-    for(i=0;i<Np;i++)
-        ds[i] *= temp[i];
+    for(i=0;i<Np;i++) {ds[i] *= temp[i];}
+    return;
 }
 
 /**
- * @brief get orthogonal function value at interpolation nodes
+ * @brief
+ * get orthogonal function value at interpolation nodes
  * @details
  * The orthogonal function on quadrilateral is derived by the
  * 1d orthogonal function
@@ -165,7 +201,7 @@ void sc_deriOrthogFunc_quad(stdCell *quad, int ind, double *dr, double *ds){
  * @param [in] ind index of orthogonal function
  * @param [out] func value of orthogonal function
  */
-void sc_orthogFunc_quad(stdCell *quad, int ind, double *func){
+void dg_quad_orthog_func(dg_cell *quad, int ind, double *func){
     const int N = quad->N;
     const int Np = quad->Np;
 
@@ -186,12 +222,13 @@ void sc_orthogFunc_quad(stdCell *quad, int ind, double *func){
 }
 
 /**
- * @brief get the nature coordinate of interpolation nodes in standard quadrilateral element.
+ * @brief
+ * get the nature coordinate of interpolation nodes in standard quadrilateral element.
  * @param [int,out] quad standard quadrilateral element
  * @note
  * the nodes is arranged along r coordinate first
  */
-void sc_coord_quad(stdCell *quad){
+void dg_quad_coord(dg_cell *quad){
     const int Nfp = quad->Nfp;
     const int Np = quad->Np;
     double t[Nfp],w[Nfp];
@@ -221,7 +258,7 @@ void sc_coord_quad(stdCell *quad){
  * @param [int] quad standard quadralteral element
  * @return Fmask[Nfaces][Nfp]
  */
-int** sc_fmask_quad(stdCell *quad){
+int** dg_quad_fmask(dg_cell *quad){
     const int Nfp = quad->Nfp;
     const int Nfaces = quad->Nfaces;
 
@@ -268,7 +305,7 @@ int** sc_fmask_quad(stdCell *quad){
  * @param[in] nodeVal value of nodes
  *
  */
-void sc_proj_vert2node_quad(stdCell *cell, double *vertVal, double *nodeVal){
+void dg_quad_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal){
     int i;
     for (i=0;i<cell->Np;++i) {
         double ri = cell->r[i];

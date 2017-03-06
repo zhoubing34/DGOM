@@ -105,7 +105,7 @@ static void permuteNodalBuffer(physField *phys){
     int p2,n1,m,fld;
     int nprocs = mesh->nprocs;
     int procid = mesh->procid;
-    stdCell *shape = phys->cell;
+    dg_cell *shape = phys->cell;
     int Nfp = shape->Nfp;
 
     int sp=0, sk=0;
@@ -207,7 +207,7 @@ static void phys_surfInfo2d(physField *phys){
 
     int k,f,m,sk = 0;
     parallMesh *mesh = phys->mesh;
-    stdCell *shape = mesh->cell;
+    dg_cell *shape = mesh->cell;
     multiReg *region = phys->region;
 
     const int Nfields = phys->Nfield;

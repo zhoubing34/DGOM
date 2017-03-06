@@ -7,7 +7,7 @@
 int phys_cellFetch_test(physField *phys, int verbose){
     int fail = 0;
 
-    geoGrid *grid = phys->grid;
+    dg_grid *grid = phys->grid;
     parallMesh *mesh = phys->mesh;
 
     const int Nfield = phys->Nfield;

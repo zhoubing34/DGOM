@@ -3,7 +3,6 @@
 //
 
 #include <PhysField/pf_phys.h>
-#include <MultiRegions/mr_grid.h>
 #include "conv_extsol.h"
 
 extern conv_solver2d solver;

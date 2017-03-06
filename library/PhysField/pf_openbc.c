@@ -20,7 +20,7 @@ static void pf_openbc_interp(int ncid, double timeloc, time_interp_method method
  */
 void pf_set_openbc(physField *phys, double timeloc, time_interp_method method){
     parallMesh *mesh = phys->mesh;
-    stdCell *cell = phys->cell;
+    dg_cell *cell = phys->cell;
     const int Nobc = mesh->Nobc;
     const int K = phys->grid->K;
     const int Nvert = phys->grid->Nv;
@@ -56,7 +56,7 @@ void pf_set_openbc(physField *phys, double timeloc, time_interp_method method){
                         int v1 = EToV[k][m];
                         vertbc[m] = bc[v1*Nfield + fld];
                     }
-                    sc_proj_vert2node(cell, vertbc, nodebc);
+                    dg_cell_proj_vert2node(cell, vertbc, nodebc);
 
                     sk = k*Np*Nfield+fld;
                     for(m=0;m<Np;m++){

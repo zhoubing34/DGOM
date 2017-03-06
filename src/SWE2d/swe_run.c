@@ -2,7 +2,7 @@
 #include "swe_driver2d.h"
 #include "PhysField/pf_cellMean.h"
 #include "swe_output.h"
-#include "PhysField/pf_limiter.h"
+#include "PhysField/Limiter/pf_limit_BJ2d.h"
 #include "swe_rhs.h"
 #include "PhysField/pf_openbc.h"
 
@@ -63,7 +63,7 @@ void swe_run(swe_solver *solver){
     double  dt;  /* delta time */
     /* save initial condition */
     swe_save_var(solver, tstep++, time);
-    pf_slloc2d(phys, 1.0);
+    pf_limit_BJ2d(phys, 1.0);
     swe_ppreserve(solver);
 
     double mpitime0 = MPI_Wtime();
@@ -92,7 +92,7 @@ void swe_run(swe_solver *solver){
             pf_set_openbc(phys, time+rk4c[INTRK-1]*dt, time_interp_linear);
             swe_rhs(solver, fa, fb, fdt);
             //swe_h2eta(solver);
-            pf_slloc2d(phys, 1.0);
+            pf_limit_BJ2d(phys, 1.0);
             //swe_eta2h(solver);
             //pf_vert_limit(phys);
             swe_ppreserve(solver);

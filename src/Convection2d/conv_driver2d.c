@@ -14,7 +14,7 @@
  * @author
  * Li Longxiang, Tianjin University, li12242@tju.edu.cn
  */
-
+#define DEBUG 0
 #include "conv_driver2d.h"
 #include "conv_getparameter.h"
 #include "conv_intilization.h"
@@ -33,15 +33,25 @@ int main(int argc, char **argv){
 
     /* initialize MPI */
     MPI_Init(&argc, &argv);
-
+#if DEBUG
+    int procid, nprocs;
+    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
+    if(!procid) printf("step into conv_getparameter\n");
+#endif
     /* get parameters */
     conv_getparameter(argc, argv);
 
     /* physical field */
-    stdCell *cell = sc_create(solver.N, solver.celltype);
+    dg_cell *cell = dg_cell_creat(solver.N, solver.celltype);
+#if DEBUG
+    if(!procid) printf("step into conv_mesh\n");
+#endif
     parallMesh *mesh = conv_mesh(cell);
     physField *phys = pf_create(3, mesh);
 
+#if DEBUG
+    if(!procid) printf("step out conv_intilization\n");
+#endif
     /* initialization */
     conv_intilization(phys);
 

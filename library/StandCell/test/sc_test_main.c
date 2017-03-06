@@ -29,7 +29,7 @@ int main(int argc, char **argv){
     int fail = 0, err[NTEST];
     int N = 3,i;
     printf(HEADSTART "Running %d test for SandCell_triangle test\n", NTEST);
-    stdCell *tri = sc_create(N, TRIANGLE);
+    dg_cell *tri = dg_cell_creat(N, TRIANGLE);
     /* triangle test case */
     i=0;
     err[i++] = sc_triCoor_test(tri, isverbose);
@@ -40,7 +40,7 @@ int main(int argc, char **argv){
     err[i++] = sc_triVertProj_test(tri, isverbose);
 
 
-    sc_free(tri);
+    dg_cell_free(tri);
 
     for(i=0;i<NTEST;i++)
         fail += err[i];
@@ -51,7 +51,7 @@ int main(int argc, char **argv){
         printf(HEADEND "%d test passed from SandCell_triangle test\n", NTEST);
 
     /* quadrilateral test case */
-    stdCell *quad = sc_create(N, QUADRIL);
+    dg_cell *quad = dg_cell_creat(N, QUADRIL);
     printf(HEADSTART "Running %d test for SandCell_quadrilateral test\n", NTEST);
     i = 0;
     err[i++] = sc_quadCoor_test(quad, isverbose);
@@ -60,7 +60,7 @@ int main(int argc, char **argv){
     err[i++] = sc_quadDeriMatrix_test(quad, isverbose);
     err[i++] = sc_quadLIFT_test(quad, isverbose);
     err[i++] = sc_quadVertProj_test(quad, isverbose);
-    sc_free(quad);
+    dg_cell_free(quad);
 
     for(i=0;i<NTEST;i++)
         fail += err[i];

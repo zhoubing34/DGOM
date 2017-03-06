@@ -2,7 +2,7 @@
 // Created by li12242 on 12/19/16.
 //
 
-#include <StandCell/sc_stdcell.h>
+#include <StandCell/dg_cell.h>
 #include "mr_mesh.h"
 #include "mr_mesh_cellConnect.h"
 #include "mr_mesh_nodeConnect.h"

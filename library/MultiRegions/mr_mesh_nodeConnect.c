@@ -12,7 +12,7 @@
  */
 void mr_mesh_nodeConnect2d(parallMesh *mesh){
 
-    stdCell *shape = mesh->cell;
+    dg_cell *shape = mesh->cell;
     multiReg *region = mesh->region;
 
     /* constant variables */

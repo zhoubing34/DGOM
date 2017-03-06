@@ -5,7 +5,7 @@
 #include "sc_quad_test.h"
 #include "sc_quad_data3.h"
 
-int sc_quadCoor_test(stdCell *quad, int verbose){
+int sc_quadCoor_test(dg_cell *quad, int verbose){
     int fail = 0;
     const int Np = quad->Np;
     extern double quad_r[NP];
@@ -23,7 +23,7 @@ int sc_quadCoor_test(stdCell *quad, int verbose){
     return fail;
 }
 
-int sc_quadVandMatrix_test(stdCell *quad, int verbose){
+int sc_quadVandMatrix_test(dg_cell *quad, int verbose){
     int fail = 0;
     extern double quad_V[NP][NP];
     double **V_ext = matrix_double_create(NP, NP);
@@ -45,7 +45,7 @@ int sc_quadVandMatrix_test(stdCell *quad, int verbose){
     return fail;
 }
 
-int sc_quadMassMatrix_test(stdCell *quad, int verbose){
+int sc_quadMassMatrix_test(dg_cell *quad, int verbose){
     int fail = 0;
     extern double quad_M[NP][NP];
     double **M_ext = matrix_double_create(NP, NP);
@@ -66,7 +66,7 @@ int sc_quadMassMatrix_test(stdCell *quad, int verbose){
     return fail;
 }
 
-int sc_quadDeriMatrix_test(stdCell *quad, int verbose){
+int sc_quadDeriMatrix_test(dg_cell *quad, int verbose){
     int fail =0;
     extern double quad_Dr[NP][NP];
     extern double quad_Ds[NP][NP];
@@ -97,7 +97,7 @@ int sc_quadDeriMatrix_test(stdCell *quad, int verbose){
 }
 
 
-int sc_quadLIFT_test(stdCell *quad, int verbose){
+int sc_quadLIFT_test(dg_cell *quad, int verbose){
     int fail = 0;
     extern double quad_LIFT[NP][NFP];
     double **LIFT_ext = matrix_double_create(NP, NFP);
@@ -121,16 +121,16 @@ int sc_quadLIFT_test(stdCell *quad, int verbose){
 }
 
 
-int sc_quadVertProj_test(stdCell *quad, int verbose){
+int sc_quadVertProj_test(dg_cell *quad, int verbose){
     int fail=0;
     extern double quad_VX[NV];
     extern double quad_VY[NV];
 
     double x[quad->Np], y[quad->Np];
-    sc_proj_vert2node(quad, quad_VX, x);
+    dg_cell_proj_vert2node(quad, quad_VX, x);
     fail = vector_double_test("sc_quadVertProj_test", x, quad->r, quad->Np);
 
-    sc_proj_vert2node(quad, quad_VY, y);
+    dg_cell_proj_vert2node(quad, quad_VY, y);
     fail = vector_double_test("sc_quadVertProj_test", y, quad->s, quad->Np);
     return fail;
 }

@@ -15,7 +15,7 @@ typedef enum{
 typedef struct {
     int caseid; ///< indicator of problem case
     char *casename; ///< case name
-    sc_cellType celltype; ///< cell type
+    dg_cell_type celltype; ///< cell type
     int N; ///< order of polynomial
     int Ne; ///< number of elements in each coordinate
     double cfl; ///< CFL number

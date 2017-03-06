@@ -1,6 +1,8 @@
-#include <StandCell/sc_stdcell.h>
+#include <StandCell/dg_cell.h>
 #include "mr_reg.h"
 #include "mr_grid.h"
+
+#define DEBUG 0
 
 /* create node coordinate for multiReg object */
 static void mr_reg_nodeCoor(multiReg *region);
@@ -37,7 +39,7 @@ static void mr_reg_surfInfo2d(multiReg *region);
  * @note
  * postcondition: user should call @ref mr_reg_free to free the memory manually.
  */
-multiReg* mr_reg_create(geoGrid *grid){
+multiReg* mr_reg_create(dg_grid *grid){
 
     /* allocation */
     multiReg *region = (multiReg *)calloc(1, sizeof(multiReg));
@@ -132,8 +134,8 @@ static void mr_reg_nodeCoor(multiReg *region){
  * @param[in,out] region multi-regions object
  */
 static void mr_reg_nodeCoor3d(multiReg *region){
-    stdCell *cell = region->cell;
-    geoGrid *grid = region->grid;
+    dg_cell *cell = region->cell;
+    dg_grid *grid = region->grid;
     const int Np = cell->Np;
     const int K = grid->K;
     const int Nv = cell->Nv;
@@ -154,9 +156,9 @@ static void mr_reg_nodeCoor3d(multiReg *region){
             gy[i] = vy[EToV[k][i]];
             gz[i] = vz[EToV[k][i]];
         }
-        sc_proj_vert2node(cell, gx, region->x[k]);
-        sc_proj_vert2node(cell, gy, region->y[k]);
-        sc_proj_vert2node(cell, gz, region->z[k]);
+        dg_cell_proj_vert2node(cell, gx, region->x[k]);
+        dg_cell_proj_vert2node(cell, gy, region->y[k]);
+        dg_cell_proj_vert2node(cell, gz, region->z[k]);
     }
     return;
 }
@@ -166,8 +168,8 @@ static void mr_reg_nodeCoor3d(multiReg *region){
  * @param[in,out] region multi-regions object
  */
 static void mr_reg_nodeCoor2d(multiReg *region){
-    stdCell *cell = region->cell;
-    geoGrid *grid = region->grid;
+    dg_cell *cell = region->cell;
+    dg_grid *grid = region->grid;
     const int Np = cell->Np;
     const int K = grid->K;
     const int Nv = cell->Nv;
@@ -185,8 +187,8 @@ static void mr_reg_nodeCoor2d(multiReg *region){
             gx[i] = vx[EToV[k][i]];
             gy[i] = vy[EToV[k][i]];
         }
-        sc_proj_vert2node(cell, gx, region->x[k]);
-        sc_proj_vert2node(cell, gy, region->y[k]);
+        dg_cell_proj_vert2node(cell, gx, region->x[k]);
+        dg_cell_proj_vert2node(cell, gy, region->y[k]);
     }
     return;
 }
@@ -352,8 +354,8 @@ static void mr_reg_surfInfo2d(multiReg *region){
  * @param[in,out] region multi-region object
  */
 static void mr_reg_volScale(multiReg *region){
-    stdCell *cell = region->cell;
-    geoGrid *grid = region->grid;
+    dg_cell *cell = region->cell;
+    dg_grid *grid = region->grid;
     const int Np = cell->Np;
     const int K = grid->K;
 

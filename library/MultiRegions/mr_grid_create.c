@@ -1,9 +1,9 @@
-#include <StandCell/sc_stdcell.h>
+#include <StandCell/dg_cell.h>
 #include "mr_grid.h"
 
 #define DEBUG 0
 #if DEBUG
-#include "Utility/UTest.h"
+#include "Utility/unit_test.h"
 #endif
 
 /**
@@ -25,8 +25,8 @@
  *
  * @return grid geometry grid object
  */
-geoGrid* mr_grid_create_uniform_tri
-        (stdCell *shape, int Mx, int My,
+dg_grid* mr_grid_create_uniform_tri
+        (dg_cell *shape, int Mx, int My,
          double xmin, double xmax,
          double ymin, double ymax, int type)
 {
@@ -89,7 +89,7 @@ geoGrid* mr_grid_create_uniform_tri
     }
 
     /* initialize */
-    geoGrid* grid = mr_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
+    dg_grid* grid = mr_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
 
     /* free memory */
     matrix_int_free(EToV);
@@ -113,8 +113,8 @@ geoGrid* mr_grid_create_uniform_tri
  *
  * @return grid geometry grid object
  */
-geoGrid* mr_grid_create_uniform_quad
-        (stdCell *shape, int Mx, int My,
+dg_grid* mr_grid_create_uniform_quad
+        (dg_cell *shape, int Mx, int My,
          double xmin, double xmax,
          double ymin, double ymax)
 {
@@ -165,7 +165,7 @@ geoGrid* mr_grid_create_uniform_quad
     }
 
     /* initialize */
-    geoGrid* grid = mr_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
+    dg_grid* grid = mr_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
 
     /* free memory */
     matrix_int_free(EToV);
@@ -179,7 +179,7 @@ geoGrid* mr_grid_create_uniform_quad
  * the 'casename' is defined as parameter. The node file contains the vertex
  * value and the ele
  * */
-geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename){
+dg_grid* mr_grid_read_file2d(dg_cell *shape, char *casename){
     char element_file[MAX_NAME_LENGTH];
     char vertex_file[MAX_NAME_LENGTH];
     strcpy(element_file, casename);
@@ -233,17 +233,20 @@ geoGrid* mr_grid_read_file2d(stdCell *shape, char *casename){
     fclose(fp);
 
     /* initialize */
-    geoGrid* grid = mr_grid_create(shape, K, Nvert, vx, vy, NULL, EToV);
+    dg_grid* grid = mr_grid_create(shape, K, Nvert, vx, vy, NULL, EToV);
 
 #if DEBUG
     char filename[20] = "mr_grid_read_file2d";
     int procid, nprocs;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-    fp = CreateLog(filename, procid, nprocs);
-    PrintIntMatrix2File(fp, "EToV", EToV, K, Nv);
-    PrintVector2File(fp, "vx", vx, Nvert);
-    PrintVector2File(fp, "vy", vy, Nvert);
+    fp = create_log(filename, procid, nprocs);
+    print_int_matrix2file(fp, "EToV", EToV, K, Nv);
+    print_double_vector2file(fp, "vx", vx, Nvert);
+    print_double_vector2file(fp, "vy", vy, Nvert);
+    print_int_matrix2file(fp, "grid->EToV", grid->EToV, grid->K, Nv);
+    print_double_vector2file(fp, "vx", grid->vx, grid->Nv);
+    print_double_vector2file(fp, "vy", grid->vy, grid->Nv);
     fclose(fp);
 #endif
     /* free memory */

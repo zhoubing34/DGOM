@@ -19,8 +19,8 @@ typedef struct{
 
     parallMesh *mesh; ///< parallel mesh object
     multiReg *region; ///< multi-region object
-    geoGrid *grid; ///< geometry grid
-    stdCell *cell; ///< standard element
+    dg_grid *grid; ///< geometry grid
+    dg_cell *cell; ///< standard element
 
     int Nsurfinfo; ///< number of elements in surfinfo
     dg_real *surfinfo; ///< surface infomation

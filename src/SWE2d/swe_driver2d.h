@@ -20,7 +20,7 @@ typedef struct{
     swe_case caseid; ///< case id
     char *casename;
     /* standard cell */
-    sc_cellType celltype; ///< type id of standard cell
+    dg_cell_type celltype; ///< type id of standard cell
     int N; ///< degree of polynomial
     /* physical field */
     physField *phys;

@@ -36,7 +36,7 @@ int phys_strong_surface_flux2d_test(physField *phys, int verbose){
 
     parallMesh *mesh = phys->mesh;
     multiReg *region = phys->region;
-    stdCell *shape = phys->cell;
+    dg_cell *shape = phys->cell;
 
     const int K = phys->grid->K;
     const int Np = shape->Np;

@@ -2,7 +2,7 @@
 // Created by li12242 on 17/1/1.
 //
 
-#include <StandCell/sc_stdcell.h>
+#include <StandCell/dg_cell.h>
 #include <MultiRegions/mr_grid.h>
 #include "pf_strong_viscosity_LDG_flux2d.h"
 #include "pf_fetchBuffer.h"

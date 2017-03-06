@@ -20,12 +20,12 @@ typedef enum {
     TETRA=2,    ///< tetrahedron
     TRIPRISM=3, ///< triangle prism
     HEXA=4,     ///< hexahedron
-} sc_cellType;
+} dg_cell_type;
 
-typedef struct {
-    sc_cellType type; ///< cell enum type
+typedef struct dg_cell{
+    dg_cell_type type; ///< cell enum type
 
-    int dim; ///< dimension
+    int dim; ///< unused dimension
 
     int N; ///< polynomial order
     int Np; ///< number of points
@@ -41,28 +41,23 @@ typedef struct {
     double **V; ///< Vandermonde matrix
     double **M; ///< mass matrix
 
-    double **Dr; ///< nodal basis derivative matrix
-    double **Ds; ///< nodal basis derivative matrix
+    double **Dr, **Ds, **Dt; ///< nodal basis derivative matrix
     double **LIFT; ///< lift matrix
 
     /* float version coefficient */
     dg_real *f_Dr, *f_Ds, *f_LIFT; ///< user specific version
 
-} stdCell;
+    void (*free_func)(struct dg_cell *cell);
+    void (*proj_vert2node)(struct dg_cell *cell, double *vertVal, double *nodeVal);
+} dg_cell;
 
 /* ======================== functions for standard elements ======================== */
 /* create stand cell object */
-stdCell* sc_create(int N, sc_cellType type);
-/* free stdCell object */
-void sc_free(stdCell *);
+dg_cell* dg_cell_creat(int N, dg_cell_type type);
+/* free dg_cell object */
+void dg_cell_free(dg_cell *);
 /* project the vertex value to interpolation nodes */
-void sc_proj_vert2node(stdCell *cell, double *vertVal, double *nodeVal);
+void dg_cell_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal);
 
-/* calculate the Vandermonde matrix */
-double** sc_VandMatrix(stdCell *cell, void (*orthfunc)(stdCell *, int ind, double *func));
-/* calculate the mass matrix */
-double** sc_massMatrix(stdCell *cell);
-/* create LIFT matrix */
-double** sc_liftMatrix(stdCell *cell, void (*surf_mass_matrix)(stdCell *, double **));
 
 #endif //DGOM_STDCELL_H

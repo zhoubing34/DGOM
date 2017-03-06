@@ -15,12 +15,12 @@ set(PHYSDOMAIN_SOURCE
         pf_strong_viscosity_LDG_flux2d.h
         pf_cellMean.c
         pf_cellMean.h
-        pf_limiter.c
-        pf_limiter.h
         pf_init_file.c
         pf_init_file.h
         pf_openbc.c
-        pf_openbc.h)
+        pf_openbc.h
+        Limiter/pf_limit_BJ2d.c
+        Limiter/pf_limit_BJ2d.h)
 
 add_library(physfield STATIC ${PHYSDOMAIN_SOURCE})
 add_dependencies(physfield multiregions)

@@ -63,7 +63,7 @@ int main(int argc, char **argv){
 static void swe_finalize(swe_solver *solver){
 
     /* physcal field */
-    sc_free(solver->phys->cell);
+    dg_cell_free(solver->phys->cell);
     mr_grid_free(solver->phys->grid);
     mr_reg_free(solver->phys->region);
     mr_mesh_del_bc2d(solver->phys->mesh);

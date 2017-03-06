@@ -20,8 +20,8 @@ typedef struct {
     int nprocs; ///< number of processes
     int dim; ///< dimension
 
-    stdCell *cell; ///< standard element
-    geoGrid *grid; ///< geometry grid
+    dg_cell *cell; ///< standard element
+    dg_grid *grid; ///< geometry grid
     double **x; ///< node coordinate
     double **y; ///< node coordinate
     double **z; ///< node coordinate
@@ -43,7 +43,7 @@ typedef struct {
 }multiReg;
 
 /* create of multi-region object */
-multiReg* mr_reg_create(geoGrid *grid);
+multiReg* mr_reg_create(dg_grid *grid);
 
 /* free the memory of multiReg */
 void mr_reg_free(multiReg *region);

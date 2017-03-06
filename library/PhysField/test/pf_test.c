@@ -37,8 +37,8 @@ static const phys_func phys_creator[Nphys] = {
  */
 physField *uniform_tri_physfield(){
     int type = 1;
-    stdCell *tri = sc_create(N, TRIANGLE);
-    geoGrid *tri_grid = mr_grid_create_uniform_tri(tri, Mx, My, xmin, xmax, ymin, ymax, type);
+    dg_cell *tri = dg_cell_creat(N, TRIANGLE);
+    dg_grid *tri_grid = mr_grid_create_uniform_tri(tri, Mx, My, xmin, xmax, ymin, ymax, type);
     multiReg *tri_region = mr_reg_create(tri_grid);
     parallMesh *tri_mesh = mr_mesh_create(tri_region);
     mr_mesh_add_bc2d(tri_mesh, 0, NULL);
@@ -50,8 +50,8 @@ physField *uniform_tri_physfield(){
  * @return physField
  */
 physField *uniform_quad_physfield(){
-    stdCell *quad = sc_create(N, QUADRIL);
-    geoGrid *quad_grid = mr_grid_create_uniform_quad(quad, Mx, My, xmin, xmax, ymin, ymax);
+    dg_cell *quad = dg_cell_creat(N, QUADRIL);
+    dg_grid *quad_grid = mr_grid_create_uniform_quad(quad, Mx, My, xmin, xmax, ymin, ymax);
     multiReg *quad_region = mr_reg_create(quad_grid);
     parallMesh *quad_mesh = mr_mesh_create(quad_region);
     mr_mesh_add_bc2d(quad_mesh, 0, NULL);
@@ -60,9 +60,9 @@ physField *uniform_quad_physfield(){
 }
 
 physField *rectangle_tri_physfield(){
-    stdCell *tri = sc_create(N, TRIANGLE);
+    dg_cell *tri = dg_cell_creat(N, TRIANGLE);
     char casename[] = "example/Rectangle/tri/Rectangle";
-    geoGrid *tri_grid = mr_grid_read_file2d(tri, casename);
+    dg_grid *tri_grid = mr_grid_read_file2d(tri, casename);
     multiReg *tri_region = mr_reg_create(tri_grid);
     parallMesh *tri_mesh = mr_mesh_create(tri_region);
     mr_mesh_read_bcfile2d(tri_mesh, casename);
@@ -75,7 +75,7 @@ physField *rectangle_tri_physfield(){
  * @param phys
  */
 void phys_free(physField *phys){
-    sc_free(phys->cell);
+    dg_cell_free(phys->cell);
     mr_grid_free(phys->grid);
     mr_reg_free(phys->region);
     mr_mesh_del_bc2d(phys->mesh);

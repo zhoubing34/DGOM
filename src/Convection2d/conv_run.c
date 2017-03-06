@@ -1,7 +1,7 @@
-#include <MultiRegions/mr_mesh.h>
 #include "conv_driver2d.h"
 #include "conv_output.h"
 #include "conv_rhs.h"
+#include "PhysField/Limiter/pf_limit_BJ2d.h"
 
 /* assignment of RK45 parameter */
 static void conv_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
@@ -44,6 +44,7 @@ void conv_run(physField *phys){
             const dg_real fb = (dg_real)rk4b[intrk-1];
 
             conv_rhs(phys, fa, fb, fdt);
+            //pf_limit_BJ2d(phys, 1.0);
         }
 
         printf("processing: %f%%\r", time/ftime);

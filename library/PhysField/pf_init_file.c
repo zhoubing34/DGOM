@@ -40,7 +40,7 @@ void pf_init_file2d(physField *phys, char *casename){
     }
 
     /* assign to node fields */
-    stdCell *cell = phys->cell;
+    dg_cell *cell = phys->cell;
     const int Nv = phys->cell->Nv;
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
@@ -53,7 +53,7 @@ void pf_init_file2d(physField *phys, char *casename){
                 floc_v[n] = intval[fld][ EToV[k][n] ];
             }
             /* map from vertex to nodes */
-            sc_proj_vert2node(cell, floc_v, floc);
+            dg_cell_proj_vert2node(cell, floc_v, floc);
             for(n=0;n<Np;n++){ // assign to node values
                 f_Q[(k*Np+n)*Nfield + fld] = floc[n];
             }

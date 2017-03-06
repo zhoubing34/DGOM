@@ -29,8 +29,8 @@ mesh_create_func mesh_func[Nmesh] = {uniform_tri_mesh, uniform_quad_mesh, user_s
  * @return
  */
 parallMesh *uniform_tri_mesh(){
-    stdCell *shape = sc_create(N, TRIANGLE);
-    geoGrid *grid = mr_grid_create_uniform_tri(shape, Mx, My, xmin, xmax, ymin, ymax, 1);
+    dg_cell *shape = dg_cell_creat(N, TRIANGLE);
+    dg_grid *grid = mr_grid_create_uniform_tri(shape, Mx, My, xmin, xmax, ymin, ymax, 1);
     multiReg *region = mr_reg_create(grid);
     parallMesh *mesh = mr_mesh_create(region);
     mr_mesh_add_bc2d(mesh, 0, NULL);
@@ -41,8 +41,8 @@ parallMesh *uniform_tri_mesh(){
  * @return
  */
 parallMesh *uniform_quad_mesh(){
-    stdCell *shape = sc_create(N, QUADRIL);
-    geoGrid *grid = mr_grid_create_uniform_quad(shape, Mx, My, xmin, xmax, ymin, ymax);
+    dg_cell *shape = dg_cell_creat(N, QUADRIL);
+    dg_grid *grid = mr_grid_create_uniform_quad(shape, Mx, My, xmin, xmax, ymin, ymax);
     multiReg *region = mr_reg_create(grid);
     parallMesh *mesh = mr_mesh_create(region);
     mr_mesh_add_bc2d(mesh, 0, NULL);
@@ -53,9 +53,9 @@ parallMesh *uniform_quad_mesh(){
  * @return
  */
 parallMesh *user_set_tri_mesh(){
-    stdCell *shape = sc_create(N, TRIANGLE);
+    dg_cell *shape = dg_cell_creat(N, TRIANGLE);
     char casename[] = "example/Rectangle/tri/Rectangle";
-    geoGrid *grid = mr_grid_read_file2d(shape, casename);
+    dg_grid *grid = mr_grid_read_file2d(shape, casename);
     multiReg *region = mr_reg_create(grid);
     parallMesh *mesh = mr_mesh_create(region);
     mr_mesh_read_bcfile2d(mesh, casename);
@@ -63,7 +63,7 @@ parallMesh *user_set_tri_mesh(){
 }
 
 void mesh_free(parallMesh *mesh){
-    sc_free(mesh->cell);
+    dg_cell_free(mesh->cell);
     mr_grid_free(mesh->grid);
     mr_mesh_del_bc2d(mesh);
     mr_mesh_free(mesh);
@@ -103,7 +103,7 @@ int main(int argc, char **argv){
     // test
     parallMesh *mesh;
     multiReg *region;
-    geoGrid *grid;
+    dg_grid *grid;
     for(n=0;n<Nmesh;n++){
         if(!procid){ printf(HEADSTART "Running test for mesh[%d]\n", n); }
 

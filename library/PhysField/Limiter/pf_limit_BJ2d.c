@@ -1,21 +1,10 @@
 //
-// Created by li12242 on 16/8/3.
+// Created by li12242 on 17/2/28.
 //
 
-#include <MultiRegions/mr_mesh.h>
-#include "pf_limiter.h"
-#include "pf_cellMean.h"
-#include "pf_fetchBuffer.h"
-#include "pf_phys.h"
+#include "pf_limit_BJ2d.h"
 
-#define DEBUG 0
-#if DEBUG
-#include "Utility/UTest.h"
-#endif
-
-#define TOL 1e-8
-#define INFTY 1e10
-#define EXCEPTION(u, u1, u2) ( ((u-u1)>TOL)& ((u-u2)>TOL) )||( ((u1-u)>TOL)&((u2-u)>TOL))
+#define EXCEPTION(u, u1, u2) ( ((u-u1)>EPS)& ((u-u2)>EPS) )||( ((u1-u)>EPS)&((u2-u)>EPS))
 
 /**
  * @brief integral averaged values of each faces
@@ -214,8 +203,13 @@ static void phys_gradient_Green(physField *phys, dg_real *px, dg_real *py){
     return;
 }
 
-
-void pf_adjacent_cellinfo(physField *phys, dg_real *cell_max, dg_real *cell_min){
+/**
+ *
+ * @param phys
+ * @param cell_max
+ * @param cell_min
+ */
+static void pf_adjacent_cellinfo(physField *phys, dg_real *cell_max, dg_real *cell_min){
     const int K = phys->grid->K;
     const int Nfield = phys->Nfield;
     const int procid = phys->mesh->procid;
@@ -323,7 +317,11 @@ static void pf_BJ_limiter(physField *phys, dg_real *cell_max, dg_real *cell_min,
 }
 
 /**
- *
+ * @brief
+ * trouble cell indicator
+ * @details
+ * The trouble cell is determined with the edge value exceeding the average values
+ * of local and adjacent elements.
  * @param phys
  * @param tind trouble cell indicator
  */
@@ -383,7 +381,7 @@ static void pf_edge_indicator(physField *phys, int *tind){
  * scalar distribution.
  * @param[in] phys
  */
-void pf_slloc2d(physField *phys, double beta){
+void pf_limit_BJ2d(physField *phys, double beta){
 
     const int K = phys->grid->K;
     const int Nfield = phys->Nfield;
@@ -445,5 +443,3 @@ void pf_slloc2d(physField *phys, double beta){
 #endif
     return;
 }
-
-

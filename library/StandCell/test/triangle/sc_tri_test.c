@@ -5,7 +5,7 @@
 #include "sc_tri_test.h"
 #include "sc_tri_data3.h"
 
-int sc_triCoor_test(stdCell *tri, int verbose){
+int sc_triCoor_test(dg_cell *tri, int verbose){
 
     int fail=0;
     extern double tri_r[NP];
@@ -20,15 +20,16 @@ int sc_triCoor_test(stdCell *tri, int verbose){
         print_double_vector2file(fp, "s", tri->s, tri->Np);
         fclose(fp);
     }
+    if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 
-int sc_Fmask(stdCell *tri, int verbose){
+int sc_Fmask(dg_cell *tri, int verbose){
     int fail = 0;
     return fail;
 }
 
-int sc_triVandMatrix_test(stdCell *tri, int verbose){
+int sc_triVandMatrix_test(dg_cell *tri, int verbose){
     int fail = 0;
     extern double tri_V[NP][NP];
     double **V_ext = matrix_double_create(NP, NP);
@@ -47,10 +48,11 @@ int sc_triVandMatrix_test(stdCell *tri, int verbose){
     }
 
     matrix_double_free(V_ext);
+    if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 
-int sc_triMassMatrix_test(stdCell *tri, int verbose){
+int sc_triMassMatrix_test(dg_cell *tri, int verbose){
     int fail = 0;
     extern double tri_M[NP][NP];
     double **M_ext = matrix_double_create(NP, NP);
@@ -68,10 +70,11 @@ int sc_triMassMatrix_test(stdCell *tri, int verbose){
         fclose(fp);
     }
     matrix_double_free(M_ext);
+    if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 
-int sc_triDeriMatrix_test(stdCell *tri, int verbose){
+int sc_triDeriMatrix_test(dg_cell *tri, int verbose){
     int fail =0;
     extern double tri_Dr[NP][NP];
     extern double tri_Ds[NP][NP];
@@ -98,10 +101,11 @@ int sc_triDeriMatrix_test(stdCell *tri, int verbose){
 
     matrix_double_free(Dr_ext);
     matrix_double_free(Ds_ext);
+    if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 
-int sc_triLIFT_test(stdCell *tri, int verbose){
+int sc_triLIFT_test(dg_cell *tri, int verbose){
     int fail = 0;
     extern double tri_LIFT[NP][NFP];
     double **LIFT_ext = matrix_double_create(NP, NFP);
@@ -121,10 +125,11 @@ int sc_triLIFT_test(stdCell *tri, int verbose){
     }
 
     matrix_double_free(LIFT_ext);
+    if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
 
-int sc_triVertProj_test(stdCell *tri, int verbose){
+int sc_triVertProj_test(dg_cell *tri, int verbose){
     int fail = 0;
 
     extern double tri_VX[NV];
@@ -132,11 +137,11 @@ int sc_triVertProj_test(stdCell *tri, int verbose){
 
     double x[tri->Np], y[tri->Np];
 
-    sc_proj_vert2node(tri, tri_VX, x);
+    dg_cell_proj_vert2node(tri, tri_VX, x);
     fail = vector_double_test("sc_triVertProj_x_test", x, tri->r, tri->Np);
 
-    sc_proj_vert2node(tri, tri_VY, y);
+    dg_cell_proj_vert2node(tri, tri_VY, y);
     fail = vector_double_test("sc_triVertProj_y_test", y, tri->s, tri->Np);
-
+    if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }

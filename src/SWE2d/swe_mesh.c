@@ -15,8 +15,8 @@
 physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
                             double xmin, double xmax, double ymin, double ymax){
 
-    stdCell *cell = sc_create(solver->N, solver->celltype);
-    geoGrid *grid = NULL;
+    dg_cell *cell = dg_cell_creat(solver->N, solver->celltype);
+    dg_grid *grid = NULL;
 
     switch (solver->celltype){
         case TRIANGLE:
@@ -48,8 +48,8 @@ static void swe_boundary_condition(swe_solver *solver, parallMesh *mesh){
  * */
 physField* swe_file_mesh(swe_solver *solver, char *meshfile){
 
-    stdCell *cell = sc_create(solver->N, solver->celltype);
-    geoGrid *grid = mr_grid_read_file2d(cell, meshfile);
+    dg_cell *cell = dg_cell_creat(solver->N, solver->celltype);
+    dg_grid *grid = mr_grid_read_file2d(cell, meshfile);
     multiReg *region = mr_reg_create(grid);
     parallMesh *mesh = mr_mesh_create(region);
     swe_boundary_condition(solver, mesh);
@@ -89,7 +89,7 @@ dg_real* swe_read_topography(swe_solver *solver, char *botfile){
     }
     const int Np = phys->cell->Np;
     const int K = phys->grid->K;
-    stdCell *cell = phys->cell;
+    dg_cell *cell = phys->cell;
 
     // project to nodes
     dg_real *bot = vector_real_create(Np*K);
@@ -100,7 +100,7 @@ dg_real* swe_read_topography(swe_solver *solver, char *botfile){
         for(n=0;n<Nv;n++){
             bloc[n] = bv[phys->grid->EToV[k][n]];
         }
-        sc_proj_vert2node(cell, bloc, bot + k * Np);
+        dg_cell_proj_vert2node(cell, bloc, bot + k * Np);
     }
     fclose(fp);
     vector_double_free(bv);
