@@ -85,7 +85,7 @@ static void pairmarry(const void *obj1, const void *obj2){
  * @param [in,out] shape standard element
  *
  */
-void mr_mesh_cellConnect2d(parallMesh *mesh){
+void mr_mesh_cellConnect2d(dg_mesh *mesh){
 
     const int procid = mesh->procid;
     const int nprocs = mesh->nprocs;
@@ -144,15 +144,13 @@ void mr_mesh_cellConnect2d(parallMesh *mesh){
         k1 = myfaces[n].k1; f1 = myfaces[n].f1; p1 = myfaces[n].p1;
         k2 = myfaces[n].k2; f2 = myfaces[n].f2; p2 = myfaces[n].p2;
 
-        if(p1!=procid)
-            fprintf(stderr, "WARNING WRONG proc\n");
+        if(p1!=procid) {fprintf(stderr, "%s: %d\nWARNING WRONG proc\n", __FUNCTION__, __LINE__);}
 
         mesh->EToE[k1][f1] = k2; /* adjacent element index */
         mesh->EToF[k1][f1] = f2; /* local face index of adjacent element */
         mesh->EToP[k1][f1] = p2; /* process id of adjacent element */
 
-        if(p1!=p2){
-            /* increment number of links */
+        if(p1!=p2){/* increment number of links */
             ++Npar[p2];
             mesh->parallCellNum++;
         }

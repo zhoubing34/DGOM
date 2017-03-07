@@ -1,4 +1,5 @@
 #include "Utility/utility.h"
+#include "dg_grid.h"
 
 typedef struct{
 	double x, y; // coordinate
@@ -31,14 +32,14 @@ static int pt_cmp2d(const void *p1, const void *p2){
 }
 
 /**
- * @brief re-sort the vertex list to be anti-clockwise
- *
+ * @brief
+ * sort the vertex list in EToV to be anti-clockwise
  * @param[in] Nvert number of vertex in vertlist
  * @param[in] vx coordinate of all the vertex
  * @param[in] vy coordinate of all the vertex
  * @param[in,out] vertlist array of vertex index
  */
-void mr_resortEToV2d(int Nvert, double *vx, double *vy, int *vertlist){
+static void dg_grid_resortEToV2d(int Nvert, double *vx, double *vy, int *vertlist){
 
     register int i;
 	point2d vertex[Nvert];
@@ -58,5 +59,19 @@ void mr_resortEToV2d(int Nvert, double *vx, double *vy, int *vertlist){
 	for(i=0;i<Nvert;i++){
 		vertlist[i] = vertex[i].ind;
 	}
+	return;
+}
+
+void dg_grid_retreatEToV2d(dg_grid *grid){
+	const int K = grid->K;
+	const int Nv = grid->cell->Nv;
+	int k;
+	for(k=0;k<K;k++){
+		dg_grid_resortEToV2d(Nv, grid->vx, grid->vy, grid->EToV[k]);
+	}
+	return;
+}
+
+void dg_grid_retreatEToV3d(dg_grid *grid){
 	return;
 }

@@ -11,11 +11,10 @@
  * @brief create mesh object
  * @param[in] region multi-region object
  */
-parallMesh* mr_mesh_create(multiReg *region){
+dg_mesh* mr_mesh_create(dg_region *region){
 
-    parallMesh *mesh = calloc(1, sizeof(parallMesh));
+    dg_mesh *mesh = calloc(1, sizeof(dg_mesh));
 
-    mesh->dim = region->dim;
     mesh->nprocs = region->nprocs;
     mesh->procid = region->procid;
 
@@ -38,7 +37,7 @@ parallMesh* mr_mesh_create(multiReg *region){
     return mesh;
 }
 
-void mr_mesh_free(parallMesh *mesh){
+void mr_mesh_free(dg_mesh *mesh){
     matrix_int_free(mesh->EToE);
     matrix_int_free(mesh->EToF);
     matrix_int_free(mesh->EToP);

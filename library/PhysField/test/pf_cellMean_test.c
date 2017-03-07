@@ -10,8 +10,8 @@ int phys_cellMean_test(physField *phys, int verbose){
     // local variable
     int fail = 0;
 
-    multiReg *region = phys->region;
-    parallMesh *mesh = phys->mesh;
+    dg_region *region = phys->region;
+    dg_mesh *mesh = phys->mesh;
 
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;

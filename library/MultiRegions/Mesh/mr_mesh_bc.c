@@ -3,7 +3,6 @@
 //
 
 #include "mr_mesh_bc.h"
-#include "mr_mesh.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -25,7 +24,7 @@ typeid = ind;\
  * @param mesh
  * @param casename
  */
-void mr_mesh_read_bcfile2d(parallMesh *mesh, char *casename){
+void mr_mesh_read_bcfile2d(dg_mesh *mesh, char *casename){
     char filename[MAX_NAME_LENGTH];
     strcpy(filename, casename);
     strcat(filename, ".edge");
@@ -85,7 +84,7 @@ void mr_mesh_read_bcfile2d(parallMesh *mesh, char *casename){
  * @param[in] Nsurf number of surface
  * @param[in] SFToV surface to vertex list
  */
-void mr_mesh_add_bc2d(parallMesh *mesh, int Nsurf, int **SFToV){
+void mr_mesh_add_bc2d(dg_mesh *mesh, int Nsurf, int **SFToV){
     int k,f1,f2;
 
     const int K = mesh->grid->K;
@@ -104,8 +103,8 @@ void mr_mesh_add_bc2d(parallMesh *mesh, int Nsurf, int **SFToV){
 
         surfList[f1] = SFToV[f1][2];
         if(SFToV[f1][2] == INNERLOC | SFToV[f1][2] == INNERBS ){
-            printf("mr_mesh_addBoundary (%s): Error boundary type in SFToV[%d][3] = %d\n",
-                   __FILE__, f1,SFToV[f1][2]);
+            printf("%s (%d): Error boundary type in SFToV[%d][2] = %d\n",
+                   __FUNCTION__, __LINE__, f1, SFToV[f1][2]);
             printf("The boundary type indicator cannot be %d or %d:\n", INNERLOC, INNERBS);
             printf("   %d - local boundary surface[default]\n", INNERLOC);
             printf("   %d - parallel boundary surface\n", INNERBS);
@@ -182,7 +181,7 @@ void mr_mesh_add_bc2d(parallMesh *mesh, int Nsurf, int **SFToV){
 /**
  * @brief delete the boundary relative properties
  */
-void mr_mesh_del_bc2d(parallMesh *mesh){
+void mr_mesh_del_bc2d(dg_mesh *mesh){
     matrix_int_free(mesh->EToBS);
     vector_int_free(mesh->bcind);
     vector_int_free(mesh->obcind);

@@ -42,24 +42,20 @@ void mr_mesh_parallelPairs(void *objs, int Nmyobjs, int sizeobj,
   /* count the number of objs in each bin */
   int binup = binsize;
   for(p=0;p<nprocs;++p){
-    while( numget(myobjs+(sk*sizeobj) ) <= binup ){
-      ++(outN[p]);
-      ++sk;
-      if(sk==Nmyobjs){
-        break;
+      while( numget(myobjs+(sk*sizeobj) ) <= binup ){
+          ++(outN[p]);
+          ++sk;
+          if(sk==Nmyobjs){
+              break;
+          }
       }
-    }
-    binup += binsize;
-    if(sk==Nmyobjs){
-        break;
-    }
+      binup += binsize;
+      if(sk==Nmyobjs){ break; }
   }
   /* TW: <---------- replace to here */
 
   /* communicate numbers to be sent to each bin */
-  MPI_Alltoall(outN, 1, MPI_INT, 
-	       inN,  1, MPI_INT, 
-	       MPI_COMM_WORLD);
+  MPI_Alltoall(outN, 1, MPI_INT, inN, 1, MPI_INT, MPI_COMM_WORLD);
 
   /* build incoming buffer */
   int Notherobjs = 0;
@@ -79,37 +75,33 @@ void mr_mesh_parallelPairs(void *objs, int Nmyobjs, int sizeobj,
   /* fill up bins of objects from cloud */
   char *otherobjs = (char*) calloc(Notherobjs*sizeobj, sizeof(char));
 
-  MPI_Alltoallv(myobjs,    outN, cumoutN, MPI_INT,
-		otherobjs, inN,  cuminN,  MPI_INT,
-		MPI_COMM_WORLD);
+  MPI_Alltoallv(myobjs, outN, cumoutN, MPI_INT, otherobjs,
+                inN,  cuminN,  MPI_INT, MPI_COMM_WORLD);
 
   /* sort the bin */
   qsort(otherobjs, Notherobjs, sizeobj, compare_objs);
 
   /* number unique objs consecutively in each bin */
   for(n=1;n<Notherobjs;++n){
-    /* match ? */
-    if(!compare_objs(otherobjs+    n*sizeobj, 
-		     otherobjs+(n-1)*sizeobj)){
-      
-      marry(otherobjs+n*sizeobj, otherobjs+(n-1)*sizeobj);
-    }
+      /* match ? */
+      if(!compare_objs(otherobjs+n*sizeobj, otherobjs+(n-1)*sizeobj)){
+        marry(otherobjs+n*sizeobj, otherobjs+(n-1)*sizeobj);
+      }
   }
 
   char *outobjs = (char*) calloc(Notherobjs*sizeobj, sizeof(char));
   sk = 0;
-  for(p=0;p<nprocs;++p)
-    for(n=0;n<Notherobjs;++n)
-      if(procget(otherobjs+n*sizeobj)==p){
-    	  memcpy(outobjs+sk*sizeobj, otherobjs+n*sizeobj, sizeobj);
-    	  ++sk;
+  for(p=0;p<nprocs;++p){
+      for(n=0;n<Notherobjs;++n){
+          if(procget(otherobjs+n*sizeobj)==p){
+              memcpy(outobjs+sk*sizeobj, otherobjs+n*sizeobj, sizeobj);
+              ++sk;
+          }
       }
-
+  }
   /* send results out */
-  MPI_Alltoallv(outobjs,  inN,  cuminN, MPI_INT,
-		 myobjs, outN, cumoutN, MPI_INT,
-		MPI_COMM_WORLD);
-
+  MPI_Alltoallv(outobjs, inN, cuminN, MPI_INT, myobjs,
+                outN, cumoutN, MPI_INT, MPI_COMM_WORLD);
 
   free(otherobjs);
   free(outN); free(inN); free(cumoutN); free(cuminN);

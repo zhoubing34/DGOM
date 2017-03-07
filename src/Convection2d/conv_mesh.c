@@ -4,18 +4,18 @@
 
 #include "conv_driver2d.h"
 #include "conv_mesh.h"
-#include "MultiRegions/mr_grid_create.h"
-#include "MultiRegions/mr_mesh_bc.h"
+#include "MultiRegions/Grid/dg_grid_reader.h"
+#include "MultiRegions/Mesh/mr_mesh_bc.h"
 
 /* set open boundary condition */
 static void conv_uniform_bc(int *indicator, int **SFToV);
-static parallMesh* conv_uniform_mesh(dg_cell *shape);
-static parallMesh* conv_userset_mesh(dg_cell *shape);
+static dg_mesh* conv_uniform_mesh(dg_cell *shape);
+static dg_mesh* conv_userset_mesh(dg_cell *shape);
 
 /* set parallel mesh object */
-parallMesh* conv_mesh(dg_cell *shape){
+dg_mesh* conv_mesh(dg_cell *shape){
 
-    parallMesh *mesh = NULL;
+    dg_mesh *mesh = NULL;
 
     extern conv_solver2d solver;
     switch (solver.caseid){
@@ -33,33 +33,33 @@ parallMesh* conv_mesh(dg_cell *shape){
     return mesh;
 }
 
-static parallMesh* conv_userset_mesh(dg_cell *shape){
+static dg_mesh* conv_userset_mesh(dg_cell *shape){
     extern conv_solver2d solver;
-    dg_grid *grid = mr_grid_read_file2d(shape, solver.casename);
-    multiReg *region = mr_reg_create(grid);
-    parallMesh *mesh = mr_mesh_create(region);
+    dg_grid *grid = dg_grid_read_file2d(shape, solver.casename);
+    dg_region *region = mr_reg_create(grid);
+    dg_mesh *mesh = mr_mesh_create(region);
     mr_mesh_read_bcfile2d(mesh, solver.casename);
     return mesh;
 }
 
-static parallMesh* conv_uniform_mesh(dg_cell *shape){
+static dg_mesh* conv_uniform_mesh(dg_cell *shape){
     extern conv_solver2d solver;
     const int Ne = solver.Ne;
     dg_grid *grid = NULL;
     switch (solver.celltype){
         case TRIANGLE:
-            grid = mr_grid_create_uniform_tri(shape, Ne, Ne, -1, 1, -1, 1, 1);
+            grid = dg_grid_create_uniform_tri(shape, Ne, Ne, -1, 1, -1, 1, 1);
             break;
         case QUADRIL:
-            grid = mr_grid_create_uniform_quad(shape, Ne, Ne, -1, 1, -1, 1);
+            grid = dg_grid_create_uniform_quad(shape, Ne, Ne, -1, 1, -1, 1);
             break;
         default:
             fprintf(stderr, "%s: %d\nUnknown cell type %d\n",
                     __FUNCTION__, __LINE__, solver.celltype);
             MPI_Abort(MPI_COMM_WORLD, -1);
     }
-    multiReg *region = mr_reg_create(grid);
-    parallMesh *mesh = mr_mesh_create(region);
+    dg_region *region = mr_reg_create(grid);
+    dg_mesh *mesh = mr_mesh_create(region);
 
     // boundary condition
     /* add boundary condition */

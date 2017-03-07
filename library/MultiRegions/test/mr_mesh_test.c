@@ -3,7 +3,7 @@
 //
 #include "mr_mesh_test.h"
 
-int mr_mesh_connet_test(parallMesh *mesh, int verbose){
+int mr_mesh_connet_test(dg_mesh *mesh, int verbose){
     int fail = 0;
     const int K = mesh->grid->K;
     const int Nfaces = mesh->cell->Nfaces;
@@ -21,7 +21,7 @@ int mr_mesh_connet_test(parallMesh *mesh, int verbose){
     return fail;
 }
 
-int mr_mesh_parallel_test(parallMesh *mesh, int verbose){
+int mr_mesh_parallel_test(dg_mesh *mesh, int verbose){
     int fail = 0;
     const int K = mesh->grid->K;
     const int Nfaces = mesh->cell->Nfaces;
@@ -43,7 +43,7 @@ int mr_mesh_parallel_test(parallMesh *mesh, int verbose){
     return fail;
 }
 
-int mr_mesh_bc_test(parallMesh *mesh, int verbose){
+int mr_mesh_bc_test(dg_mesh *mesh, int verbose){
     int fail = 0;
     const int K = mesh->grid->K;
     const int Nfaces = mesh->cell->Nfaces;

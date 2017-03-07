@@ -1,7 +1,7 @@
 #ifndef DGOM_PHYSDOMAIN_H
 #define DGOM_PHYSDOMAIN_H
 
-#include "MultiRegions/mr_mesh.h"
+#include "MultiRegions/Mesh/mr_mesh.h"
 
 
 typedef struct {
@@ -14,11 +14,10 @@ typedef struct {
 
 
 typedef struct{
-    int dim; ///< dimensions
     int Nfield; ///< number of variable fields
 
-    parallMesh *mesh; ///< parallel mesh object
-    multiReg *region; ///< multi-region object
+    dg_mesh *mesh; ///< parallel mesh object
+    dg_region *region; ///< multi-region object
     dg_grid *grid; ///< geometry grid
     dg_cell *cell; ///< standard element
 
@@ -49,7 +48,7 @@ typedef struct{
     pf_LDG_solver *viscosity; ///< LDG solver
 } physField;
 
-physField* pf_create(int Nfields, parallMesh *mesh);
+physField* pf_create(int Nfields, dg_mesh *mesh);
 void pf_free(physField *phys);
 
 #endif //DGOM_PHYSDOMAIN_H

@@ -2,9 +2,9 @@
 #define MR_TEST_MAIN_H
 
 #include "Utility/unit_test.h"
-#include "MultiRegions/mr_grid.h"
-#include "MultiRegions/mr_mesh.h"
-#include "MultiRegions/mr_grid_create.h"
-#include "MultiRegions/mr_mesh_bc.h"
+#include "MultiRegions/Grid/dg_grid.h"
+#include "MultiRegions/Mesh/mr_mesh.h"
+#include "MultiRegions/Grid/dg_grid_reader.h"
+#include "MultiRegions/Mesh/mr_mesh_bc.h"
 
 #endif

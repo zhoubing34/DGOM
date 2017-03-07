@@ -2,14 +2,14 @@
 // Created by li12242 on 17/1/10.
 //
 
-#include <MultiRegions/mr_reg.h>
+#include <MultiRegions/Region/mr_reg.h>
 #include "pf_limiter_test.h"
 
 int phys_limiter_test(physField *phys, int verbose){
 
     int fail = 0;
 
-    multiReg *region = phys->region;
+    dg_region *region = phys->region;
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
 

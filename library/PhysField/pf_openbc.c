@@ -19,7 +19,7 @@ static void pf_openbc_interp(int ncid, double timeloc, time_interp_method method
  * @param method
  */
 void pf_set_openbc(physField *phys, double timeloc, time_interp_method method){
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
     dg_cell *cell = phys->cell;
     const int Nobc = mesh->Nobc;
     const int K = phys->grid->K;
@@ -82,7 +82,7 @@ void pf_set_openbc(physField *phys, double timeloc, time_interp_method method){
  * @param ncfile
  */
 static void pf_openbc_init(physField *phys, int *ncfile){
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
     const int Nobc = mesh->Nobc;
     /* open boundary condition files */
     int n;

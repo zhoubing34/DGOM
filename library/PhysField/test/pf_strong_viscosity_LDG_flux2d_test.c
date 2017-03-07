@@ -2,8 +2,8 @@
 // Created by li12242 on 17/1/5.
 //
 
-#include <MultiRegions/mr_grid.h>
-#include <MultiRegions/mr_mesh.h>
+#include <MultiRegions/Grid/dg_grid.h>
+#include <MultiRegions/Mesh/mr_mesh.h>
 #include "pf_strong_viscosity_LDG_flux2d_test.h"
 #include "pf_test.h"
 #include "PhysField/pf_add_LDG_solver.h"
@@ -24,8 +24,8 @@ int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose){
     int fail = 0;
     extern int Nfield;
 
-    parallMesh *mesh = phys->mesh;
-    multiReg *region = phys->region;
+    dg_mesh *mesh = phys->mesh;
+    dg_region *region = phys->region;
     dg_cell *shape = phys->cell;
 
     const int K = phys->grid->K;

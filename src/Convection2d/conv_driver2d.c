@@ -20,7 +20,7 @@
 #include "conv_intilization.h"
 #include "conv_mesh.h"
 #include "conv_output.h"
-#include "MultiRegions/mr_mesh_bc.h"
+#include "MultiRegions/Mesh/mr_mesh_bc.h"
 #include "conv_run.h"
 #include "conv_extsol.h"
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv){
 #if DEBUG
     if(!procid) printf("step into conv_mesh\n");
 #endif
-    parallMesh *mesh = conv_mesh(cell);
+    dg_mesh *mesh = conv_mesh(cell);
     physField *phys = pf_create(3, mesh);
 
 #if DEBUG
@@ -76,7 +76,7 @@ void conv_finalize(physField *phys){
     nc_file_close(solver.outfile);
     nc_file_free(solver.outfile);
 
-    mr_grid_free(phys->grid);
+    dg_grid_free(phys->grid);
     mr_reg_free(phys->region);
     mr_mesh_del_bc2d(phys->mesh);
     mr_mesh_free(phys->mesh);

@@ -8,7 +8,7 @@ int phys_cellFetch_test(physField *phys, int verbose){
     int fail = 0;
 
     dg_grid *grid = phys->grid;
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
 
     const int Nfield = phys->Nfield;
     const int K = phys->grid->K;

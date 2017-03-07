@@ -1,16 +1,23 @@
 #include "parmetis.h"
 #include "metis.h"
-#include "mr_grid.h"
+#include "dg_grid.h"
 
 #define MAXNCON 12
 #define UNBALANCE_FRACTION 1.05
 #define PMV3_OPTION_DBGLVL 1
 #define PMV3_OPTION_SEED 2
 
+
+void mr_grid_loadBalance3d(dg_grid *grid){
+    return;
+}
+
 /**
- * @brief Redistribute the elements on each process.
- * @details Call ParMetis library to redistribute the mesh.
- * @param [in,out] grid geometry grid object
+ * @brief
+ * Redistribute the elements on each process.
+ * @details
+ * Call ParMetis library to redistribute the mesh.
+ * @param [in,out] grid dg_grid structure
  * @note The properties of EToV and K is updated.
  */
 void mr_grid_loadBalance2d(dg_grid *grid){
@@ -37,27 +44,26 @@ void mr_grid_loadBalance2d(dg_grid *grid){
     idx_t *elmdist = (idx_t*) calloc((size_t) nprocs+1, sizeof(idx_t));
 
     elmdist[0] = 0;
-    for(p=0;p<nprocs;++p)
-        elmdist[p+1] = elmdist[p] + Kprocs[p];
+    for(p=0;p<nprocs;++p) { elmdist[p+1] = elmdist[p] + Kprocs[p]; }
 
     /* list of element starts */
     idx_t *eptr = (idx_t*) calloc((size_t) Klocal+1, sizeof(idx_t));
 
     eptr[0] = 0;
-    for(k=0;k<Klocal;++k)
-        eptr[k+1] = eptr[k] + Nv;
+    for(k=0;k<Klocal;++k) {eptr[k+1] = eptr[k] + Nv;}
 
     /* local element to vertex */
     idx_t *eind = (idx_t*) calloc((size_t) Nv*Klocal, sizeof(idx_t));
-    for(k=0;k<Klocal;++k)
-        for(n=0;n<Nv;++n)
+    for(k=0;k<Klocal;++k) {
+        for(n=0;n<Nv;++n) {
             eind[k*Nv+n] = EToV[k][n];
+        }
+    }
 
     /* weight per element */
     idx_t *elmwgt = (idx_t*) calloc((size_t) Klocal, sizeof(idx_t));
 
-    for(k=0;k<Klocal;++k)
-        elmwgt[k] = 1;
+    for(k=0;k<Klocal;++k) {elmwgt[k] = 1;}
 
     /* weight flag */
     int wgtflag = 0;
@@ -77,13 +83,11 @@ void mr_grid_loadBalance2d(dg_grid *grid){
     /* tpwgts */
     float *tpwgts = (float*) calloc((size_t) Klocal, sizeof(float));
 
-    for(k=0;k<Klocal;++k)
-        tpwgts[k] = (float)1./nprocs;
+    for(k=0;k<Klocal;++k) {tpwgts[k] = (float)1./nprocs;}
 
     float ubvec[MAXNCON];
 
-    for (n=0; n<ncon; ++n)
-        ubvec[n] = UNBALANCE_FRACTION;
+    for(n=0;n<ncon;++n) {ubvec[n] = UNBALANCE_FRACTION;}
 
     int options[10];
 
@@ -124,17 +128,14 @@ void mr_grid_loadBalance2d(dg_grid *grid){
     /** number of elements to receive from each process */
     int *inK = (int*) calloc((size_t) nprocs, sizeof(int));;
 
-    for(k=0;k<Klocal;++k)
-        ++outK[part[k]];
+    for(k=0;k<Klocal;++k) {++outK[part[k]];}
 
     /* get count of incoming elements from each process in inK */
     MPI_Alltoall(outK, 1, MPI_INT, inK,  1, MPI_INT, MPI_COMM_WORLD);
 
     /** total element number receive from process */
     int totalinK = 0;
-    for(p=0;p<nprocs;++p){
-        totalinK += inK[p];
-    }
+    for(p=0;p<nprocs;++p){ totalinK += inK[p]; }
 
     /* receive the EToV from each process, including itself */
     int **newEToV = matrix_int_create(totalinK, Nv);
@@ -150,13 +151,14 @@ void mr_grid_loadBalance2d(dg_grid *grid){
     for(p=0;p<nprocs;++p){
         cnt = 0;
         int outlist[Nv*outK[p]];
-        for(k=0;k<Klocal;++k)
+        for(k=0;k<Klocal;++k){
             if(part[k]==p){
                 for(v=0;v<Nv;++v){
                     outlist[cnt] = EToV[k][v];
                     ++cnt;
                 }
             }
+        }
 
         MPI_Isend(outlist, Nv*outK[p], MPI_INT, p, 666+procid, MPI_COMM_WORLD, outRequests+p);
     }

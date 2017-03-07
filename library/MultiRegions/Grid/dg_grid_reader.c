@@ -1,5 +1,5 @@
 #include <StandCell/dg_cell.h>
-#include "mr_grid.h"
+#include "dg_grid.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -25,7 +25,7 @@
  *
  * @return grid geometry grid object
  */
-dg_grid* mr_grid_create_uniform_tri
+dg_grid* dg_grid_create_uniform_tri
         (dg_cell *shape, int Mx, int My,
          double xmin, double xmax,
          double ymin, double ymax, int type)
@@ -89,7 +89,7 @@ dg_grid* mr_grid_create_uniform_tri
     }
 
     /* initialize */
-    dg_grid* grid = mr_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
+    dg_grid* grid = dg_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
 
     /* free memory */
     matrix_int_free(EToV);
@@ -113,7 +113,7 @@ dg_grid* mr_grid_create_uniform_tri
  *
  * @return grid geometry grid object
  */
-dg_grid* mr_grid_create_uniform_quad
+dg_grid* dg_grid_create_uniform_quad
         (dg_cell *shape, int Mx, int My,
          double xmin, double xmax,
          double ymin, double ymax)
@@ -165,7 +165,7 @@ dg_grid* mr_grid_create_uniform_quad
     }
 
     /* initialize */
-    dg_grid* grid = mr_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
+    dg_grid* grid = dg_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
 
     /* free memory */
     matrix_int_free(EToV);
@@ -179,7 +179,7 @@ dg_grid* mr_grid_create_uniform_quad
  * the 'casename' is defined as parameter. The node file contains the vertex
  * value and the ele
  * */
-dg_grid* mr_grid_read_file2d(dg_cell *shape, char *casename){
+dg_grid* dg_grid_read_file2d(dg_cell *shape, char *casename){
     char element_file[MAX_NAME_LENGTH];
     char vertex_file[MAX_NAME_LENGTH];
     strcpy(element_file, casename);
@@ -233,7 +233,7 @@ dg_grid* mr_grid_read_file2d(dg_cell *shape, char *casename){
     fclose(fp);
 
     /* initialize */
-    dg_grid* grid = mr_grid_create(shape, K, Nvert, vx, vy, NULL, EToV);
+    dg_grid* grid = dg_grid_create(shape, K, Nvert, vx, vy, NULL, EToV);
 
 #if DEBUG
     char filename[20] = "mr_grid_read_file2d";

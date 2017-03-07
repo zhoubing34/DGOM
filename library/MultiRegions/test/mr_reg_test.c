@@ -10,7 +10,7 @@
  * @param verbose
  * @return
  */
-int mr_reg_node_test(multiReg *reg, int verbose){
+int mr_reg_node_test(dg_region *reg, int verbose){
     int fail = 0;
     const int K = reg->grid->K;
     const int Np = reg->grid->cell->Np;
@@ -30,7 +30,7 @@ int mr_reg_node_test(multiReg *reg, int verbose){
  * @param verbose
  * @return
  */
-int mr_reg_volume_factor_test(multiReg *reg, int verbose){
+int mr_reg_volume_factor_test(dg_region *reg, int verbose){
     int fail = 0;
     const int K = reg->grid->K;
     const int Np = reg->grid->cell->Np;
@@ -53,7 +53,7 @@ int mr_reg_volume_factor_test(multiReg *reg, int verbose){
  * @param verbose
  * @return
  */
-int mr_reg_face_factor_test(multiReg *reg, int verbose){
+int mr_reg_face_factor_test(dg_region *reg, int verbose){
     int fail = 0;
     const int K = reg->grid->K;
     const int Nfaces = reg->grid->cell->Nfaces;
@@ -74,7 +74,7 @@ int mr_reg_face_factor_test(multiReg *reg, int verbose){
  * @param verbose
  * @return
  */
-int mr_reg_scale_test(multiReg *reg, int verbose){
+int mr_reg_scale_test(dg_region *reg, int verbose){
     int fail = 0;
     const int K = reg->grid->K;
     if(verbose){

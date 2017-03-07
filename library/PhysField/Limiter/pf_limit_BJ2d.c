@@ -50,8 +50,8 @@ static void pf_weiface_mean(physField *phys, dg_real *f_mean){
     const int procid = phys->mesh->procid;
     const int nprocs = phys->mesh->nprocs;
 
-    multiReg *region = phys->region;
-    parallMesh *mesh = phys->mesh;
+    dg_region *region = phys->region;
+    dg_mesh *mesh = phys->mesh;
     register int k,f,n,fld;
     dg_real *xc = vector_real_create(K);
     dg_real *yc = vector_real_create(K);
@@ -263,7 +263,7 @@ static void pf_adjacent_cellinfo(physField *phys, dg_real *cell_max, dg_real *ce
     MPI_Waitall(Nmess, mpi_out_requests, instatus);
 
     /* parallel cell loop */
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
     for(n=0;n<mesh->parallCellNum;n++){
         k = mesh->cellIndexIn[n];
         for(fld=0;fld<Nfield;fld++){
@@ -357,7 +357,7 @@ static void pf_edge_indicator(physField *phys, int *tind){
     }
 
     /* parallel cell loop */
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
     for(n=0;n<mesh->parallCellNum;n++){
         k = mesh->cellIndexIn[n];
         f = mesh->faceIndexIn[n];
@@ -412,7 +412,7 @@ void pf_limit_BJ2d(physField *phys, double beta){
     pf_edge_indicator(phys, tind);
 
     /* 6. reconstruction */
-    multiReg *region = phys->region;
+    dg_region *region = phys->region;
     for(k=0;k<K;k++){
         double A = 1.0/phys->region->size[k];
         double xc = A * mr_reg_integral(region, k, region->x[k]);

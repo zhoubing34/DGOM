@@ -12,13 +12,12 @@
 #ifndef DGOM_MULTIREGIONS_H
 #define DGOM_MULTIREGIONS_H
 
-#include "mr_grid.h"
+#include "MultiRegions/Grid/dg_grid.h"
 
-typedef struct {
+typedef struct dg_region{
 
     int procid; ///< index of local process
     int nprocs; ///< number of processes
-    int dim; ///< dimension
 
     dg_cell *cell; ///< standard element
     dg_grid *grid; ///< geometry grid
@@ -27,28 +26,25 @@ typedef struct {
     double **z; ///< node coordinate
 
     /* info of each element */
-    double **drdx; ///< transformation of partial derivative on each nodes
-    double **drdy; ///< transformation of partial derivative on each nodes
-    double **dsdx; ///< transformation of partial derivative on each nodes
-    double **dsdy; ///< transformation of partial derivative on each nodes
+    double **drdx, **drdy, **drdz; ///< transformation of partial derivative on each nodes
+    double **dsdx, **dsdy, **dsdz; ///< transformation of partial derivative on each nodes
+    double **dtdx, **dtdy, **dtdz; ///< transformation of partial derivative on each nodes
     double **J; ///< jacobi-coefficients on each nodes on each nodes
 
-    double **nx; ///< outward normal vector of each faces
-    double **ny; ///< outward normal vector of each faces
+    double **nx, **ny, **nz; ///< outward normal vector of each faces
     double **sJ; ///< jacobi-coefficients of each faces
 
     double *len; ///< radius of each elements
     double *size; ///< area of 2d elements or volume of 3d elements
 
-}multiReg;
+    void (*free_func)(struct dg_region *region);
+}dg_region;
 
 /* create of multi-region object */
-multiReg* mr_reg_create(dg_grid *grid);
-
-/* free the memory of multiReg */
-void mr_reg_free(multiReg *region);
-
+dg_region* mr_reg_create(dg_grid *grid);
+/* free the memory of dg_region */
+void mr_reg_free(dg_region *region);
 /* integral in the specific element */
-double mr_reg_integral(multiReg *region, int ind, double *nodalVal);
+double mr_reg_integral(dg_region *region, int ind, double *nodalVal);
 
 #endif //DGOM_MULTIREGIONS_H

@@ -2,7 +2,7 @@
 // Created by li12242 on 12/22/16.
 //
 
-#include <MultiRegions/mr_mesh.h>
+#include <MultiRegions/Mesh/mr_mesh.h>
 #include "pf_fetchBuffer.h"
 #include "pf_phys.h"
 
@@ -44,7 +44,7 @@ void pf_fetchNodeBuffer2d(physField *phys,
     for(n=0;n<phys->parallNodeNum;++n)
         phys->f_outQ[n] = phys->f_Q[phys->nodeIndexOut[n]];
 
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
 
     const int nprocs = mesh->nprocs;
     const int procid = mesh->procid;
@@ -95,7 +95,7 @@ void pf_fetchCellBuffer(physField *phys,
                         MPI_Request *mpi_recv_requests,
                         int *Nmessage){
 
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
 
     const int nprocs = mesh->nprocs;
     const int procid = mesh->procid;

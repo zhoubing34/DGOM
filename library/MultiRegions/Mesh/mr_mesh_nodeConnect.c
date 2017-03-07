@@ -10,10 +10,10 @@
  * @note
  * vmapP contains the mapping from nodes to incoming buffers, which is marked as negative.
  */
-void mr_mesh_nodeConnect2d(parallMesh *mesh){
+void mr_mesh_nodeConnect2d(dg_mesh *mesh){
 
     dg_cell *shape = mesh->cell;
-    multiReg *region = mesh->region;
+    dg_region *region = mesh->region;
 
     /* constant variables */
     const int nprocs = mesh->nprocs;

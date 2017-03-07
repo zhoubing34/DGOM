@@ -3,6 +3,6 @@
 
 #include "mr_mesh.h"
 
-void mr_mesh_cellConnect2d(parallMesh *mesh);
+void mr_mesh_cellConnect2d(dg_mesh *mesh);
 
 #endif

@@ -1,0 +1,243 @@
+#include "mr_reg.h"
+#include "dg_reg_volumInfo.h"
+#include "dg_reg_surfInfo.h"
+
+#define DEBUG 0
+
+/* create node coordinate for 2d dg_region object */
+static void mr_reg_nodeCoor2d(dg_region *region);
+static void mr_reg_nodeCoor3d(dg_region *region);
+/* calculate the volume/area and the length scale of each element */
+static void dg_reg_volumeScale2d(dg_region *region);
+static void dg_reg_volumeScale3d(dg_region *region);
+static void dg_reg_free2d(dg_region *region);
+static void dg_reg_free3d(dg_region *region);
+
+typedef struct dg_region_creator{
+    void (*set_nood)(dg_region *reg);
+    void (*set_volumInfo)(dg_region *reg);
+    void (*set_surfInfo)(dg_region *reg);
+    void (*set_volumScal)(dg_region *reg);
+    void (*free_func)(dg_region *reg);
+}dg_region_creator;
+
+static const dg_region_creator region2d_creator={
+        mr_reg_nodeCoor2d,
+        mr_reg_volumInfo2d,
+        dg_reg_surfInfo2d,
+        dg_reg_volumeScale2d,
+        dg_reg_free2d,
+};
+
+static const dg_region_creator region3d_creator={
+        mr_reg_nodeCoor3d,
+        mr_reg_volumInfo3d,
+        dg_reg_surfInfo3d,
+        dg_reg_volumeScale3d,
+        dg_reg_free3d,
+};
+
+dg_region* mr_reg_create(dg_grid *grid){
+
+    dg_region *region = (dg_region *)calloc(1, sizeof(dg_region));
+    /* basic infomation */
+    region->procid = grid->procid;
+    region->nprocs = grid->nprocs;
+    region->cell = grid->cell;
+    region->grid = grid;
+
+    const dg_region_creator *creator;
+    switch (grid->cell->type){
+        case TRIANGLE:
+            creator = &region2d_creator; break;
+        case QUADRIL:
+            creator = &region2d_creator; break;
+        default:
+            fprintf(stderr, "%s (%d): Unknown cell type %d\n", __FUNCTION__, __LINE__, grid->cell->type);
+            exit(-1);
+    }
+
+    creator->set_nood(region);
+    creator->set_volumInfo(region);
+    creator->set_surfInfo(region);
+    creator->set_volumScal(region);
+
+    region->free_func = creator->free_func;
+    return region;
+}
+
+void mr_reg_free(dg_region *region){
+    region->free_func(region);
+    return;
+}
+
+static void dg_reg_free2d(dg_region *region){
+    matrix_double_free(region->x);
+    matrix_double_free(region->y);
+    matrix_double_free(region->J);
+    /* volume geometry */
+    matrix_double_free(region->drdx);
+    matrix_double_free(region->drdy);
+    matrix_double_free(region->dsdx);
+    matrix_double_free(region->dsdy);
+
+    matrix_double_free(region->nx);
+    matrix_double_free(region->ny);
+    matrix_double_free(region->sJ);
+
+    /* volume/area size and length len */
+    vector_double_free(region->size);
+    vector_double_free(region->len);
+
+    free(region);
+    return;
+}
+
+static void dg_reg_free3d(dg_region *region){
+    matrix_double_free(region->x);
+    matrix_double_free(region->y);
+    matrix_double_free(region->z);
+    matrix_double_free(region->J);
+    /* volume geometry */
+    matrix_double_free(region->drdx);
+    matrix_double_free(region->drdy);
+    matrix_double_free(region->dsdx);
+    matrix_double_free(region->dsdy);
+
+    matrix_double_free(region->nx);
+    matrix_double_free(region->ny);
+    matrix_double_free(region->sJ);
+
+    /* volume/area size and length len */
+    vector_double_free(region->size);
+    vector_double_free(region->len);
+
+    free(region);
+    return;
+}
+
+/**
+ * @brief create node coordinate for 2d (triangle and quadrilateral)
+ * @param[in,out] region multi-regions object
+ */
+static void mr_reg_nodeCoor3d(dg_region *region){
+    dg_cell *cell = region->cell;
+    dg_grid *grid = region->grid;
+    const int Np = cell->Np;
+    const int K = grid->K;
+    const int Nv = cell->Nv;
+    int **EToV = grid->EToV;
+    double *vx = grid->vx;
+    double *vy = grid->vy;
+    double *vz = grid->vz;
+
+    region->x = matrix_double_create(K, Np);
+    region->y = matrix_double_create(K, Np);
+    region->z = matrix_double_create(K, Np);
+
+    int k,i;
+    double gx[Nv], gy[Nv], gz[Nv];
+    for(k=0;k<K;k++){
+        for(i=0;i<Nv;i++){
+            gx[i] = vx[EToV[k][i]];
+            gy[i] = vy[EToV[k][i]];
+            gz[i] = vz[EToV[k][i]];
+        }
+        dg_cell_proj_vert2node(cell, gx, region->x[k]);
+        dg_cell_proj_vert2node(cell, gy, region->y[k]);
+        dg_cell_proj_vert2node(cell, gz, region->z[k]);
+    }
+    return;
+}
+
+/**
+ * @brief create node coordinate for 2d region (triangle and quadrilateral)
+ * @param[in,out] region multi-regions object
+ */
+static void mr_reg_nodeCoor2d(dg_region *region){
+    dg_cell *cell = region->cell;
+    dg_grid *grid = region->grid;
+    const int Np = cell->Np;
+    const int K = grid->K;
+    const int Nv = cell->Nv;
+    int **EToV = grid->EToV;
+    double *vx = grid->vx;
+    double *vy = grid->vy;
+
+    region->x = matrix_double_create(K, Np);
+    region->y = matrix_double_create(K, Np);
+
+    int k,i;
+    double gx[Nv], gy[Nv];
+    for(k=0;k<K;k++){
+        for(i=0;i<Nv;i++){
+            gx[i] = vx[EToV[k][i]];
+            gy[i] = vy[EToV[k][i]];
+        }
+        dg_cell_proj_vert2node(cell, gx, region->x[k]);
+        dg_cell_proj_vert2node(cell, gy, region->y[k]);
+    }
+    return;
+}
+
+static void dg_reg_volumeScale2d(dg_region *region){
+    const int Np = region->cell->Np;
+    const int K = region->grid->K;
+
+    region->size = vector_double_create(K); // volume or area
+    region->len = vector_double_create(K); // length of element
+    int k,i;
+    /* initialize ones */
+    double ones[Np];
+    for(i=0;i<Np;i++) {ones[i] = 1.0;}
+
+    // elemental size
+    for(k=0;k<K;k++){
+        double area = mr_reg_integral(region, k, ones);
+        region->size[k] = area;
+        region->len[k] = sqrt(area/M_PI);
+    }
+    return;
+}
+
+static void dg_reg_volumeScale3d(dg_region *region){
+    const int Np = region->cell->Np;
+    const int K = region->grid->K;
+
+    region->size = vector_double_create(K); // volume or area
+    region->len = vector_double_create(K); // length of element
+    int k,i;
+    /* initialize ones */
+    double ones[Np];
+    for(i=0;i<Np;i++) {ones[i] = 1.0;}
+
+    // elemental size
+    for(k=0;k<K;k++){
+        double area = mr_reg_integral(region, k, ones);
+        region->size[k] = area;
+        region->len[k] = pow(area*3.0/4./M_PI, 1.0/3);
+    }
+    return;
+}
+
+/**
+ * @brief integral in the specific element
+ *
+ * @param[in] region multi-region object
+ * @param[in] ind index of integral element
+ * @param[in] nodalVal value on interpolation points
+ * @return integral integral value
+ */
+double mr_reg_integral(dg_region *region, int ind, double *nodalVal){
+    double integral = 0;
+
+    const double *J = region->J[ind];
+    const double *w = region->cell->wv;
+    const int Np = region->cell->Np;
+
+    register int i;
+    for(i=0;i<Np;i++){
+        integral += J[i]*w[i]*nodalVal[i];
+    }
+    return integral;
+}

@@ -30,7 +30,7 @@
 #include <PhysField/pf_phys.h>
 #include "swe_driver2d.h"
 #include "swe_init.h"
-#include "MultiRegions/mr_mesh_bc.h"
+#include "MultiRegions/Mesh/mr_mesh_bc.h"
 #include "swe_output.h"
 #include "swe_run.h"
 #include "swe_extsol.h"
@@ -64,7 +64,7 @@ static void swe_finalize(swe_solver *solver){
 
     /* physcal field */
     dg_cell_free(solver->phys->cell);
-    mr_grid_free(solver->phys->grid);
+    dg_grid_free(solver->phys->grid);
     mr_reg_free(solver->phys->region);
     mr_mesh_del_bc2d(solver->phys->mesh);
     mr_mesh_free(solver->phys->mesh);

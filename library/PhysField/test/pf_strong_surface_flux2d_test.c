@@ -34,8 +34,8 @@ static int wall_func(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP){
 int phys_strong_surface_flux2d_test(physField *phys, int verbose){
     int fail = 0;
 
-    parallMesh *mesh = phys->mesh;
-    multiReg *region = phys->region;
+    dg_mesh *mesh = phys->mesh;
+    dg_region *region = phys->region;
     dg_cell *shape = phys->cell;
 
     const int K = phys->grid->K;

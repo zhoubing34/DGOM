@@ -55,7 +55,12 @@ void dg_quad_gauss_weight(dg_cell *cell){
     }
     return;
 }
-
+/**
+ * @brief
+ * generation of surface mass matrix
+ * @param cell
+ * @return surface mass matrix
+ */
 double ** dg_quad_surf_mass_matrix(dg_cell *cell){
     const int Np = cell->Np;
     const int Nfaces = cell->Nfaces;

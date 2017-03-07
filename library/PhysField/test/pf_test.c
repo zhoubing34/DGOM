@@ -38,9 +38,9 @@ static const phys_func phys_creator[Nphys] = {
 physField *uniform_tri_physfield(){
     int type = 1;
     dg_cell *tri = dg_cell_creat(N, TRIANGLE);
-    dg_grid *tri_grid = mr_grid_create_uniform_tri(tri, Mx, My, xmin, xmax, ymin, ymax, type);
-    multiReg *tri_region = mr_reg_create(tri_grid);
-    parallMesh *tri_mesh = mr_mesh_create(tri_region);
+    dg_grid *tri_grid = dg_grid_create_uniform_tri(tri, Mx, My, xmin, xmax, ymin, ymax, type);
+    dg_region *tri_region = mr_reg_create(tri_grid);
+    dg_mesh *tri_mesh = mr_mesh_create(tri_region);
     mr_mesh_add_bc2d(tri_mesh, 0, NULL);
     physField *tri_phys = pf_create(Nfield, tri_mesh);
     return tri_phys;
@@ -51,9 +51,9 @@ physField *uniform_tri_physfield(){
  */
 physField *uniform_quad_physfield(){
     dg_cell *quad = dg_cell_creat(N, QUADRIL);
-    dg_grid *quad_grid = mr_grid_create_uniform_quad(quad, Mx, My, xmin, xmax, ymin, ymax);
-    multiReg *quad_region = mr_reg_create(quad_grid);
-    parallMesh *quad_mesh = mr_mesh_create(quad_region);
+    dg_grid *quad_grid = dg_grid_create_uniform_quad(quad, Mx, My, xmin, xmax, ymin, ymax);
+    dg_region *quad_region = mr_reg_create(quad_grid);
+    dg_mesh *quad_mesh = mr_mesh_create(quad_region);
     mr_mesh_add_bc2d(quad_mesh, 0, NULL);
     physField *quad_phys = pf_create(Nfield, quad_mesh);
     return quad_phys;
@@ -61,10 +61,10 @@ physField *uniform_quad_physfield(){
 
 physField *rectangle_tri_physfield(){
     dg_cell *tri = dg_cell_creat(N, TRIANGLE);
-    char casename[] = "example/Rectangle/tri/Rectangle";
-    dg_grid *tri_grid = mr_grid_read_file2d(tri, casename);
-    multiReg *tri_region = mr_reg_create(tri_grid);
-    parallMesh *tri_mesh = mr_mesh_create(tri_region);
+    char casename[] = "example/SWE2d/Rectangle/Rectangle";
+    dg_grid *tri_grid = dg_grid_read_file2d(tri, casename);
+    dg_region *tri_region = mr_reg_create(tri_grid);
+    dg_mesh *tri_mesh = mr_mesh_create(tri_region);
     mr_mesh_read_bcfile2d(tri_mesh, casename);
     physField *tri_phys = pf_create(Nfield, tri_mesh);
     return tri_phys;
@@ -76,7 +76,7 @@ physField *rectangle_tri_physfield(){
  */
 void phys_free(physField *phys){
     dg_cell_free(phys->cell);
-    mr_grid_free(phys->grid);
+    dg_grid_free(phys->grid);
     mr_reg_free(phys->region);
     mr_mesh_del_bc2d(phys->mesh);
     mr_mesh_free(phys->mesh);

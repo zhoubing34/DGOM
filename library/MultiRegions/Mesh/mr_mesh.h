@@ -5,7 +5,7 @@
 #ifndef DGOM_MR_MESH_H
 #define DGOM_MR_MESH_H
 
-#include "mr_reg.h"
+#include "MultiRegions/Region/mr_reg.h"
 
 typedef enum {
     INNERLOC=0, // 0-inner face, adjacent face in the same process
@@ -15,13 +15,12 @@ typedef enum {
     OPENBS   // 4-open boundary
 } mr_surfType;
 
-typedef struct {
+typedef struct dg_mesh{
 
-    int dim; ///< dimension
     int procid; ///< process id
     int nprocs; ///< number of process
 
-    multiReg *region; ///< multi-region object
+    dg_region *region; ///< multi-region object
     dg_grid *grid; ///< geometry grid object
     dg_cell *cell; ///< standard element object
 
@@ -51,10 +50,10 @@ typedef struct {
     int *obcind; ///< array of open boundary type indicators
     char **obcfilename; ///< filename of open boundary files
 
-} parallMesh;
+} dg_mesh;
 
-parallMesh* mr_mesh_create(multiReg *region);
-void mr_mesh_free(parallMesh *mesh);
+dg_mesh* mr_mesh_create(dg_region *region);
+void mr_mesh_free(dg_mesh *mesh);
 
 
 #endif //DGOM_MR_MESH_H

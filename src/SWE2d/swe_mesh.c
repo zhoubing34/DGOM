@@ -4,8 +4,8 @@
 
 #include <PhysField/pf_phys.h>
 #include "swe_mesh.h"
-#include "MultiRegions/mr_grid_create.h"
-#include "MultiRegions/mr_mesh_bc.h"
+#include "MultiRegions/Grid/dg_grid_reader.h"
+#include "MultiRegions/Mesh/mr_mesh_bc.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -20,17 +20,17 @@ physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
 
     switch (solver->celltype){
         case TRIANGLE:
-            grid = mr_grid_create_uniform_tri(cell, Mx, My, xmin, xmax, ymin, ymax, 1);
+            grid = dg_grid_create_uniform_tri(cell, Mx, My, xmin, xmax, ymin, ymax, 1);
             break;
         case QUADRIL:
-            grid = mr_grid_create_uniform_quad(cell, Mx, My, xmin, xmax, ymin, ymax);
+            grid = dg_grid_create_uniform_quad(cell, Mx, My, xmin, xmax, ymin, ymax);
             break;
         default:
             printf("Error in %s line %d\n", __FILE__, __LINE__);
             MPI_Abort(MPI_COMM_WORLD, -1);
     }
-    multiReg *region = mr_reg_create(grid);
-    parallMesh *mesh = mr_mesh_create(region);
+    dg_region *region = mr_reg_create(grid);
+    dg_mesh *mesh = mr_mesh_create(region);
     mr_mesh_add_bc2d(mesh, 0, NULL);
 
     /* add boundary condition */
@@ -39,7 +39,7 @@ physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
     return phys;
 }
 
-static void swe_boundary_condition(swe_solver *solver, parallMesh *mesh){
+static void swe_boundary_condition(swe_solver *solver, dg_mesh *mesh){
     mr_mesh_read_bcfile2d(mesh, solver->casename);
 }
 
@@ -49,9 +49,9 @@ static void swe_boundary_condition(swe_solver *solver, parallMesh *mesh){
 physField* swe_file_mesh(swe_solver *solver, char *meshfile){
 
     dg_cell *cell = dg_cell_creat(solver->N, solver->celltype);
-    dg_grid *grid = mr_grid_read_file2d(cell, meshfile);
-    multiReg *region = mr_reg_create(grid);
-    parallMesh *mesh = mr_mesh_create(region);
+    dg_grid *grid = dg_grid_read_file2d(cell, meshfile);
+    dg_region *region = mr_reg_create(grid);
+    dg_mesh *mesh = mr_mesh_create(region);
     swe_boundary_condition(solver, mesh);
     physField *phys = pf_create(3, mesh);
 #if DEBUG

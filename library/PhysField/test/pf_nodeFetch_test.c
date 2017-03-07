@@ -2,7 +2,7 @@
 // Created by li12242 on 16/12/16.
 //
 
-#include <MultiRegions/mr_mesh.h>
+#include <MultiRegions/Mesh/mr_mesh.h>
 #include "pf_nodeFetch_test.h"
 #include "PhysField/pf_fetchBuffer.h"
 #include "pf_test.h"
@@ -11,8 +11,8 @@ int phys_nodeFetch_test(physField *phys, int verbose){
     // local variable
     int fail = 0;
 
-    parallMesh *mesh = phys->mesh;
-    multiReg *region = phys->region;
+    dg_mesh *mesh = phys->mesh;
+    dg_region *region = phys->region;
     dg_cell *shape = phys->cell;
 
     const int K = phys->grid->K;
@@ -96,7 +96,6 @@ int phys_nodeFetch_test(physField *phys, int verbose){
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "Nfield = %d\n", phys->Nfield);
-        fprintf(fp, "dim = %d\n", phys->dim);
         fprintf(fp, "Nsurfinfo = %d\n", phys->Nsurfinfo);
         print_double_vector2file(fp, "surinfo", phys->surfinfo, K * phys->Nsurfinfo * Nfp * Nfaces);
         fprintf(fp, "Nvgeo = %d\n", phys->Nvgeo);

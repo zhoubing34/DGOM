@@ -1,4 +1,4 @@
-#include <MultiRegions/mr_mesh.h>
+#include <MultiRegions/Mesh/mr_mesh.h>
 #include "conv_driver2d.h"
 #include "PhysField/pf_fetchBuffer.h"
 #include "PhysField/pf_strong_volume_flux2d.h"
@@ -34,7 +34,7 @@ int conv_upWindFlux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_rea
 
 void conv_rhs(physField *phys, dg_real frka, dg_real frkb, dg_real fdt){
 
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
     const int K = mesh->grid->K;
     const int nprocs = mesh->nprocs;
     const int Np = phys->cell->Np;

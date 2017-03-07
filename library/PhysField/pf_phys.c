@@ -8,7 +8,7 @@
  * li12242, Tianjin University, li12242@tju.edu.cn
  */
 
-#include <MultiRegions/mr_mesh.h>
+#include <MultiRegions/Mesh/mr_mesh.h>
 #include "pf_phys.h"
 
 #define DEBUG 0
@@ -22,11 +22,10 @@ static void permuteNodalBuffer(physField *phys);
 /* permute the cell buffers to send/recv */
 static void permuteCellBuffer(physField *phys);
 
-physField* pf_create(int Nfields, parallMesh *mesh){
+physField* pf_create(int Nfields, dg_mesh *mesh){
 
     physField *phys = (physField *) calloc(1, sizeof(physField));
 
-    phys->dim = mesh->dim;
     phys->mesh = mesh;
     phys->region = mesh->region;
     phys->grid = mesh->grid;
@@ -101,7 +100,7 @@ static void permuteNodalBuffer(physField *phys){
     phys->f_inQ  = (dg_real *) calloc(sz, sizeof(dg_real));
     phys->f_outQ = (dg_real *) calloc(sz, sizeof(dg_real));
 
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
     int p2,n1,m,fld;
     int nprocs = mesh->nprocs;
     int procid = mesh->procid;
@@ -145,7 +144,7 @@ static void permuteCellBuffer(physField *phys){
     phys->c_inQ  = (dg_real *) calloc(sz, sizeof(dg_real));
     phys->c_outQ = (dg_real *) calloc(sz, sizeof(dg_real));
 
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
 
     int p2, m, fld;
     int nprocs = mesh->nprocs;
@@ -173,7 +172,7 @@ static void permuteCellBuffer(physField *phys){
  */
 static void phys_volumeInfo2d(physField *phys){
 
-    multiReg *region = phys->region;
+    dg_region *region = phys->region;
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
 
@@ -206,9 +205,9 @@ static void phys_volumeInfo2d(physField *phys){
 static void phys_surfInfo2d(physField *phys){
 
     int k,f,m,sk = 0;
-    parallMesh *mesh = phys->mesh;
+    dg_mesh *mesh = phys->mesh;
     dg_cell *shape = mesh->cell;
-    multiReg *region = phys->region;
+    dg_region *region = phys->region;
 
     const int Nfields = phys->Nfield;
     const int K = phys->grid->K;
