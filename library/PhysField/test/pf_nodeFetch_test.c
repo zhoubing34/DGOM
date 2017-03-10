@@ -2,12 +2,12 @@
 // Created by li12242 on 16/12/16.
 //
 
-#include <MultiRegions/Mesh/mr_mesh.h>
+#include <MultiRegions/Mesh/dg_mesh.h>
 #include "pf_nodeFetch_test.h"
 #include "PhysField/pf_fetchBuffer.h"
 #include "pf_test.h"
 
-int phys_nodeFetch_test(physField *phys, int verbose){
+int phys_nodeFetch_test(dg_phys *phys, int verbose){
     // local variable
     int fail = 0;
 

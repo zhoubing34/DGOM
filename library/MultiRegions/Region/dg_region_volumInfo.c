@@ -2,14 +2,14 @@
 // Created by li12242 on 17/3/7.
 //
 
-#include "dg_reg_volumInfo.h"
+#include "dg_region_volumInfo.h"
 
 /**
  * @brief calculate the volume factors (drdx, dsdx, drdy and dsdy) for 3d region
  * @param[in,out] region multi-regions object
  * @todo
  */
-void mr_reg_volumInfo3d(dg_region *region){
+void dg_reg_volumInfo3d(dg_region *region){
 
     return;
 }
@@ -49,7 +49,7 @@ void mr_reg_volumInfo3d(dg_region *region){
  *
  * @param[in,out] region multi-regions object
  */
-void mr_reg_volumInfo2d(dg_region *region){
+void dg_reg_volumInfo2d(dg_region *region){
     int k,n;
     const int Np = region->cell->Np;
     double **Dr = region->cell->Dr;

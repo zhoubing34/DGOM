@@ -8,23 +8,23 @@
  * li12242, Tianjin University, li12242@tju.edu.cn
  */
 
-#include <MultiRegions/Mesh/mr_mesh.h>
+#include <MultiRegions/Mesh/dg_mesh.h>
 #include "pf_phys.h"
 
 #define DEBUG 0
 
-/* set the surface information of physField object */
-static void phys_surfInfo2d(physField *phys);
+/* set the surface information of dg_phys object */
+static void phys_surfInfo2d(dg_phys *phys);
 /* set the volume geometry information `vgeo` */
-static void phys_volumeInfo2d(physField *phys);
+static void phys_volumeInfo2d(dg_phys *phys);
 /* permute the nodal buffers to send/recv */
-static void permuteNodalBuffer(physField *phys);
+static void permuteNodalBuffer(dg_phys *phys);
 /* permute the cell buffers to send/recv */
-static void permuteCellBuffer(physField *phys);
+static void permuteCellBuffer(dg_phys *phys);
 
-physField* pf_create(int Nfields, dg_mesh *mesh){
+dg_phys* pf_create(int Nfields, dg_mesh *mesh){
 
-    physField *phys = (physField *) calloc(1, sizeof(physField));
+    dg_phys *phys = (dg_phys *) calloc(1, sizeof(dg_phys));
 
     phys->mesh = mesh;
     phys->region = mesh->region;
@@ -61,7 +61,7 @@ physField* pf_create(int Nfields, dg_mesh *mesh){
     return phys;
 }
 
-void pf_free(physField *phys){
+void pf_free(dg_phys *phys){
 
     free(phys->surfinfo);
     free(phys->vgeo);
@@ -88,10 +88,10 @@ void pf_free(physField *phys){
  * @brief permute the nodal buffers to send/recv
  * @param[in] phys physField object
  */
-static void permuteNodalBuffer(physField *phys){
+static void permuteNodalBuffer(dg_phys *phys){
 
     const int Nfields = phys->Nfield;
-    const int parallNodalNum = phys->mesh->parallNodeNum*Nfields;
+    const int parallNodalNum = phys->mesh->Npnode*Nfields;
     int *nodeIndexOut = vector_int_create(parallNodalNum);
     phys->parallNodeNum = parallNodalNum;
     phys->nodeIndexOut = nodeIndexOut;
@@ -110,12 +110,12 @@ static void permuteNodalBuffer(physField *phys){
     int sp=0, sk=0;
     for(p2=0;p2<nprocs;++p2){
         if(p2!=procid) {
-            /* for each received face */
-            for (m=0;m<mesh->Npar[p2];++m) {
+            /* for each received face2d */
+            for (m=0;m<mesh->Parf[p2];++m) {
                 for (n1=0;n1<Nfp;++n1) {
                     for (fld=0;fld<Nfields;++fld) {
                         /* sk and node index determine the map relationship */
-                        nodeIndexOut[sp++] = Nfields*(mesh->nodeIndexOut[sk])+fld;
+                        nodeIndexOut[sp++] = Nfields*(mesh->Parnodeid[sk])+fld;
                     }
                     sk++;
                 }
@@ -129,15 +129,15 @@ static void permuteNodalBuffer(physField *phys){
  * @brief permute the elemental buffers to send/recv
  * @param[in] phys physField object
  */
-static void permuteCellBuffer(physField *phys){
+static void permuteCellBuffer(dg_phys *phys){
 
     const int Nfields = phys->Nfield;
-    const int phys_parallCellNum = phys->mesh->parallCellNum*Nfields;
+    const int phys_parallCellNum = phys->mesh->Nparf*Nfields;
     int *cellIndexOut = vector_int_create(phys_parallCellNum);
-    //int *cellIndexIn = IntVector_create(phys_parallCellNum);
+    //int *Pcid_recv = IntVector_create(phys_parallCellNum);
 
     phys->parallCellNum = phys_parallCellNum;
-    //phys->cellIndexIn = cellIndexIn;
+    //phys->Pcid_recv = Pcid_recv;
     phys->cellIndexOut = cellIndexOut;
 
     size_t sz = (size_t) phys_parallCellNum;
@@ -152,12 +152,12 @@ static void permuteCellBuffer(physField *phys){
     int sp=0, sk=0;
     for(p2=0;p2<nprocs;++p2){
         if(p2!=procid) {
-            /* for each received face */
-            for (m=0;m<mesh->Npar[p2];++m) {
+            /* for each received face2d */
+            for (m=0;m<mesh->Parf[p2];++m) {
                 for (fld = 0; fld < Nfields;++fld) {
                     /* sk and node index determine the map relationship */
-                    cellIndexOut[sp] = Nfields*(mesh->cellIndexOut[sk]) + fld;
-                    //cellIndexIn[sp] = Nfields*(mesh->cellIndexIn[sk]) + fld;
+                    cellIndexOut[sp] = Nfields*(mesh->Parcellid[sk]) + fld;
+                    //Pcid_recv[sp] = Nfields*(mesh->Pcid_recv[sk]) + fld;
                     sp++;
                 }
                 sk++;
@@ -170,7 +170,7 @@ static void permuteCellBuffer(physField *phys){
  * @brief set the volume geometry information `vgeo`
  * @param[in] phys physField object
  */
-static void phys_volumeInfo2d(physField *phys){
+static void phys_volumeInfo2d(dg_phys *phys){
 
     dg_region *region = phys->region;
     const int K = phys->grid->K;
@@ -202,7 +202,7 @@ static void phys_volumeInfo2d(physField *phys){
  * @brief set the surface information of physField object
  * @param[in,out] phys physField object
  */
-static void phys_surfInfo2d(physField *phys){
+static void phys_surfInfo2d(dg_phys *phys){
 
     int k,f,m,sk = 0;
     dg_mesh *mesh = phys->mesh;

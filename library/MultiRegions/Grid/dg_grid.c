@@ -1,12 +1,13 @@
 #include "dg_grid.h"
 #include "dg_grid_retreatEToV.h"
 #include "dg_grid_loadBalance.h"
+#include "dg_grid_connect.h"
+#include "dg_grid_BS.h"
 
 /* allocate and assignment the vertex coordinate in 2d dg_grid object */
-void dg_grid_copyVert2d(dg_grid *grid, double *vx, double *vy, double *vz);
-
+void dg_grid_set_vert2d(dg_grid *grid, double *vx, double *vy, double *vz);
 /* allocate and assignment the vertex coordinate in 3d dg_grid object */
-void dg_grid_copyVert3d(dg_grid *grid, double *vx, double *vy, double *vz);
+void dg_grid_set_vert3d(dg_grid *grid, double *vx, double *vy, double *vz);
 
 /* partition of the whole grid into each process */
 void dg_grid_partition(dg_grid *grid);
@@ -16,24 +17,33 @@ void dg_grid_free3d(dg_grid *grid);
 typedef struct dg_grid_creator{
     void (*copy_vert)(dg_grid *grid, double *vx, double *vy, double *vz);
     void (*partition)(dg_grid *grid);
-    void (*retreatEToV)(dg_grid *grid);
-    void (*loadBalance)(dg_grid *grid);
+    void (*restructEToV)(dg_grid *grid);
+    void (*load_balance)(dg_grid *grid);
+    void (*connect)(dg_grid *grid);
+    void (*init_BS)(dg_grid *grid);
+    void (*add_BS)(dg_grid *grid, int Nsruf, int **SFToBS);
     void (*free_func)(dg_grid *grid);
 } dg_grid_creator;
 
 const dg_grid_creator grid_2d_creator = {
-        dg_grid_copyVert2d,
+        dg_grid_set_vert2d,
         dg_grid_partition,
         dg_grid_retreatEToV2d,
-        mr_grid_loadBalance2d,
+        dg_grid_load_balance2d,
+        dg_grid_connect2d,
+        dg_grid_init_BS,
+        dg_grid_add_BS2d,
         dg_grid_free2d,
 };
 
 const dg_grid_creator grid_3d_creator = {
-        dg_grid_copyVert3d,
+        dg_grid_set_vert3d,
         dg_grid_partition,
         dg_grid_retreatEToV3d,
-        mr_grid_loadBalance3d,
+        dg_grid_load_balance3d,
+        dg_grid_connect3d,
+        dg_grid_init_BS,
+        dg_grid_add_BS3d,
         dg_grid_free3d,
 };
 
@@ -46,6 +56,7 @@ const dg_grid_creator grid_3d_creator = {
  * @param vx,vy,vz coordinate of vertex
  * @param EToV element to vertex list
  * @return
+ * grid dg_grid structure
  */
 dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, double *vz, int **EToV){
 
@@ -58,7 +69,7 @@ dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, do
     MPI_Comm_size(MPI_COMM_WORLD, &grid->nprocs);
 
     const dg_grid_creator *creator;
-    switch (cell->type){
+    switch ( dg_cell_celltype(cell) ){
         case TRIANGLE:
             creator = &grid_2d_creator; break;
         case QUADRIL:
@@ -70,21 +81,29 @@ dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, do
 
     /* assignment of EToV */
     int k,i;
-    grid->EToV = matrix_int_create(K, cell->Nv);
+    int nv = dg_cell_Nv(cell);
+    grid->EToV = matrix_int_create(K, nv);
     for(k=0;k<K;k++){
-        for(i=0;i<cell->Nv;i++)
+        for(i=0;i<nv;i++) {
             grid->EToV[k][i] = EToV[k][i];
+        }
     }
     /* copy vertex */
     creator->copy_vert(grid, vx, vy, vz);
     creator->partition(grid);
-    creator->retreatEToV(grid);
-    creator->loadBalance(grid);
-
+    creator->restructEToV(grid);
+    creator->load_balance(grid);
+    creator->connect(grid);
+    creator->init_BS(grid);
+    grid->add_BS = creator->add_BS;
     grid->free_func = creator->free_func;
     return grid;
 }
 
+void dg_grid_add_BS(dg_grid *grid, int Nsurf, int **SFToBS){
+    grid->add_BS(grid, Nsurf, SFToBS);
+    return;
+}
 
 void dg_grid_free(dg_grid *grid){
     grid->free_func(grid);
@@ -93,6 +112,10 @@ void dg_grid_free(dg_grid *grid){
 
 static void dg_grid_free2d(dg_grid *grid){
     matrix_int_free(grid->EToV);
+    matrix_int_free(grid->EToE);
+    matrix_int_free(grid->EToF);
+    matrix_int_free(grid->EToP);
+    matrix_int_free(grid->EToBS);
 
     vector_double_free(grid->vx);
     vector_double_free(grid->vy);
@@ -102,6 +125,10 @@ static void dg_grid_free2d(dg_grid *grid){
 
 static void dg_grid_free3d(dg_grid *grid){
     matrix_int_free(grid->EToV);
+    matrix_int_free(grid->EToE);
+    matrix_int_free(grid->EToF);
+    matrix_int_free(grid->EToP);
+    matrix_int_free(grid->EToBS);
 
     vector_double_free(grid->vx);
     vector_double_free(grid->vy);
@@ -121,9 +148,9 @@ static void dg_grid_partition(dg_grid *grid){
 
     const int nprocs = grid->nprocs;
     const int procid = grid->procid;
-    const int Nv = grid->cell->Nv;
+    const int Nv = dg_cell_Nv(grid->cell);
 
-    int K = grid->K;
+    int K = dg_grid_K(grid);
     int **EToV = grid->EToV;
 
     int Kprocs[nprocs];
@@ -157,6 +184,7 @@ static void dg_grid_partition(dg_grid *grid){
     matrix_int_free(grid->EToV);
     grid->EToV = newEToV;
     grid->K = Klocal;
+    return;
 }
 
 /**
@@ -165,8 +193,8 @@ static void dg_grid_partition(dg_grid *grid){
  * @param[in] vx coordinate of vertex
  * @param[in] vy coordinate of vertex
  */
-static void dg_grid_copyVert2d(dg_grid *grid, double *vx, double *vy, double *vz){
-    const int Nv = grid->Nv;
+static void dg_grid_set_vert2d(dg_grid *grid, double *vx, double *vy, double *vz){
+    const int Nv = dg_grid_Nv(grid);
     int i;
     grid->vx  = vector_double_create(Nv);
     grid->vy  = vector_double_create(Nv);
@@ -185,8 +213,8 @@ static void dg_grid_copyVert2d(dg_grid *grid, double *vx, double *vy, double *vz
  * @param[in] vy coordinate of vertex
  * @param[in] vz coordinate of vertex
  */
-static void dg_grid_copyVert3d(dg_grid *grid, double *vx, double *vy, double *vz){
-    const int Nv = grid->Nv;
+static void dg_grid_set_vert3d(dg_grid *grid, double *vx, double *vy, double *vz){
+    const int Nv = dg_grid_Nv(grid);
     int i;
     grid->vx  = vector_double_create(Nv);
     grid->vy  = vector_double_create(Nv);

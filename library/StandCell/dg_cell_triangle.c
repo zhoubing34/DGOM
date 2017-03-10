@@ -40,7 +40,7 @@ void dg_tri_free(dg_cell *cell){
     matrix_double_free(cell->LIFT);
 
     /* Gauss quadrature */
-    vector_double_free(cell->ws);
+    matrix_double_free(cell->ws);
     vector_double_free(cell->wv);
 
     /* float version */
@@ -118,15 +118,20 @@ void dg_tri_info(dg_cell *cell, int N){
     cell->Np     = Np;
     cell->Nv     = Nv;
     cell->Nfaces = Nfaces;
-    cell->Nfp    = Nfp;
+    cell->Nfptotal = Nfaces*Nfp;
+    cell->Nfp    = (int *)calloc(Nfaces, sizeof(int));
+    int f;
+    for(f=0;f<Nfaces;f++){
+        cell->Nfp[f] = Nfp;
+    }
 
     return;
 }
 
 double ** dg_tri_surf_mass_matrix(dg_cell *cell){
-    const int Np = cell->Np;
-    const int Nfaces = cell->Nfaces;
-    const int Nfp = cell->Nfp;
+    const int Np = dg_cell_Np(cell);
+    const int Nfaces = dg_cell_Nfaces(cell);
+    const int Nfp = dg_cell_N(cell)+1;
 
     double **Mes = matrix_double_create(Np, Nfaces * Nfp);
 
@@ -155,10 +160,10 @@ double ** dg_tri_surf_mass_matrix(dg_cell *cell){
 
     int k, sr, sk;
     for(i=0;i<Nfaces;i++){
-        for(j=0;j<Nfp;j++){         /* row index of M */
-            for(k=0;k<Nfp;k++){     /* column index of M */
+        for(k=0;k<Nfp;k++){     /* column index of M */
+            sk = i*Nfp + k;     /* columns index of Mes */
+            for(j=0;j<Nfp;j++){     /* row index of M */
                 sr = Fmask[i][j];   /* row index of Mes */
-                sk = i*Nfp + k;     /* columns index of Mes */
                 Mes[sr][sk] = m[j*Nfp + k];
             }
         }
@@ -171,16 +176,22 @@ double ** dg_tri_surf_mass_matrix(dg_cell *cell){
  * @param [in] cell 2d standard elements
  */
 void dg_tri_gauss_weight(dg_cell *cell){
-    const int Nfp = cell->Nfp;
-    const int Np = cell->Np;
-    double r[Nfp];
-    // Gauss quadrature weights for face
-    cell->ws = vector_double_create(Nfp);
-    zwglj(r, cell->ws, Nfp, 0, 0);
+    const int Nfp = dg_cell_N(cell)+1;
+    const int Np = dg_cell_Np(cell);
+    const int Nfaces = dg_cell_Nfaces(cell);
+    double r[Nfp], ws[Nfp];
+    // Gauss quadrature weights for face2d
+    cell->ws = matrix_double_create(Nfaces, Nfp);
+    zwglj(r, ws, Nfp, 0, 0);
+    int i,j;
+    for(i=0;i<Nfaces;i++){
+        for(j=0;j<dg_cell_Nfp(cell, i);j++){
+            cell->ws[i][j] = ws[j];
+        }
+    }
 
     // Gauss quadrature weights for volume
     cell->wv = vector_double_create(Np);
-    int i,j;
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
             cell->wv[j] += cell->M[i][j];
@@ -483,7 +494,7 @@ static void dg_tri_warpfactor(int N, double *r, int Nr, double *w){
  */
 int** dg_tri_fmask(dg_cell *tri){
 
-    const int Nfp = tri->Nfp;
+    const int Nfp = dg_cell_N(tri)+1;
     const int Nfaces = tri->Nfaces;
     int **Fmask = matrix_int_create(Nfaces, Nfp);
 
@@ -491,10 +502,10 @@ int** dg_tri_fmask(dg_cell *tri){
     int nrp[Nfp]; /* # of nodes from s=-1 to s=1 */
     int i;
 
-    /* face 1, s=-1 */
+    /* face2d 1, s=-1 */
     for(i=0;i<Nfp;i++) {Fmask[0][i] = i;}
 
-    /* face 3, r=-1 */
+    /* face2d 3, r=-1 */
     for(i=0;i<Nfp;i++) {nrp[i] = Nfp - i;}
 
     temp[0] = 1; /* node index on r=-1 from s=-1 to s=1 */
@@ -505,7 +516,7 @@ int** dg_tri_fmask(dg_cell *tri){
         /* node index on r=-1 from s=1 to s=-1 */
         Fmask[2][i] = temp[Nfp-1-i] - 1;
     }
-    /* face 2, r+s=0 */
+    /* face2d 2, r+s=0 */
     nrp[0] = Nfp;
     for(i=1;i<Nfp-1;i++) { nrp[i] = temp[i+1]-1; }
     nrp[Nfp-1] = temp[Nfp-1];

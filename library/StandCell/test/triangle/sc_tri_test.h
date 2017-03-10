@@ -11,6 +11,7 @@ int sc_triCoor_test(dg_cell *tri, int verbose);
 int sc_triVandMatrix_test(dg_cell *tri, int verbose);
 int sc_triMassMatrix_test(dg_cell *tri, int verbose);
 int sc_triDeriMatrix_test(dg_cell *tri, int verbose);
+int sc_triFmask_test(dg_cell *tri, int verbose);
 int sc_triLIFT_test(dg_cell *tri, int verbose);
 int sc_triVertProj_test(dg_cell *tri, int verbose);
 

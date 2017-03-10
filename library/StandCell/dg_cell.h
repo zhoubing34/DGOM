@@ -24,17 +24,15 @@ typedef enum {
 
 typedef struct dg_cell{
     dg_cell_type type; ///< cell enum type
-
-    int dim; ///< unused dimension
-
     int N; ///< polynomial order
     int Np; ///< number of points
     int Nv; ///< number of vertex
     int Nfaces; ///< number of faces
-    int Nfp; ///< number of points on each face
+    int *Nfp; ///< number of points on each face
+    int Nfptotal; ///< total number of points on faces
 
     int **Fmask; ///< index of node at faces
-    double *ws; ///< surface Gauss quadrature
+    double **ws; ///< surface Gauss quadrature at each face
     double *wv; ///< volume Gauss quadrature
 
     double *r, *s, *t; ///< coordinate
@@ -51,7 +49,6 @@ typedef struct dg_cell{
     void (*proj_vert2node)(struct dg_cell *cell, double *vertVal, double *nodeVal);
 } dg_cell;
 
-/* ======================== functions for standard elements ======================== */
 /* create stand cell object */
 dg_cell* dg_cell_creat(int N, dg_cell_type type);
 /* free dg_cell object */
@@ -59,5 +56,12 @@ void dg_cell_free(dg_cell *);
 /* project the vertex value to interpolation nodes */
 void dg_cell_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal);
 
+#define dg_cell_celltype(cell) cell->type
+#define dg_cell_N(cell) cell->N
+#define dg_cell_Np(cell) cell->Np
+#define dg_cell_Nv(cell) cell->Nv
+#define dg_cell_Nfaces(cell) cell->Nfaces
+#define dg_cell_Nfptotal(cell) cell->Nfptotal
+#define dg_cell_Nfp(cell, f) cell->Nfp[f]  ///< number of points on fth face
 
 #endif //DGOM_STDCELL_H

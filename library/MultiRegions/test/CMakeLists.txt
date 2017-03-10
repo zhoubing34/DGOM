@@ -1,13 +1,14 @@
 include_directories(${CMAKE_SOURCE_DIR}/library)
 set(MULTIREGIONS_TEST_SRC
-        mr_test.c
-        mr_test.h
-        mr_grid_test.c
-        mr_grid_test.h
-        mr_reg_test.c
-        mr_reg_test.h
-        mr_mesh_test.c
-        mr_mesh_test.h)
+        multiregion_test.c
+        multiregion_test.h
+        dg_grid_test.c
+        dg_grid_test.h
+        dg_reg_test.c
+        dg_reg_test.h
+        dg_mesh_test.c
+        dg_mesh_test.h
+        dg_edge_test.c)
 
 add_executable(mulitregions_test ${MULTIREGIONS_TEST_SRC})
 add_dependencies(mulitregions_test multiregions)

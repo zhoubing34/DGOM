@@ -24,8 +24,21 @@ int sc_triCoor_test(dg_cell *tri, int verbose){
     return fail;
 }
 
-int sc_Fmask(dg_cell *tri, int verbose){
+int sc_triFmask_test(dg_cell *cell, int verbose){
     int fail = 0;
+    const int Nfaces = dg_cell_Nfaces(cell);
+    if(verbose){
+        FILE *fp = fopen("sc_triFmask_test.txt","w");
+        fprintf(fp, "Fmsk = \n");
+        int f,n;
+        for(f=0;f<Nfaces;f++){
+            for(n=0;n<dg_cell_Nfp(cell, f);n++){
+                fprintf(fp, "%d ", cell->Fmask[f][n]);
+            }
+            fprintf(fp, "\n");
+        }
+        fclose(fp);
+    }
     return fail;
 }
 

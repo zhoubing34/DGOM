@@ -141,7 +141,7 @@
 
 
 
-! The number of data words needed on a cell face is set by nfacevar.
+! The number of data words needed on a cell face2d is set by nfacevar.
 !
 
       integer nfacevar

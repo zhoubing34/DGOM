@@ -46,5 +46,6 @@ if( (fp = fopen(filename, "r")) == NULL ){ \
 /* string to int */
 void str2int(char *str, int *N, char* errmessage);
 void str2double(char *str, double *scal, char* errmessage);
+int unique_int(int len, int *list);
 
 #endif //LIBUTILITIES_H

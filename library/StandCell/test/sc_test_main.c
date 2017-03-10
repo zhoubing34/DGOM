@@ -6,7 +6,7 @@
 #include "StandCell/test/triangle/sc_tri_test.h"
 #include "StandCell/test/quadrilateral/sc_quad_test.h"
 
-#define NTEST 6
+#define NTEST 7
 
 int main(int argc, char **argv){
 
@@ -36,19 +36,19 @@ int main(int argc, char **argv){
     err[i++] = sc_triVandMatrix_test(tri, isverbose);
     err[i++] = sc_triMassMatrix_test(tri, isverbose);
     err[i++] = sc_triDeriMatrix_test(tri, isverbose);
+    err[i++] = sc_triFmask_test(tri, isverbose);
     err[i++] = sc_triLIFT_test(tri, isverbose);
     err[i++] = sc_triVertProj_test(tri, isverbose);
 
-
     dg_cell_free(tri);
 
-    for(i=0;i<NTEST;i++)
-        fail += err[i];
+    for(i=0;i<NTEST;i++) {fail += err[i];}
 
-    if(fail)
+    if(fail){
         printf(HEADEND "%d test faild from SandCell_triangle test\n", fail);
-    else
+    } else {
         printf(HEADEND "%d test passed from SandCell_triangle test\n", NTEST);
+    }
 
     /* quadrilateral test case */
     dg_cell *quad = dg_cell_creat(N, QUADRIL);
@@ -58,6 +58,7 @@ int main(int argc, char **argv){
     err[i++] = sc_quadVandMatrix_test(quad, isverbose);
     err[i++] = sc_quadMassMatrix_test(quad, isverbose);
     err[i++] = sc_quadDeriMatrix_test(quad, isverbose);
+    err[i++] = sc_quadFmask_test(quad, isverbose);
     err[i++] = sc_quadLIFT_test(quad, isverbose);
     err[i++] = sc_quadVertProj_test(quad, isverbose);
     dg_cell_free(quad);

@@ -2,10 +2,10 @@
 // Created by li12242 on 17/1/10.
 //
 
-#include <MultiRegions/Region/mr_reg.h>
+#include <MultiRegions/Region/dg_region.h>
 #include "pf_limiter_test.h"
 
-int phys_limiter_test(physField *phys, int verbose){
+int phys_limiter_test(dg_phys *phys, int verbose){
 
     int fail = 0;
 

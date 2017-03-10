@@ -5,7 +5,7 @@
 #include "pf_cellMean_test.h"
 #include "PhysField/pf_cellMean.h"
 
-int phys_cellMean_test(physField *phys, int verbose){
+int phys_cellMean_test(dg_phys *phys, int verbose){
 
     // local variable
     int fail = 0;

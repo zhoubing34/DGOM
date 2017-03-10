@@ -23,6 +23,24 @@ int sc_quadCoor_test(dg_cell *quad, int verbose){
     return fail;
 }
 
+int sc_quadFmask_test(dg_cell *cell, int verbose){
+    int fail = 0;
+    const int Nfaces = dg_cell_Nfaces(cell);
+    if(verbose){
+        FILE *fp = fopen("sc_quadFmask_test.txt","w");
+        fprintf(fp, "Fmsk = \n");
+        int f,n;
+        for(f=0;f<Nfaces;f++){
+            for(n=0;n<dg_cell_Nfp(cell, f);n++){
+                fprintf(fp, "%d ", cell->Fmask[f][n]);
+            }
+            fprintf(fp, "\n");
+        }
+        fclose(fp);
+    }
+    return fail;
+}
+
 int sc_quadVandMatrix_test(dg_cell *quad, int verbose){
     int fail = 0;
     extern double quad_V[NP][NP];

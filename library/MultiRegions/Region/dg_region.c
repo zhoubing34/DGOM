@@ -1,17 +1,17 @@
-#include "mr_reg.h"
-#include "dg_reg_volumInfo.h"
-#include "dg_reg_surfInfo.h"
+#include "dg_region.h"
+#include "dg_region_volumInfo.h"
+#include "dg_region_surfInfo.h"
 
 #define DEBUG 0
 
 /* create node coordinate for 2d dg_region object */
-static void mr_reg_nodeCoor2d(dg_region *region);
-static void mr_reg_nodeCoor3d(dg_region *region);
+static void dg_region_nodeCoor2d(dg_region *region);
+static void dg_region_nodeCoor3d(dg_region *region);
 /* calculate the volume/area and the length scale of each element */
-static void dg_reg_volumeScale2d(dg_region *region);
-static void dg_reg_volumeScale3d(dg_region *region);
-static void dg_reg_free2d(dg_region *region);
-static void dg_reg_free3d(dg_region *region);
+static void dg_region_volumeScale2d(dg_region *region);
+static void dg_region_volumeScale3d(dg_region *region);
+static void dg_region_free2d(dg_region *region);
+static void dg_region_free3d(dg_region *region);
 
 typedef struct dg_region_creator{
     void (*set_nood)(dg_region *reg);
@@ -22,22 +22,22 @@ typedef struct dg_region_creator{
 }dg_region_creator;
 
 static const dg_region_creator region2d_creator={
-        mr_reg_nodeCoor2d,
-        mr_reg_volumInfo2d,
+        dg_region_nodeCoor2d,
+        dg_reg_volumInfo2d,
         dg_reg_surfInfo2d,
-        dg_reg_volumeScale2d,
-        dg_reg_free2d,
+        dg_region_volumeScale2d,
+        dg_region_free2d,
 };
 
 static const dg_region_creator region3d_creator={
-        mr_reg_nodeCoor3d,
-        mr_reg_volumInfo3d,
+        dg_region_nodeCoor3d,
+        dg_reg_volumInfo3d,
         dg_reg_surfInfo3d,
-        dg_reg_volumeScale3d,
-        dg_reg_free3d,
+        dg_region_volumeScale3d,
+        dg_region_free3d,
 };
 
-dg_region* mr_reg_create(dg_grid *grid){
+dg_region* dg_region_create(dg_grid *grid){
 
     dg_region *region = (dg_region *)calloc(1, sizeof(dg_region));
     /* basic infomation */
@@ -66,12 +66,12 @@ dg_region* mr_reg_create(dg_grid *grid){
     return region;
 }
 
-void mr_reg_free(dg_region *region){
+void dg_region_free(dg_region *region){
     region->free_func(region);
     return;
 }
 
-static void dg_reg_free2d(dg_region *region){
+static void dg_region_free2d(dg_region *region){
     matrix_double_free(region->x);
     matrix_double_free(region->y);
     matrix_double_free(region->J);
@@ -93,7 +93,7 @@ static void dg_reg_free2d(dg_region *region){
     return;
 }
 
-static void dg_reg_free3d(dg_region *region){
+static void dg_region_free3d(dg_region *region){
     matrix_double_free(region->x);
     matrix_double_free(region->y);
     matrix_double_free(region->z);
@@ -120,7 +120,7 @@ static void dg_reg_free3d(dg_region *region){
  * @brief create node coordinate for 2d (triangle and quadrilateral)
  * @param[in,out] region multi-regions object
  */
-static void mr_reg_nodeCoor3d(dg_region *region){
+static void dg_region_nodeCoor3d(dg_region *region){
     dg_cell *cell = region->cell;
     dg_grid *grid = region->grid;
     const int Np = cell->Np;
@@ -154,7 +154,7 @@ static void mr_reg_nodeCoor3d(dg_region *region){
  * @brief create node coordinate for 2d region (triangle and quadrilateral)
  * @param[in,out] region multi-regions object
  */
-static void mr_reg_nodeCoor2d(dg_region *region){
+static void dg_region_nodeCoor2d(dg_region *region){
     dg_cell *cell = region->cell;
     dg_grid *grid = region->grid;
     const int Np = cell->Np;
@@ -180,7 +180,7 @@ static void mr_reg_nodeCoor2d(dg_region *region){
     return;
 }
 
-static void dg_reg_volumeScale2d(dg_region *region){
+static void dg_region_volumeScale2d(dg_region *region){
     const int Np = region->cell->Np;
     const int K = region->grid->K;
 
@@ -193,14 +193,14 @@ static void dg_reg_volumeScale2d(dg_region *region){
 
     // elemental size
     for(k=0;k<K;k++){
-        double area = mr_reg_integral(region, k, ones);
+        double area = dg_region_integral(region, k, ones);
         region->size[k] = area;
         region->len[k] = sqrt(area/M_PI);
     }
     return;
 }
 
-static void dg_reg_volumeScale3d(dg_region *region){
+static void dg_region_volumeScale3d(dg_region *region){
     const int Np = region->cell->Np;
     const int K = region->grid->K;
 
@@ -213,7 +213,7 @@ static void dg_reg_volumeScale3d(dg_region *region){
 
     // elemental size
     for(k=0;k<K;k++){
-        double area = mr_reg_integral(region, k, ones);
+        double area = dg_region_integral(region, k, ones);
         region->size[k] = area;
         region->len[k] = pow(area*3.0/4./M_PI, 1.0/3);
     }
@@ -228,7 +228,7 @@ static void dg_reg_volumeScale3d(dg_region *region){
  * @param[in] nodalVal value on interpolation points
  * @return integral integral value
  */
-double mr_reg_integral(dg_region *region, int ind, double *nodalVal){
+double dg_region_integral(dg_region *region, int ind, double *nodalVal){
     double integral = 0;
 
     const double *J = region->J[ind];

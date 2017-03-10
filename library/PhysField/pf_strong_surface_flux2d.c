@@ -56,7 +56,7 @@ void pf_strong_surface_flux2d
             const dg_real nx = surfinfo[surfid++];
             const dg_real ny = surfinfo[surfid++];
 
-            // local face values
+            // local face2d values
             for(fld=0;fld<Nfield;fld++)
                 f_M[fld] = f_Q[idM++];
 

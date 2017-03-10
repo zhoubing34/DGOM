@@ -5,7 +5,7 @@
 #include <PhysField/pf_phys.h>
 #include "pf_openbc_test.h"
 
-int pf_openbc_test(physField *phys, int verbose){
+int pf_openbc_test(dg_phys *phys, int verbose){
     const int procid = phys->mesh->procid;
     const int nprocs = phys->mesh->nprocs;
     const int Nfield = phys->Nfield;

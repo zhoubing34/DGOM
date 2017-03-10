@@ -6,6 +6,6 @@
 #define DGOM_PF_OPENBC_TEST_H
 
 #include "pf_test.h"
-int pf_openbc_test(physField *phys, int verbose);
+int pf_openbc_test(dg_phys *phys, int verbose);
 
 #endif //DGOM_PF_OPENBC_TEST_H

@@ -31,7 +31,7 @@ static int wall_func(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP){
     return 0;
 }
 
-int phys_strong_surface_flux2d_test(physField *phys, int verbose){
+int phys_strong_surface_flux2d_test(dg_phys *phys, int verbose){
     int fail = 0;
 
     dg_mesh *mesh = phys->mesh;

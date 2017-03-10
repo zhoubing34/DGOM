@@ -8,7 +8,7 @@
 #define PMV3_OPTION_SEED 2
 
 
-void mr_grid_loadBalance3d(dg_grid *grid){
+void dg_grid_load_balance3d(dg_grid *grid){
     return;
 }
 
@@ -20,7 +20,7 @@ void mr_grid_loadBalance3d(dg_grid *grid){
  * @param [in,out] grid dg_grid structure
  * @note The properties of EToV and K is updated.
  */
-void mr_grid_loadBalance2d(dg_grid *grid){
+void dg_grid_load_balance2d(dg_grid *grid){
 
     int n,p,k,v;
     /* MPI process */
@@ -34,7 +34,7 @@ void mr_grid_loadBalance2d(dg_grid *grid){
     int Kprocs[nprocs];
 
     /* local number of elements */
-    int Klocal = grid->K;
+    int Klocal = dg_grid_K(grid);
     int **EToV = grid->EToV;
 
     /* find number of elements on all processors */
@@ -74,7 +74,7 @@ void mr_grid_loadBalance2d(dg_grid *grid){
     /* ncon = 1 */
     int ncon = 1;
 
-    /* nodes on element face */
+    /* nodes on element face2d */
     int ncommonnodes = 2;
 
     /* number of partitions */

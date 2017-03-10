@@ -19,12 +19,12 @@ double xmin = -1, xmax = 1;
 double ymin = -1, ymax = 1;
 
 /** generation of physfield */
-physField *uniform_tri_physfield();
-physField *uniform_quad_physfield();
-physField *rectangle_tri_physfield();
+dg_phys *uniform_tri_physfield();
+dg_phys *uniform_quad_physfield();
+dg_phys *rectangle_tri_physfield();
 
 #define Nphys 3
-typedef physField* (*phys_func)();
+typedef dg_phys* (*phys_func)();
 static const phys_func phys_creator[Nphys] = {
         uniform_tri_physfield,
         uniform_quad_physfield,
@@ -35,38 +35,38 @@ static const phys_func phys_creator[Nphys] = {
  * @brief create uniform triangle mesh of physField
  * @return physField
  */
-physField *uniform_tri_physfield(){
+dg_phys *uniform_tri_physfield(){
     int type = 1;
     dg_cell *tri = dg_cell_creat(N, TRIANGLE);
     dg_grid *tri_grid = dg_grid_create_uniform_tri(tri, Mx, My, xmin, xmax, ymin, ymax, type);
-    dg_region *tri_region = mr_reg_create(tri_grid);
+    dg_region *tri_region = mr_region_create(tri_grid);
     dg_mesh *tri_mesh = mr_mesh_create(tri_region);
     mr_mesh_add_bc2d(tri_mesh, 0, NULL);
-    physField *tri_phys = pf_create(Nfield, tri_mesh);
+    dg_phys *tri_phys = pf_create(Nfield, tri_mesh);
     return tri_phys;
 }
 /**
  * @brief create uniform quadrilateral mesh of physField
  * @return physField
  */
-physField *uniform_quad_physfield(){
+dg_phys *uniform_quad_physfield(){
     dg_cell *quad = dg_cell_creat(N, QUADRIL);
     dg_grid *quad_grid = dg_grid_create_uniform_quad(quad, Mx, My, xmin, xmax, ymin, ymax);
-    dg_region *quad_region = mr_reg_create(quad_grid);
+    dg_region *quad_region = mr_region_create(quad_grid);
     dg_mesh *quad_mesh = mr_mesh_create(quad_region);
     mr_mesh_add_bc2d(quad_mesh, 0, NULL);
-    physField *quad_phys = pf_create(Nfield, quad_mesh);
+    dg_phys *quad_phys = pf_create(Nfield, quad_mesh);
     return quad_phys;
 }
 
-physField *rectangle_tri_physfield(){
+dg_phys *rectangle_tri_physfield(){
     dg_cell *tri = dg_cell_creat(N, TRIANGLE);
     char casename[] = "example/SWE2d/Rectangle/Rectangle";
     dg_grid *tri_grid = dg_grid_read_file2d(tri, casename);
-    dg_region *tri_region = mr_reg_create(tri_grid);
+    dg_region *tri_region = mr_region_create(tri_grid);
     dg_mesh *tri_mesh = mr_mesh_create(tri_region);
     mr_mesh_read_bcfile2d(tri_mesh, casename);
-    physField *tri_phys = pf_create(Nfield, tri_mesh);
+    dg_phys *tri_phys = pf_create(Nfield, tri_mesh);
     return tri_phys;
 }
 
@@ -74,7 +74,7 @@ physField *rectangle_tri_physfield(){
  * @brief deallocate the memory of physField
  * @param phys
  */
-void phys_free(physField *phys){
+void phys_free(dg_phys *phys){
     dg_cell_free(phys->cell);
     dg_grid_free(phys->grid);
     mr_reg_free(phys->region);
@@ -85,7 +85,7 @@ void phys_free(physField *phys){
 
 /** test functions */
 #define Ntest 8
-typedef int (*test_func)(physField *, int verbose);
+typedef int (*test_func)(dg_phys *, int verbose);
 static const test_func phys_test_func[Ntest] = {
         phys_cellMean_test,
         phys_nodeFetch_test,
@@ -126,17 +126,17 @@ int main(int argc, char **argv){
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     if(!procid){
-        printf(HEADSTART "Running %d test for %d physField from %s.\n",
+        printf(HEADSTART "Running %d test for %d dg_phys from %s.\n",
                Ntest, Nphys, __FUNCTION__);
     }
 
-    physField *phys;
+    dg_phys *phys;
     int n,m,tmp;
 
     for(n=0;n<Nphys;n++){
-        /* create physField */
+        /* create dg_phys */
         phys = phys_creator[n]();
-        if(!procid){ printf(HEADLINE "%d test for physField[%d]\n", Ntest, n); }
+        if(!procid){ printf(HEADLINE "%d test for dg_phys[%d]\n", Ntest, n); }
 
         int Nfail=0;
         for(m=0;m<Ntest;m++){
@@ -145,9 +145,9 @@ int main(int argc, char **argv){
         }
         phys_free(phys);
         if(Nfail){
-            if(!procid){ printf(HEADEND "%d test failed for physField[%d]\n\n", Nfail, n); }
+            if(!procid){ printf(HEADEND "%d test failed for dg_phys[%d]\n\n", Nfail, n); }
         } else{
-            if(!procid){ printf(HEADEND "%d test passed for physField[%d]\n\n", Ntest, n);}
+            if(!procid){ printf(HEADEND "%d test passed for dg_phys[%d]\n\n", Ntest, n);}
         }
     }
 

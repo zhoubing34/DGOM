@@ -12,6 +12,10 @@
 #include "dg_cell.h"
 #include "Polylib/polylib.h"
 
+#define DEBUG 0
+#if DEBUG
+#include "Utility/unit_test.h"
+#endif
 /* transform the index of orthogonal function to [ti,tj] for quadrilateral elements */
 void sc_transInd_quad(int N, int ind, int *ti, int *tj);
 
@@ -27,8 +31,13 @@ void dg_quad_info(dg_cell *cell, int N){
     cell->N      = N;
     cell->Np     = Np;
     cell->Nfaces = Nfaces;
-    cell->Nfp    = Nfp;
     cell->Nv     = Nv;
+    cell->Nfptotal = Nfaces*Nfp;
+    cell->Nfp    = (int *)calloc(Nfaces, sizeof(int));
+    int f;
+    for(f=0;f<Nfaces;f++){
+        cell->Nfp[f] = Nfp;
+    }
 
     return;
 }
@@ -38,16 +47,22 @@ void dg_quad_info(dg_cell *cell, int N){
  * @param [in] cell 2d standard elements
  */
 void dg_quad_gauss_weight(dg_cell *cell){
-    const int Nfp = cell->Nfp;
+    const int Nfp = dg_cell_N(cell)+1;
     const int Np = cell->Np;
-    double r[Nfp];
-    // Gauss quadrature weights for face
-    cell->ws = vector_double_create(Nfp);
-    zwglj(r, cell->ws, Nfp, 0, 0);
+    const int Nfaces = dg_cell_Nfaces(cell);
+    double r[Nfp], ws[Nfp];
+    // Gauss quadrature weights for face2d
+    cell->ws = matrix_double_create(Nfaces, Nfp);
+    zwglj(r, ws, Nfp, 0, 0);
+    int i,j;
+    for(i=0;i<Nfaces;i++){
+        for(j=0;j<dg_cell_Nfp(cell, i);j++){
+            cell->ws[i][j] = ws[j];
+        }
+    }
 
     // Gauss quadrature weights for volume
     cell->wv = vector_double_create(Np);
-    int i,j;
     for(i=0;i<Np;i++){
         for(j=0;j<Np;j++){
             cell->wv[j] += cell->M[i][j];
@@ -62,12 +77,11 @@ void dg_quad_gauss_weight(dg_cell *cell){
  * @return surface mass matrix
  */
 double ** dg_quad_surf_mass_matrix(dg_cell *cell){
-    const int Np = cell->Np;
-    const int Nfaces = cell->Nfaces;
-    const int Nfp = cell->Nfp;
+    const int Np = dg_cell_Np(cell);
+    const int Nfaces = dg_cell_Nfaces(cell);
+    const int Nfp = dg_cell_N(cell)+1;
 
     double **Mes = matrix_double_create(Np, Nfaces * Nfp);
-
     int **Fmask = cell->Fmask;
     /* coefficients for faces */
     double r[Nfp], w[Nfp];
@@ -122,7 +136,7 @@ void dg_quad_free(dg_cell *cell){
     matrix_double_free(cell->LIFT);
 
     /* Gauss quadrature */
-    vector_double_free(cell->ws);
+    matrix_double_free(cell->ws);
     vector_double_free(cell->wv);
 
     /* float version */
@@ -222,8 +236,8 @@ void dg_quad_orthog_func(dg_cell *quad, int ind, double *func){
     jacobiP(Np, s, func, tj, 0.0, 0.0);
 
     int i;
-    for(i=0;i<Np;i++)
-        func[i] *= temp[i];
+    for(i=0;i<Np;i++) {func[i] *= temp[i];}
+    return;
 }
 
 /**
@@ -234,8 +248,8 @@ void dg_quad_orthog_func(dg_cell *quad, int ind, double *func){
  * the nodes is arranged along r coordinate first
  */
 void dg_quad_coord(dg_cell *quad){
-    const int Nfp = quad->Nfp;
-    const int Np = quad->Np;
+    const int Np = dg_cell_Np(quad);
+    const int Nfp = dg_cell_N(quad)+1;
     double t[Nfp],w[Nfp];
 
     quad->r = vector_double_create(Np);
@@ -243,7 +257,6 @@ void dg_quad_coord(dg_cell *quad){
 
     /* get Gauss-Lobatto-Jacobi zeros and weights */
     zwglj(t, w, Nfp, 0, 0);
-
     int i,j,sk=0;
     for(i=0;i<Nfp;i++){
         for(j=0;j<Nfp;j++){
@@ -251,6 +264,7 @@ void dg_quad_coord(dg_cell *quad){
             quad->s[sk++] = t[i];
         }
     }
+    return;
 }
 
 
@@ -264,40 +278,43 @@ void dg_quad_coord(dg_cell *quad){
  * @return Fmask[Nfaces][Nfp]
  */
 int** dg_quad_fmask(dg_cell *quad){
-    const int Nfp = quad->Nfp;
-    const int Nfaces = quad->Nfaces;
+    const int Nfp = dg_cell_N(quad)+1;
+    const int Nfaces = dg_cell_Nfaces(quad);
+    const int Nfptotal = dg_cell_Nfptotal(quad);
 
-    int **Fmask = matrix_int_create(Nfaces, Nfp);
+    // allocation
+    int **Fmask = (int **)calloc(Nfaces, sizeof(int *));
+    Fmask[0] = calloc((size_t) Nfptotal, sizeof(int));
+    int n;
+    for(n=1;n<Nfaces;++n){
+        Fmask[n] = Fmask[n-1]+ dg_cell_Nfp(quad, n-1);
+    }
+    // point index on each face
     int i, std, td;
-
-    /* face 1, s=-1 */
+    /* face2d 1, s=-1 */
     for(i=0;i<Nfp;i++)
         Fmask[0][i] = i;
-
-    /* face 2, r=+1 */
+    /* face2d 2, r=+1 */
     std = Nfp-1; /* start index */
     td  = Nfp;
     for(i=0;i<Nfp;i++) {
         Fmask[1][i] = std;
         std += td;
     }
-
-    /* face 3, s=+1 */
+    /* face2d 3, s=+1 */
     std = Nfp*Nfp - 1;
     td  = -1;
     for(i=0;i<Nfp;i++) {
         Fmask[2][i] = std;
         std += td;
     }
-
-    /* face 4, r=-1 */
+    /* face2d 4, r=-1 */
     std = (Nfp - 1)*Nfp;
     td  = -Nfp;
     for(i=0;i<Nfp;i++) {
         Fmask[3][i] = std;
         std += td;
     }
-
     return Fmask;
 }
 
@@ -305,7 +322,6 @@ int** dg_quad_fmask(dg_cell *quad){
 /**
  * @brief
  * Project the quadrilateral vertex value to interpolation nodes.
- *
  * @param[in] vertVal value of vertex
  * @param[in] nodeVal value of nodes
  *
@@ -320,4 +336,5 @@ void dg_quad_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal){
                              + vertVal[2] * (1. + ri) * (1. + si)
                              + vertVal[3] * (1. - ri)*(1. + si));
     }
+    return;
 }

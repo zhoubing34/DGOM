@@ -1,7 +1,7 @@
 #include "Utility/utility.h"
 #include "dg_grid.h"
 
-typedef struct{
+typedef struct point2d{
 	double x, y; // coordinate
 	int ind; // No. of point
 }point2d;
@@ -50,12 +50,11 @@ static void dg_grid_resortEToV2d(int Nvert, double *vx, double *vy, int *vertlis
 		vertex[i].y = vy[t];
 		vertex[i].ind = t;
 	}
-	PRI_VERT2d.x  = vertex[0].x;
-	PRI_VERT2d.y  = vertex[0].y;
+	PRI_VERT2d.x = vertex[0].x;
+	PRI_VERT2d.y = vertex[0].y;
 	PRI_VERT2d.ind = vertex[0].ind;
 
     qsort(&vertex[1], (size_t)(Nvert-1), sizeof(point2d), pt_cmp2d);
-
 	for(i=0;i<Nvert;i++){
 		vertlist[i] = vertex[i].ind;
 	}
@@ -64,7 +63,7 @@ static void dg_grid_resortEToV2d(int Nvert, double *vx, double *vy, int *vertlis
 
 void dg_grid_retreatEToV2d(dg_grid *grid){
 	const int K = grid->K;
-	const int Nv = grid->cell->Nv;
+	const int Nv = dg_cell_Nv(grid->cell);
 	int k;
 	for(k=0;k<K;k++){
 		dg_grid_resortEToV2d(Nv, grid->vx, grid->vy, grid->EToV[k]);

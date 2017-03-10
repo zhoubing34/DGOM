@@ -1,5 +1,5 @@
-#include <StandCell/dg_cell.h>
 #include "dg_grid.h"
+#include "dg_grid_BS.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -14,26 +14,21 @@
  * Generate uniform triangle mesh with specific coordinate range and number of elements.
  * The flag 'type' defines how the square divides into two triangles.
  *
- * @param[in] shape standard cell object
- * @param[in] Mx number of elements on x coordinate
- * @param[in] My number of elements on x coordinate
- * @param[in] xmin  minimum value of x
- * @param[in] xmax  maximum value of x
- * @param[in] ymin  minimum value of y
- * @param[in] ymax  maximum value of y
- * @param[in] type  flag for triangle dividing, 0 for '\' and 1 for '/'
+ * @param[in] cell standard cell object;
+ * @param[in] Mx,My number of cells on x and y coordinate;
+ * @param[in] xmin,xmax  range of x coordinate;
+ * @param[in] ymin,ymax  range of y coordinate;
+ * @param[in] type  flag for triangle dividing, 0 for '\' and 1 for '/';
  *
- * @return grid geometry grid object
+ * @return grid geometry grid object.
  */
-dg_grid* dg_grid_create_uniform_tri
-        (dg_cell *shape, int Mx, int My,
-         double xmin, double xmax,
-         double ymin, double ymax, int type)
-{
+dg_grid* dg_grid_uniform_tri(dg_cell *cell, int Mx, int My,
+                             double xmin, double xmax,
+                             double ymin, double ymax, int type) {
     /* check stand element */
-    if(shape->type !=  TRIANGLE){
+    if(cell->type !=  TRIANGLE){
         fprintf(stderr, "%s (%s):%d\nthe input element type %d is not triangle!\n",
-               __FUNCTION__, __FILE__, __LINE__, shape->type);
+               __FUNCTION__, __FILE__, __LINE__, cell->type);
         exit(-1);
     }
 
@@ -89,7 +84,7 @@ dg_grid* dg_grid_create_uniform_tri
     }
 
     /* initialize */
-    dg_grid* grid = dg_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
+    dg_grid* grid = dg_grid_create(cell, K, Nv, VX, VY, NULL, EToV);
 
     /* free memory */
     matrix_int_free(EToV);
@@ -103,25 +98,21 @@ dg_grid* dg_grid_create_uniform_tri
  * @details
  * Generate uniform quadrilateral mesh with specific coordinate range and number of elements.
  *
- * @param[in] shape standard cell object
- * @param[in] Mx      number of elements on x coordinate
- * @param[in] My      number of elements on x coordinate
- * @param[in] xmin    minimum value of x
- * @param[in] xmax    maximum value of x
- * @param[in] ymin    minimum value of y
- * @param[in] ymax    maximum value of y
+ * @param[in] cell dg_cell structure;
+ * @param[in] Mx,My number of cells on x and y coordinate;
+ * @param[in] xmin,xmax range of x coordinate;
+ * @param[in] ymin,ymax range of y coordinate;
  *
- * @return grid geometry grid object
+ * @return grid dg_grid structure.
  */
-dg_grid* dg_grid_create_uniform_quad
-        (dg_cell *shape, int Mx, int My,
-         double xmin, double xmax,
-         double ymin, double ymax)
+dg_grid* dg_grid_uniform_quad(dg_cell *cell, int Mx, int My,
+                              double xmin, double xmax,
+                              double ymin, double ymax)
 {
     /* check stand element */
-    if(shape->type!= QUADRIL){
+    if(cell->type!= QUADRIL){
         fprintf(stderr, "%s (%s):%d\nthe input element type %d is not quadrilateral!\n",
-                __FUNCTION__, __FILE__, __LINE__, shape->type);
+                __FUNCTION__, __FILE__, __LINE__, cell->type);
         exit(-1);
     }
 
@@ -165,7 +156,7 @@ dg_grid* dg_grid_create_uniform_quad
     }
 
     /* initialize */
-    dg_grid* grid = dg_grid_create(shape, K, Nv, VX, VY, NULL, EToV);
+    dg_grid* grid = dg_grid_create(cell, K, Nv, VX, VY, NULL, EToV);
 
     /* free memory */
     matrix_int_free(EToV);
@@ -174,12 +165,14 @@ dg_grid* dg_grid_create_uniform_quad
 }
 
 /**
- * @brief create grid from mesh files
- * @details the mesh files include 'casename.node' and 'casename.ele', while
- * the 'casename' is defined as parameter. The node file contains the vertex
- * value and the ele
+ * @brief
+ * Create dg_grid structure from files.
+ * @details
+ * The mesh files include 'casename.node' and 'casename.ele', while
+ * the 'casename' is defined as parameter.
+ * The node file contains the vertex value and the ele.
  * */
-dg_grid* dg_grid_read_file2d(dg_cell *shape, char *casename){
+dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
     char element_file[MAX_NAME_LENGTH];
     char vertex_file[MAX_NAME_LENGTH];
     strcpy(element_file, casename);
@@ -190,16 +183,16 @@ dg_grid* dg_grid_read_file2d(dg_cell *shape, char *casename){
     /* read the element file (EToV) */
     FILE *fp;
     if( (fp = fopen(element_file, "r")) == NULL ){
-        fprintf(stderr, "%s: %d\n"
+        fprintf(stderr, "%s (%d)\n"
                         "Unable to open element file %s.\n",
                 __FUNCTION__,__LINE__,element_file);
     }
     int Nv, K, temp;
     fscanf(fp, "%d %d %d\n", &K, &Nv, &temp);
     // check element vertex
-    if(shape->Nv !=  Nv){
-        fprintf(stderr, "mr_grid_file2d (%s): %d\n"
-                "the input element type is not correct!\n", __FILE__, __LINE__);
+    if(cell->Nv !=  Nv){
+        fprintf(stderr, "%s (%d)\n"
+                "The input element type is not correct!\n", __FILE__, __LINE__);
         exit(-1);
     }
 
@@ -233,7 +226,7 @@ dg_grid* dg_grid_read_file2d(dg_cell *shape, char *casename){
     fclose(fp);
 
     /* initialize */
-    dg_grid* grid = dg_grid_create(shape, K, Nvert, vx, vy, NULL, EToV);
+    dg_grid* grid = dg_grid_create(cell, K, Nvert, vx, vy, NULL, EToV);
 
 #if DEBUG
     char filename[20] = "mr_grid_read_file2d";
@@ -255,4 +248,42 @@ dg_grid* dg_grid_read_file2d(dg_cell *shape, char *casename){
     vector_double_free(vy);
 
     return grid;
+}
+
+
+void dg_grid_read_BSfile2d(dg_grid *grid, char *casename){
+    char filename[MAX_NAME_LENGTH];
+    strcpy(filename, casename);
+    strcat(filename, ".edge");
+
+    FILE *fp;
+    dg_fopen(fp, filename, "Unable to open boundary condition file");
+    int Nsurf, tmp, n;
+    fscanf(fp, "%d %d\n", &Nsurf, &tmp);
+#if DEBUG
+    char testname[30] = "dg_grid_read_bcfile2d_test";
+    FILE *fh = CreateLog(testname, mesh->grid->procid, mesh->grid->nprocs);
+    fprintf(fh, "Nsurf=%d\n", Nsurf);
+#endif
+    int **SFToV = NULL;
+    if(Nsurf){
+        SFToV = matrix_int_create(Nsurf, 3);
+        for(n=0;n<Nsurf;n++){
+            fscanf(fp, "%d", &tmp);
+            fscanf(fp, "%d %d %d", SFToV[n], SFToV[n]+1, SFToV[n]+2);
+            SFToV[n][0] -= 1;
+            SFToV[n][1] -= 1; // change to C type
+        }
+        dg_grid_add_BS2d(grid, Nsurf, SFToV);
+#if DEBUG
+        PrintIntMatrix2File(fh, "SFToV", SFToV, Nsurf, 3);
+        PrintIntMatrix2File(fh, "ETBS", mesh->EToBS, mesh->grid->K, mesh->cell->Nfaces);
+        fclose(fh);
+#endif
+        matrix_int_free(SFToV);
+    }else{
+        dg_grid_add_BS2d(grid, Nsurf, NULL);
+    }
+    fclose(fp);
+    return;
 }

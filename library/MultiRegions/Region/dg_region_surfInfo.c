@@ -2,7 +2,7 @@
 // Created by li12242 on 17/3/7.
 //
 
-#include "dg_reg_surfInfo.h"
+#include "dg_region_surfInfo.h"
 
 /**
  * @brief calculate the outward normal vector and jacobi coefficient on faces
@@ -10,9 +10,9 @@
  */
 void dg_reg_surfInfo2d(dg_region *region){
     int k,f;
-    const int K = region->grid->K;
-    const int Nfaces = region->cell->Nfaces;
-    const int Nfp = region->cell->Nfp;
+    dg_cell *cell = region->cell;
+    const int K = dg_grid_K(region->grid);
+    const int Nfaces = dg_cell_Nfaces(cell);
 
     double **x = region->x;
     double **y = region->y;
@@ -28,6 +28,7 @@ void dg_reg_surfInfo2d(dg_region *region){
 
     for(k=0;k<K;k++){
         for(f=0;f<Nfaces;f++){
+            const int Nfp = dg_cell_Nfp(cell, f);
             double x1 = x[k][Fmask[f][0]];
             double x2 = x[k][Fmask[f][Nfp-1]];
             double y1 = y[k][Fmask[f][0]];
@@ -42,7 +43,6 @@ void dg_reg_surfInfo2d(dg_region *region){
             sJ[k][f] /= 2.;
         }
     }
-
     return;
 }
 

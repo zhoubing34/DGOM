@@ -1,7 +1,7 @@
 #ifndef DGOM_PHYSDOMAIN_H
 #define DGOM_PHYSDOMAIN_H
 
-#include "MultiRegions/Mesh/mr_mesh.h"
+#include "MultiRegions/Mesh/dg_mesh.h"
 
 
 typedef struct {
@@ -12,8 +12,7 @@ typedef struct {
     dg_real *vis_Q; ///< viscosity on each node
 } pf_LDG_solver;
 
-
-typedef struct{
+typedef struct dg_phys{
     int Nfield; ///< number of variable fields
 
     dg_mesh *mesh; ///< parallel mesh object
@@ -34,7 +33,7 @@ typedef struct{
 
     int parallCellNum; ///< number of cell variables to send/recv
     int *cellIndexOut; ///< map from send buffer `c_outQ` to cell index
-    //int *cellIndexIn; ///< map from recv buffer `c_inQ` to cell index
+    //int *Pcid_recv; ///< map from recv buffer `c_inQ` to cell index
     dg_real *c_inQ, *c_outQ; ///< send/recv buffers for elemental information
 
     /* information */
@@ -45,10 +44,9 @@ typedef struct{
     dg_real *f_rhsQ; ///< RHS data
     dg_real *f_resQ; ///< residual data
 
-    pf_LDG_solver *viscosity; ///< LDG solver
-} physField;
+} dg_phys;
 
-physField* pf_create(int Nfields, dg_mesh *mesh);
-void pf_free(physField *phys);
+dg_phys* pf_create(int Nfields, dg_mesh *mesh);
+void pf_free(dg_phys *phys);
 
 #endif //DGOM_PHYSDOMAIN_H

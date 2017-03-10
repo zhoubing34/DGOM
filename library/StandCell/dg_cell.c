@@ -2,6 +2,11 @@
 #include "dg_cell_quadrilateral.h"
 #include "dg_cell_triangle.h"
 
+#define DEBUG 0
+#if DEBUG
+#include "Utility/unit_test.h"
+#endif
+
 typedef struct dg_cell_creator{
     void (*set_info)(dg_cell *cell, int N); ///< infomation property
     void (*set_coor)(dg_cell *cell); ///< coordinate function
@@ -68,10 +73,11 @@ dg_cell *dg_cell_creat(int N, dg_cell_type type){
     }
     creator->set_info(cell, N); // basic information
     creator->set_coor(cell); // coordinate
-    cell->Fmask = creator->fmask(cell); // fmask
+    creator->set_coor(cell); // coordinate
     cell->V = dg_cell_vand_matrix(cell, creator->orthogonal_func);
     cell->M = dg_cell_mass_matrix(cell);
     dg_cell_deri_matrix(cell, creator->deri_orthgonal_func);
+    cell->Fmask = creator->fmask(cell); // fmask
     cell->LIFT = dg_cell_lift_matrix(cell, creator->surf_mass_matrix);
     dg_cell_d2f(cell);
     creator->gauss_weight(cell);
@@ -87,16 +93,15 @@ dg_cell *dg_cell_creat(int N, dg_cell_type type){
  * @param [in,out] cell dg_cell structure
  */
 static void dg_cell_d2f(dg_cell *cell){
-    const int Np = cell->Np;
-    const int Nfaces = cell->Nfaces;
-    const int Nfp = cell->Nfp;
+    const int Np = dg_cell_Np(cell);
+    int NfpTotal = dg_cell_Nfptotal(cell);
     /* float version */
-    size_t sz = (size_t) Np*Nfp*Nfaces;
+    size_t sz = (size_t) NfpTotal*Np;
     cell->f_LIFT = (dg_real *) calloc(sz, sizeof(dg_real));
 
-    int sk = 0, n, m;
+    int sk=0,n,m;
     for(n=0;n<Np;++n){
-        for(m=0;m<Nfp*Nfaces;++m){
+        for(m=0;m<NfpTotal;++m){
             cell->f_LIFT[sk++] = (dg_real) cell->LIFT[n][m];
         }
     }
@@ -141,10 +146,10 @@ void dg_cell_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal){
  * @param [out] Vs the derivative of Vandermonde matrix on s coordinate
  * @param [out] Vt the derivative of Vandermonde matrix on t coordinate
  * @note
- * Vr, Vs and Vt should be allocated before calling sc_deriVandMatrix2d
+ * Vr, Vs and Vt should be allocated before calling.
  */
 static void dg_deri_vand_matrix(dg_cell *cell,
-                                void (*derorthfunc)(dg_cell *, int ind, double *dr, double *ds, double *dt),
+                                void (*derorthfunc)(dg_cell *, int, double *, double *, double *),
                                 double **Vr, double **Vs, double **Vt)
 {
     const int Np = cell->Np;
@@ -177,7 +182,7 @@ static void dg_deri_vand_matrix(dg_cell *cell,
  * @param [in] derorthfunc derivative orthogonal function handle
  */
 static void dg_cell_deri_matrix(dg_cell *cell,
-                                void (*derorthfunc)(dg_cell *, int ind, double *dr, double *ds, double *dt))
+                                void (*derorthfunc)(dg_cell *, int, double *, double *, double *))
 {
     const int Np = cell->Np;
     // allocation
@@ -218,7 +223,7 @@ static void dg_cell_deri_matrix(dg_cell *cell,
  * @return Vandermonde matrix
  */
 static double** dg_cell_vand_matrix(dg_cell *cell,
-                                    void (*orthfunc)(dg_cell *, int ind, double *func))
+                                    void (*orthfunc)(dg_cell *, int, double *))
 {
     const int Np = cell->Np;
     // allocation
@@ -284,11 +289,10 @@ static double** dg_cell_mass_matrix(dg_cell *cell){
 static double** dg_cell_lift_matrix(dg_cell *cell,
                                     double **(*surf_mass_matrix)(dg_cell *))
 {
-    const int Np = cell->Np;
-    const int Nfaces = cell->Nfaces;
-    const int Nfp = cell->Nfp;
+    const int Np = dg_cell_Np(cell);
+    const int NfpTotal = dg_cell_Nfptotal(cell);
     // allocation
-    double **LIFT = matrix_double_create(Np, Nfaces * Nfp);
+    double **LIFT = matrix_double_create(Np, NfpTotal);
 
     double **V = cell->V;
     double vt[Np*Np]; //transpose Vandermonde matrix
@@ -304,7 +308,7 @@ static double** dg_cell_lift_matrix(dg_cell *cell,
     // get surface mass matrix Mes
     double **Mes = surf_mass_matrix(cell);
     /* LIFT = M^{-1}*Mes */
-    matrix_multiply(Np, Np, Nfp * Nfaces, invM, Mes[0], LIFT[0]);
+    matrix_multiply(Np, Np, NfpTotal, invM, Mes[0], LIFT[0]);
 
     // free surface mass matrix
     matrix_double_free(Mes);

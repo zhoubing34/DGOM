@@ -60,14 +60,14 @@ static void pf_weiface_mean(physField *phys, dg_real *f_mean){
         xc[k] = Area * mr_reg_integral(region, k, region->x[k]);
         yc[k] = Area * mr_reg_integral(region, k, region->y[k]);
     }
-    const int parallCellNum = phys->mesh->parallCellNum;
+    const int parallCellNum = phys->mesh->Nparf;
     dg_real *xc_out = vector_real_create(parallCellNum);
     dg_real *xc_in = vector_real_create(parallCellNum);
     dg_real *yc_out = vector_real_create(parallCellNum);
     dg_real *yc_in = vector_real_create(parallCellNum);
 
     for(n=0;n<parallCellNum;++n){
-        int sk = mesh->cellIndexOut[n];
+        int sk = mesh->Parcellid[n];
         xc_out[n] = xc[sk];
         yc_out[n] = yc[sk];
     }
@@ -76,9 +76,9 @@ static void pf_weiface_mean(physField *phys, dg_real *f_mean){
     MPI_Request yc_out_requests[nprocs];
     MPI_Request yc_in_requests[nprocs];
     int Nmess;
-    pf_fetchBuffer(procid, nprocs, mesh->Npar, xc_out, xc_in,
+    pf_fetchBuffer(procid, nprocs, mesh->Parf, xc_out, xc_in,
                    xc_out_requests, xc_in_requests, &Nmess);
-    pf_fetchBuffer(procid, nprocs, mesh->Npar, yc_out, yc_in,
+    pf_fetchBuffer(procid, nprocs, mesh->Parf, yc_out, yc_in,
                    yc_out_requests, yc_in_requests, &Nmess);
 
     dg_real *c_Q = phys->c_Q;
@@ -119,8 +119,8 @@ static void pf_weiface_mean(physField *phys, dg_real *f_mean){
     MPI_Waitall(Nmess, yc_out_requests, instatus);
 
     for(n=0;n<parallCellNum;n++){
-        k = mesh->cellIndexIn[n];
-        f = mesh->faceIndexIn[n];
+        k = mesh->Pcid_recv[n];
+        f = mesh->Parfaceid[n];
 
         dg_real xc_next = xc_in[n];
         dg_real yc_next = yc_in[n];
@@ -264,8 +264,8 @@ static void pf_adjacent_cellinfo(physField *phys, dg_real *cell_max, dg_real *ce
 
     /* parallel cell loop */
     dg_mesh *mesh = phys->mesh;
-    for(n=0;n<mesh->parallCellNum;n++){
-        k = mesh->cellIndexIn[n];
+    for(n=0;n<mesh->Nparf;n++){
+        k = mesh->Pcid_recv[n];
         for(fld=0;fld<Nfield;fld++){
             dg_real c_next = phys->c_inQ[n*Nfield+fld];
             int sk = k*Nfield+fld;
@@ -358,9 +358,9 @@ static void pf_edge_indicator(physField *phys, int *tind){
 
     /* parallel cell loop */
     dg_mesh *mesh = phys->mesh;
-    for(n=0;n<mesh->parallCellNum;n++){
-        k = mesh->cellIndexIn[n];
-        f = mesh->faceIndexIn[n];
+    for(n=0;n<mesh->Nparf;n++){
+        k = mesh->Pcid_recv[n];
+        f = mesh->Parfaceid[n];
         for(fld=0;fld<Nfield;fld++){
             dg_real c_mean = phys->c_Q[k*Nfield+fld];
             dg_real c_next = phys->c_inQ[n*Nfield+fld];

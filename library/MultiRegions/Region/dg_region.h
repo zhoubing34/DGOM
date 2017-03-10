@@ -41,10 +41,13 @@ typedef struct dg_region{
 }dg_region;
 
 /* create of multi-region object */
-dg_region* mr_reg_create(dg_grid *grid);
+dg_region* dg_region_create(dg_grid *grid);
 /* free the memory of dg_region */
-void mr_reg_free(dg_region *region);
+void dg_region_free(dg_region *region);
 /* integral in the specific element */
-double mr_reg_integral(dg_region *region, int ind, double *nodalVal);
+double dg_region_integral(dg_region *region, int ind, double *nodalVal);
+
+#define dg_region_procid(region) region->procid
+#define dg_region_nprocs(region) region->nprocs
 
 #endif //DGOM_MULTIREGIONS_H

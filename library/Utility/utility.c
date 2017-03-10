@@ -34,3 +34,24 @@ void str2double(char *str, double *scal, char* errmessage){
         exit(-1);
     }
 }
+
+/* sort numbers from small to large */
+static int cmp_increase(const void *a, const void *b){
+    return (* (int *)a) - (* (int *)b);
+}
+
+/**
+ * @brief count the number of uique elements in an array
+ * @param len length of the array
+ * @param list array of integer
+ * @return n number of unique elements
+ */
+int unique_int(int len, int *list){
+    if(len ==0) { return 0; }
+    qsort(list, (size_t)len, sizeof(int), cmp_increase); // sort the list
+    int n=1, i;
+    for(i=0;i<(len-1);i++){
+        if(list[i+1] != list[i]) { n++; }
+    }
+    return n;
+}

@@ -62,7 +62,7 @@ void pf_strong_viscosity_LDG_flux2d(physField *phys,
 
     int Nout[nprocs];
     for(n=0;n<nprocs;n++){
-        Nout[n] = phys->mesh->Npar[n]*Nfield*Nfp;
+        Nout[n] = phys->mesh->Parf[n]*Nfield*Nfp;
     }
 
     MPI_Request mpi_send_requests[nprocs], mpi_recv_requests[nprocs];
@@ -173,7 +173,7 @@ static void phys_auxiliaryflux2d(physField *phys,
             const dg_real nx = surfinfo[surfid++];
             const dg_real ny = surfinfo[surfid++];
 
-            // local face values
+            // local face2d values
             for(fld=0;fld<Nfield;fld++){
                 f_varM[fld] = f_Q[idM];
                 p_varM[fld] = p_Q[idM];
@@ -334,7 +334,7 @@ static void phys_viscosityflux2d(physField *phys,
             const dg_real nx = surfinfo[surfid++];
             const dg_real ny = surfinfo[surfid++];
 
-            // local face values
+            // local face2d values
             for(fld=0;fld<Nfield;fld++){
                 f_varM[fld] = f_Q[idM];
                 p_varM[fld] = p_Q[idM];

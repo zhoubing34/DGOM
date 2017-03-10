@@ -3,7 +3,7 @@
 //
 
 #include <MultiRegions/Grid/dg_grid.h>
-#include <MultiRegions/Mesh/mr_mesh.h>
+#include <MultiRegions/Mesh/dg_mesh.h>
 #include "pf_strong_viscosity_LDG_flux2d_test.h"
 #include "pf_test.h"
 #include "PhysField/pf_add_LDG_solver.h"
@@ -20,7 +20,7 @@ static int wall_func(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP,
     return 0;
 }
 
-int phys_strong_viscosity_LDG_flux2d_test(physField *phys, int verbose){
+int phys_strong_viscosity_LDG_flux2d_test(dg_phys *phys, int verbose){
     int fail = 0;
     extern int Nfield;
 

@@ -6,6 +6,6 @@
 #define DGOM_PHYS_CELLFETCH_TEST_H
 
 #include "pf_test.h"
-int phys_cellFetch_test(physField *phys, int verbose);
+int phys_cellFetch_test(dg_phys *phys, int verbose);
 
 #endif //DGOM_PHYS_CELLFETCH_TEST_H
