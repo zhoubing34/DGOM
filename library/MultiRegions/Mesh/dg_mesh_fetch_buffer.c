@@ -19,8 +19,8 @@ void dg_mesh_fetch_node_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real 
     /* prepare for send data */
     int n,fld;
     for(n=0;n<Nparn;n++){
-        int sk = n*Nfield;
-        int nind = mesh->parnode[n]*Nfield;
+        const int sk = n*Nfield;
+        const int nind = mesh->parnode[n]*Nfield;
         for(fld=0;fld<Nfield;fld++){
             f_sendQ[sk+fld] = f_Q[nind+fld];
         }
@@ -53,8 +53,8 @@ void dg_mesh_fetch_cell_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real 
     /* prepare for send data */
     int n,fld;
     for(n=0;n<Nparf;n++){
-        int sk = n*Nfield;
-        int cind = mesh->parcell[n]*Nfield;
+        const int sk = n*Nfield;
+        const int cind = mesh->parcell[n]*Nfield;
         for(fld=0;fld<Nfield;fld++){
             f_sendQ[sk+fld] = f_Q[cind+fld];
         }

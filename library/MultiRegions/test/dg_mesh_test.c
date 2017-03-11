@@ -9,39 +9,29 @@ int dg_mesh_cell_fetch_buffer_test(dg_mesh *mesh, int verbose){
     const int procid = dg_grid_procid(grid);
     const int nprocs = dg_grid_nprocs(grid);
     const int K = dg_grid_K(grid);
-    const int Nfaces = dg_cell_Nfaces(grid->cell);
-    const int Nfield = 2;
-    const double *vx = grid->vx;
-    const double *vy = grid->vy;
+    const int Nfield = 1;
+
     const int Nparf = mesh->TotalParFace;
+    int **EToE = grid->EToE;
     /* allocation and assignment */
     dg_real *c_Q = vector_real_create(Nfield*K);
     dg_real *c_recvQ = vector_real_create(Nfield*Nparf);
     dg_real *c_extQ = vector_real_create(Nfield*Nparf);
-    int k,f;
+    int k;
     for(k=0;k<K;k++){
-        for(f=0;f<Nfaces;f++){
-            if( grid->EToP[k][f] != procid){
-                int v1 = grid->EToV[k][f];
-                int v2 = grid->EToV[k][(f+1)%Nfaces];
-                c_Q[k*Nfield + 0] = (vx[v1] + vx[v2])/2;
-                c_Q[k*Nfield + 1] = (vy[v1] + vy[v2])/2;
-            }
-        }
+        c_Q[k] = (dg_real)k;
     }
     MPI_Request mpi_send_requests[nprocs], mpi_recv_requests[nprocs];
     int Nmess;
     dg_mesh_fetch_cell_buffer(mesh, Nfield, c_Q, c_recvQ, mpi_send_requests, mpi_recv_requests, &Nmess);
 
-    int n,sk=0;
+    int n;
     for(n=0;n<Nparf;n++){
-        k = mesh->parcell[n];
-        f = mesh->parface[n];
-        int v1 = grid->EToV[k][f];
-        int v2 = grid->EToV[k][(f+1)%Nfaces];
-        c_extQ[sk++] = (vx[v1] + vx[v2])/2;
-        c_extQ[sk++] = (vy[v1] + vy[v2])/2;
+        int k1 = mesh->parcell[n];
+        int f1 = mesh->parface[n];
+        c_extQ[n] = EToE[k1][f1];
     }
+
     MPI_Status instatus[nprocs];
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
     MPI_Waitall(Nmess, mpi_send_requests, instatus);

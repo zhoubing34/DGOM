@@ -20,9 +20,9 @@ double xmin = -1, xmax = 1;
 double ymin = -1, ymax = 1;
 
 /** mesh creating function */
-#define Nmesh 1
+#define Nmesh 3
 typedef dg_grid* (* grid_create_func)();
-grid_create_func grid_func[Nmesh] = {uniform_quad_grid};
+grid_create_func grid_func[Nmesh] = {uniform_tri_grid, uniform_quad_grid, user_set_tri_grid};
 
 /**
  * @brief create uniform triangle mesh
