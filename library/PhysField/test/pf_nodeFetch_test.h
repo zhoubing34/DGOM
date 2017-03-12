@@ -5,7 +5,7 @@
 #ifndef DGOM_NODEFETCH_TEST_H
 #define DGOM_NODEFETCH_TEST_H
 
-#include "pf_test.h"
+#include "dg_phys_test.h"
 
 int phys_nodeFetch_test(dg_phys *phys, int verbose);
 

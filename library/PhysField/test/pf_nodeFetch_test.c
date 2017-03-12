@@ -5,7 +5,7 @@
 #include <MultiRegions/Mesh/dg_mesh.h>
 #include "pf_nodeFetch_test.h"
 #include "PhysField/pf_fetchBuffer.h"
-#include "pf_test.h"
+#include "dg_phys_test.h"
 
 int phys_nodeFetch_test(dg_phys *phys, int verbose){
     // local variable

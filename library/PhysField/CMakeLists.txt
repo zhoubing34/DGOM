@@ -1,9 +1,9 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
 
 set(PHYSDOMAIN_SOURCE
-        pf_phys.c
-        #pf_strong_volume_flux2d.c
-        #pf_strong_surface_flux2d.c
+        dg_phys.c
+        dg_phys_strong_vol_opt.c
+        dg_phys_strong_surf_opt.c
         #pf_add_LDG_solver.c
         #pf_strong_viscosity_LDG_flux2d.c
         #pf_cellMean.c

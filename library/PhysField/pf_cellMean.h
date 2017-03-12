@@ -5,7 +5,7 @@
 #ifndef DGOM_PHYS_CELLMEAN_H
 #define DGOM_PHYS_CELLMEAN_H
 
-#include "pf_phys.h"
+#include "dg_phys.h"
 
 void pf_cellMean(physField *phys);
 

@@ -7,10 +7,8 @@
 
 #include "Utility/unit_test.h"
 #include "MultiRegions/Grid/dg_grid_reader.h"
-#include "MultiRegions/Mesh/mr_mesh_bc.h"
-#include "PhysField/pf_phys.h"
-#include "PhysField/pf_fetchBuffer.h"
-#include "PhysField/Limiter/pf_limit_BJ2d.h"
-#include "PhysField/pf_openbc.h"
+#include "PhysField/dg_phys.h"
+#include "PhysField/dg_phys_strong_vol_opt.h"
+#include "PhysField/dg_phys_strong_surf_opt.h"
 
 #endif //DGOM_PHYSDOMAIN_TEST_H

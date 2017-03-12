@@ -6,7 +6,7 @@
 #include <MultiRegions/Grid/dg_grid.h>
 #include "pf_strong_viscosity_LDG_flux2d.h"
 #include "pf_fetchBuffer.h"
-#include "pf_phys.h"
+#include "dg_phys.h"
 
 #define DEBUG 0
 

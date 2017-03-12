@@ -5,7 +5,7 @@
 #ifndef DGOM_PHYS_FETCHBUFFER_H
 #define DGOM_PHYS_FETCHBUFFER_H
 
-#include "pf_phys.h"
+#include "dg_phys.h"
 
 /*
  * Send/rece nodal value `f_Q` through buffers

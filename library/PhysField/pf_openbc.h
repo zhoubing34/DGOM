@@ -5,7 +5,7 @@
 #ifndef DGOM_PF_OPENBC_H
 #define DGOM_PF_OPENBC_H
 
-#include "pf_phys.h"
+#include "dg_phys.h"
 
 typedef enum{
     time_interp_linear=0

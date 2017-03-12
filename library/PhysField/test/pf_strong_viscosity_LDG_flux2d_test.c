@@ -5,7 +5,7 @@
 #include <MultiRegions/Grid/dg_grid.h>
 #include <MultiRegions/Mesh/dg_mesh.h>
 #include "pf_strong_viscosity_LDG_flux2d_test.h"
-#include "pf_test.h"
+#include "dg_phys_test.h"
 #include "PhysField/pf_add_LDG_solver.h"
 #include "PhysField/pf_fetchBuffer.h"
 

@@ -1,15 +1,9 @@
 //
 // Created by li12242 on 12/11/16.
 //
-#include "pf_test.h"
-#include "pf_nodeFetch_test.h"
-#include "pf_strong_volume_flux2d_test.h"
-#include "pf_strong_surface_flux2d_test.h"
-#include "pf_strong_viscosity_LDG_flux2d_test.h"
-#include "pf_cellMean_test.h"
-#include "pf_cellFetch_test.h"
-#include "pf_limiter_test.h"
-#include "pf_openbc_test.h"
+#include "dg_phys_test.h"
+#include "dg_phys_strong_vol_opt_test.h"
+#include "dg_phys_strong_surf_opt_test.h"
 
 int Mx = 4;
 int My = 2;
@@ -38,12 +32,12 @@ static const phys_func phys_creator[Nphys] = {
 dg_phys *uniform_tri_physfield(){
     int type = 1;
     dg_cell *tri = dg_cell_creat(N, TRIANGLE);
-    dg_grid *tri_grid = dg_grid_create_uniform_tri(tri, Mx, My, xmin, xmax, ymin, ymax, type);
-    dg_region *tri_region = mr_region_create(tri_grid);
-    dg_mesh *tri_mesh = mr_mesh_create(tri_region);
-    mr_mesh_add_bc2d(tri_mesh, 0, NULL);
-    dg_phys *tri_phys = pf_create(Nfield, tri_mesh);
-    return tri_phys;
+    dg_grid *grid = dg_grid_uniform_tri(tri, Mx, My, xmin, xmax, ymin, ymax, type);
+    dg_region *region = dg_region_create(grid);
+    dg_mesh *mesh = dg_mesh_create(region);
+    dg_edge *edge = dg_edge_create(mesh);
+    dg_phys *phys = dg_phys_create(Nfield, edge);
+    return phys;
 }
 /**
  * @brief create uniform quadrilateral mesh of physField
@@ -51,23 +45,24 @@ dg_phys *uniform_tri_physfield(){
  */
 dg_phys *uniform_quad_physfield(){
     dg_cell *quad = dg_cell_creat(N, QUADRIL);
-    dg_grid *quad_grid = dg_grid_create_uniform_quad(quad, Mx, My, xmin, xmax, ymin, ymax);
-    dg_region *quad_region = mr_region_create(quad_grid);
-    dg_mesh *quad_mesh = mr_mesh_create(quad_region);
-    mr_mesh_add_bc2d(quad_mesh, 0, NULL);
-    dg_phys *quad_phys = pf_create(Nfield, quad_mesh);
-    return quad_phys;
+    dg_grid *grid = dg_grid_uniform_quad(quad, Mx, My, xmin, xmax, ymin, ymax);
+    dg_region *region = dg_region_create(grid);
+    dg_mesh *mesh = dg_mesh_create(region);
+    dg_edge *edge = dg_edge_create(mesh);
+    dg_phys *phys = dg_phys_create(Nfield, edge);
+    return phys;
 }
 
 dg_phys *rectangle_tri_physfield(){
     dg_cell *tri = dg_cell_creat(N, TRIANGLE);
     char casename[] = "example/SWE2d/Rectangle/Rectangle";
-    dg_grid *tri_grid = dg_grid_read_file2d(tri, casename);
-    dg_region *tri_region = mr_region_create(tri_grid);
-    dg_mesh *tri_mesh = mr_mesh_create(tri_region);
-    mr_mesh_read_bcfile2d(tri_mesh, casename);
-    dg_phys *tri_phys = pf_create(Nfield, tri_mesh);
-    return tri_phys;
+    dg_grid *grid = dg_grid_read_file2d(tri, casename);
+    dg_grid_read_BSfile2d(grid, casename);
+    dg_region *region = dg_region_create(grid);
+    dg_mesh *mesh = dg_mesh_create(region);
+    dg_edge *edge = dg_edge_create(mesh);
+    dg_phys *phys = dg_phys_create(Nfield, edge);
+    return phys;
 }
 
 /**
@@ -77,24 +72,18 @@ dg_phys *rectangle_tri_physfield(){
 void phys_free(dg_phys *phys){
     dg_cell_free(phys->cell);
     dg_grid_free(phys->grid);
-    mr_reg_free(phys->region);
-    mr_mesh_del_bc2d(phys->mesh);
-    mr_mesh_free(phys->mesh);
-    pf_free(phys);
+    dg_region_free(phys->region);
+    dg_mesh_free(phys->mesh);
+    dg_edge_free(phys->edge);
+    dg_phys_free(phys);
 }
 
 /** test functions */
-#define Ntest 8
+#define Ntest 2
 typedef int (*test_func)(dg_phys *, int verbose);
 static const test_func phys_test_func[Ntest] = {
-        phys_cellMean_test,
-        phys_nodeFetch_test,
-        phys_cellFetch_test,
-        phys_strong_volume_flux2d_test,
-        phys_strong_surface_flux2d_test,
-        phys_strong_viscosity_LDG_flux2d_test,
-        phys_limiter_test,
-        pf_openbc_test
+        dg_phys_strong_vol_opt2d_test,
+        dg_phys_strong_surf_opt2d_test,
 };
 
 /**

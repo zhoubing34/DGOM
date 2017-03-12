@@ -5,7 +5,7 @@
 #ifndef DGOM_PHYS_STRONG_VOLUME_FLUX2D_TEST_H
 #define DGOM_PHYS_STRONG_VOLUME_FLUX2D_TEST_H
 
-#include "PhysField/pf_phys.h"
-int phys_strong_volume_flux2d_test(dg_phys *phys, int verbose);
+#include "PhysField/dg_phys.h"
+int dg_phys_strong_vol_opt2d_test(dg_phys *phys, int verbose);
 
 #endif //DGOM_PHYS_STRONG_VOLUME_FLUX2D_TEST_H

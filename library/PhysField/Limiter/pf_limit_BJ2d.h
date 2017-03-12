@@ -5,7 +5,7 @@
 #ifndef DGOM_PF_LIMIT_BJ2D_H
 #define DGOM_PF_LIMIT_BJ2D_H
 
-#include "../pf_phys.h"
+#include "PhysField/dg_phys.h"
 #include "../pf_fetchBuffer.h"
 #include "../pf_cellMean.h"
 

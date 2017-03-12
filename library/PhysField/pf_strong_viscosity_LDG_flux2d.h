@@ -5,7 +5,7 @@
 #ifndef DGOM_PHYS_STRONG_VISCOSITY_LDG_FLUX2D_H
 #define DGOM_PHYS_STRONG_VISCOSITY_LDG_FLUX2D_H
 
-#include "pf_phys.h"
+#include "dg_phys.h"
 
 typedef int (* viscosity_wall_condition_func)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP,
                                     dg_real *pxM, dg_real *pxP, dg_real *pyM, dg_real *pyP);

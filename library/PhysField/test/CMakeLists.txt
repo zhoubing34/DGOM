@@ -1,24 +1,14 @@
 include_directories(${CMAKE_SOURCE_DIR}/library)
 
 set(PHYSDOMAIN_TEST_SRC
-        pf_test.c
-        pf_test.h
-        pf_nodeFetch_test.c
-        pf_nodeFetch_test.h
-        pf_strong_volume_flux2d_test.c
-        pf_strong_volume_flux2d_test.h
-        pf_strong_surface_flux2d_test.c
-        pf_strong_surface_flux2d_test.h
-        pf_strong_viscosity_LDG_flux2d_test.h
-        pf_strong_viscosity_LDG_flux2d_test.c
-        pf_cellMean_test.c
-        pf_cellMean_test.h
-        pf_cellFetch_test.c
-        pf_cellFetch_test.h
-        pf_limiter_test.c
-        pf_limiter_test.h
-        pf_openbc_test.c
-        pf_openbc_test.h)
+        dg_phys_test.c
+        dg_phys_strong_vol_opt_test.c
+        dg_phys_strong_surf_opt_test.c
+        #pf_strong_viscosity_LDG_flux2d_test.c
+        #pf_cellMean_test.c
+        #pf_limiter_test.c
+        #pf_openbc_test.c
+        )
 
 add_executable(physfield_test ${PHYSDOMAIN_TEST_SRC})
 add_dependencies(physfield_test physfield)

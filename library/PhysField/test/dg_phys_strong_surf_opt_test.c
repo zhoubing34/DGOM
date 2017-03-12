@@ -2,8 +2,7 @@
 // Created by li12242 on 12/27/16.
 //
 
-#include "pf_strong_surface_flux2d_test.h"
-#include "PhysField/pf_strong_surface_flux2d.h"
+#include "dg_phys_strong_surf_opt_test.h"
 
 static int nodal_flux(dg_real *var, dg_real *Eflux, dg_real *Gflux){
     dg_real u = var[0];
@@ -31,7 +30,7 @@ static int wall_func(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP){
     return 0;
 }
 
-int phys_strong_surface_flux2d_test(dg_phys *phys, int verbose){
+int dg_phys_strong_surf_opt2d_test(dg_phys *phys, int verbose){
     int fail = 0;
 
     dg_mesh *mesh = phys->mesh;

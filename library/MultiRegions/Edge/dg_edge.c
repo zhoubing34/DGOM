@@ -8,11 +8,13 @@
 #include "dg_edge_surfinfo.h"
 
 void dg_edge_free2d(dg_edge *edge);
+void dg_edge_setinfo2d(dg_edge *edge);
 
 typedef struct dg_edge_creator{
     void (*map_face)(dg_edge *edge);
     void (*map_node)(dg_edge *edge);
     void (*surf_info)(dg_edge *edge);
+    void (*set_info)(dg_edge *edge);
     void (*free_func)(dg_edge *edge);
 }dg_edge_creator;
 
@@ -20,6 +22,7 @@ static const dg_edge_creator edge_creator2d = {
         dg_edge_face_map2d,
         dg_edge_node_map2d,
         dg_edge_surfinfo2d,
+        dg_edge_setinfo2d,
         dg_edge_free2d,
 };
 
@@ -47,8 +50,36 @@ dg_edge* dg_edge_create(dg_mesh *mesh){
     creator->map_face(edge);
     creator->map_node(edge);
     creator->surf_info(edge);
+    creator->set_info(edge);
     edge->free_func = creator->free_func;
     return edge;
+}
+
+static void dg_edge_setinfo2d(dg_edge *edge){
+    const int Nedge = dg_edge_Nedge(edge);
+    const int Nnode = dg_edge_Nnode(edge);
+    int *faceinfo = (int*) calloc(Nedge*5, sizeof(int));
+    dg_real *nodeinfo = (dg_real*) calloc(Nnode*5, sizeof(dg_real));
+
+    int f,n,sk=0;
+    for(f=0;f<Nedge;f++){
+        faceinfo[sk++] = edge->varkM[f];
+        faceinfo[sk++] = edge->varkP[f];
+        faceinfo[sk++] = edge->varfM[f];
+        faceinfo[sk++] = edge->varfP[f];
+        faceinfo[sk++] = edge->ftype[f];
+    }
+    sk = 0;
+    for(n=0;n<Nnode;n++){
+        nodeinfo[sk++] = edge->varpM[n];
+        nodeinfo[sk++] = edge->varpP[n];
+        nodeinfo[sk++] = edge->nx[n];
+        nodeinfo[sk++] = edge->ny[n];
+        nodeinfo[sk++] = edge->fsc[n];
+    }
+    edge->surfinfo = faceinfo;
+    edge->nodeinfo = nodeinfo;
+    return;
 }
 
 void dg_edge_free(dg_edge *edge){

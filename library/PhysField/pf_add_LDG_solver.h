@@ -5,7 +5,7 @@
 #ifndef DGOM_PHYS_ADD_VISCOSITY_SOLVER_H
 #define DGOM_PHYS_ADD_VISCOSITY_SOLVER_H
 
-#include "pf_phys.h"
+#include "dg_phys.h"
 
 void pf_add_LDG_solver(physField *phys);
 void pf_delete_LDG_solver(physField *phys);

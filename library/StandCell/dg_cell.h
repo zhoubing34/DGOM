@@ -29,6 +29,7 @@ typedef struct dg_cell{
     int Nv; ///< number of vertex
     int Nfaces; ///< number of faces
     int *Nfp; ///< number of points on each face
+    int *Nfpstart; ///< start point index on each face
     int Nfptotal; ///< total number of points on faces
 
     int **Fmask; ///< index of node at faces
@@ -63,5 +64,6 @@ void dg_cell_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal);
 #define dg_cell_Nfaces(cell) cell->Nfaces
 #define dg_cell_Nfptotal(cell) cell->Nfptotal
 #define dg_cell_Nfp(cell, f) cell->Nfp[f]  ///< number of points on fth face
+#define dg_cell_Nfpstart(cell, f) cell->Nfpstart[f]
 
 #endif //DGOM_STDCELL_H

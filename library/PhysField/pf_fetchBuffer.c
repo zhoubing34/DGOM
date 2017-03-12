@@ -4,7 +4,7 @@
 
 #include <MultiRegions/Mesh/dg_mesh.h>
 #include "pf_fetchBuffer.h"
-#include "pf_phys.h"
+#include "dg_phys.h"
 
 /**
  * @brief Send/rece nodal value `f_Q` through buffers

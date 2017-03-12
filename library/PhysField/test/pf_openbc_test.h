@@ -5,7 +5,7 @@
 #ifndef DGOM_PF_OPENBC_TEST_H
 #define DGOM_PF_OPENBC_TEST_H
 
-#include "pf_test.h"
+#include "dg_phys_test.h"
 int pf_openbc_test(dg_phys *phys, int verbose);
 
 #endif //DGOM_PF_OPENBC_TEST_H

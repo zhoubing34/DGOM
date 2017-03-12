@@ -2,7 +2,7 @@
 // Created by li12242 on 17/2/23.
 //
 
-#include <PhysField/pf_phys.h>
+#include <PhysField/dg_phys.h>
 #include "pf_openbc_test.h"
 
 int pf_openbc_test(dg_phys *phys, int verbose){

@@ -2,7 +2,7 @@
 // Created by li12242 on 12/26/16.
 //
 
-#include "pf_strong_volume_flux2d.h"
+#include "dg_phys_strong_vol_opt.h"
 
 #define DEBUG 0
 
@@ -16,18 +16,22 @@
  * @note
  * The field of variable `phys->rhs` will be initialized and assigned to new values.
  */
-void pf_strong_volume_flux2d(physField *phys, nodal_flux_func nodal_flux){
-    const int K = phys->grid->K;
-    const int Np = phys->cell->Np;
-    const int Nfield = phys->Nfield;
+void dg_phys_strong_vol_opt2d(dg_phys *phys, Nodal_Flux_Fun nodal_flux){
+
+    const int K = dg_grid_K(phys->grid);
+    const int Np = dg_cell_Np(phys->cell);
+    const int Nfield = dg_phys_Nfield(phys);
 
     dg_real *f_Q = phys->f_Q;
     dg_real *f_rhsQ = phys->f_rhsQ;
     dg_real *f_Dr = phys->cell->f_Dr;
     dg_real *f_Ds = phys->cell->f_Ds;
-    dg_real *vgeo = phys->vgeo;
 
-    register unsigned int k,n,m,fld,geoid=0, rhsid=0;
+    register unsigned int k,n,m,fld,rhsid=0;
+    dg_real **drdx_p = phys->region->drdx;
+    dg_real **drdy_p = phys->region->drdy;
+    dg_real **dsdx_p = phys->region->dsdx;
+    dg_real **dsdy_p = phys->region->dsdy;
 
     dg_real Eflux[Np*Nfield], Gflux[Np*Nfield], rhs[Nfield];
 
@@ -37,11 +41,7 @@ void pf_strong_volume_flux2d(physField *phys, nodal_flux_func nodal_flux){
         // calculate flux term
         for(n=0;n<Np;n++){
             // calculate flux term on the n-th point
-            nodal_flux(var + n*Nfield, Eflux + n*Nfield, Gflux + n*Nfield);
-//            if( nodal_flux(var + n*Nfield, Eflux + n*Nfield, Gflux + n*Nfield) ){
-//                fprintf(stderr ,"PhysField (%s): flux error at k=%d, n=%d\n", __FILE__, k, n);
-//                MPI_Abort(MPI_COMM_WORLD, -1);
-//            }
+            nodal_flux(var+n*Nfield, Eflux+n*Nfield, Gflux+n*Nfield);
 #if DEBUG
             if(!phys->grid->procid){
                 for(fld = 0; fld<Nfield; fld ++)
@@ -55,10 +55,10 @@ void pf_strong_volume_flux2d(physField *phys, nodal_flux_func nodal_flux){
             const dg_real *ptDr = f_Dr+n*Np; // n-th row of Dr
             const dg_real *ptDs = f_Ds+n*Np; // n-th row of Ds
 
-            const dg_real drdx = vgeo[geoid++]; // volume geometry for n-th point
-            const dg_real drdy = vgeo[geoid++]; // volume geometry for n-th point
-            const dg_real dsdx = vgeo[geoid++]; // volume geometry for n-th point
-            const dg_real dsdy = vgeo[geoid++]; // volume geometry for n-th point
+            const dg_real drdx = drdx_p[k][n]; // volume geometry for n-th point
+            const dg_real drdy = drdy_p[k][n]; // volume geometry for n-th point
+            const dg_real dsdx = dsdx_p[k][n]; // volume geometry for n-th point
+            const dg_real dsdy = dsdy_p[k][n]; // volume geometry for n-th point
 
             // initialize rhs
             for(m=0;m<Nfield;m++){

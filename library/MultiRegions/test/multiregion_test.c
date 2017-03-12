@@ -31,7 +31,6 @@ grid_create_func grid_func[Nmesh] = {uniform_tri_grid, uniform_quad_grid, user_s
 dg_grid *uniform_tri_grid(){
     dg_cell *shape = dg_cell_creat(N, TRIANGLE);
     dg_grid *grid = dg_grid_uniform_tri(shape, Mx, My, xmin, xmax, ymin, ymax, 1);
-    dg_grid_add_BS(grid, 0, NULL);
     return grid;
 }
 /**
@@ -41,7 +40,6 @@ dg_grid *uniform_tri_grid(){
 dg_grid *uniform_quad_grid(){
     dg_cell *shape = dg_cell_creat(N, QUADRIL);
     dg_grid *grid = dg_grid_uniform_quad(shape, Mx, My, xmin, xmax, ymin, ymax);
-    dg_grid_add_BS(grid, 0, NULL);
     return grid;
 }
 /**

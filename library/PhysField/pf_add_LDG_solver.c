@@ -3,7 +3,7 @@
 //
 
 #include "pf_add_LDG_solver.h"
-#include "pf_phys.h"
+#include "dg_phys.h"
 
 void pf_add_LDG_solver(physField *phys){
 

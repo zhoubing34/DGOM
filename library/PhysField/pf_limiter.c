@@ -6,7 +6,7 @@
 #include "pf_limiter.h"
 #include "pf_cellMean.h"
 #include "pf_fetchBuffer.h"
-#include "pf_phys.h"
+#include "dg_phys.h"
 
 #define DEBUG 0
 #if DEBUG

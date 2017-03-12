@@ -1,0 +1,128 @@
+//
+// Created by li12242 on 12/27/16.
+//
+
+#include "dg_phys_strong_surf_opt.h"
+
+#define DEBUG 0
+
+/**
+ * @brief calculate the surface integral of strong form
+ * @details
+ * \f[ M^{-1} \cdot M_{es} (E \cdot nx + G \cdot ny - Fhs) \f]
+ * where the \f[ Fhs \f] is the numerical flux, \f[ F = (E, G) \f] is the flux term.
+ *
+ * @param[in,out] phys physField object
+ * @param[in] slipwall_func boundary condition for slip-wall
+ * @param[in] nonslipwall_condition boundary condition for non-slip-wall
+ * @param[in] nodal_flux function to calculate the flux term
+ * @param[in] numerical_flux numerical flux function
+ *
+ * @note
+ *
+ */
+void pf_strong_surface_flux2d(dg_phys *phys,
+         Wall_Condition slipwall_func,  // slip wall condition
+         Wall_Condition non_slipwall_func, // non-slip wall condition
+         Nodal_Flux_Fun nodal_flux, // flux term
+         Numerical_Flux numerical_flux) // numerical flux function
+{
+    dg_edge *edge = phys->edge;
+    dg_cell *cell = phys->cell;
+    const int Nfield = dg_phys_Nfield(phys);
+    const int K = dg_grid_K(phys->grid);
+    const int Nedge = dg_edge_Nedge(edge);
+    const int Nfaces = dg_cell_Nfaces(phys->cell);
+    const int Nfptotal = dg_cell_Nfptotal(phys->cell);
+    const int Np = dg_cell_Np(phys->cell);
+
+    dg_real *f_Q = phys->f_Q;
+    dg_real *f_inQ = phys->f_recvQ;
+    dg_real *f_ext = phys->f_extQ;
+    dg_real *f_LIFT  = phys->cell->f_LIFT;
+    dg_real *f_rhsQ = phys->f_rhsQ;
+
+    dg_real f_M[Nfield], f_P[Nfield], Fhs[Nfield];
+    dg_real E_M[Nfield], G_M[Nfield];
+    dg_real E_P[Nfield], G_P[Nfield];
+
+    register int f,m,n,fld,surfid=0,nodeid=0;
+
+    for(f=0;f<Nedge;f++){
+        const int k1 = edge->surfinfo[surfid++];
+        const int k2 = edge->surfinfo[surfid++];
+        const int f1 = edge->surfinfo[surfid++];
+        const int f2 = edge->surfinfo[surfid++];
+        const int ftype = edge->surfinfo[surfid++];
+        const int Nfp = dg_cell_Nfp(cell, f1);
+
+        dg_real flux_M[Nfp*Nfaces*Nfield];
+        dg_real flux_P[Nfp*Nfaces*Nfield];
+        for(m=0;m<Nfp;m++){
+            const int idM = (int)edge->nodeinfo[nodeid++];
+            const int idP = (int)edge->nodeinfo[nodeid++];
+            const dg_real nx = edge->nodeinfo[nodeid++];
+            const dg_real ny = edge->nodeinfo[nodeid++];
+            const dg_real fsc = edge->nodeinfo[nodeid++];
+
+            // local face2d values
+            for(fld=0;fld<Nfield;fld++) {f_M[fld] = f_Q[idM*Nfield+fld];}
+
+            // adjacent nodal values
+            switch (ftype){
+                case INNERLOC:
+                    for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_Q[idP*Nfield+fld]; }
+                    break;
+                case INNERBS:
+                    for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_inQ[idP*Nfield+fld]; }
+                    break;
+                case SLIPWALL:
+                    slipwall_func(nx, ny, f_M, f_P);
+                    break;
+                case NSLIPWALL:
+                    non_slipwall_func(nx, ny, f_M, f_P);
+                    break;
+                default:
+                    for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_ext[idP*Nfield+fld]; }
+                    break;
+            }
+            nodal_flux(f_M, E_M, G_M);
+            nodal_flux(f_P, E_P, G_P);
+            numerical_flux(nx,ny,f_M,f_P,Fhs);
+
+            dg_real *t = flux_M + m*Nfield;
+            dg_real *s = flux_P + m*Nfield;
+            for(fld=0;fld<Nfield;fld++){
+                t[fld] = fsc*(  nx*E_M[fld] + ny*G_M[fld] - Fhs[fld] );
+                s[fld] = fsc*( -nx*E_P[fld] - ny*G_P[fld] + Fhs[fld] );
+            }
+
+        }
+
+        for(n=0;n<Np;n++){
+            const dg_real *ptLIFT = f_LIFT + n*Nfptotal;
+            dg_real *f_rhsM = f_rhsQ + Nfield*(n+k1*Np);
+            dg_real *f_rhsP = f_rhsQ + Nfield*(n+k2*Np);
+
+            for(m=0;m<Nfp;m++){
+                const int col = dg_cell_Nfpstart(cell, f1);
+                const dg_real L = ptLIFT[col+m];
+                const dg_real *t = flux_M+m*Nfield;
+                for(fld=0;fld<Nfield;fld++)
+                    f_rhsM[fld] += L*t[fld];
+            }
+
+            for(m=0;m<Nfp;m++){
+                const int col = dg_cell_Nfpstart(cell, f2);
+                const dg_real L = ptLIFT[col+m];
+                const dg_real *s = flux_P+m*Nfield;
+                for(fld=0;fld<Nfield;fld++)
+                    f_rhsP[fld] += L*s[fld];
+            }
+
+        }
+
+    }
+
+    return;
+}
