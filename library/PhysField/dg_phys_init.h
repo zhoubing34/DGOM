@@ -6,6 +6,6 @@
 #define DGOM_PF_INIT_FILE_H
 
 #include "dg_phys.h"
-void pf_init_file2d(physField *phys, char *casename);
+void dg_phys_init_file2d(dg_phys *phys, char *casename);
 
 #endif //DGOM_PF_INIT_FILE_H

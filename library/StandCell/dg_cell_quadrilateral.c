@@ -38,11 +38,6 @@ void dg_quad_info(dg_cell *cell, int N){
     for(f=0;f<Nfaces;f++){
         cell->Nfp[f] = Nfp;
     }
-    cell->Nfpstart = (int *)calloc(Nfaces, sizeof(int));
-    cell->Nfpstart[0] = 0;
-    for(f=1;f<Nfaces;f++){
-        cell->Nfpstart[f] = cell->Nfpstart[f-1] + cell->Nfp[f-1];
-    }
 
     return;
 }

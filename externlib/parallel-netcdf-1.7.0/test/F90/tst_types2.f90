@@ -14,7 +14,7 @@ program tst_types2
   implicit none
   
   ! This is the name of the data file we will create.
-  character (len = *), parameter :: FILE_NAME = "tst_types2.nc"
+  character (len = *), parameter :: INPUT_FILE_NAME = "tst_types2.nc"
   
   integer :: ncid, varid1, varid2, varid3, varid4, varid5, varid6, varid7
   integer :: dimid1, dimid2, dimid3, dimid4, dimid5, dimid6, dimid7
@@ -44,7 +44,7 @@ program tst_types2
 
   ! take filename from command-line argument if there is any
   if (my_rank .EQ. 0) then
-      filename = FILE_NAME
+      filename = INPUT_FILE_NAME
       err = get_args(cmd, filename)
   endif
   call MPI_Bcast(err, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)

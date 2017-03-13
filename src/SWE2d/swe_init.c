@@ -2,7 +2,7 @@
 #include "swe_read_command.h"
 #include "swe_mesh.h"
 #include "swe_input.h"
-#include "PhysField/pf_init_file.h"
+#include "PhysField/dg_phys_init.h"
 
 #define DEBUG 0
 static void swe_initial_condition(swe_solver *solver);

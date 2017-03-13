@@ -5,6 +5,7 @@
 #ifndef DGOM_DG_MESH_FETCH_BUFFER_H
 #define DGOM_DG_MESH_FETCH_BUFFER_H
 
+#include "dg_mesh.h"
 void dg_mesh_fetch_cell_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
                                MPI_Request *send_requests,
                                MPI_Request *recv_requests,

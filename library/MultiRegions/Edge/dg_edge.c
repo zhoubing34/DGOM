@@ -44,7 +44,8 @@ dg_edge* dg_edge_create(dg_mesh *mesh){
         case QUADRIL:
             creator = &edge_creator2d; break;
         default:
-            fprintf(stderr, "%s (%d):\nUnknown cell type %d\n", __FUNCTION__, __LINE__, type);
+            fprintf(stderr, "%s (%d):\nUnknown cell type %d\n",
+                    __FUNCTION__, __LINE__, type);
             exit(-1);
     }
     creator->map_face(edge);
@@ -59,7 +60,7 @@ static void dg_edge_setinfo2d(dg_edge *edge){
     const int Nedge = dg_edge_Nedge(edge);
     const int Nnode = dg_edge_Nnode(edge);
     int *faceinfo = (int*) calloc(Nedge*5, sizeof(int));
-    dg_real *nodeinfo = (dg_real*) calloc(Nnode*5, sizeof(dg_real));
+    dg_real *nodeinfo = (dg_real*) calloc(Nnode*7, sizeof(dg_real));
 
     int f,n,sk=0;
     for(f=0;f<Nedge;f++){
@@ -73,10 +74,13 @@ static void dg_edge_setinfo2d(dg_edge *edge){
     for(n=0;n<Nnode;n++){
         nodeinfo[sk++] = edge->varpM[n];
         nodeinfo[sk++] = edge->varpP[n];
+        nodeinfo[sk++] = edge->varfpM[n];
+        nodeinfo[sk++] = edge->varfpP[n];
         nodeinfo[sk++] = edge->nx[n];
         nodeinfo[sk++] = edge->ny[n];
         nodeinfo[sk++] = edge->fsc[n];
     }
+
     edge->surfinfo = faceinfo;
     edge->nodeinfo = nodeinfo;
     return;

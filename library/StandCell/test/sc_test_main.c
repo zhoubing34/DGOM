@@ -6,7 +6,7 @@
 #include "StandCell/test/triangle/sc_tri_test.h"
 #include "StandCell/test/quadrilateral/sc_quad_test.h"
 
-#define NTEST 7
+#define NTEST 8
 
 int main(int argc, char **argv){
 
@@ -32,6 +32,7 @@ int main(int argc, char **argv){
     dg_cell *tri = dg_cell_creat(N, TRIANGLE);
     /* triangle test case */
     i=0;
+    err[i++] = dg_tri_info_test(tri, isverbose);
     err[i++] = sc_triCoor_test(tri, isverbose);
     err[i++] = sc_triVandMatrix_test(tri, isverbose);
     err[i++] = sc_triMassMatrix_test(tri, isverbose);
@@ -54,6 +55,7 @@ int main(int argc, char **argv){
     dg_cell *quad = dg_cell_creat(N, QUADRIL);
     printf(HEADSTART "Running %d test for SandCell_quadrilateral test\n", NTEST);
     i = 0;
+    err[i++] = dg_quad_info_test(quad, isverbose);
     err[i++] = sc_quadCoor_test(quad, isverbose);
     err[i++] = sc_quadVandMatrix_test(quad, isverbose);
     err[i++] = sc_quadMassMatrix_test(quad, isverbose);

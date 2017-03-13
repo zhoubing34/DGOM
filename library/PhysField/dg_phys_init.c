@@ -2,14 +2,14 @@
 // Created by li12242 on 17/2/18.
 //
 
-#include "pf_init_file.h"
+#include "dg_phys_init.h"
 
 /***
  * @brief initialize the physical fields with initial condition file.
  * @param phys physical structure
  * @param casename name of computational case
  */
-void pf_init_file2d(physField *phys, char *casename){
+void dg_phys_init_file2d(dg_phys *phys, char *casename){
     char init_filename[MAX_NAME_LENGTH];
     strcpy(init_filename, casename);
     strcat(init_filename, ".init");
@@ -41,9 +41,10 @@ void pf_init_file2d(physField *phys, char *casename){
 
     /* assign to node fields */
     dg_cell *cell = phys->cell;
-    const int Nv = phys->cell->Nv;
-    const int K = phys->grid->K;
-    const int Np = phys->cell->Np;
+    const int Nv = dg_cell_Nv(cell);
+    const int K = dg_grid_K(phys->grid);
+    const int Np = dg_cell_Np(cell);
+
     int **EToV = phys->grid->EToV;
     dg_real floc_v[Nv], floc[Np];
     dg_real *f_Q = phys->f_Q;

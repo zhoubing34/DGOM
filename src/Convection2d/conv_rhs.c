@@ -1,9 +1,5 @@
-#include <MultiRegions/Mesh/dg_mesh.h>
-#include "conv_driver2d.h"
-#include "PhysField/pf_fetchBuffer.h"
-#include "PhysField/pf_strong_volume_flux2d.h"
-#include "PhysField/pf_strong_surface_flux2d.h"
-#include "PhysField/pf_strong_viscosity_LDG_flux2d.h"
+
+#include "conv_driver.h"
 
 int conv_fluxTerm(dg_real *var, dg_real *Eflux, dg_real *Gflux){
     const dg_real c = var[0];
@@ -32,15 +28,15 @@ int conv_upWindFlux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_rea
 }
 
 
-void conv_rhs(physField *phys, dg_real frka, dg_real frkb, dg_real fdt){
-
+void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
     dg_mesh *mesh = phys->mesh;
     const int K = mesh->grid->K;
     const int nprocs = mesh->nprocs;
     const int Np = phys->cell->Np;
     const int Nfield = phys->Nfield;
 
-    extern conv_solver2d solver;
+    dg_real *f_Q = phys->f_Q;
+    dg_real *f_recvQ = phys->f_recvQ;
 
     /* mpi request buffer */
     MPI_Request *mpi_send_requests = (MPI_Request *) calloc((size_t) nprocs, sizeof(MPI_Request));
@@ -48,31 +44,25 @@ void conv_rhs(physField *phys, dg_real frka, dg_real frkb, dg_real fdt){
 
     int Nmess=0;
     /* fetch nodal value through all procss */
-    pf_fetchNodeBuffer2d(phys, mpi_send_requests, mpi_recv_requests, &Nmess);
+    dg_mesh_fetch_node_buffer(mesh, Nfield, f_Q, f_recvQ,
+                              mpi_send_requests, mpi_recv_requests, &Nmess);
 
     /* volume integral */
-    pf_strong_volume_flux2d(phys, conv_fluxTerm);
+    dg_phys_strong_vol_opt2d(phys, conv_fluxTerm);
 
     /* waite to recv */
     MPI_Status instatus[nprocs];
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
     /* surface integral */
-    pf_strong_surface_flux2d(phys, NULL, NULL, conv_fluxTerm, conv_upWindFlux);
+    dg_phys_strong_surf_opt2d(phys, NULL, NULL, conv_fluxTerm, conv_upWindFlux);
 
     /* waite for finishing send buffer */
     MPI_Waitall(Nmess, mpi_send_requests, instatus);
 
     /* viscosity flux */
-    if(solver.viscosity > DIFF_THRESHOLD) {
-        dg_real c11 = (dg_real) solver.LDG_parameter[0];
-        dg_real c12 = (dg_real) solver.LDG_parameter[1];
-        dg_real c22 = (dg_real) solver.LDG_parameter[2];
-        pf_strong_viscosity_LDG_flux2d(phys, NULL, NULL, c11, c12, c22);
-    }
 
     dg_real *f_resQ = phys->f_resQ;
-    dg_real *f_Q = phys->f_Q;
     const dg_real *f_rhsQ = phys->f_rhsQ;
     int t;
     for(t=0;t<K*Np*Nfield;++t){

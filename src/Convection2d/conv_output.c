@@ -1,6 +1,4 @@
-#include <MultiRegions/Mesh/dg_mesh.h>
-#include <PhysField/pf_phys.h>
-#include "conv_driver2d.h"
+#include "conv_driver.h"
 
 /**
  * @brief
@@ -20,12 +18,14 @@
  * varid    | int*      | variable ids
  *
  */
-void conv_setoutput(physField *phys){
+void conv_setoutput(){
 
-    const int K = phys->grid->K;
-    const int Np = phys->cell->Np;
-    const int procid = phys->mesh->procid;
-    const int nprocs = phys->mesh->nprocs;
+    extern Conv_Solver solver;
+    dg_phys *phys = solver.phys;
+    const int K = dg_grid_K(phys->grid);
+    const int Np = dg_cell_Np(phys->cell);
+    const int procid = dg_grid_procid(phys->grid);
+    const int nprocs = dg_grid_nprocs(phys->grid);
 
     /* define dimensions */
     nc_dim *ne = nc_dim_create("ne", K);
@@ -69,16 +69,15 @@ void conv_setoutput(physField *phys){
     nc_error( ncmpi_put_var_double_all(file->id, file->var_vec_p[0]->id, phys->region->x[0]) );
     nc_error( ncmpi_put_var_double_all(file->id, file->var_vec_p[1]->id, phys->region->y[0]) );
 
-    extern conv_solver2d solver;
+    extern Conv_Solver solver;
     solver.outfile = file;
-
     return;
 }
 
 
-void conv_putvar(physField *phys, int timestep, double time){
+void conv_putvar(dg_phys *phys, int timestep, double time){
 
-    extern conv_solver2d solver;
+    extern Conv_Solver solver;
     nc_file *file = solver.outfile;
 
     const int K = phys->grid->K;
@@ -114,7 +113,6 @@ void conv_putvar(physField *phys, int timestep, double time){
         }
     }
     nc_error( ncmpi_put_vara_float_all(file->id, ncvar->id, start_v, count_v, var) );
-
     return;
 }
 

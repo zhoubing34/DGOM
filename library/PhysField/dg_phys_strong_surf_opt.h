@@ -11,7 +11,7 @@ typedef int (*Wall_Condition)(dg_real nx, dg_real ny, dg_real *varM, dg_real *va
 typedef int (*Nodal_Flux_Fun)(dg_real *var, dg_real *Eflux, dg_real *Gflux);
 typedef int (*Numerical_Flux)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_real *Fhs);
 
-void pf_strong_surface_flux2d
+void dg_phys_strong_surf_opt2d
         (dg_phys *phys,
          Wall_Condition slipwall_func,  // slip wall condition
          Wall_Condition non_slipwall_func, // non-slip wall condition

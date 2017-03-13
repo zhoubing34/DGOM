@@ -21,16 +21,15 @@
  * @note
  *
  */
-void pf_strong_surface_flux2d(dg_phys *phys,
-         Wall_Condition slipwall_func,  // slip wall condition
-         Wall_Condition non_slipwall_func, // non-slip wall condition
-         Nodal_Flux_Fun nodal_flux, // flux term
-         Numerical_Flux numerical_flux) // numerical flux function
+void dg_phys_strong_surf_opt2d(dg_phys *phys,
+                               Wall_Condition slipwall_func,  // slip wall condition
+                               Wall_Condition non_slipwall_func, // non-slip wall condition
+                               Nodal_Flux_Fun nodal_flux, // flux term
+                               Numerical_Flux numerical_flux) // numerical flux function
 {
     dg_edge *edge = phys->edge;
     dg_cell *cell = phys->cell;
     const int Nfield = dg_phys_Nfield(phys);
-    const int K = dg_grid_K(phys->grid);
     const int Nedge = dg_edge_Nedge(edge);
     const int Nfaces = dg_cell_Nfaces(phys->cell);
     const int Nfptotal = dg_cell_Nfptotal(phys->cell);
@@ -41,10 +40,6 @@ void pf_strong_surface_flux2d(dg_phys *phys,
     dg_real *f_ext = phys->f_extQ;
     dg_real *f_LIFT  = phys->cell->f_LIFT;
     dg_real *f_rhsQ = phys->f_rhsQ;
-
-    dg_real f_M[Nfield], f_P[Nfield], Fhs[Nfield];
-    dg_real E_M[Nfield], G_M[Nfield];
-    dg_real E_P[Nfield], G_P[Nfield];
 
     register int f,m,n,fld,surfid=0,nodeid=0;
 
@@ -58,13 +53,17 @@ void pf_strong_surface_flux2d(dg_phys *phys,
 
         dg_real flux_M[Nfp*Nfaces*Nfield];
         dg_real flux_P[Nfp*Nfaces*Nfield];
+        int fp_M[Nfp], fp_P[Nfp];
         for(m=0;m<Nfp;m++){
             const int idM = (int)edge->nodeinfo[nodeid++];
             const int idP = (int)edge->nodeinfo[nodeid++];
+            fp_M[m] = (int)edge->nodeinfo[nodeid++];
+            fp_P[m] = (int)edge->nodeinfo[nodeid++];
             const dg_real nx = edge->nodeinfo[nodeid++];
             const dg_real ny = edge->nodeinfo[nodeid++];
             const dg_real fsc = edge->nodeinfo[nodeid++];
 
+            dg_real f_M[Nfield], f_P[Nfield], Fhs[Nfield];
             // local face2d values
             for(fld=0;fld<Nfield;fld++) {f_M[fld] = f_Q[idM*Nfield+fld];}
 
@@ -86,6 +85,10 @@ void pf_strong_surface_flux2d(dg_phys *phys,
                     for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_ext[idP*Nfield+fld]; }
                     break;
             }
+
+            dg_real E_M[Nfield], G_M[Nfield];
+            dg_real E_P[Nfield], G_P[Nfield];
+
             nodal_flux(f_M, E_M, G_M);
             nodal_flux(f_P, E_P, G_P);
             numerical_flux(nx,ny,f_M,f_P,Fhs);
@@ -102,24 +105,24 @@ void pf_strong_surface_flux2d(dg_phys *phys,
         for(n=0;n<Np;n++){
             const dg_real *ptLIFT = f_LIFT + n*Nfptotal;
             dg_real *f_rhsM = f_rhsQ + Nfield*(n+k1*Np);
-            dg_real *f_rhsP = f_rhsQ + Nfield*(n+k2*Np);
 
             for(m=0;m<Nfp;m++){
-                const int col = dg_cell_Nfpstart(cell, f1);
-                const dg_real L = ptLIFT[col+m];
+                const int col1 = fp_M[m];
+                const dg_real L = ptLIFT[col1];
                 const dg_real *t = flux_M+m*Nfield;
                 for(fld=0;fld<Nfield;fld++)
                     f_rhsM[fld] += L*t[fld];
             }
-
-            for(m=0;m<Nfp;m++){
-                const int col = dg_cell_Nfpstart(cell, f2);
-                const dg_real L = ptLIFT[col+m];
-                const dg_real *s = flux_P+m*Nfield;
-                for(fld=0;fld<Nfield;fld++)
-                    f_rhsP[fld] += L*s[fld];
+            if (ftype == INNERLOC){
+                dg_real *f_rhsP = f_rhsQ + Nfield*(n+k2*Np);
+                for(m=0;m<Nfp;m++){
+                    const int col2 = fp_P[m];
+                    const dg_real L = ptLIFT[col2];
+                    const dg_real *s = flux_P+m*Nfield;
+                    for(fld=0;fld<Nfield;fld++)
+                        f_rhsP[fld] += L*s[fld];
+                }
             }
-
         }
 
     }

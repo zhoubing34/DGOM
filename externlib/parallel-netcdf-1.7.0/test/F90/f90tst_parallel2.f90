@@ -49,7 +49,7 @@ program f90tst_parallel
   implicit none
   
   ! This is the name of the data file we will create.
-  character (len = *), parameter :: FILE_NAME = "f90tst_parallel2.nc"
+  character (len = *), parameter :: INPUT_FILE_NAME = "f90tst_parallel2.nc"
 
   integer, parameter :: MAX_DIMS = 2
   integer, parameter :: NX = 16, NY = 16
@@ -71,7 +71,7 @@ program f90tst_parallel
 
   ! take filename from command-line argument if there is any
   if (my_rank .EQ. 0) then
-      filename = FILE_NAME
+      filename = INPUT_FILE_NAME
       err = get_args(cmd, filename)
   endif
   call MPI_Bcast(err, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)

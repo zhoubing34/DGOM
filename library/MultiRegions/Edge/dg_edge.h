@@ -24,6 +24,7 @@ typedef struct dg_edge{
     int *surfinfo; ///< gather the varkM/varkP, varfM/varfP and ftype
     /* node info */
     int *varpM, *varpP; ///< node index of local and adjacent node
+    int *varfpM, *varfpP; ///< face node index of local and adjacent node
     dg_real *fsc; ///< face Jacobi divided by volume Jacobi
     dg_real *nx, *ny, *nz; ///< outward normal vector of local cell
     dg_real *nodeinfo; ///< gather the varpM/varpP, fsc and nx/ny/nz

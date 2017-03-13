@@ -29,7 +29,6 @@ typedef struct dg_cell{
     int Nv; ///< number of vertex
     int Nfaces; ///< number of faces
     int *Nfp; ///< number of points on each face
-    int *Nfpstart; ///< start point index on each face
     int Nfptotal; ///< total number of points on faces
 
     int **Fmask; ///< index of node at faces

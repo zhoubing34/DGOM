@@ -14,6 +14,7 @@ void dg_edge_node_map2d(dg_edge *edge){
     const int Nedge = dg_edge_Nedge(edge);
     const int Np = dg_cell_Np(cell);
     const int TotalParNode = dg_mesh_Nparn(edge->mesh);
+    const int Nfaces = dg_cell_Nfaces(cell);
     int **Fmask = cell->Fmask;
     double **x = edge->region->x;
     double **y = edge->region->y;
@@ -27,6 +28,14 @@ void dg_edge_node_map2d(dg_edge *edge){
     // map node
     int *varpM = vector_int_create(totalNode);
     int *varpP = vector_int_create(totalNode);
+    int *varfpM = vector_int_create(totalNode);
+    int *varfpP = vector_int_create(totalNode);
+
+    int *Nfpstart = (int *)calloc(Nfaces, sizeof(int));
+    Nfpstart[0] = 0;
+    for(f=1;f<Nfaces;f++){
+        Nfpstart[f] = Nfpstart[f-1] + dg_cell_Nfp(cell, f-1);
+    }
 
     int n1,n2,sk=0;
     for(f=0;f<Nedge;f++){
@@ -40,6 +49,7 @@ void dg_edge_node_map2d(dg_edge *edge){
         for(n1=0;n1<Nfp;n1++){
             const int idM = k1*Np + Fmask[f1][n1];
             varpM[sk] = idM;
+            varfpM[sk] = Nfpstart[f1] + n1;
             double xM = x[0][idM];
             double yM = y[0][idM];
 
@@ -49,11 +59,19 @@ void dg_edge_node_map2d(dg_edge *edge){
                     double xP = x[0][idP];
                     double yP = y[0][idP];
                     double d12 = (xM-xP)*(xM-xP) + (yM-yP)*(yM-yP);
-                    if(d12 < EPS){ varpP[sk] = idP; break; }
+                    if(d12 < EPS){
+                        varpP[sk] = idP;
+                        varfpP[sk] = Nfpstart[f2] + n2;
+                        break;
+                    }
                 }
             }else{ // parallel face
                 for(n2=0;n2<TotalParNode;n2++){
-                    if( varpM[sk] == parnode[n2] ){ varpP[sk] = n2; break; }
+                    if( varpM[sk] == parnode[n2] ){
+                        varpP[sk] = n2;
+                        varfpP[sk] = 0;
+                        break;
+                    }
                 }
             }
             sk++;
@@ -61,6 +79,8 @@ void dg_edge_node_map2d(dg_edge *edge){
     }
     // assignment
     edge->Nnode = totalNode;
+    edge->varfpM = varfpM;
+    edge->varfpP = varfpP;
     edge->varpM = varpM;
     edge->varpP = varpP;
 

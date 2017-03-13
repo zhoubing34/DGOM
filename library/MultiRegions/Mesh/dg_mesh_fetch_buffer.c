@@ -1,7 +1,6 @@
 //
 // Created by li12242 on 17/3/9.
 //
-#include "dg_mesh.h"
 #include "dg_mesh_fetch_buffer.h"
 
 static void fetch_buffer(int procid, int nprocs, int *pout, dg_real *send_buffer, dg_real *recv_buffer,

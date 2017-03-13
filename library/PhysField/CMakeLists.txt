@@ -7,7 +7,7 @@ set(PHYSDOMAIN_SOURCE
         #pf_add_LDG_solver.c
         #pf_strong_viscosity_LDG_flux2d.c
         #pf_cellMean.c
-        #pf_init_file.c
+        dg_phys_init.c
         #pf_openbc.c
         #Limiter/pf_limit_BJ2d.c)
         )

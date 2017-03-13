@@ -5,6 +5,16 @@
 #include "sc_quad_test.h"
 #include "sc_quad_data3.h"
 
+int dg_quad_info_test(dg_cell *cell, int verbose){
+    int fail = 0;
+    if(verbose){
+        FILE *fp = fopen("dg_quad_info_test.txt", "w");
+        print_int_vector2file(fp, "Nfp", cell->Nfp, cell->Nfaces);
+        fclose(fp);
+    }
+    return fail;
+}
+
 int sc_quadCoor_test(dg_cell *quad, int verbose){
     int fail = 0;
     const int Np = quad->Np;

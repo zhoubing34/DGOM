@@ -12,7 +12,7 @@ program tst_f90_nc4
   use pnetcdf
   implicit none
   integer :: fh, cmode, err, ierr, dimid, varid, ndim, nvar, get_args
-  character (len = *), parameter :: FILE_NAME = "tst_f90_nc4.nc"
+  character (len = *), parameter :: INPUT_FILE_NAME = "tst_f90_nc4.nc"
   integer(KIND=MPI_OFFSET_KIND) :: ten=10
   character(LEN=256) filename, cmd, msg
   integer my_rank, p
@@ -23,7 +23,7 @@ program tst_f90_nc4
 
   ! take filename from command-line argument if there is any
   if (my_rank .EQ. 0) then
-      filename = FILE_NAME
+      filename = INPUT_FILE_NAME
       err = get_args(cmd, filename)
   endif
   call MPI_Bcast(err, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)

@@ -7,6 +7,7 @@
 
 #include "StandCell/test/sc_test_main.h"
 
+int dg_tri_info_test(dg_cell *cell, int verbose);
 int sc_triCoor_test(dg_cell *tri, int verbose);
 int sc_triVandMatrix_test(dg_cell *tri, int verbose);
 int sc_triMassMatrix_test(dg_cell *tri, int verbose);

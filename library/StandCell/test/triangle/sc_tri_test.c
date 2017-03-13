@@ -5,6 +5,16 @@
 #include "sc_tri_test.h"
 #include "sc_tri_data3.h"
 
+int dg_tri_info_test(dg_cell *cell, int verbose){
+    int fail = 0;
+    if(verbose){
+        FILE *fp = fopen("dg_tri_info_test.txt", "w");
+        print_int_vector2file(fp, "Nfp", cell->Nfp, cell->Nfaces);
+        fclose(fp);
+    }
+    return fail;
+}
+
 int sc_triCoor_test(dg_cell *tri, int verbose){
 
     int fail=0;

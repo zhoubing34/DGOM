@@ -1,7 +1,4 @@
-#include "conv_driver2d.h"
-#include "conv_output.h"
-#include "conv_rhs.h"
-#include "PhysField/Limiter/pf_limit_BJ2d.h"
+#include "conv_driver.h"
 
 /* assignment of RK45 parameter */
 static void conv_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
@@ -11,10 +8,10 @@ static void conv_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
  * @details
  * @param [in,out] phys physField object
  */
-void conv_run(physField *phys){
+void conv_run(){
 
-    extern conv_solver2d solver;
-
+    extern Conv_Solver solver;
+    dg_phys *phys = solver.phys;
     double ftime = solver.finaltime;
     double dt = solver.dt;
 
