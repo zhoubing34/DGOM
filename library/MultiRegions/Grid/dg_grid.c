@@ -8,7 +8,6 @@
 void dg_grid_set_vert2d(dg_grid *grid, double *vx, double *vy, double *vz);
 /* allocate and assignment the vertex coordinate in 3d dg_grid object */
 void dg_grid_set_vert3d(dg_grid *grid, double *vx, double *vy, double *vz);
-
 /* partition of the whole grid into each process */
 void dg_grid_partition(dg_grid *grid);
 void dg_grid_free2d(dg_grid *grid);
@@ -88,6 +87,9 @@ dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, do
             grid->EToV[k][i] = EToV[k][i];
         }
     }
+    /* assignment of EToR */
+    grid->EToR = vector_int_create(K);
+
     /* copy vertex */
     creator->copy_vert(grid, vx, vy, vz);
     creator->partition(grid);

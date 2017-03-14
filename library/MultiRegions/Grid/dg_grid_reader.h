@@ -13,4 +13,6 @@ dg_grid* dg_grid_uniform_quad(
 
 dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename);
 void dg_grid_read_BSfile2d(dg_grid *grid, char *casename);
+void dg_grid_add_EToR(dg_grid *grid, int cell_num, int **RgionID);
+
 #endif // DGOM_UNIFORMMESH_H

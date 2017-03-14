@@ -73,7 +73,6 @@ dg_cell *dg_cell_creat(int N, dg_cell_type type){
     }
     creator->set_info(cell, N); // basic information
     creator->set_coor(cell); // coordinate
-    creator->set_coor(cell); // coordinate
     cell->V = dg_cell_vand_matrix(cell, creator->orthogonal_func);
     cell->M = dg_cell_mass_matrix(cell);
     dg_cell_deri_matrix(cell, creator->deri_orthgonal_func);

@@ -35,6 +35,7 @@ int dg_grid_EToV_test(dg_grid *grid, int verbose){
         /* gen log filename */
         FILE *fp = create_log(__FUNCTION__, grid->procid, grid->nprocs);
         print_int_matrix2file(fp, "EToV", grid->EToV, grid->K, grid->cell->Nv);
+        print_int_vector2file(fp, "EToR", grid->EToR, grid->K);
         fclose(fp);
     }
     const int procid = grid->procid;

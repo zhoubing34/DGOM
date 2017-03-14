@@ -1,5 +1,5 @@
-#include "dg_grid.h"
 #include "dg_grid_BS.h"
+#include "dg_grid_reader.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -197,14 +197,16 @@ dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
     }
 
     int **EToV = matrix_int_create(K, Nv);
+    int **EToR = matrix_int_create(K, 2);
     register int k,n;
     for(k=0;k<K;k++){
-        fscanf(fp, "%d", &temp); //read index
+        fscanf(fp, "%d", EToR[k]); //read index
+        EToR[k][0] -= 1; // change index start from 0 (C style)
         for(n=0;n<Nv;n++){
             fscanf(fp, "%d", EToV[0]+k*Nv+n);
             EToV[k][n] -= 1; // change index start from 0 (C style)
         }
-        fscanf(fp, "%d", &temp); //read region id
+        fscanf(fp, "%d", EToR[k]+1); //read region id
     }
     fclose(fp);
 
@@ -227,6 +229,7 @@ dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
 
     /* initialize */
     dg_grid* grid = dg_grid_create(cell, K, Nvert, vx, vy, NULL, EToV);
+    dg_grid_add_EToR(grid, K, EToR);
 
 #if DEBUG
     char filename[20] = "mr_grid_read_file2d";
@@ -244,6 +247,7 @@ dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
 #endif
     /* free memory */
     matrix_int_free(EToV);
+    matrix_int_free(EToR);
     vector_double_free(vx);
     vector_double_free(vy);
 
@@ -285,5 +289,15 @@ void dg_grid_read_BSfile2d(dg_grid *grid, char *casename){
         dg_grid_add_BS2d(grid, Nsurf, NULL);
     }
     fclose(fp);
+    return;
+}
+
+void dg_grid_add_EToR(dg_grid *grid, int cell_num, int **RgionID){
+    int k;
+    int *EToR = grid->EToR;
+    for(k=0;k<cell_num;k++){
+        int cell_id = RgionID[k][0];
+        EToR[ cell_id ] = RgionID[k][1];
+    }
     return;
 }

@@ -46,6 +46,7 @@ dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
 }
 
 void dg_phys_free(dg_phys *phys){
+
     free(phys->f_Q);
     free(phys->f_rhsQ);
     free(phys->f_resQ);
@@ -55,4 +56,5 @@ void dg_phys_free(dg_phys *phys){
     free(phys->c_Q);
     free(phys->c_recvQ);
     free(phys);
+    return;
 }

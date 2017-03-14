@@ -84,11 +84,11 @@ nc_file * create_ncfile(char *file_name){
     dg_fopen(fp, file_name, "Unable to open obc file");
     int Nv, Nfield;
     if( fscanf(fp, "%d", &Nv)!=1 ){ // reading Nv
-        fprintf(stderr, "%s (%s):%d\nerror in reading Nv\n", __FUNCTION__, __FILE__, __LINE__);
+        fprintf(stderr, "%s (%d)\nerror in reading Nv\n", __FUNCTION__, __LINE__);
         exit(-1);
     };
     if( fscanf(fp, "%d", &Nfield)!=1 ){ // reading Nfield
-        fprintf(stderr, "%s (%s):%d\nerror in reading Nfield\n", __FUNCTION__, __FILE__, __LINE__);
+        fprintf(stderr, "%s (%d)\nerror in reading Nfield\n", __FUNCTION__, __LINE__);
         exit(-1);
     };
     /* reading vertex list */
@@ -96,8 +96,8 @@ nc_file * create_ncfile(char *file_name){
     int i;
     for(i=0;i<Nv;i++){
         if(fscanf(fp, "%d", vertlist+i)!=1){
-            fprintf(stderr, "%s (%s):%d\nerror in reading vertex %d\n",
-                    __FUNCTION__, __FILE__, __LINE__, i);
+            fprintf(stderr, "%s (%d)\nerror in reading vertex %d\n",
+                    __FUNCTION__, __LINE__, i);
             exit(-1);
         }
         vertlist[i] -= 1; // change to C type

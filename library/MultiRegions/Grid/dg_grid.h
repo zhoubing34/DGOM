@@ -12,6 +12,13 @@ typedef enum {
     OPENBS = 4   // 4-open boundary
 } dg_face_type;
 
+typedef enum{
+    COMPUTE_CELL = 0,
+    SPONGE_CELL = 1,
+    REFINED_CELL = 2,
+    TROUBLE_CELL = 3
+} dg_grid_cell_type;
+
 /* geometry grid structure */
 typedef struct dg_grid{
     dg_cell *cell; ///< standard element
@@ -21,13 +28,13 @@ typedef struct dg_grid{
     int Nv;///< Num of vertex
     int K; ///< Num of element
     int **EToV; ///< vertex list in elements, start from 0
-    int **EToE; ///< adjacent element id in each element
-    int **EToF; ///< adjacent face index (0,1,2...)
-    int **EToP; ///< adjacent element process
-    int **EToBS; ///< boundary surface type
+    int **EToE; ///< adjacent element id
+    int **EToF; ///< adjacent face id (0,1,2...)
+    int **EToP; ///< process id of adjacent element
+    int **EToBS; ///< boundary surface type of adjacent element
+    int *EToR; ///< region id of each cell
     double *vx, *vy, *vz; ///< vertex coordinate
 
-    int Nobc; ///< number of open boundary
     void (*add_BS)(struct dg_grid *grid, int Nsurf, int **SFToV);
     void (*free_func)(struct dg_grid *grid); ///< free function
 } dg_grid;

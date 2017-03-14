@@ -63,6 +63,5 @@ void dg_cell_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal);
 #define dg_cell_Nfaces(cell) cell->Nfaces
 #define dg_cell_Nfptotal(cell) cell->Nfptotal
 #define dg_cell_Nfp(cell, f) cell->Nfp[f]  ///< number of points on fth face
-#define dg_cell_Nfpstart(cell, f) cell->Nfpstart[f]
 
 #endif //DGOM_STDCELL_H
