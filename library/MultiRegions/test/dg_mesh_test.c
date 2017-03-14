@@ -22,8 +22,7 @@ int dg_mesh_cell_fetch_buffer_test(dg_mesh *mesh, int verbose){
         c_Q[k] = (dg_real)k;
     }
     MPI_Request mpi_send_requests[nprocs], mpi_recv_requests[nprocs];
-    int Nmess;
-    dg_mesh_fetch_cell_buffer(mesh, Nfield, c_Q, c_recvQ, mpi_send_requests, mpi_recv_requests, &Nmess);
+    int Nmess = dg_mesh_fetch_cell_buffer(mesh, Nfield, c_Q, c_recvQ, mpi_send_requests, mpi_recv_requests);
 
     int n;
     for(n=0;n<Nparf;n++){
@@ -76,8 +75,7 @@ int dg_mesh_node_fetch_buffer_test(dg_mesh *mesh, int verbose){
         }
     }
     MPI_Request mpi_send_requests[nprocs], mpi_recv_requests[nprocs];
-    int Nmess;
-    dg_mesh_fetch_node_buffer(mesh, Nfield, f_Q, f_recvQ, mpi_send_requests, mpi_recv_requests, &Nmess);
+    int Nmess = dg_mesh_fetch_node_buffer(mesh, Nfield, f_Q, f_recvQ, mpi_send_requests, mpi_recv_requests);
     sk = 0;
     for(n=0;n<Nparn;n++){
         int ind = mesh->parnode[n];

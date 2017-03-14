@@ -7,7 +7,7 @@
 #include "pf_strong_viscosity_LDG_flux2d_test.h"
 #include "dg_phys_test.h"
 #include "PhysField/pf_add_LDG_solver.h"
-#include "PhysField/pf_fetchBuffer.h"
+#include "PhysField/dg_phys_fetch_buffer.h"
 
 static int wall_func(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP,
               dg_real *pxM, dg_real *pxP, dg_real *pyM, dg_real *pyP){

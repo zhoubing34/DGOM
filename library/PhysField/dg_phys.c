@@ -7,6 +7,7 @@
  */
 
 #include "dg_phys.h"
+#include "dg_phys_fetch_buffer.h"
 
 #define DEBUG 0
 
@@ -38,6 +39,9 @@ dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
     phys->c_Q = (dg_real *) calloc((size_t) K*Nfields, sizeof(dg_real));
     phys->c_recvQ = (dg_real *) calloc((size_t) Nparface*Nfields, sizeof(dg_real));
 
+    /* fetch buffer */
+    phys->fetch_node_buffer = dg_phys_fetch_node_buffer;
+    phys->fetch_cell_buffer = dg_phys_fetch_cell_buffer;
     return phys;
 }
 

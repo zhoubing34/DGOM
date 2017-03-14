@@ -20,10 +20,9 @@
  *     MPI_Status instatus[nprocs];
  *     MPI_Waitall(Nmess, mpi_in_requests, instatus);
  * */
-void pf_fetchNodeBuffer2d(physField *phys,
-                          MPI_Request *mpi_send_requests,
-                          MPI_Request *mpi_recv_requests,
-                          int *Nmessage);
+int dg_phys_fetch_node_buffer(dg_phys *phys,
+                              MPI_Request *mpi_send_requests,
+                              MPI_Request *mpi_recv_requests);
 
 /*
  * Send/rece elemental value `c_Q` through buffers
@@ -38,16 +37,8 @@ void pf_fetchNodeBuffer2d(physField *phys,
  *     MPI_Status instatus[nprocs];
  *     MPI_Waitall(Nmess, mpi_in_requests, instatus);
  * */
-void pf_fetchCellBuffer(physField *phys,
-                        MPI_Request *mpi_send_requests,
-                        MPI_Request *mpi_recv_requests,
-                        int *Nmessage);
-
-/* send and receive buffers to/from other processes */
-void pf_fetchBuffer(int procid, int nprocs, int *pout,
-                    dg_real *send_buffer, dg_real *recv_buffer,
-                    MPI_Request *mpi_send_requests,
-                    MPI_Request *mpi_recv_requests,
-                    int *Nmessage);
+int dg_phys_fetch_cell_buffer(dg_phys *phys,
+                              MPI_Request *mpi_send_requests,
+                              MPI_Request *mpi_recv_requests);
 
 #endif //DGOM_PHYS_FETCHBUFFER_H

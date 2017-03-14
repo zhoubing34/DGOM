@@ -36,16 +36,13 @@ void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
     const int Nfield = phys->Nfield;
 
     dg_real *f_Q = phys->f_Q;
-    dg_real *f_recvQ = phys->f_recvQ;
 
     /* mpi request buffer */
     MPI_Request *mpi_send_requests = (MPI_Request *) calloc((size_t) nprocs, sizeof(MPI_Request));
     MPI_Request *mpi_recv_requests = (MPI_Request *) calloc((size_t) nprocs, sizeof(MPI_Request));
 
-    int Nmess=0;
     /* fetch nodal value through all procss */
-    dg_mesh_fetch_node_buffer(mesh, Nfield, f_Q, f_recvQ,
-                              mpi_send_requests, mpi_recv_requests, &Nmess);
+    int Nmess = phys->fetch_node_buffer(phys, mpi_send_requests, mpi_recv_requests);
 
     /* volume integral */
     dg_phys_strong_vol_opt2d(phys, conv_fluxTerm);

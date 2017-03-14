@@ -25,6 +25,12 @@ typedef struct dg_mesh{
     int TotalParNode; ///< total number of nodes to send recv
     int *parnode; ///< index list of nodes to send out
 
+    int (*fetch_node_buffer)(struct dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
+                             MPI_Request *send_requests,
+                             MPI_Request *recv_requests);
+    int (*fetch_cell_buffer)(struct dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
+                             MPI_Request *send_requests,
+                             MPI_Request *recv_requests);
     void (*free_func)(struct dg_mesh *mesh);
 } dg_mesh;
 

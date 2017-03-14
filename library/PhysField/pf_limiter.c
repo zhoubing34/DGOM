@@ -5,7 +5,7 @@
 #include <MultiRegions/Mesh/dg_mesh.h>
 #include "pf_limiter.h"
 #include "pf_cellMean.h"
-#include "pf_fetchBuffer.h"
+#include "dg_phys_fetch_buffer.h"
 #include "dg_phys.h"
 
 #define DEBUG 0

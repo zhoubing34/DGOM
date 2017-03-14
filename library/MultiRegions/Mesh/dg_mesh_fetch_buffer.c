@@ -8,10 +8,9 @@ static void fetch_buffer(int procid, int nprocs, int *pout, dg_real *send_buffer
                          MPI_Request *mpi_recv_requests,
                          int *Nmessage);
 
-void dg_mesh_fetch_node_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
+int dg_mesh_fetch_node_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
                                MPI_Request *send_requests,
-                               MPI_Request *recv_requests,
-                               int *Nmess){
+                               MPI_Request *recv_requests){
     const int Nparn = dg_mesh_Nparn(mesh);
     const int nprocs = dg_mesh_nprocs(mesh);
     dg_real *f_sendQ = vector_double_create(Nfield*Nparn);
@@ -29,9 +28,10 @@ void dg_mesh_fetch_node_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real 
         cout[n] = Nfield * mesh->parnodeNum[n];
     }
     /* send and recv data */
-    fetch_buffer(mesh->procid, nprocs, cout, f_sendQ, f_recvQ, send_requests, recv_requests, Nmess);
+    int Nmess = 0;
+    fetch_buffer(mesh->procid, nprocs, cout, f_sendQ, f_recvQ, send_requests, recv_requests, &Nmess);
     vector_real_free(f_sendQ);
-    return;
+    return Nmess;
 }
 
 /**
@@ -42,10 +42,9 @@ void dg_mesh_fetch_node_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real 
  * @param f_recv
  * @param Nmess
  */
-void dg_mesh_fetch_cell_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
+int dg_mesh_fetch_cell_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
                                MPI_Request *send_requests,
-                               MPI_Request *recv_requests,
-                               int *Nmess){
+                               MPI_Request *recv_requests){
     const int Nparf = dg_mesh_Nparf(mesh);
     const int nprocs = dg_mesh_nprocs(mesh);
     dg_real *f_sendQ = vector_real_create(Nfield*Nparf);
@@ -63,9 +62,10 @@ void dg_mesh_fetch_cell_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real 
         cout[n] = Nfield * mesh->parfaceNum[n];
     }
     /* send and recv data */
-    fetch_buffer(mesh->procid, nprocs, cout, f_sendQ, f_recvQ, send_requests, recv_requests, Nmess);
+    int Nmess = 0;
+    fetch_buffer(mesh->procid, nprocs, cout, f_sendQ, f_recvQ, send_requests, recv_requests, &Nmess);
     vector_real_free(f_sendQ);
-    return;
+    return Nmess;
 }
 
 

@@ -4,18 +4,27 @@
 
 #include "dg_mesh.h"
 #include "dg_mesh_connect.h"
+#include "dg_mesh_fetch_buffer.h"
 
 static void dg_mesh_free2d(dg_mesh *mesh);
 
 typedef struct dg_mesh_creator{
     void (*init_cell_fetch_buffer)(dg_mesh *mesh);
     void (*init_node_fetch_buffer)(dg_mesh *mesh);
+    int (*fetch_node_buffer)(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
+                             MPI_Request *send_requests,
+                             MPI_Request *recv_requests);
+    int (*fetch_cell_buffer)(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
+                             MPI_Request *send_requests,
+                             MPI_Request *recv_requests);
     void (*free_func)(dg_mesh *mesh);
 }dg_mesh_creator;
 
 const static dg_mesh_creator mesh2d_creator = {
         dg_mesh_init_cell_fetch_buffer,
         dg_mesh_init_node_fetch_buffer,
+        dg_mesh_fetch_node_buffer,
+        dg_mesh_fetch_cell_buffer,
         dg_mesh_free2d,
 };
 
@@ -42,6 +51,8 @@ dg_mesh* dg_mesh_create(dg_region *region){
     }
     creator->init_cell_fetch_buffer(mesh);
     creator->init_node_fetch_buffer(mesh);
+    mesh->fetch_node_buffer = creator->fetch_node_buffer;
+    mesh->fetch_cell_buffer = creator->fetch_cell_buffer;
     mesh->free_func = creator->free_func;
     return mesh;
 }

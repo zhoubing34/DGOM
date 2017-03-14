@@ -32,6 +32,13 @@ typedef struct dg_phys{
     dg_real *f_rhsQ; ///< RHS data
     dg_real *f_resQ; ///< residual data
 
+    int (*fetch_node_buffer)(struct dg_phys *phys,
+                             MPI_Request *send_requests,
+                             MPI_Request *recv_requests);
+    int (*fetch_cell_buffer)(struct dg_phys *phys,
+                             MPI_Request *send_requests,
+                             MPI_Request *recv_requests);
+
 } dg_phys;
 
 dg_phys* dg_phys_create(int Nfields, dg_edge *edge);

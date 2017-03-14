@@ -4,6 +4,7 @@ set(PHYSDOMAIN_SOURCE
         dg_phys.c
         dg_phys_strong_vol_opt.c
         dg_phys_strong_surf_opt.c
+        dg_phys_fetch_buffer.c
         #pf_add_LDG_solver.c
         #pf_strong_viscosity_LDG_flux2d.c
         #pf_cellMean.c

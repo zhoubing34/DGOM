@@ -4,7 +4,7 @@
 
 #include <PhysField/pf_phys.h>
 #include "swe_rhs.h"
-#include "PhysField/pf_fetchBuffer.h"
+#include "PhysField/dg_phys_fetch_buffer.h"
 #include "PhysField/pf_strong_volume_flux2d.h"
 #include "PhysField/pf_strong_surface_flux2d.h"
 #include "swe_driver2d.h"
