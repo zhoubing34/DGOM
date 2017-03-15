@@ -27,22 +27,30 @@ void matrix_multiply(const int M, const int K, const int N,
                      const double *A, const double *B, double *C);
 
 /* allocation */
+double **array_double_create(int Nrows, int *Ncols);
 double **matrix_double_create(int Nrows, int Ncols);
 double * vector_double_create(int Nrows);
-int    **matrix_int_create(int Nrows, int Ncols);
-int    * vector_int_create(int Nrows);
-float  **matrix_float_create(int Nrows, int Ncols);
-float  * vector_float_create(int Nrows);
-dg_real   **matrix_real_create(int Nrows, int Ncols);
-dg_real   * vector_real_create(int Nrows);
+int **array_int_create(int Nrows, int *Ncols);
+int **matrix_int_create(int Nrows, int Ncols);
+int *vector_int_create(int Nrows);
+float **array_float_create(int Nrows, int *Ncols);
+float **matrix_float_create(int Nrows, int Ncols);
+float *vector_float_create(int Nrows);
+dg_real **array_real_create(int Nrows, int *Ncols);
+dg_real **matrix_real_create(int Nrows, int Ncols);
+dg_real *vector_real_create(int Nrows);
 
+double **array_double_free(double **);
 double **matrix_double_free(double **);
-double * vector_double_free(double *);
-int    **matrix_int_free(int **);
-int    * vector_int_free(int *);
-float  **matrix_float_free(float **);
-float  * vector_float_free(float *);
-dg_real   **matrix_real_free(dg_real **);
-dg_real   * vector_real_free(dg_real *);
+double *vector_double_free(double *);
+int **array_int_free(int **);
+int **matrix_int_free(int **);
+int *vector_int_free(int *);
+float **array_float_free(float **);
+float **matrix_float_free(float **);
+float *vector_float_free(float *);
+dg_real **array_real_free(dg_real **);
+dg_real **matrix_real_free(dg_real **);
+dg_real *vector_real_free(dg_real *);
 
 #endif

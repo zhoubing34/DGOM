@@ -246,6 +246,6 @@ FILE* create_log(const char *name, int rank, int nprocs){
                 __FUNCTION__, __FILE__, __LINE__, name);
         exit(-1);
     }
-    FILE *fig = fopen(filename, "w+");
+    FILE *fig = fopen(filename, "ws+");
     return fig;
 }

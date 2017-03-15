@@ -1,14 +1,16 @@
 #ifndef DGOM_SC_TRIANGLE_H
 #define DGOM_SC_TRIANGLE_H
 
-void dg_tri_info(dg_cell *cell, int N);
-void dg_tri_coord(dg_cell *tri);
-int** dg_tri_fmask(dg_cell *tri);
-void dg_tri_orthog_func(dg_cell *cell, int ind, double *func);
-void dg_tri_deriorthog_func(dg_cell *tri, int ind, double *dr, double *ds, double *dt);
-double ** dg_tri_surf_mass_matrix(dg_cell *cell);
-void dg_tri_gauss_weight(dg_cell *cell);
-void dg_tri_free(dg_cell *cell);
-void dg_tri_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal);
+#include "dg_cell.h"
+
+dg_cell_info* dg_cell_tri_info(int N);
+void dg_cell_tri_set_node(dg_cell *cell, int *Np, double **r, double **s, double **t);
+void dg_cell_tri_orthog_func(int N, int ind, int Np, double *r, double *s, double *t, double *func);
+void dg_cell_tri_deriorthog_func(int N, int ind, int Np,
+                                 double *r, double *s, double *t,
+                                 double *dr, double *ds, double *dt);
+void dg_cell_tri_Fmask(dg_cell *cell, int **Fmask);
+
+void dg_cell_tri_proj(dg_cell *cell, double *vertVal, double *nodeVal);
 
 #endif

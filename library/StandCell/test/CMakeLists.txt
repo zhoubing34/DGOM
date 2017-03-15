@@ -2,14 +2,11 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library
         ${CMAKE_SOURCE_DIR}/StdRegions)
 
 set(STDREGIONS_SCR
-        sc_test_main.c
-        sc_test_main.h
-        triangle/sc_tri_test.c
-        triangle/sc_tri_test.h
-        triangle/sc_tri_data3.h
-        quadrilateral/sc_quad_test.c
-        quadrilateral/sc_quad_test.h
-        quadrilateral/sc_quad_data3.h)
+        dg_cell_test_main.c
+        point/dg_cell_point_test.c
+        line/dg_cell_line_test.c
+        triangle/dg_cell_tri_test.c
+        quadrilateral/dg_cell_quad_test.c)
 
 add_executable(standcell_test ${STDREGIONS_SCR})
 

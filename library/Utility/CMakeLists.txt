@@ -3,7 +3,6 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/library)
 set(LIBUTILITIES_SOURCE
         utility.c
         utility.h
-        mat_utils.hh
         mat_utils.h
         mat_utils.c
         unit_test.h
