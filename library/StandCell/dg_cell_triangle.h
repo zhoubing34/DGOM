@@ -9,7 +9,6 @@ void dg_cell_tri_orthog_func(int N, int ind, int Np, double *r, double *s, doubl
 void dg_cell_tri_deriorthog_func(int N, int ind, int Np,
                                  double *r, double *s, double *t,
                                  double *dr, double *ds, double *dt);
-void dg_cell_tri_Fmask(dg_cell *cell, int **Fmask);
 
 void dg_cell_tri_proj(dg_cell *cell, double *vertVal, double *nodeVal);
 

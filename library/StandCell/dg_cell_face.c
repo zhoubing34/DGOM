@@ -77,6 +77,43 @@ static double **dg_cell_face_LIFT(dg_cell *cell, int Nfptotal, int **Fmask){
 }
 
 
+void dg_face_cell_Fmask(dg_cell *cell, int **Fmask){
+    const int N = dg_cell_N(cell);
+    const int Np = dg_cell_Np(cell);
+    const int Nfaces = dg_cell_Nfaces(cell);
+    const dg_cell_type *face_type = dg_cell_facetype(cell);
+    int m,n,f;
+    for(f=0;f<Nfaces;f++){
+        dg_cell *face_cell = dg_cell_creat(N, face_type[f]);
+        /* assignment of Fmask */
+        int Nface_node = dg_cell_Np(face_cell);
+        int Nface_vert = dg_cell_Nv(face_cell);
+        double f_vr[Nface_vert], f_vs[Nface_vert], f_vt[Nface_vert];
+        for(n=0;n<Nface_vert;n++){
+            f_vr[n] = dg_cell_vr(cell)[ dg_cell_FToV(cell)[f][n] ];
+            f_vs[n] = dg_cell_vs(cell)[ dg_cell_FToV(cell)[f][n] ];
+            f_vt[n] = dg_cell_vt(cell)[ dg_cell_FToV(cell)[f][n] ];
+        }
+        double f_r[Nface_node], f_s[Nface_node], f_t[Nface_node]; // face node coordinate
+        face_cell->proj_vert2node(face_cell, f_vr, f_r);
+        face_cell->proj_vert2node(face_cell, f_vs, f_s);
+        face_cell->proj_vert2node(face_cell, f_vt, f_t);
+        for(n=0;n<Nface_node;n++){
+            double x1 = f_r[n];
+            double y1 = f_s[n];
+            double z1 = f_t[n];
+            for(m=0;m<Np;m++){
+                double x2 = dg_cell_r(cell)[m];
+                double y2 = dg_cell_s(cell)[m];
+                double z2 = dg_cell_t(cell)[m];
+                double d12 = (x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)+(z1-z2)*(z1-z2);
+                if(d12 < EPS) {Fmask[f][n] = m; break;}
+            }
+        }
+    }
+    return;
+}
+
 /**
  * @brief
  * @param cell
@@ -96,14 +133,8 @@ dg_cell_face *dg_cell_face_create(dg_cell *cell, const dg_cell_creator *creator)
     double **w = array_double_create(Nfaces, Nfp);
     int **Fmask = array_int_create(Nfaces, Nfp);
     /* assignment of Fmask */
-    creator->face_Fmask(cell, Fmask);
+    dg_face_cell_Fmask(cell, Fmask);
 
-//    /* print Fmask */
-//    int m,t;
-//    for(m=0;m<Nfaces;m++){
-//        for(t=0;t<Nfp[m];t++)
-//            printf("Fmask[%d][%d]=%d\n", m, t, Fmask[m][t]);
-//    }
     /* assignment of ws and Mes */
     dg_cell_type *face_type = dg_cell_facetype(cell);
     int n,f;

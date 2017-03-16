@@ -16,7 +16,6 @@ static const dg_cell_creator point_creator = {
         dg_cell_point_set_node,
         dg_cell_point_orthog_func,
         dg_cell_point_deri_orthog_func,
-        dg_cell_point_Fmask,
         dg_cell_point_proj,
 };
 
@@ -25,7 +24,6 @@ static const dg_cell_creator line_creator = {
         dg_cell_line_set_nood,
         dg_cell_line_orthog_func,
         dg_cell_line_deri_orthog_func,
-        dg_cell_line_Fmask,
         dg_cell_line_proj,
 };
 
@@ -34,7 +32,6 @@ static const dg_cell_creator tri_creator = {
         dg_cell_tri_set_node,
         dg_cell_tri_orthog_func,
         dg_cell_tri_deriorthog_func,
-        dg_cell_tri_Fmask,
         dg_cell_tri_proj,
 };
 
@@ -43,7 +40,6 @@ static const dg_cell_creator quad_creator = {
         dg_cell_quad_set_nood,
         dg_cell_quad_orthog_func,
         dg_cell_quad_deri_orthog_func,
-        dg_cell_quad_Fmask,
         dg_cell_quad_proj,
 };
 
@@ -72,15 +68,11 @@ dg_cell *dg_cell_creat(int N, dg_cell_type type){
             fprintf(stderr, "%s (%d): Unknown cell type %d\n", __FUNCTION__, __LINE__, type);
             exit(-1);
     }
-
     cell->info = creator->cell_info_create(N);
     cell->volume = dg_cell_volume_create(cell, creator);
     cell->face = dg_cell_face_create(cell, creator);
     cell->proj_vert2node = creator->proj_func;
     dg_cell_d2f(cell);
-//    creator->gauss_weight(cell);
-//
-//    cell->free_func = creator->free_func;
     return cell;
 }
 

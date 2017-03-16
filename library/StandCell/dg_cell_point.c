@@ -16,8 +16,8 @@ dg_cell_info* dg_cell_point_info(int N){
     info->face_type = calloc(Nfaces, sizeof(dg_cell_type));
     info->FToV = matrix_int_create(Nfaces, Nfv);
     info->vr = calloc(Nv, sizeof(double));
-    info->vs = NULL;
-    info->vt = NULL;
+    info->vs = calloc(Nv, sizeof(double));
+    info->vt = calloc(Nv, sizeof(double));
     return info;
 }
 
@@ -25,8 +25,8 @@ void dg_cell_point_set_node(dg_cell *cell, int *Np, double **r, double **s, doub
     const int Npt = 1;
     *Np = Npt;
     *r = vector_double_create(1);
-    *s = NULL;
-    *t = NULL;
+    *s = vector_double_create(1);
+    *t = vector_double_create(1);
 
     *r[0] = 0;
     return;
@@ -42,10 +42,6 @@ void dg_cell_point_deri_orthog_func(int N, int ind, int Np, double *r, double *s
                                     double *dr, double *ds, double *dt){
     /* Vr */
     dr[0] = 0;
-    return;
-}
-
-void dg_cell_point_Fmask(dg_cell *cell, int **Fmask){
     return;
 }
 

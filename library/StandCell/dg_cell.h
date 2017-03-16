@@ -68,8 +68,6 @@ typedef void (*Orthogonal_Func)(int N, int ind, int Np, double *r, double *s, do
 /** function of derivatives orthogonal function value at nodes (r,s,t) */
 typedef void (*Derivative_Orthogonal_Func)(int N, int ind, int Np, double *r, double *s, double *t,
                                            double *dr, double *ds, double *dt);
-/** function of creating Fmask matrix */
-typedef void (*Fmask_Func)(dg_cell *cell, int **Fmask);
 /** function of projecting vertex to nodes */
 typedef void (*Proj_Func)(dg_cell *cell, double *vertVal, double *nodeVal);
 
@@ -78,7 +76,6 @@ typedef struct dg_cell_creator{
     Cell_Node_Func set_node;
     Orthogonal_Func orthogonal_func; ///< orthogonal function
     Derivative_Orthogonal_Func deri_orthgonal_func; ///<derivative of orthogonal func
-    Fmask_Func face_Fmask;
     Proj_Func proj_func;
 } dg_cell_creator;
 

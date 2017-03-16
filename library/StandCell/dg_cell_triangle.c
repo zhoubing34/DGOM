@@ -34,7 +34,7 @@ dg_cell_info* dg_cell_tri_info(int N){
     info->FToV = matrix_int_create(Nfaces, Nfv);
     info->vr = (double *)calloc(Nv, sizeof(double));
     info->vs = (double *)calloc(Nv, sizeof(double));
-    info->vt = NULL;
+    info->vt = (double *)calloc(Nv, sizeof(double));
     /* faces */
     info->face_type[0] = LINE; info->FToV[0][0] = 0; info->FToV[0][1] = 1;
     info->face_type[1] = LINE; info->FToV[1][0] = 1; info->FToV[1][1] = 2;
@@ -226,7 +226,7 @@ void dg_cell_tri_set_node(dg_cell *cell, int *Np, double **r, double **s, double
     *Np = Npt;
     *r = vector_double_create(Npt);
     *s = vector_double_create(Npt);
-    *t = NULL;
+    *t = vector_double_create(Npt);
 
     double L1[Npt], L2[Npt], L3[Npt];
     double x[Npt], y[Npt], dL[Npt], warpf1[Npt];
@@ -386,39 +386,6 @@ static void dg_tri_rstoad(int Np, double *r, double *s, double *a, double *b){
         }
         b[i] = s[i];
     }
-}
-
-void dg_cell_tri_Fmask(dg_cell *cell, int **Fmask){
-    const int N = dg_cell_N(cell);
-    const int Np = dg_cell_Np(cell);
-    const int Nfaces = dg_cell_Nfaces(cell);
-    const dg_cell_type *face_type = dg_cell_facetype(cell);
-    int m,n,f;
-    for(f=0;f<Nfaces;f++){
-        dg_cell *face_cell = dg_cell_creat(N, face_type[f]);
-        /* assignment of Fmask */
-        int Nface_node = dg_cell_Np(face_cell);
-        int Nface_vert = dg_cell_Nv(face_cell);
-        double f_vr[Nface_vert], f_vs[Nface_vert];
-        for(n=0;n<Nface_vert;n++){
-            f_vr[n] = dg_cell_vr(cell)[ dg_cell_FToV(cell)[f][n] ];
-            f_vs[n] = dg_cell_vs(cell)[ dg_cell_FToV(cell)[f][n] ];
-        }
-        double f_r[Nface_node], f_s[Nface_node]; // face node coordinate
-        face_cell->proj_vert2node(face_cell, f_vr, f_r);
-        face_cell->proj_vert2node(face_cell, f_vs, f_s);
-        for(n=0;n<Nface_node;n++){
-            double x1 = f_r[n];
-            double y1 = f_s[n];
-            for(m=0;m<Np;m++){
-                double x2 = dg_cell_r(cell)[m];
-                double y2 = dg_cell_s(cell)[m];
-                double d12 = (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2);
-                if(d12 < EPS) {Fmask[f][n] = m; break;}
-            }
-        }
-    }
-    return;
 }
 
 /**
