@@ -5,8 +5,8 @@
 #define DEBUG 0
 
 /* create node coordinate for 2d dg_region object */
-static void dg_region_nodeCoor2d(dg_region *region);
-static void dg_region_nodeCoor3d(dg_region *region);
+static void dg_region_node2d(dg_region *region);
+static void dg_region_node3d(dg_region *region);
 /* calculate the volume/area and the length scale of each element */
 static void dg_region_volumeScale2d(dg_region *region);
 static void dg_region_volumeScale3d(dg_region *region);
@@ -22,7 +22,7 @@ typedef struct dg_region_creator{
 }dg_region_creator;
 
 static const dg_region_creator region2d_creator={
-        dg_region_nodeCoor2d,
+        dg_region_node2d,
         dg_reg_volumInfo2d,
         dg_reg_surfInfo2d,
         dg_region_volumeScale2d,
@@ -30,7 +30,7 @@ static const dg_region_creator region2d_creator={
 };
 
 static const dg_region_creator region3d_creator={
-        dg_region_nodeCoor3d,
+        dg_region_node3d,
         dg_reg_volumInfo3d,
         dg_reg_surfInfo3d,
         dg_region_volumeScale3d,
@@ -47,13 +47,14 @@ dg_region* dg_region_create(dg_grid *grid){
     region->grid = grid;
 
     const dg_region_creator *creator;
-    switch (grid->cell->type){
+    switch (dg_cell_celltype(grid->cell)){
         case TRIANGLE:
             creator = &region2d_creator; break;
         case QUADRIL:
             creator = &region2d_creator; break;
         default:
-            fprintf(stderr, "%s (%d): Unknown cell type %d\n", __FUNCTION__, __LINE__, grid->cell->type);
+            fprintf(stderr, "%s (%d): Unknown cell type %d\n",
+                    __FUNCTION__, __LINE__, dg_cell_celltype(grid->cell));
             exit(-1);
     }
 
@@ -120,16 +121,16 @@ static void dg_region_free3d(dg_region *region){
  * @brief create node coordinate for 2d (triangle and quadrilateral)
  * @param[in,out] region multi-regions object
  */
-static void dg_region_nodeCoor3d(dg_region *region){
+static void dg_region_node3d(dg_region *region){
     dg_cell *cell = region->cell;
     dg_grid *grid = region->grid;
-    const int Np = cell->Np;
-    const int K = grid->K;
-    const int Nv = cell->Nv;
-    int **EToV = grid->EToV;
-    double *vx = grid->vx;
-    double *vy = grid->vy;
-    double *vz = grid->vz;
+    const int Np = dg_cell_Np(cell);
+    const int Nv = dg_cell_Nv(cell);
+    const int K = dg_grid_K(grid);
+    int **EToV = dg_grid_EToV(grid);
+    double *vx = dg_grid_vx(grid);
+    double *vy = dg_grid_vy(grid);
+    double *vz = dg_grid_vz(grid);
 
     region->x = matrix_double_create(K, Np);
     region->y = matrix_double_create(K, Np);
@@ -154,15 +155,15 @@ static void dg_region_nodeCoor3d(dg_region *region){
  * @brief create node coordinate for 2d region (triangle and quadrilateral)
  * @param[in,out] region multi-regions object
  */
-static void dg_region_nodeCoor2d(dg_region *region){
+static void dg_region_node2d(dg_region *region){
     dg_cell *cell = region->cell;
     dg_grid *grid = region->grid;
-    const int Np = cell->Np;
-    const int K = grid->K;
-    const int Nv = cell->Nv;
-    int **EToV = grid->EToV;
-    double *vx = grid->vx;
-    double *vy = grid->vy;
+    const int Np = dg_cell_Np(cell);
+    const int Nv = dg_cell_Nv(cell);
+    const int K = dg_grid_K(grid);
+    int **EToV = dg_grid_EToV(grid);
+    double *vx = dg_grid_vx(grid);
+    double *vy = dg_grid_vy(grid);
 
     region->x = matrix_double_create(K, Np);
     region->y = matrix_double_create(K, Np);
@@ -181,8 +182,8 @@ static void dg_region_nodeCoor2d(dg_region *region){
 }
 
 static void dg_region_volumeScale2d(dg_region *region){
-    const int Np = region->cell->Np;
-    const int K = region->grid->K;
+    const int Np = dg_cell_Np(region->cell);
+    const int K = dg_grid_K(region->grid);
 
     region->size = vector_double_create(K); // volume or area
     region->len = vector_double_create(K); // length of element
@@ -201,8 +202,8 @@ static void dg_region_volumeScale2d(dg_region *region){
 }
 
 static void dg_region_volumeScale3d(dg_region *region){
-    const int Np = region->cell->Np;
-    const int K = region->grid->K;
+    const int Np = dg_cell_Np(region->cell);
+    const int K = dg_grid_K(region->grid);
 
     region->size = vector_double_create(K); // volume or area
     region->len = vector_double_create(K); // length of element
@@ -232,8 +233,8 @@ double dg_region_integral(dg_region *region, int ind, double *nodalVal){
     double integral = 0;
 
     const double *J = region->J[ind];
-    const double *w = region->cell->wv;
-    const int Np = region->cell->Np;
+    const double *w = dg_cell_w(region->cell);
+    const int Np = dg_cell_Np(region->cell);
 
     register int i;
     for(i=0;i<Np;i++){

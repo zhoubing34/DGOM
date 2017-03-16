@@ -7,17 +7,18 @@
 void dg_edge_surfinfo2d(dg_edge *edge){
 
     dg_cell *cell = edge->cell;
+    dg_region *region = edge->region;
     const int Nnode = dg_edge_Nnode(edge);
     const int Nedge = dg_edge_Nedge(edge);
     dg_real *fsc = vector_real_create(Nnode);
     dg_real *nxe = vector_real_create(Nnode);
     dg_real *nye = vector_real_create(Nnode);
 
-    int **Fmask = cell->Fmask;
-    double **J = edge->region->J;
-    double **sJ = edge->region->sJ;
-    double **nx = edge->region->nx;
-    double **ny = edge->region->ny;
+    int **Fmask = dg_cell_Fmask(cell);
+    double **J = dg_region_J(region);
+    double **sJ = dg_region_sJ(region);
+    double **nx = dg_region_nx(region);
+    double **ny = dg_region_ny(region);
 
     int f,n,sk=0;
     for(f=0;f<Nedge;f++){
@@ -26,7 +27,7 @@ void dg_edge_surfinfo2d(dg_edge *edge){
         const double isJ = sJ[k1][f1];
         const double nxi = nx[k1][f1];
         const double nyi = ny[k1][f1];
-        const int Nfp = dg_cell_Nfp(cell, f1);
+        const int Nfp = dg_cell_Nfp(cell)[f1];
         for(n=0;n<Nfp;n++){
             nxe[sk] = nxi;
             nye[sk] = nyi;

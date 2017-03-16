@@ -49,5 +49,22 @@ double dg_region_integral(dg_region *region, int ind, double *nodalVal);
 
 #define dg_region_procid(region) region->procid
 #define dg_region_nprocs(region) region->nprocs
+#define dg_region_x(region) region->x
+#define dg_region_y(region) region->y
+#define dg_region_z(region) region->z
+#define dg_region_drdx(region) region->drdx
+#define dg_region_drdy(region) region->drdy
+#define dg_region_drdz(region) region->drdz
+#define dg_region_dsdx(region) region->dsdx
+#define dg_region_dsdy(region) region->dsdy
+#define dg_region_dsdz(region) region->dsdz
+#define dg_region_dtdx(region) region->dtdx
+#define dg_region_dtdy(region) region->dtdy
+#define dg_region_dtdz(region) region->dtdz
+#define dg_region_nx(region) region->nx
+#define dg_region_ny(region) region->ny
+#define dg_region_nz(region) region->nz
+#define dg_region_J(region) region->J
+#define dg_region_sJ(region) region->sJ
 
 #endif //DGOM_MULTIREGIONS_H

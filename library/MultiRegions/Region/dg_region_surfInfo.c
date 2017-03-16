@@ -16,7 +16,7 @@ void dg_reg_surfInfo2d(dg_region *region){
 
     double **x = region->x;
     double **y = region->y;
-    int **Fmask = region->cell->Fmask;
+    int **Fmask = dg_cell_Fmask(cell);
 
     double **nx = matrix_double_create(K, Nfaces);
     double **ny = matrix_double_create(K, Nfaces);
@@ -28,7 +28,7 @@ void dg_reg_surfInfo2d(dg_region *region){
 
     for(k=0;k<K;k++){
         for(f=0;f<Nfaces;f++){
-            const int Nfp = dg_cell_Nfp(cell, f);
+            const int Nfp = dg_cell_Nfp(cell)[f];
             double x1 = x[k][Fmask[f][0]];
             double x2 = x[k][Fmask[f][Nfp-1]];
             double y1 = y[k][Fmask[f][0]];

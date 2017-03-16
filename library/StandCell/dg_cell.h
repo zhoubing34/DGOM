@@ -15,8 +15,8 @@
 #include "Utility/utility.h"
 
 typedef enum {
-    POINT = 0,
-    LINE = 1,
+    POINT = 0,  ///< point
+    LINE = 1,   ///< line
     TRIANGLE=2, ///< triangle
     QUADRIL=3,  ///< quadrilateral
     TETRA=4,    ///< tetrahedron

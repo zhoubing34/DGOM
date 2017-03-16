@@ -34,10 +34,8 @@ void dg_phys_strong_vol_opt2d(dg_phys *phys, Nodal_Flux_Fun nodal_flux){
     dg_real **dsdy_p = phys->region->dsdy;
 
     dg_real Eflux[Np*Nfield], Gflux[Np*Nfield], rhs[Nfield];
-
     for(k=0;k<K;k++){
         dg_real *var = f_Q + k*Np*Nfield; // variable in k-th element
-
         // calculate flux term
         for(n=0;n<Np;n++){
             // calculate flux term on the n-th point
@@ -49,7 +47,6 @@ void dg_phys_strong_vol_opt2d(dg_phys *phys, Nodal_Flux_Fun nodal_flux){
             }
 #endif
         }
-
         for(n=0;n<Np;++n){ // rhs for n-th point
 
             const dg_real *ptDr = f_Dr+n*Np; // n-th row of Dr
@@ -92,4 +89,5 @@ void dg_phys_strong_vol_opt2d(dg_phys *phys, Nodal_Flux_Fun nodal_flux){
             }
         }
     }
+    return;
 }

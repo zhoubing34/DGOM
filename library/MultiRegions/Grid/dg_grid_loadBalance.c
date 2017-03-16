@@ -28,7 +28,7 @@ void dg_grid_load_balance2d(dg_grid *grid){
     const int procid = grid->procid;
 
     /* number of vertex in each element */
-    const int Nv = grid->cell->Nv;
+    const int Nv = dg_cell_Nv(grid->cell);
 
     /* number of elements in each process */
     int Kprocs[nprocs];

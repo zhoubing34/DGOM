@@ -77,7 +77,7 @@ dg_cell *dg_cell_creat(int N, dg_cell_type type){
     cell->volume = dg_cell_volume_create(cell, creator);
     cell->face = dg_cell_face_create(cell, creator);
     cell->proj_vert2node = creator->proj_func;
-//    dg_cell_d2f(cell);
+    dg_cell_d2f(cell);
 //    creator->gauss_weight(cell);
 //
 //    cell->free_func = creator->free_func;
@@ -102,37 +102,39 @@ void dg_cell_free(dg_cell *cell){
     return;
 }
 
-///**
-// * @brief
-// * copy double type to user specific precision.
-// * @param [in,out] cell dg_cell structure
-// */
-//static void dg_cell_d2f(dg_cell *cell){
-//    const int Np = dg_cell_Np(cell);
-//    int NfpTotal = dg_cell_Nfptotal(cell);
-//    /* float version */
-//    size_t sz = (size_t) NfpTotal*Np;
-//    cell->f_LIFT = (dg_real *) calloc(sz, sizeof(dg_real));
-//
-//    int sk=0,n,m;
-//    for(n=0;n<Np;++n){
-//        for(m=0;m<NfpTotal;++m){
-//            cell->f_LIFT[sk++] = (dg_real) cell->LIFT[n][m];
-//        }
-//    }
-//
-//    sz = (size_t) Np*Np;
-//    cell->f_Dr = (dg_real*) calloc(sz, sizeof(dg_real));
-//    cell->f_Ds = (dg_real*) calloc(sz, sizeof(dg_real));
-//    sk = 0;
-//    for(n=0;n<Np;++n){
-//        for(m=0;m<Np;++m){
-//            cell->f_Dr[sk  ] = (dg_real) cell->Dr[n][m];
-//            cell->f_Ds[sk++] = (dg_real) cell->Ds[n][m];
-//        }
-//    }
-//    return;
-//}
+/**
+ * @brief
+ * copy double type to user specific precision.
+ * @param [in,out] cell dg_cell structure
+ */
+static void dg_cell_d2f(dg_cell *cell){
+    const int Np = dg_cell_Np(cell);
+    int NfpTotal = dg_cell_Nfptotal(cell);
+    /* float version */
+    size_t sz = (size_t) NfpTotal*Np;
+    cell->f_LIFT = (dg_real *) calloc(sz, sizeof(dg_real));
+
+    int sk=0,n,m;
+    for(n=0;n<Np;++n){
+        for(m=0;m<NfpTotal;++m){
+            cell->f_LIFT[sk++] = (dg_real) dg_cell_LIFT(cell)[n][m];
+        }
+    }
+
+    sz = (size_t) Np*Np;
+    cell->f_Dr = (dg_real*) calloc(sz, sizeof(dg_real));
+    cell->f_Ds = (dg_real*) calloc(sz, sizeof(dg_real));
+    cell->f_Dt = (dg_real*) calloc(sz, sizeof(dg_real));
+    sk = 0;
+    for(n=0;n<Np;++n){
+        for(m=0;m<Np;++m){
+            cell->f_Dr[sk  ] = (dg_real) dg_cell_Dr(cell)[n][m];
+            cell->f_Ds[sk  ] = (dg_real) dg_cell_Ds(cell)[n][m];
+            cell->f_Dt[sk++] = (dg_real) dg_cell_Ds(cell)[n][m];
+        }
+    }
+    return;
+}
 
 
 /**

@@ -46,7 +46,17 @@ void dg_grid_free(dg_grid *grid);
 
 #define dg_grid_K(grid) grid->K
 #define dg_grid_Nv(grid) grid->Nv
+#define dg_grid_EToV(grid) grid->EToV
+#define dg_grid_EToE(grid) grid->EToE
+#define dg_grid_EToF(grid) grid->EToF
+#define dg_grid_EToP(grid) grid->EToP
+#define dg_grid_EToBS(grid) grid->EToBS
+#define dg_grid_EToR(grid) grid->EToR
+
 #define dg_grid_procid(grid) grid->procid
 #define dg_grid_nprocs(grid) grid->nprocs
+#define dg_grid_vx(grid) grid->vx
+#define dg_grid_vy(grid) grid->vy
+#define dg_grid_vz(grid) grid->vz
 
 #endif // UNSTRCUTMESH_H

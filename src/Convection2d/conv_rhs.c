@@ -29,11 +29,10 @@ int conv_upWindFlux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_rea
 
 
 void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
-    dg_mesh *mesh = phys->mesh;
-    const int K = mesh->grid->K;
-    const int nprocs = mesh->nprocs;
-    const int Np = phys->cell->Np;
-    const int Nfield = phys->Nfield;
+    const int K = dg_grid_K(phys->grid);
+    const int nprocs = dg_grid_nprocs(phys->grid);
+    const int Np = dg_cell_Np(phys->cell);
+    const int Nfield = dg_phys_Nfield(phys);
 
     dg_real *f_Q = phys->f_Q;
 

@@ -24,10 +24,10 @@ int dg_phys_strong_vol_opt2d_test(dg_phys *phys, int verbose){
 
     dg_mesh *mesh = phys->mesh;
     dg_region *region = phys->region;
-    dg_cell *shape = phys->cell;
+    dg_cell *cell = phys->cell;
 
     const int K = phys->grid->K;
-    const int Np = shape->Np;
+    const int Np = dg_cell_Np(cell);
 
     int k,i;
     dg_real rhs_ext[Np*Nfield*K];
@@ -53,7 +53,7 @@ int dg_phys_strong_vol_opt2d_test(dg_phys *phys, int verbose){
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
         fprintf(fp, "Nfield = %d\n", dg_phys_Nfield(phys));
-        fprintf(fp, "Np = %d\n", phys->cell->Np);
+        fprintf(fp, "Np = %d\n", Np);
         print_double_vector2file(fp, "f_Q", phys->f_Q, Nfield*Np*k);
         print_double_vector2file(fp, "f_rhsQ", phys->f_rhsQ, Nfield*Np*k);
     }

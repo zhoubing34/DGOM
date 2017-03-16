@@ -50,11 +50,12 @@ void dg_reg_volumInfo3d(dg_region *region){
  * @param[in,out] region multi-regions object
  */
 void dg_reg_volumInfo2d(dg_region *region){
-    int k,n;
-    const int Np = region->cell->Np;
-    double **Dr = region->cell->Dr;
-    double **Ds = region->cell->Ds;
-    const int K = region->grid->K;
+
+    dg_cell *cell = region->cell;
+    const int Np = dg_cell_Np(cell);
+    double **Dr = dg_cell_Dr(cell);
+    double **Ds = dg_cell_Ds(cell);
+    const int K = dg_grid_K(region->grid);
     double dxdr[Np], dxds[Np], dydr[Np], dyds[Np];
 
     // allocation
@@ -69,6 +70,7 @@ void dg_reg_volumInfo2d(dg_region *region){
     double **dsdx = region->dsdx;
     double **dsdy = region->dsdy;
 
+    int k,n;
     for(k=0;k<K;k++){
 
         // calculate the dxdr,dxds,dydr,dyds

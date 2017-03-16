@@ -37,7 +37,7 @@ dg_edge* dg_edge_create(dg_mesh *mesh){
     edge->nprocs = dg_mesh_nprocs(mesh);
 
     const dg_edge_creator *creator;
-    dg_cell_type type = mesh->cell->type;
+    dg_cell_type type = dg_cell_celltype(mesh->cell);
     switch (type){
         case TRIANGLE:
             creator = &edge_creator2d; break;

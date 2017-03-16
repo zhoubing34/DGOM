@@ -26,7 +26,7 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
     // total number of parallel face points
     int f, Nparn = 0;
     for(f=0;f<Nparf;f++){
-        Nparn += dg_cell_Nfp(cell, parface[f]);
+        Nparn += dg_cell_Nfp(cell)[parface[f]];
     }
     // adjacent node id
     int *n1 = vector_int_create(Nparn);
@@ -37,7 +37,7 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
     double *yP = vector_double_create(Nparn);
     int *n_recv = vector_int_create(Nparn);
 
-    int **Fmask = mesh->cell->Fmask;
+    int **Fmask = dg_cell_Fmask(cell);
     const int *parfN = mesh->parfaceNum;
     double **x = mesh->region->x;
     double **y = mesh->region->y;
@@ -51,7 +51,7 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
     for(n=0;n<Nparf;n++){
         k = parcell[n];
         f = parface[n];
-        int Nfp = dg_cell_Nfp(cell, f);
+        int Nfp = dg_cell_Nfp(cell)[f];
         for(m=0;m<Nfp;m++){
             int ind = k*Np + Fmask[f][m];
             n1[sk] = ind;
@@ -73,7 +73,7 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
         if(p!=procid){
             int Nout = 0; // # of points send to process p
             for(f=0;f<(parfN[p]);f++){
-                Nout += dg_cell_Nfp(cell, parface[st++]);
+                Nout += dg_cell_Nfp(cell)[parface[st++]];
             }
             //const int Nout = mesh->parfaceNum[p]*Nfp;
             parnodeNum[p] = Nout;
@@ -100,7 +100,7 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
 
     /* set n2, n2 the node index from adjacent process */
     for(n=0;n<Nparf;n++){
-        int Nfp = dg_cell_Nfp(cell, parface[n]);
+        int Nfp = dg_cell_Nfp(cell)[parface[n]];
         for(m=0;m<Nfp;m++){
             sk = n*Nfp+m;
             double x1 = xM[sk];

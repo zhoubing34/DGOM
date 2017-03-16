@@ -12,8 +12,8 @@
  */
 int dg_region_node_test(dg_region *reg, int verbose){
     int fail = 0;
-    const int K = reg->grid->K;
-    const int Np = reg->grid->cell->Np;
+    const int K = dg_grid_K(reg->grid);
+    const int Np = dg_cell_Np(reg->cell);
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, reg->procid, reg->nprocs);
         print_double_matrix2file(fp, "region->x", reg->x, K, Np);
@@ -32,8 +32,8 @@ int dg_region_node_test(dg_region *reg, int verbose){
  */
 int dg_region_volume_factor_test(dg_region *reg, int verbose){
     int fail = 0;
-    const int K = reg->grid->K;
-    const int Np = reg->grid->cell->Np;
+    const int K = dg_grid_K(reg->grid);
+    const int Np = dg_cell_Np(reg->cell);
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, reg->procid, reg->nprocs);
         print_double_matrix2file(fp, "region->drdx", reg->drdx, K, Np);
@@ -55,8 +55,8 @@ int dg_region_volume_factor_test(dg_region *reg, int verbose){
  */
 int dg_region_face_factor_test(dg_region *reg, int verbose){
     int fail = 0;
-    const int K = reg->grid->K;
-    const int Nfaces = reg->grid->cell->Nfaces;
+    const int K = dg_grid_K(reg->grid);
+    const int Nfaces = dg_cell_Nfaces(reg->cell);
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, reg->procid, reg->nprocs);
         print_double_matrix2file(fp, "region->nx", reg->nx, K, Nfaces);

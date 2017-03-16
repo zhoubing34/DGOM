@@ -74,7 +74,8 @@ dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, do
         case QUADRIL:
             creator = &grid_2d_creator; break;
         default:
-            fprintf(stderr, "%s (%d): Unknown cell type %d\n", __FUNCTION__, __LINE__, cell->type);
+            fprintf(stderr, "%s (%d): Unknown cell type %d\n",
+                    __FUNCTION__, __LINE__, dg_cell_celltype(cell));
             exit(-1);
     }
 
@@ -173,7 +174,7 @@ static void dg_grid_partition(dg_grid *grid){
     int Kstart = 0;
     for(p=0;p<procid;++p) {Kstart += Kprocs[p];}
 
-    int **newEToV = matrix_int_create(Klocal, grid->cell->Nv);
+    int **newEToV = matrix_int_create(Klocal, dg_cell_Nv(grid->cell));
     /* Assignment of local mesh information */
     int sk=0,n,i;
     for (n=0; n<K; n++){

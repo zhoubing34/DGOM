@@ -112,8 +112,8 @@ static arg_section** conv_arg_section_create(){
     section_p[ind++] = section_create(probleminfo, var_num);
 
     char scinfo[] = HEADEND "standard element info (2 parameters)\n"
-            HEADLINE "    1. element type  |--- 0. triangle\n"
-            HEADLINE "                     |--- 1. quadrilateral\n"
+            HEADLINE "    1. element type  |--- 2. triangle\n"
+            HEADLINE "                     |--- 3. quadrilateral\n"
             HEADLINE "    2. order of polynomial\n";
     var_num = 2;
     section_p[ind++] = section_create(scinfo, var_num);

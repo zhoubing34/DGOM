@@ -11,19 +11,20 @@ void dg_edge_node_map3d(dg_edge *edge){
 void dg_edge_node_map2d(dg_edge *edge){
 
     dg_cell *cell = edge->cell;
+    dg_region *region = edge->region;
     const int Nedge = dg_edge_Nedge(edge);
     const int Np = dg_cell_Np(cell);
     const int TotalParNode = dg_mesh_Nparn(edge->mesh);
     const int Nfaces = dg_cell_Nfaces(cell);
-    int **Fmask = cell->Fmask;
-    double **x = edge->region->x;
-    double **y = edge->region->y;
+    int **Fmask = dg_cell_Fmask(cell);
+    double **x = dg_region_x(region);
+    double **y = dg_region_y(region);
     int *parnode = edge->mesh->parnode;
     // count total nodes on edges
     int f,totalNode = 0;
     for(f=0;f<Nedge;f++){
         int f1 = edge->varfM[f];
-        totalNode += dg_cell_Nfp(cell, f1);
+        totalNode += dg_cell_Nfp(cell)[f1];
     }
     // map node
     int *varpM = vector_int_create(totalNode);
@@ -34,7 +35,7 @@ void dg_edge_node_map2d(dg_edge *edge){
     int *Nfpstart = (int *)calloc(Nfaces, sizeof(int));
     Nfpstart[0] = 0;
     for(f=1;f<Nfaces;f++){
-        Nfpstart[f] = Nfpstart[f-1] + dg_cell_Nfp(cell, f-1);
+        Nfpstart[f] = Nfpstart[f-1] + dg_cell_Nfp(cell)[f-1];
     }
 
     int n1,n2,sk=0;
@@ -45,7 +46,7 @@ void dg_edge_node_map2d(dg_edge *edge){
         int f2 = edge->varfP[f];
         int ftype = edge->ftype[f];
 
-        const int Nfp = dg_cell_Nfp(cell, f1);
+        const int Nfp = dg_cell_Nfp(cell)[f1];
         for(n1=0;n1<Nfp;n1++){
             const int idM = k1*Np + Fmask[f1][n1];
             varpM[sk] = idM;

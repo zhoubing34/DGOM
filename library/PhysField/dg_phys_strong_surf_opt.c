@@ -49,7 +49,7 @@ void dg_phys_strong_surf_opt2d(dg_phys *phys,
         const int f1 = edge->surfinfo[surfid++];
         const int f2 = edge->surfinfo[surfid++];
         const int ftype = edge->surfinfo[surfid++];
-        const int Nfp = dg_cell_Nfp(cell, f1);
+        const int Nfp = dg_cell_Nfp(cell)[f1];
 
         dg_real flux_M[Nfp*Nfaces*Nfield];
         dg_real flux_P[Nfp*Nfaces*Nfield];

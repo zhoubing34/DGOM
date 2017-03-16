@@ -80,9 +80,9 @@ void conv_putvar(dg_phys *phys, int timestep, double time){
     extern Conv_Solver solver;
     nc_file *file = solver.outfile;
 
-    const int K = phys->grid->K;
-    const int Np = phys->cell->Np;
-    const int Nfield = phys->Nfield;
+    const int K = dg_grid_K(phys->grid);
+    const int Np = dg_cell_Np(phys->cell);
+    const int Nfield = dg_phys_Nfield(phys);
 
     MPI_Offset start_v[3], count_v[3];
     MPI_Offset start_t, count_t;

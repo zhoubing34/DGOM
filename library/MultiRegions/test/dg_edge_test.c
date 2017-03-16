@@ -33,7 +33,7 @@ int dg_edge_nodemap_test(dg_edge *edge, int verbose){
     for(f=0;f<Nedge;f++){
         int f1 = edge->varfM[f];
         int ftype = edge->ftype[f];
-        const int Nfp = dg_cell_Nfp(edge->cell, f1);
+        const int Nfp = dg_cell_Nfp(edge->cell)[f1];
         for(n=0;n<Nfp;n++){
             if(ftype != INNERBS){
                 xM[sk] = x[0][edge->varpM[sk]];

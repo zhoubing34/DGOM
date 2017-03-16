@@ -26,9 +26,9 @@ dg_grid* dg_grid_uniform_tri(dg_cell *cell, int Mx, int My,
                              double xmin, double xmax,
                              double ymin, double ymax, int type) {
     /* check stand element */
-    if(cell->type !=  TRIANGLE){
+    if(dg_cell_celltype(cell) !=  TRIANGLE){
         fprintf(stderr, "%s (%s):%d\nthe input element type %d is not triangle!\n",
-               __FUNCTION__, __FILE__, __LINE__, cell->type);
+               __FUNCTION__, __FILE__, __LINE__, dg_cell_celltype(cell));
         exit(-1);
     }
 
@@ -110,9 +110,9 @@ dg_grid* dg_grid_uniform_quad(dg_cell *cell, int Mx, int My,
                               double ymin, double ymax)
 {
     /* check stand element */
-    if(cell->type!= QUADRIL){
+    if(dg_cell_celltype(cell) != QUADRIL){
         fprintf(stderr, "%s (%s):%d\nthe input element type %d is not quadrilateral!\n",
-                __FUNCTION__, __FILE__, __LINE__, cell->type);
+                __FUNCTION__, __FILE__, __LINE__, dg_cell_celltype(cell));
         exit(-1);
     }
 
@@ -190,7 +190,7 @@ dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
     int Nv, K, temp;
     fscanf(fp, "%d %d %d\n", &K, &Nv, &temp);
     // check element vertex
-    if(cell->Nv !=  Nv){
+    if(dg_cell_Nv(cell) !=  Nv){
         fprintf(stderr, "%s (%d)\n"
                 "The input element type is not correct!\n", __FILE__, __LINE__);
         exit(-1);

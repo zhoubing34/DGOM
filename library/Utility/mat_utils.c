@@ -184,4 +184,4 @@ __T__ *__FUNC_NAME(__T__ *v){   \
 VECTOR_FREE_FUNC_TEMPLATE(int, vector_int_free)
 VECTOR_FREE_FUNC_TEMPLATE(double, vector_double_free)
 VECTOR_FREE_FUNC_TEMPLATE(float, vector_float_free)
-VECTOR_FREE_FUNC_TEMPLATE(dg_real, vector_dg_real_free)
+VECTOR_FREE_FUNC_TEMPLATE(dg_real, vector_real_free)
