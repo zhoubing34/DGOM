@@ -6,35 +6,30 @@
 
 /* create node coordinate for 2d dg_region object */
 static void dg_region_node2d(dg_region *region);
-static void dg_region_node3d(dg_region *region);
+static void dg_region_node(dg_region *region);
 /* calculate the volume/area and the length scale of each element */
 static void dg_region_volumeScale2d(dg_region *region);
 static void dg_region_volumeScale3d(dg_region *region);
-static void dg_region_free2d(dg_region *region);
-static void dg_region_free3d(dg_region *region);
 
 typedef struct dg_region_creator{
     void (*set_nood)(dg_region *reg);
     void (*set_volumInfo)(dg_region *reg);
     void (*set_surfInfo)(dg_region *reg);
     void (*set_volumScal)(dg_region *reg);
-    void (*free_func)(dg_region *reg);
 }dg_region_creator;
 
 static const dg_region_creator region2d_creator={
-        dg_region_node2d,
+        dg_region_node,
         dg_reg_volumInfo2d,
         dg_reg_surfInfo2d,
         dg_region_volumeScale2d,
-        dg_region_free2d,
 };
 
 static const dg_region_creator region3d_creator={
-        dg_region_node3d,
+        dg_region_node,
         dg_reg_volumInfo3d,
         dg_reg_surfInfo3d,
         dg_region_volumeScale3d,
-        dg_region_free3d,
 };
 
 dg_region* dg_region_create(dg_grid *grid){
@@ -63,38 +58,10 @@ dg_region* dg_region_create(dg_grid *grid){
     creator->set_surfInfo(region);
     creator->set_volumScal(region);
 
-    region->free_func = creator->free_func;
     return region;
 }
 
 void dg_region_free(dg_region *region){
-    region->free_func(region);
-    return;
-}
-
-static void dg_region_free2d(dg_region *region){
-    matrix_double_free(region->x);
-    matrix_double_free(region->y);
-    matrix_double_free(region->J);
-    /* volume geometry */
-    matrix_double_free(region->drdx);
-    matrix_double_free(region->drdy);
-    matrix_double_free(region->dsdx);
-    matrix_double_free(region->dsdy);
-
-    matrix_double_free(region->nx);
-    matrix_double_free(region->ny);
-    matrix_double_free(region->sJ);
-
-    /* volume/area size and length len */
-    vector_double_free(region->size);
-    vector_double_free(region->len);
-
-    free(region);
-    return;
-}
-
-static void dg_region_free3d(dg_region *region){
     matrix_double_free(region->x);
     matrix_double_free(region->y);
     matrix_double_free(region->z);
@@ -121,7 +88,7 @@ static void dg_region_free3d(dg_region *region){
  * @brief create node coordinate for 2d (triangle and quadrilateral)
  * @param[in,out] region multi-regions object
  */
-static void dg_region_node3d(dg_region *region){
+static void dg_region_node(dg_region *region){
     dg_cell *cell = region->cell;
     dg_grid *grid = region->grid;
     const int Np = dg_cell_Np(cell);
@@ -147,36 +114,6 @@ static void dg_region_node3d(dg_region *region){
         dg_cell_proj_vert2node(cell, gx, region->x[k]);
         dg_cell_proj_vert2node(cell, gy, region->y[k]);
         dg_cell_proj_vert2node(cell, gz, region->z[k]);
-    }
-    return;
-}
-
-/**
- * @brief create node coordinate for 2d region (triangle and quadrilateral)
- * @param[in,out] region multi-regions object
- */
-static void dg_region_node2d(dg_region *region){
-    dg_cell *cell = region->cell;
-    dg_grid *grid = region->grid;
-    const int Np = dg_cell_Np(cell);
-    const int Nv = dg_cell_Nv(cell);
-    const int K = dg_grid_K(grid);
-    int **EToV = dg_grid_EToV(grid);
-    double *vx = dg_grid_vx(grid);
-    double *vy = dg_grid_vy(grid);
-
-    region->x = matrix_double_create(K, Np);
-    region->y = matrix_double_create(K, Np);
-
-    int k,i;
-    double gx[Nv], gy[Nv];
-    for(k=0;k<K;k++){
-        for(i=0;i<Nv;i++){
-            gx[i] = vx[EToV[k][i]];
-            gy[i] = vy[EToV[k][i]];
-        }
-        dg_cell_proj_vert2node(cell, gx, region->x[k]);
-        dg_cell_proj_vert2node(cell, gy, region->y[k]);
     }
     return;
 }

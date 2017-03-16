@@ -7,6 +7,6 @@
 
 #include "dg_edge.h"
 
-void dg_edge_node_map2d(dg_edge *edge);
+void dg_edge_node_map(dg_edge *edge);
 
 #endif //DGOM_DG_EDGE_NODE_MAP_H

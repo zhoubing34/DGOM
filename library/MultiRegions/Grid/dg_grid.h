@@ -36,7 +36,6 @@ typedef struct dg_grid{
     double *vx, *vy, *vz; ///< vertex coordinate
 
     void (*add_BS)(struct dg_grid *grid, int Nsurf, int **SFToV);
-    void (*free_func)(struct dg_grid *grid); ///< free function
 } dg_grid;
 
 

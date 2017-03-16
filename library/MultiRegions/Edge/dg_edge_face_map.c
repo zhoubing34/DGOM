@@ -22,6 +22,8 @@ void dg_edge_face_map2d(dg_edge *edge){
     const int K = dg_grid_K(grid);
     const int Nvert = dg_grid_Nv(grid);
     const int Nfaces = dg_cell_Nfaces(edge->cell);
+
+    int **FToV = dg_cell_FToV(edge->cell);
     int **EToV = grid->EToV;
     int **EToE = grid->EToE;
     int **EToF = grid->EToF;
@@ -32,8 +34,8 @@ void dg_edge_face_map2d(dg_edge *edge){
     int k,f,sk=0;
     for(k=0;k<K;k++){
         for(f=0;f<Nfaces;f++){
-            int n1 = EToV[k][f];
-            int n2 = EToV[k][(f+1)%Nfaces];
+            int n1 = EToV[k][ FToV[f][0] ];
+            int n2 = EToV[k][ FToV[f][1] ];
             my_face[sk].k1 = k;
             my_face[sk].k2 = EToE[k][f];
             my_face[sk].f1 = f;

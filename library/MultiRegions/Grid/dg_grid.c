@@ -10,8 +10,6 @@ void dg_grid_set_vert2d(dg_grid *grid, double *vx, double *vy, double *vz);
 void dg_grid_set_vert3d(dg_grid *grid, double *vx, double *vy, double *vz);
 /* partition of the whole grid into each process */
 void dg_grid_partition(dg_grid *grid);
-void dg_grid_free2d(dg_grid *grid);
-void dg_grid_free3d(dg_grid *grid);
 
 typedef struct dg_grid_creator{
     void (*copy_vert)(dg_grid *grid, double *vx, double *vy, double *vz);
@@ -21,7 +19,6 @@ typedef struct dg_grid_creator{
     void (*connect)(dg_grid *grid);
     void (*init_BS)(dg_grid *grid);
     void (*add_BS)(dg_grid *grid, int Nsruf, int **SFToBS);
-    void (*free_func)(dg_grid *grid);
 } dg_grid_creator;
 
 const dg_grid_creator grid_2d_creator = {
@@ -32,7 +29,6 @@ const dg_grid_creator grid_2d_creator = {
         dg_grid_connect2d,
         dg_grid_init_BS,
         dg_grid_add_BS2d,
-        dg_grid_free2d,
 };
 
 const dg_grid_creator grid_3d_creator = {
@@ -43,7 +39,6 @@ const dg_grid_creator grid_3d_creator = {
         dg_grid_connect3d,
         dg_grid_init_BS,
         dg_grid_add_BS3d,
-        dg_grid_free3d,
 };
 
 /**
@@ -99,7 +94,6 @@ dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, do
     creator->connect(grid);
     creator->init_BS(grid);
     grid->add_BS = creator->add_BS;
-    grid->free_func = creator->free_func;
     return grid;
 }
 
@@ -109,29 +103,12 @@ void dg_grid_add_BS(dg_grid *grid, int Nsurf, int **SFToBS){
 }
 
 void dg_grid_free(dg_grid *grid){
-    grid->free_func(grid);
-    return;
-}
-
-static void dg_grid_free2d(dg_grid *grid){
     matrix_int_free(grid->EToV);
     matrix_int_free(grid->EToE);
     matrix_int_free(grid->EToF);
     matrix_int_free(grid->EToP);
     matrix_int_free(grid->EToBS);
-
-    vector_double_free(grid->vx);
-    vector_double_free(grid->vy);
-    free(grid);
-    return;
-}
-
-static void dg_grid_free3d(dg_grid *grid){
-    matrix_int_free(grid->EToV);
-    matrix_int_free(grid->EToE);
-    matrix_int_free(grid->EToF);
-    matrix_int_free(grid->EToP);
-    matrix_int_free(grid->EToBS);
+    vector_int_free(grid->EToR);
 
     vector_double_free(grid->vx);
     vector_double_free(grid->vy);
@@ -201,7 +178,7 @@ static void dg_grid_set_vert2d(dg_grid *grid, double *vx, double *vy, double *vz
     int i;
     grid->vx  = vector_double_create(Nv);
     grid->vy  = vector_double_create(Nv);
-    grid->vz  = NULL;
+    grid->vz  = vector_double_create(Nv);
     // allocation
     for(i=0;i<Nv;i++){
         grid->vx[i] = vx[i];

@@ -36,8 +36,6 @@ typedef struct dg_region{
 
     double *len; ///< radius of each elements
     double *size; ///< area of 2d elements or volume of 3d elements
-
-    void (*free_func)(struct dg_region *region);
 }dg_region;
 
 /* create of multi-region object */

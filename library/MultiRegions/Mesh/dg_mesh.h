@@ -16,14 +16,14 @@ typedef struct dg_mesh{
     dg_grid *grid; ///< geometry grid object
     dg_cell *cell; ///< standard element object
 
-    int *parfaceNum; ///< number of faces adjacent to each process
-    int TotalParFace; ///< total number of parallel faces
-    int *parcell; ///< map of cell index for buffer
-    int *parface; ///< map of local face (0,1,2..) index for buffer
+    int *Nface2procs; ///< number of faces adjacent to each process
+    int NfetchFace; ///< total number of parallel faces
+    int *CBFToK; ///< map of cell index for buffer
+    int *CBFToF; ///< map of local face (0,1,2..) index for buffer
 
-    int *parnodeNum; ///< number of nodes adjacent to each process
-    int TotalParNode; ///< total number of nodes to send recv
-    int *parnode; ///< index list of nodes to send out
+    int *Nfp2procs; ///< number of nodes adjacent to each process
+    int NfetchNode; ///< total number of nodes to send recv
+    int *NBFToN; ///< index list of nodes to send out
 
     int (*fetch_node_buffer)(struct dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
                              MPI_Request *send_requests,
@@ -31,7 +31,6 @@ typedef struct dg_mesh{
     int (*fetch_cell_buffer)(struct dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
                              MPI_Request *send_requests,
                              MPI_Request *recv_requests);
-    void (*free_func)(struct dg_mesh *mesh);
 } dg_mesh;
 
 dg_mesh* dg_mesh_create(dg_region *region);
@@ -39,7 +38,7 @@ void dg_mesh_free(dg_mesh *mesh);
 
 #define dg_mesh_procid(mesh) mesh->procid
 #define dg_mesh_nprocs(mesh) mesh->nprocs
-#define dg_mesh_Nparf(mesh) mesh->TotalParFace
-#define dg_mesh_Nparn(mesh) mesh->TotalParNode
+#define dg_mesh_Nparf(mesh) mesh->NfetchFace
+#define dg_mesh_Nparn(mesh) mesh->NfetchNode
 
 #endif //DGOM_MR_MESH_H

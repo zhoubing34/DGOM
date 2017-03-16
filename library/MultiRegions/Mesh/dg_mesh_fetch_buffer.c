@@ -18,14 +18,14 @@ int dg_mesh_fetch_node_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *
     int n,fld;
     for(n=0;n<Nparn;n++){
         const int sk = n*Nfield;
-        const int nind = mesh->parnode[n]*Nfield;
+        const int nind = mesh->NBFToN[n]*Nfield;
         for(fld=0;fld<Nfield;fld++){
             f_sendQ[sk+fld] = f_Q[nind+fld];
         }
     }
     int cout[nprocs];
     for(n=0;n<nprocs;n++){
-        cout[n] = Nfield * mesh->parnodeNum[n];
+        cout[n] = Nfield * mesh->Nfp2procs[n];
     }
     /* send and recv data */
     int Nmess = 0;
@@ -52,14 +52,14 @@ int dg_mesh_fetch_cell_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *
     int n,fld;
     for(n=0;n<Nparf;n++){
         const int sk = n*Nfield;
-        const int cind = mesh->parcell[n]*Nfield;
+        const int cind = mesh->CBFToK[n]*Nfield;
         for(fld=0;fld<Nfield;fld++){
             f_sendQ[sk+fld] = f_Q[cind+fld];
         }
     }
     int cout[nprocs];
     for(n=0;n<nprocs;n++){
-        cout[n] = Nfield * mesh->parfaceNum[n];
+        cout[n] = Nfield * mesh->Nface2procs[n];
     }
     /* send and recv data */
     int Nmess = 0;

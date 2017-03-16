@@ -128,7 +128,6 @@ static void dg_cell_d2f(dg_cell *cell){
     return;
 }
 
-
 /**
  * @brief Project the vertex value to interpolation nodes.
  * @param[in] vertVal value on vertex

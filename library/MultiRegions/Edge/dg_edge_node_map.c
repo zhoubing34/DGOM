@@ -8,7 +8,7 @@ void dg_edge_node_map3d(dg_edge *edge){
     return;
 }
 
-void dg_edge_node_map2d(dg_edge *edge){
+void dg_edge_node_map(dg_edge *edge){
 
     dg_cell *cell = edge->cell;
     dg_region *region = edge->region;
@@ -19,7 +19,9 @@ void dg_edge_node_map2d(dg_edge *edge){
     int **Fmask = dg_cell_Fmask(cell);
     double **x = dg_region_x(region);
     double **y = dg_region_y(region);
-    int *parnode = edge->mesh->parnode;
+    double **z = dg_region_z(region);
+
+    int *parnode = edge->mesh->NBFToN;
     // count total nodes on edges
     int f,totalNode = 0;
     for(f=0;f<Nedge;f++){
@@ -53,13 +55,16 @@ void dg_edge_node_map2d(dg_edge *edge){
             varfpM[sk] = Nfpstart[f1] + n1;
             double xM = x[0][idM];
             double yM = y[0][idM];
+            double zM = z[0][idM];
 
             if(ftype != INNERBS){
                 for(n2=0;n2<Nfp;n2++){
                     const int idP = k2*Np + Fmask[f2][n2];
                     double xP = x[0][idP];
                     double yP = y[0][idP];
-                    double d12 = (xM-xP)*(xM-xP) + (yM-yP)*(yM-yP);
+                    double zP = z[0][idP];
+
+                    double d12 = (xM-xP)*(xM-xP)+(yM-yP)*(yM-yP)+(zM-zP)*(zM-zP);
                     if(d12 < EPS){
                         varpP[sk] = idP;
                         varfpP[sk] = Nfpstart[f2] + n2;

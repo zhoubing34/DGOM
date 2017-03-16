@@ -11,7 +11,7 @@ int dg_mesh_cell_fetch_buffer_test(dg_mesh *mesh, int verbose){
     const int K = dg_grid_K(grid);
     const int Nfield = 1;
 
-    const int Nparf = mesh->TotalParFace;
+    const int Nparf = mesh->NfetchFace;
     int **EToE = grid->EToE;
     /* allocation and assignment */
     dg_real *c_Q = vector_real_create(Nfield*K);
@@ -26,8 +26,8 @@ int dg_mesh_cell_fetch_buffer_test(dg_mesh *mesh, int verbose){
 
     int n;
     for(n=0;n<Nparf;n++){
-        int k1 = mesh->parcell[n];
-        int f1 = mesh->parface[n];
+        int k1 = mesh->CBFToK[n];
+        int f1 = mesh->CBFToF[n];
         c_extQ[n] = EToE[k1][f1];
     }
 
@@ -58,7 +58,7 @@ int dg_mesh_node_fetch_buffer_test(dg_mesh *mesh, int verbose){
     const int nprocs = dg_mesh_nprocs(mesh);
     const int procid = dg_mesh_procid(mesh);
     const int Nfield = 2;
-    const int Nparn = mesh->TotalParNode;
+    const int Nparn = mesh->NfetchNode;
 
     double **x = mesh->region->x;
     double **y = mesh->region->y;
@@ -78,7 +78,7 @@ int dg_mesh_node_fetch_buffer_test(dg_mesh *mesh, int verbose){
     int Nmess = dg_mesh_fetch_node_buffer(mesh, Nfield, f_Q, f_recvQ, mpi_send_requests, mpi_recv_requests);
     sk = 0;
     for(n=0;n<Nparn;n++){
-        int ind = mesh->parnode[n];
+        int ind = mesh->NBFToN[n];
         f_extQ[sk++] = f_Q[ind*Nfield];
         f_extQ[sk++] = f_Q[ind*Nfield+1];
     }
@@ -106,13 +106,13 @@ int dg_mesh_parallel_test(dg_mesh *mesh, int verbose){
     int fail = 0;
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
-        fprintf(fp, "mesh->TotalParFace: %d\n", mesh->TotalParFace);
-        print_int_vector2file(fp, "mesh->parfaceNum", mesh->parfaceNum, mesh->nprocs);
-        print_int_vector2file(fp, "mesh->parcell", mesh->parcell, mesh->TotalParFace);
-        print_int_vector2file(fp, "mesh->parface", mesh->parface, mesh->TotalParFace);
-        fprintf(fp, "mesh->TotalParNode: %d\n", mesh->TotalParNode);
-        print_int_vector2file(fp, "mesh->parnodeNum", mesh->parnodeNum, mesh->nprocs);
-        print_int_vector2file(fp, "mesh->parnode", mesh->parnode, mesh->TotalParNode);
+        fprintf(fp, "mesh->NfetchFace: %d\n", mesh->NfetchFace);
+        print_int_vector2file(fp, "mesh->Nface2procs", mesh->Nface2procs, mesh->nprocs);
+        print_int_vector2file(fp, "mesh->CBFToK", mesh->CBFToK, mesh->NfetchFace);
+        print_int_vector2file(fp, "mesh->CBFToF", mesh->CBFToF, mesh->NfetchFace);
+        fprintf(fp, "mesh->NfetchNode: %d\n", mesh->NfetchNode);
+        print_int_vector2file(fp, "mesh->Nfp2procs", mesh->Nfp2procs, mesh->nprocs);
+        print_int_vector2file(fp, "mesh->NBFToN", mesh->NBFToN, mesh->NfetchNode);
         fclose(fp);
     }
     const int procid = mesh->procid;

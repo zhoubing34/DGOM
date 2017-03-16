@@ -20,7 +20,7 @@ typedef struct dg_edge_creator{
 
 static const dg_edge_creator edge_creator2d = {
         dg_edge_face_map2d,
-        dg_edge_node_map2d,
+        dg_edge_node_map,
         dg_edge_surfinfo2d,
         dg_edge_setinfo2d,
         dg_edge_free2d,

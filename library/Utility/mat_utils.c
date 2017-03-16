@@ -149,6 +149,7 @@ VECTOR_CREATE_FUNC_TEMPLATE(dg_real, vector_real_create)
  */
 #define MATRIX_FREE_FUNC_TEMPLATE(__T__, __FUNC_NAME)   \
 __T__ **__FUNC_NAME(__T__ **A){         \
+    if(A == NULL) {return NULL;}        \
     free(A[0]);                         \
     free(A);                            \
     return NULL;                        \

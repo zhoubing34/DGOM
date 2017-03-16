@@ -15,13 +15,13 @@
 #include "Utility/utility.h"
 
 typedef enum {
-    POINT = 0,  ///< point
-    LINE = 1,   ///< line
-    TRIANGLE=2, ///< triangle
-    QUADRIL=3,  ///< quadrilateral
-    TETRA=4,    ///< tetrahedron
-    TRIPRISM=5, ///< triangle prism
-    HEXA=6,     ///< hexahedron
+    POINT    =0, ///< point
+    LINE     =1, ///< line
+    TRIANGLE =2, ///< triangle
+    QUADRIL  =3, ///< quadrilateral
+    TETRA    =4, ///< tetrahedron
+    TRIPRISM =5, ///< triangle prism
+    HEXA     =6, ///< hexahedron
 } dg_cell_type;
 
 typedef struct dg_cell_info{

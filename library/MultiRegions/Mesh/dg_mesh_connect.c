@@ -14,7 +14,7 @@ typedef struct face2d{
 }face2d;
 
 
-void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
+void dg_mesh_init_node_fetch_buffer2d(dg_mesh *mesh){
     dg_cell *cell = mesh->cell;
     const int Np = dg_cell_Np(cell);
     int K = dg_grid_K(mesh->grid);
@@ -22,7 +22,7 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
     const int nprocs = dg_mesh_nprocs(mesh);
     const int procid = dg_mesh_procid(mesh);
 
-    int *parface = mesh->parface;
+    int *parface = mesh->CBFToF;
     // total number of parallel face points
     int f, Nparn = 0;
     for(f=0;f<Nparf;f++){
@@ -38,7 +38,7 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
     int *n_recv = vector_int_create(Nparn);
 
     int **Fmask = dg_cell_Fmask(cell);
-    const int *parfN = mesh->parfaceNum;
+    const int *parfN = mesh->Nface2procs;
     double **x = mesh->region->x;
     double **y = mesh->region->y;
     int Kprocs[nprocs], Ntotal;
@@ -47,7 +47,7 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
 
     /* assignment of vampM */
     int k,n,m,t,p,sk=0;
-    int *parcell = mesh->parcell;
+    int *parcell = mesh->CBFToK;
     for(n=0;n<Nparf;n++){
         k = parcell[n];
         f = parface[n];
@@ -75,7 +75,7 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
             for(f=0;f<(parfN[p]);f++){
                 Nout += dg_cell_Nfp(cell)[parface[st++]];
             }
-            //const int Nout = mesh->parfaceNum[p]*Nfp;
+            //const int Nout = mesh->Nface2procs[p]*Nfp;
             parnodeNum[p] = Nout;
             if(Nout){
                 /* symmetric communications (different ordering) */
@@ -138,15 +138,15 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
         stride += parnodeNum[p];
     }
     /* assignment */
-    mesh->TotalParNode = Nparn;
-    mesh->parnodeNum = (int *) calloc(nprocs, sizeof(int));
-    mesh->parnode = (int *) calloc(Nparn, sizeof(int));
+    mesh->NfetchNode = Nparn;
+    mesh->Nfp2procs = (int *) calloc(nprocs, sizeof(int));
+    mesh->NBFToN = (int *) calloc(Nparn, sizeof(int));
 
     for(p=0;p<nprocs;p++){
-        mesh->parnodeNum[p] = parnodeNum[p];
+        mesh->Nfp2procs[p] = parnodeNum[p];
     }
     for(n=0;n<Nparn;n++){
-        mesh->parnode[n] = (int)my_node[n].k1;
+        mesh->NBFToN[n] = (int)my_node[n].k1;
     }
     /* free */
     vector_double_free(xM);
@@ -164,7 +164,7 @@ void dg_mesh_init_node_fetch_buffer(dg_mesh *mesh){
  * @brief
  * @param mesh
  */
-void dg_mesh_init_cell_fetch_buffer(dg_mesh *mesh){
+void dg_mesh_init_cell_fetch_buffer2d(dg_mesh *mesh){
 
     const dg_grid *grid = mesh->grid;
     const int nprocs = mesh->nprocs;
@@ -229,17 +229,17 @@ void dg_mesh_init_cell_fetch_buffer(dg_mesh *mesh){
     }
 
     /* assignment */
-    mesh->TotalParFace = Nparf;
-    mesh->parfaceNum = vector_int_create(nprocs);
-    mesh->parcell = vector_int_create(Nparf);
-    mesh->parface = vector_int_create(Nparf);
+    mesh->NfetchFace = Nparf;
+    mesh->Nface2procs = vector_int_create(nprocs);
+    mesh->CBFToK = vector_int_create(Nparf);
+    mesh->CBFToF = vector_int_create(Nparf);
 
     for(n=0;n<Nparf;n++){
-        mesh->parcell[n] = (int)my_face[n].k1;
-        mesh->parface[n] = my_face[n].f1;
+        mesh->CBFToK[n] = (int)my_face[n].k1;
+        mesh->CBFToF[n] = my_face[n].f1;
     }
     for(p2=0;p2<nprocs;p2++){
-        mesh->parfaceNum[p2] = Parf[p2];
+        mesh->Nface2procs[p2] = Parf[p2];
     }
 
     free(my_face);
