@@ -16,38 +16,36 @@
 #include "pnetcdf.h"
 
 /**
- * @brief
- * structure for NetCDF dimensions
+ * @brief structure for NetCDF dimensions
  */
 typedef struct {
     char *name; ///< name of dimension
-    int  len;   ///< length of dimension
-    int  id;    ///< dimension id in NetCDF file
+    int  len; ///< length of dimension
+    int  id; ///< dimension id in NetCDF file
 }nc_dim;
 /**
- * @brief
- * structure for NetCDF variable
+ * @brief structure for NetCDF variable
  */
 typedef struct {
-    char  *name;        ///< name of variables
-    int   ndim;         ///< number of dimension in the variable
-    nc_dim **dim_vec_p;  ///< pointer to the array of nc_dim
-    int   type;         ///< variable type
-    int   id;           ///< variable id in NetCDF file
+    char  *name; ///< name of variables
+    int   ndim; ///< number of dimension in the variable
+    nc_dim **dim_vec_p; ///< pointer to the array of nc_dim
+    int   type; ///< variable type
+    int   id; ///< variable id in NetCDF file
 }nc_var;
 /**
  * @brief
  * structure for NetCDF file
  */
 typedef struct {
-    char  *name;        ///< name of files
-    int   procid;       ///< process id
-    int   nprocs;       ///< number of processes
-    int   ndim;         ///< number of dimensions
-    int   nvar;         ///< number of variable
-    nc_dim **dim_vec_p;  ///< pointer to the array of nc_dim
-    nc_var **var_vec_p;  ///< pointer to the array of nc_var
-    int   id;           ///< file id of NetCDF file
+    char *name; ///< name of files;
+    int procid; ///< process id;
+    int nprocs; ///< number of processes;
+    int ndim; ///< number of dimensions;
+    int nvar; ///< number of variable;
+    nc_dim **dim_vec_p; ///< pointer to the array of nc_dim;
+    nc_var **var_vec_p; ///< pointer to the array of nc_var;
+    int id; ///< file id of NetCDF file;
 }nc_file;
 
 /* public function */
@@ -60,7 +58,7 @@ void nc_file_close(nc_file *file);
 void nc_file_free(nc_file *file);
 void nc_file_print(nc_file *file);
 
-/* handing error of parallel-netcdf */
+/** marco for handing error of parallel-netcdf */
 #define nc_error(t)                                         \
 do{                                                         \
     if(t != NC_NOERR){                                      \

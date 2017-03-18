@@ -18,7 +18,7 @@ void dg_mesh_init_node_fetch_buffer2d(dg_mesh *mesh){
     dg_cell *cell = mesh->cell;
     const int Np = dg_cell_Np(cell);
     int K = dg_grid_K(mesh->grid);
-    const int Nparf = dg_mesh_Nparf(mesh);
+    const int Nparf = dg_mesh_NfetchFace(mesh);
     const int nprocs = dg_mesh_nprocs(mesh);
     const int procid = dg_mesh_procid(mesh);
 

@@ -5,7 +5,9 @@
 #include "dg_mesh.h"
 #include "dg_mesh_connect.h"
 #include "dg_mesh_fetch_buffer.h"
-
+/**
+ * @brief
+ */
 typedef struct dg_mesh_creator{
     void (*init_cell_fetch_buffer)(dg_mesh *mesh);
     void (*init_node_fetch_buffer)(dg_mesh *mesh);
@@ -16,14 +18,20 @@ typedef struct dg_mesh_creator{
                              MPI_Request *send_requests,
                              MPI_Request *recv_requests);
 }dg_mesh_creator;
-
+/**
+ * @brief
+ */
 const static dg_mesh_creator mesh2d_creator = {
         dg_mesh_init_cell_fetch_buffer2d,
         dg_mesh_init_node_fetch_buffer2d,
         dg_mesh_fetch_node_buffer,
         dg_mesh_fetch_cell_buffer,
 };
-
+/**
+ * @brief
+ * @param region
+ * @return
+ */
 dg_mesh* dg_mesh_create(dg_region *region){
 
     dg_mesh *mesh = (dg_mesh *)calloc(1, sizeof(dg_mesh));
@@ -52,7 +60,10 @@ dg_mesh* dg_mesh_create(dg_region *region){
     return mesh;
 }
 
-
+/**
+ * @brief
+ * @param mesh
+ */
 void dg_mesh_free(dg_mesh *mesh){
     /* cell connection */
     vector_int_free(mesh->Nface2procs);

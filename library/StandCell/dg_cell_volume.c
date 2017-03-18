@@ -48,6 +48,10 @@ dg_cell_volume *dg_cell_volume_create(dg_cell *cell, const dg_cell_creator *crea
     return volume;
 }
 
+/**
+ * @brief deallocate the memory of volume.
+ * @param volume pointer of dg_cell_volume type;
+ */
 void dg_cell_volume_free(dg_cell_volume *volume){
     vector_double_free(volume->r);
     vector_double_free(volume->s);
@@ -62,11 +66,13 @@ void dg_cell_volume_free(dg_cell_volume *volume){
 }
 
 /**
- * @brief calculate the Vandermonde matrix
- * @details
- * @param [in] cell standard cell
- * @param [in] orthfunc orthogonal function handle
- * @return Vandermonde matrix
+ * @brief calculate the Vandermonde matrix.
+ * @param N order;
+ * @param Np number of nodes;
+ * @param r,s,t coordinate of nodes;
+ * @param orthogonal_func orthogonal function handle;
+ * @return
+ * pointer to Vandermonde matrix.
  */
 static double** dg_cell_volume_vand_matrix(int N, int Np,
                                            double *r, double *s, double *t,
@@ -86,14 +92,13 @@ static double** dg_cell_volume_vand_matrix(int N, int Np,
 }
 
 /**
- * @brief calculate the mass matrix
+ * @brief calculate the mass matrix.
  * @details
- * The mass matrix is calculated with
- * \f[ \mathbf{M} = (\mathbf{V}^T)^{-1} \cdot \mathbf{V}^{-1} \f]
- *
- * @param [in] cell standard cell
- * @param [out] M Vandermonde matrix
- * @return mass matrix
+ * The mass matrix is calculated with Vandermonde matrix with
+ * \f[ \mathbf{M} = (\mathbf{V}^T)^{-1} \cdot \mathbf{V}^{-1} \f].
+ * @param [in] Np number of nodes;
+ * @param [in] V Vandermonde matrix;
+ * @return pointer to a new mass matrix.
  */
 static double** dg_cell_volume_mass_matrix(int Np, double **V){
 
@@ -116,19 +121,15 @@ static double** dg_cell_volume_mass_matrix(int Np, double **V){
 }
 
 /**
- * @brief get the derivative Vandermonde matrix
- * @param [in] cell standard element
- * @param [in] derorthfunc derivative of orthogonal function
- * @param [out] Vr the derivative of Vandermonde matrix on r coordinate
- * @param [out] Vs the derivative of Vandermonde matrix on s coordinate
- * @param [out] Vt the derivative of Vandermonde matrix on t coordinate
- * @note
- * Vr, Vs and Vt should be allocated before calling.
+ * @brief get the derivative Vandermonde matrix.
+ * @param N order;
+ * @param Np number of nodes;
+ * @param r,s,t coordinate of nodes;
+ * @param deri_orthgonal_func derivative of orthogonal function handle;
+ * @param Vr,Vs,Vt derivative of Vandermonde matrix
  */
-static void dg_deri_vand_matrix(
-        int N, int Np, double *r, double *s, double *t,
-        Derivative_Orthogonal_Func deri_orthgonal_func,
-        double **Vr, double **Vs, double **Vt) {
+static void dg_deri_vand_matrix(int N, int Np, double *r, double *s, double *t,
+        Derivative_Orthogonal_Func deri_orthgonal_func, double **Vr, double **Vs, double **Vt) {
     double dr[Np],ds[Np],dt[Np];
 
     int dim1, dim2;
@@ -143,24 +144,26 @@ static void dg_deri_vand_matrix(
     return;
 }
 
-
 /**
  * @brief
- * get the gradient matrix Dr and Ds of Lagrange basis at (r,s) at order N
+ * get the gradient matrix Dr and Ds of Lagrange basis at (r,s) at order N.
  * @detail
  * The Gradient matrix \f$ \mathbf{Dr} \f$ and \f$ \mathbf{Ds} \f$ is obtained through
- * \f[ \mathbf{Dr} \cdot \mathbf{V} = \mathbf{Vr}, \quad \mathbf{Ds} \cdot \mathbf{V} = \mathbf{Vs} \f]
+ * \f[ \mathbf{Dr} \cdot \mathbf{V} = \mathbf{Vr},
+ * \quad \mathbf{Ds} \cdot \mathbf{V} = \mathbf{Vs} \f]
  * where
  * \f[ Dr_{(ij)} = \left. \frac{\partial l_j}{\partial r} \right|_{ \mathbf{r}_i },
- * \quad Ds_{(ij)} = \left. \frac{\partial l_j}{\partial s} \right|_{ \mathbf{r}_i } \f]
+ * \quad Ds_{(ij)} = \left. \frac{\partial l_j}{\partial s} \right|_{ \mathbf{r}_i } \f].
  *
- * @param [in,out] cell standard element
- * @param [in] derorthfunc derivative orthogonal function handle
+ * @param N order;
+ * @param Np number of nodes;
+ * @param r,s,t coordinate of nodes;
+ * @param V Vandermonde matrix;
+ * @param deri_orthgonal_func derivative of orthogonal function handle;
+ * @param Dr,Ds,Dt derivative of nodal basis matrix;
  */
-static void dg_cell_deri_matrix(
-        int N, int Np, double *r, double *s, double *t, double **V,
-        Derivative_Orthogonal_Func deri_orthgonal_func,
-        double ***Dr, double ***Ds, double ***Dt) {
+static void dg_cell_deri_matrix(int N, int Np, double *r, double *s, double *t, double **V,
+        Derivative_Orthogonal_Func deri_orthgonal_func, double ***Dr, double ***Ds, double ***Dt){
     // allocation
     double **dr = matrix_double_create(Np, Np);
     double **ds = matrix_double_create(Np, Np);

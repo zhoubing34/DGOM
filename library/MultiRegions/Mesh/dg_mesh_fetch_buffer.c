@@ -7,11 +7,20 @@ static void fetch_buffer(int procid, int nprocs, int *pout, dg_real *send_buffer
                          MPI_Request *mpi_send_requests,
                          MPI_Request *mpi_recv_requests,
                          int *Nmessage);
-
+/**
+ * @brief fetch the node buffer with other processes.
+ * @param mesh pointer to the dg_mesh structure;
+ * @param Nfield number of files;
+ * @param f_Q node information;
+ * @param f_recvQ receive buffer;
+ * @param send_requests, recv_requests MPI send and receive request;
+ * @return
+ * Nmess number of message to send and receive.
+ */
 int dg_mesh_fetch_node_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
                                MPI_Request *send_requests,
                                MPI_Request *recv_requests){
-    const int Nparn = dg_mesh_Nparn(mesh);
+    const int Nparn = dg_mesh_NfetchNode(mesh);
     const int nprocs = dg_mesh_nprocs(mesh);
     dg_real *f_sendQ = vector_double_create(Nfield*Nparn);
     /* prepare for send data */
@@ -45,7 +54,7 @@ int dg_mesh_fetch_node_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *
 int dg_mesh_fetch_cell_buffer(dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
                                MPI_Request *send_requests,
                                MPI_Request *recv_requests){
-    const int Nparf = dg_mesh_Nparf(mesh);
+    const int Nparf = dg_mesh_NfetchFace(mesh);
     const int nprocs = dg_mesh_nprocs(mesh);
     dg_real *f_sendQ = vector_real_create(Nfield*Nparf);
     /* prepare for send data */

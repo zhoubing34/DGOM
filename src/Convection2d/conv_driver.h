@@ -4,7 +4,6 @@
 #include "Utility/nc_library.h"
 #include "Utility/arg_section.h"
 #include "MultiRegions/Grid/dg_grid_reader.h"
-#include "MultiRegions/Mesh/dg_mesh_fetch_buffer.h"
 #include "PhysField/dg_phys.h"
 #include "PhysField/dg_phys_strong_surf_opt.h"
 #include "PhysField/dg_phys_strong_vol_opt.h"
@@ -24,6 +23,7 @@ typedef enum{
     conv_advection_diffusion = 2,
     conv_userset = 3,
 } Conv_Case_Type;
+
 
 #define INPUT_FILE_NAME "conv2d_paramter.inc"
 

@@ -1,6 +1,9 @@
 #include "Utility/utility.h"
 #include "dg_grid.h"
 
+/**
+ * @brief
+ */
 typedef struct point2d{
 	double x, y; // coordinate
 	int ind; // No. of point
@@ -8,22 +11,21 @@ typedef struct point2d{
 
 static point2d PRI_VERT2d;
 
-// Cross product function
+/** cross product of two lines */
 static double pt_crossProduct2d(point2d p1, point2d p2, point2d p3) {
 	return ((p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x));
 }
 
-// distance of points
+/** distance of 2d points */
 static double pt_distance2d(point2d p1, point2d p2){
 	return sqrt((p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.y)*(p1.y - p2.y));
 }
 
-// Compare function
+/** sort 2d point function */
 static int pt_cmp2d(const void *p1, const void *p2){
-	point2d *p3, *p4;
 	double m;
-	p3 = (point2d *)p1;
-	p4 = (point2d *)p2;
+    point2d *p3 = (point2d *)p1;
+    point2d *p4 = (point2d *)p2;
 	m = pt_crossProduct2d(PRI_VERT2d, *p3, *p4);
 	if (m < 0) return 1;
 	else if (m == 0 && (pt_distance2d(PRI_VERT2d, *p3) < pt_distance2d(PRI_VERT2d, *p4)))
@@ -34,10 +36,10 @@ static int pt_cmp2d(const void *p1, const void *p2){
 /**
  * @brief
  * sort the vertex list in EToV to be anti-clockwise
- * @param[in] Nvert number of vertex in vertlist
- * @param[in] vx coordinate of all the vertex
- * @param[in] vy coordinate of all the vertex
- * @param[in,out] vertlist array of vertex index
+ * @param[in] Nvert number of vertex in vertlist;
+ * @param[in] vx coordinate of all the vertex;
+ * @param[in] vy coordinate of all the vertex;
+ * @param[in,out] vertlist array of vertex index;
  */
 static void dg_grid_resortEToV2d(int Nvert, double *vx, double *vy, int *vertlist){
 
@@ -60,7 +62,10 @@ static void dg_grid_resortEToV2d(int Nvert, double *vx, double *vy, int *vertlis
 	}
 	return;
 }
-
+/**
+ * @brief
+ * @param grid
+ */
 void dg_grid_retreatEToV2d(dg_grid *grid){
 	const int K = grid->K;
 	const int Nv = dg_cell_Nv(grid->cell);
@@ -70,7 +75,10 @@ void dg_grid_retreatEToV2d(dg_grid *grid){
 	}
 	return;
 }
-
+/**
+ * @brief
+ * @param grid
+ */
 void dg_grid_retreatEToV3d(dg_grid *grid){
 	return;
 }

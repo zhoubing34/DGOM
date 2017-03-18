@@ -12,13 +12,11 @@
  * \f[ M^{-1} \cdot M_{es} (E \cdot nx + G \cdot ny - Fhs) \f]
  * where the \f[ Fhs \f] is the numerical flux, \f[ F = (E, G) \f] is the flux term.
  *
- * @param[in,out] phys physField object
- * @param[in] slipwall_func boundary condition for slip-wall
- * @param[in] nonslipwall_condition boundary condition for non-slip-wall
- * @param[in] nodal_flux function to calculate the flux term
- * @param[in] numerical_flux numerical flux function
- *
- * @note
+ * @param[in,out] phys pointer to dg_phys structure;
+ * @param[in] slipwall_func boundary condition for slip-wall;
+ * @param[in] nonslipwall_condition boundary condition for non-slip-wall;
+ * @param[in] nodal_flux function to calculate the flux term;
+ * @param[in] numerical_flux numerical flux function;
  *
  */
 void dg_phys_strong_surf_opt2d(dg_phys *phys,
@@ -69,16 +67,16 @@ void dg_phys_strong_surf_opt2d(dg_phys *phys,
 
             // adjacent nodal values
             switch (ftype){
-                case INNERLOC:
+                case FACE_INNER:
                     for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_Q[idP*Nfield+fld]; }
                     break;
-                case INNERBS:
+                case FACE_PARALL:
                     for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_inQ[idP*Nfield+fld]; }
                     break;
-                case SLIPWALL:
+                case FACE_SLIPWALL:
                     slipwall_func(nx, ny, f_M, f_P);
                     break;
-                case NSLIPWALL:
+                case FACE_NSLIPWALL:
                     non_slipwall_func(nx, ny, f_M, f_P);
                     break;
                 default:
@@ -113,7 +111,7 @@ void dg_phys_strong_surf_opt2d(dg_phys *phys,
                 for(fld=0;fld<Nfield;fld++)
                     f_rhsM[fld] += L*t[fld];
             }
-            if (ftype == INNERLOC){
+            if (ftype == FACE_INNER){
                 dg_real *f_rhsP = f_rhsQ + Nfield*(n+k2*Np);
                 for(m=0;m<Nfp;m++){
                     const int col2 = fp_P[m];

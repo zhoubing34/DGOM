@@ -7,13 +7,10 @@
 #endif
 
 /**
- * @brief
- * Generation of uniform triangle grid.
- *
+ * @brief Generation of uniform triangle grid.
  * @details
  * Generate uniform triangle mesh with specific coordinate range and number of elements.
  * The flag 'type' defines how the square divides into two triangles.
- *
  * @param[in] cell standard cell object;
  * @param[in] Mx,My number of cells on x and y coordinate;
  * @param[in] xmin,xmax  range of x coordinate;
@@ -92,17 +89,13 @@ dg_grid* dg_grid_uniform_tri(dg_cell *cell, int Mx, int My,
 }
 
 /**
- * @brief
- * Generation of uniform quadrilateral mesh.
- *
+ * @brief Generation of uniform quadrilateral mesh.
  * @details
  * Generate uniform quadrilateral mesh with specific coordinate range and number of elements.
- *
  * @param[in] cell dg_cell structure;
  * @param[in] Mx,My number of cells on x and y coordinate;
  * @param[in] xmin,xmax range of x coordinate;
  * @param[in] ymin,ymax range of y coordinate;
- *
  * @return grid dg_grid structure.
  */
 dg_grid* dg_grid_uniform_quad(dg_cell *cell, int Mx, int My,
@@ -165,12 +158,10 @@ dg_grid* dg_grid_uniform_quad(dg_cell *cell, int Mx, int My,
 }
 
 /**
- * @brief
- * Create dg_grid structure from files.
+ * @brief Generate dg_grid structure from files.
  * @details
- * The mesh files include 'casename.node' and 'casename.ele', while
- * the 'casename' is defined as parameter.
- * The node file contains the vertex value and the ele.
+ * The mesh files include 'casename.node' and 'casename.ele',
+ * while the 'casename' is defined as parameter.
  * */
 dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
     char element_file[MAX_NAME_LENGTH];

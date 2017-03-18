@@ -4,16 +4,12 @@
 
 #include "dg_phys_init.h"
 
-static int **read_EToV_file(dg_phys *phys, char *casename);
-
 /***
  * @brief initialize the physical fields with initial condition file.
- * @param phys physical structure
- * @param casename name of computational case
+ * @param phys pointer to dg_phys structure;
+ * @param casename name of case;
  * @note
- * The EToV in phys->grid structure is different from the original EToV
- * variable. Therefore, a new EToV is read from the input element file
- * and assigned in the function.
+ * The physical field is initialized with the vertex value
  */
 void dg_phys_init_file2d(dg_phys *phys, char *casename){
 
@@ -48,7 +44,7 @@ void dg_phys_init_file2d(dg_phys *phys, char *casename){
     }
 
     /* read element file */
-    int **EToV = read_EToV_file(phys, casename);
+    int **EToV = dg_grid_EToV(phys->grid);
 
     /* assign to node fields */
     dg_cell *cell = phys->cell;
@@ -76,36 +72,36 @@ void dg_phys_init_file2d(dg_phys *phys, char *casename){
     return;
 }
 
-static int **read_EToV_file(dg_phys *phys, char *casename){
-
-    char element_file[MAX_NAME_LENGTH];
-    strcpy(element_file, casename);
-    strcat(element_file, ".ele");
-    FILE *fp;
-    if( (fp = fopen(element_file, "r")) == NULL ){
-        fprintf(stderr, "%s (%d)\n"
-                        "Unable to open element file %s.\n",
-                __FUNCTION__,__LINE__,element_file);
-    }
-    int Nv, K, temp;
-    // read cell number and cell vertex number
-    fscanf(fp, "%d %d %d\n", &K, &Nv, &temp);
-    // check element vertex
-    if(dg_cell_Nv(phys->cell) !=  Nv){
-        fprintf(stderr, "%s (%d)\n"
-                "The input element type is not correct!\n", __FILE__, __LINE__);
-        exit(-1);
-    }
-    int **EToV = matrix_int_create(K, Nv);
-    int n,k;
-    for(k=0;k<K;k++){
-        fscanf(fp, "%d", &temp); //read index
-        for(n=0;n<Nv;n++){
-            fscanf(fp, "%d", EToV[0]+k*Nv+n);
-            EToV[k][n] -= 1; // change index start from 0 (C style)
-        }
-        fscanf(fp, "%d", &temp); //read region id
-    }
-    fclose(fp);
-    return EToV;
-}
+//static int **read_EToV_file(dg_phys *phys, char *casename){
+//
+//    char element_file[MAX_NAME_LENGTH];
+//    strcpy(element_file, casename);
+//    strcat(element_file, ".ele");
+//    FILE *fp;
+//    if( (fp = fopen(element_file, "r")) == NULL ){
+//        fprintf(stderr, "%s (%d)\n"
+//                        "Unable to open element file %s.\n",
+//                __FUNCTION__,__LINE__,element_file);
+//    }
+//    int Nv, K, temp;
+//    // read cell number and cell vertex number
+//    fscanf(fp, "%d %d %d\n", &K, &Nv, &temp);
+//    // check element vertex
+//    if(dg_cell_Nv(phys->cell) !=  Nv){
+//        fprintf(stderr, "%s (%d)\n"
+//                "The input element type is not correct!\n", __FILE__, __LINE__);
+//        exit(-1);
+//    }
+//    int **EToV = matrix_int_create(K, Nv);
+//    int n,k;
+//    for(k=0;k<K;k++){
+//        fscanf(fp, "%d", &temp); //read index
+//        for(n=0;n<Nv;n++){
+//            fscanf(fp, "%d", EToV[0]+k*Nv+n);
+//            EToV[k][n] -= 1; // change index start from 0 (C style)
+//        }
+//        fscanf(fp, "%d", &temp); //read region id
+//    }
+//    fclose(fp);
+//    return EToV;
+//}

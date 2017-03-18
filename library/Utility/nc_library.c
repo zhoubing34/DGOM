@@ -11,8 +11,8 @@
 /**
  * @brief
  * create nc_dim variable
- * @param name name string
- * @param len length of dimension
+ * @param name name string;
+ * @param len length of dimension;
  * @return
  * pointer to a new nc_dim
  */
@@ -23,11 +23,8 @@ nc_dim* nc_dim_create(const char *name, int len){
     dim->name  = (char *) calloc(strlen(name), sizeof(char));
     /* assignment */
     strcpy(dim->name, name);
-    if (len>0) {
-        dim->len = len;
-    }else if (len==0){
-        dim->len = NC_UNLIMITED;
-    }
+    if (len>0) { dim->len = len; }
+    else if (len==0){ dim->len = NC_UNLIMITED; }
     return dim;
 }
 /**
@@ -104,22 +101,21 @@ void nc_var_print(nc_var *var){
     printf("\n");
 }
 /**
- * @brief create new nc_file
- * @param name name of nc_file
- * @param procid process id
- * @param nprocs number of process
- * @param ndim number of nc_dim
- * @param dim_vec_p pointer to the nc_dim vector
- * @param nvar number of nc_var
- * @param var_vec_p pointer to the nc_var vector
- * @return file nc_file pointer
+ * @brief create pointer to a new nc_file structure.
+ * @param name name of nc_file;
+ * @param procid process id;
+ * @param nprocs number of process;
+ * @param ndim number of nc_dim;
+ * @param dim_vec_p pointer to the nc_dim vector;
+ * @param nvar number of nc_var;
+ * @param var_vec_p pointer to the nc_var vector;
+ * @return file nc_file pointer.
  */
 nc_file* nc_file_create(const char *name, int procid, int nprocs,
                        int ndim, nc_dim **dim_vec_p,
                        int nvar, nc_var **var_vec_p){
 
     nc_file *file = (nc_file*) calloc(1, sizeof(nc_file));
-
     /* check name length */
     file->name  = (char *) calloc(strlen(name), sizeof(char));
 
@@ -145,8 +141,8 @@ nc_file* nc_file_create(const char *name, int procid, int nprocs,
     return file;
 }
 /**
- * @brief print the info mation of nc_file
- * @param file nc_file pointer
+ * @brief print the information of nc_file.
+ * @param file pointer to a nc_file structure;
  */
 void nc_file_print(nc_file *file){
     printf("NetCDF Files\n");
@@ -165,19 +161,16 @@ void nc_file_print(nc_file *file){
     }
 }
 /**
- * @brief free the memory of nc_file and its included nc_dim and nc_var
- * @param file nc_file pointer
+ * @brief free the memory of nc_file and associated nc_dim and nc_var.
+ * @param file pointer to nc_file;
  */
 void nc_file_free(nc_file *file){
     int i;
     free(file->name);
-    for (i=0;i<file->ndim;i++)
-        nc_dim_free(file->dim_vec_p[i]);
-
-    for (i=0;i<file->nvar;i++)
-        nc_var_free(file->var_vec_p[i]);
-
+    for (i=0;i<file->ndim;i++){ nc_dim_free(file->dim_vec_p[i]); }
+    for (i=0;i<file->nvar;i++){ nc_var_free(file->var_vec_p[i]); }
     free(file);
+    return;
 }
 
 /**
@@ -193,20 +186,17 @@ void nc_file_init(nc_file *file){
                           MPI_INFO_NULL, &file->id));
     /* define dimensions */
     int i,j;
-    nc_dim *dim;
     for (i=0;i<Ndim;i++){
-        dim = file->dim_vec_p[i]; /* pointer of dim */
+        nc_dim *dim = file->dim_vec_p[i]; /* pointer of dim */
         nc_error( ncmpi_def_dim(file->id, dim->name, dim->len, &dim->id) );
     }
     /* define variables */
-    nc_var *var;
     for (i=0;i<Nvar; i++){
-        var = file->var_vec_p[i]; /* pointer of var */
+        nc_var *var = file->var_vec_p[i]; /* pointer of var */
         int *dimids = (int *)calloc(var->ndim, sizeof(int));
         for(j=0;j<var->ndim;j++){ dimids[j] = var->dim_vec_p[j]->id; }
 
-        nc_error(ncmpi_def_var(file->id, var->name, var->type,
-                               var->ndim, dimids, &var->id));
+        nc_error(ncmpi_def_var(file->id, var->name, var->type, var->ndim, dimids, &var->id));
         free(dimids);
     }
     /* finish definition */

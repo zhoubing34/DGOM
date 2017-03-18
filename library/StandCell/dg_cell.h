@@ -1,12 +1,10 @@
 /**
  * @file
- * Public function for standard element
- *
+ * Public function for standard cell dg_cell structure.
  * @brief
- * Basic element structure definition
- *
+ * standard cell definition.
  * @author
- * li12242, Tianjin University, li12242@tju.edu.cn
+ * li12242, Tianjin University, li12242@tju.edu.cn.
  */
 
 #ifndef DGOM_STDCELL_H
@@ -14,69 +12,84 @@
 
 #include "Utility/utility.h"
 
+/**
+ * @brief enum for standard cell type
+ */
 typedef enum {
-    POINT    =0, ///< point
-    LINE     =1, ///< line
-    TRIANGLE =2, ///< triangle
-    QUADRIL  =3, ///< quadrilateral
-    TETRA    =4, ///< tetrahedron
-    TRIPRISM =5, ///< triangle prism
-    HEXA     =6, ///< hexahedron
+    POINT    =0, ///< point;
+    LINE     =1, ///< line;
+    TRIANGLE =2, ///< triangle;
+    QUADRIL  =3, ///< quadrilateral;
+    TETRA    =4, ///< tetrahedron;
+    TRIPRISM =5, ///< triangle prism;
+    HEXA     =6, ///< hexahedron;
 } dg_cell_type;
-
+/**
+ * @brief basic information of dg_cell
+ */
 typedef struct dg_cell_info{
-    int N; ///< order
-    int Nv; ///< number of vertex
-    int Nfaces; ///< number of faces
-    dg_cell_type type; ///< cell type
-    dg_cell_type *face_type; ///< face type
-    double *vr,*vs,*vt; ///< vertex coordinate
-    int **FToV; ///< Face to vertex list
+    int N; ///< order;
+    int Nv; ///< number of vertex;
+    int Nfaces; ///< number of faces;
+    dg_cell_type type; ///< cell type;
+    dg_cell_type *face_type; ///< face type of each faces;
+    double *vr,*vs,*vt; ///< vertex coordinate;
+    int **FToV; ///< Face to vertex list;
 }dg_cell_info;
-
+/**
+ * @brief volume information of dg_cell
+ */
 typedef struct dg_cell_volume{
-    int Np;
-    double *r,*s,*t;
-    double *w;
-    double **M, **V;
-    double **Dr,**Ds,**Dt;
+    int Np; ///< number of nodes;
+    double *r,*s,*t; ///< coordinate of nodes;
+    double *w; ///< Gauss quadrature weights for volume integral;
+    double **M, **V; ///< Mass and Vandermonde matrix;
+    double **Dr,**Ds,**Dt; ///< Derivative matrix;
 } dg_cell_volume;
-
+/**
+ * @brief face information of dg_cell
+ */
 typedef struct dg_cell_face{
-    int *Nfp;
-    int Nfptotal;
-    int **Fmask;
-    double **ws;
-    double **LIFT;
+    int *Nfp; ///< number of nodes on each faces;
+    int Nfptotal; ///< total number of Nfp;
+    int **Fmask; ///< node index on each faces;
+    double **ws; ///< Gauss quadrature weights for face integral;
+    double **LIFT; ///< lift matrix;
 } dg_cell_face;
-
+/**
+ * @brief structure of standard cell
+ */
 typedef struct dg_cell{
-    dg_cell_info *info;
-    dg_cell_volume *volume;
-    dg_cell_face *face;
+    dg_cell_info *info; ///< basic info
+    dg_cell_volume *volume; ///< volume info
+    dg_cell_face *face; ///< face info
     /* user defined precision */
-    dg_real *f_Dr,*f_Ds,*f_Dt,*f_LIFT; ///< user specific version
+    dg_real *f_Dr,*f_Ds,*f_Dt,*f_LIFT; ///< user specific version of Dr,Ds,Dt and LIFT
     void (*proj_vert2node)(struct dg_cell *cell, double *vertVal, double *nodeVal);
+    ///< function to project vertex value to nodes
 } dg_cell;
 
-/** function of create cell_info structure */
+/** function pointer of create cell_info structure */
 typedef dg_cell_info* (*Cell_Info_Create_Func)(int N);
-/** function of return node number and the address of pointer */
+/** function pointer of return node number and coordinate */
 typedef void (*Cell_Node_Func)(dg_cell *cell, int *Np, double **r, double **s, double **t);
-/** function of orthogonal function value at nodes (r,s,t) */
+/** function pointer of orthogonal function value at nodes (r,s,t) */
 typedef void (*Orthogonal_Func)(int N, int ind, int Np, double *r, double *s, double *t, double *fun);
-/** function of derivatives orthogonal function value at nodes (r,s,t) */
+/** function pointer of derivatives orthogonal function value at nodes (r,s,t) */
 typedef void (*Derivative_Orthogonal_Func)(int N, int ind, int Np, double *r, double *s, double *t,
                                            double *dr, double *ds, double *dt);
-/** function of projecting vertex to nodes */
+/** function pointer of projecting vertex to nodes */
 typedef void (*Proj_Func)(dg_cell *cell, double *vertVal, double *nodeVal);
 
+/**
+ * @brief function handles for creating dg_cell
+ */
 typedef struct dg_cell_creator{
-    Cell_Info_Create_Func cell_info_create; ///< generate dg_cell_info struct
-    Cell_Node_Func set_node;
-    Orthogonal_Func orthogonal_func; ///< orthogonal function
-    Derivative_Orthogonal_Func deri_orthgonal_func; ///<derivative of orthogonal func
-    Proj_Func proj_func;
+    Cell_Info_Create_Func cell_info_create; ///< generate dg_cell_info struct;
+    Cell_Node_Func set_node; ///< set coordinate of cell nodes;
+    Orthogonal_Func orthogonal_func; ///< orthogonal function;
+    Derivative_Orthogonal_Func deri_orthgonal_func; ///< derivative of orthogonal function;
+    Proj_Func proj_func; ///< project vertex value function;
 } dg_cell_creator;
 
 /** create stand cell object */

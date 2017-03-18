@@ -25,8 +25,8 @@ dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
 
     const int K = dg_grid_K(phys->grid);
     const int Np = dg_cell_Np(phys->cell);
-    const int Nparface = dg_mesh_Nparf(phys->mesh);
-    const int Nparnode = dg_mesh_Nparn(phys->mesh);
+    const int Nparface = dg_mesh_NfetchFace(phys->mesh);
+    const int Nparnode = dg_mesh_NfetchNode(phys->mesh);
 
     /* nodal array */
     phys->f_Q    = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));

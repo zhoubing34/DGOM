@@ -35,7 +35,7 @@ int dg_edge_nodemap_test(dg_edge *edge, int verbose){
         int ftype = edge->ftype[f];
         const int Nfp = dg_cell_Nfp(edge->cell)[f1];
         for(n=0;n<Nfp;n++){
-            if(ftype != INNERBS){
+            if(ftype != FACE_PARALL){
                 xM[sk] = x[0][edge->varpM[sk]];
                 xP[sk] = x[0][edge->varpP[sk]];
                 yM[sk] = y[0][edge->varpM[sk]];

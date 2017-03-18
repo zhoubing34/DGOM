@@ -11,15 +11,18 @@ static int pairnumget2d(const void *obj1);
 static void pairnumset2d(const void *obj1, int g);
 static void pairmarry2d(const void *obj1, const void *obj2);
 
-/* private functions and structures for FacePair */
+/** private functions and structures for FacePair */
 typedef struct face {
-    int p1, k1, f1;
-    int p2, k2, f2;
+    int p1, k1, f1; ///< local cell information;
+    int p2, k2, f2; ///< adjacent cell information;
 
-    int va, vb; ///< index of vertex on face
-    int g; ///< max index of vertex
+    int va, vb; ///< index of vertex on face;
+    int g; ///< max index of vertex;
 }face2d;
-
+/**
+ * @brief connect the cell in grid.
+ * @param grid poniter to dg_grid structure;
+ */
 void dg_grid_connect2d(dg_grid *grid){
     const int procid = dg_grid_procid(grid);
     const int Klocal = dg_grid_K(grid);
@@ -35,17 +38,11 @@ void dg_grid_connect2d(dg_grid *grid){
     int n,k,e,sk=0;
     face2d *myfaces = (face2d*) calloc(Klocal*Nfaces, sizeof(face2d));
 
-    int vind[Nfaces][2];
-    // triangle      vind[3][2] = { {0,1}, {1,2}, {2,0} };
-    // quadrilateral vind[4][2] = { {0,1}, {1,2}, {2,3}, {3,0}};
-    for(n=0;n<Nfaces;n++){
-        vind[n][0] = n%Nv;
-        vind[n][1] = (n+1)%(Nv);
-    }
+    int **FToV = dg_cell_FToV(grid->cell);
     for(k=0;k<Klocal;++k){
         for(e=0;e<Nfaces;++e){
-            int n1 = EToV[k][vind[e][0]];
-            int n2 = EToV[k][vind[e][1]];
+            int n1 = EToV[k][FToV[e][0]];
+            int n2 = EToV[k][FToV[e][1]];
 
             myfaces[sk].p1 = procid; myfaces[sk].k1 = k; myfaces[sk].f1 = e;
             myfaces[sk].p2 = procid; myfaces[sk].k2 = k; myfaces[sk].f2 = e;
@@ -80,7 +77,11 @@ void dg_grid_connect2d(dg_grid *grid){
 void dg_grid_connect3d(dg_grid *grid){
     return;
 }
-
+/**
+ * @brief sort 2d faces (line) function;
+ * @param obj1,obj2 pointer to a face2d structure;
+ * @return
+ */
 static int compare_pairs2d(const void *obj1, const void *obj2){
     face2d *e1 = (face2d*) obj1;
     face2d *e2 = (face2d*) obj2;
@@ -101,7 +102,11 @@ static int compare_pairs2d(const void *obj1, const void *obj2){
     return 0;
 }
 
-
+/**
+ * @brief
+ * @param obj1
+ * @return
+ */
 static int pairprocget2d(const void *obj1){
     face2d *e1 = (face2d*) obj1;
     return (e1->p1);

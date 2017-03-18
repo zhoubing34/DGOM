@@ -5,9 +5,8 @@
 #include "dg_grid_BS.h"
 
 /**
- * @brief
- * Initialize the EToBS field.
- * @param grid dg_grid structure.
+ * @brief Initialize the EToBS field.
+ * @param grid dg_grid structure;
  */
 void dg_grid_init_BS(dg_grid *grid){
     const int procid = dg_grid_procid(grid);
@@ -21,9 +20,9 @@ void dg_grid_init_BS(dg_grid *grid){
         for(f=0;f<Nfaces;f++){
             /* the inner boundary surface */
             if(EToP[k][f] != procid){
-                EToBS[k][f] = INNERBS;
+                EToBS[k][f] = FACE_PARALL;
             }else{
-                EToBS[k][f] = INNERLOC;
+                EToBS[k][f] = FACE_INNER;
             }
         }
     }
@@ -35,12 +34,12 @@ void dg_grid_add_BS3d(dg_grid *grid, int Nsurface, int **SFToV){
     return;
 }
 /**
- * @brief
- * Add boundary surface type into EToBS.
- * @param grid
+ * @brief Add boundary surface type into EToBS.
+ * @details
+ *
+ * @param grid pointer to dg_grid structure;
  * @param Nsurface number of surface in SFToV;
  * @param SFToV surface type to vertex, size [Nsurf x 3];
- *
  */
 void dg_grid_add_BS2d(dg_grid *grid, int Nsurface, int **SFToV){
 
@@ -59,7 +58,7 @@ void dg_grid_add_BS2d(dg_grid *grid, int Nsurface, int **SFToV){
         int v2 = SFToV[f][1];
         face_indicator[f] = min(v1, v2)*Nvert + max(v1, v2);
         int facetype = SFToV[f][2];
-        if( facetype == INNERLOC | facetype == INNERBS ){
+        if( facetype == FACE_INNER | facetype == FACE_PARALL ){
             printf("%s (%d)\nWarning: surface type in SFToV[%d][2] = %d\n",
                    __FUNCTION__, __LINE__, f, SFToV[f][2]);
         }

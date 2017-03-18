@@ -5,7 +5,7 @@
 #include "dg_phys_fetch_buffer.h"
 
 /**
- * @brief Send/rece nodal value `f_Q` through buffers
+ * @brief Send/rece nodal value node information through buffers
  *
  * @details
  * The internal boundary values of `f_Q` in local process is arranged into `f_outQ` buffer
@@ -24,12 +24,11 @@
  *     MPI_Status instatus[nprocs];
  *     MPI_Waitall(Nmess, mpi_in_requests, instatus);
  *
- * @param[in]       phys    PhysDomain2d pointer
- * @param[in,out]    mpi_send_requests  MPI_Request send request
- * @param[in,out]    mpi_recv_requests  MPI_Request receive request
- * @param[in,out]    Nmessage number of messages stored in `mpi_send_requests` and `mpi_send_requests`
- *
- * @note Nmess is initialize inside the function
+ * @param[in] phys pointer to dg_phys structure;
+ * @param[in,out] mpi_send_requests MPI send request
+ * @param[in,out] mpi_recv_requests MPI receive request
+ * @return
+ * Nmess number of messages in `mpi_send_requests` and `mpi_send_requests`
  *
  */
 int dg_phys_fetch_node_buffer(dg_phys *phys,

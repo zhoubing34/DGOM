@@ -10,6 +10,9 @@
 void dg_edge_free2d(dg_edge *edge);
 void dg_edge_setinfo2d(dg_edge *edge);
 
+/**
+ * @brief creator for generating dg_edge structure.
+ */
 typedef struct dg_edge_creator{
     void (*map_face)(dg_edge *edge);
     void (*map_node)(dg_edge *edge);
@@ -105,6 +108,7 @@ static void dg_edge_free2d(dg_edge *edge){
     vector_real_free(edge->fsc);
     vector_real_free(edge->nx);
     vector_real_free(edge->ny);
+    vector_real_free(edge->nz);
     free(edge);
     return;
 }

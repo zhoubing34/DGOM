@@ -11,6 +11,9 @@ void dg_grid_set_vert3d(dg_grid *grid, double *vx, double *vy, double *vz);
 /* partition of the whole grid into each process */
 void dg_grid_partition(dg_grid *grid);
 
+/**
+ * @brief creator for generating dg_grid structure.
+ */
 typedef struct dg_grid_creator{
     void (*copy_vert)(dg_grid *grid, double *vx, double *vy, double *vz);
     void (*partition)(dg_grid *grid);
@@ -21,6 +24,7 @@ typedef struct dg_grid_creator{
     void (*add_BS)(dg_grid *grid, int Nsruf, int **SFToBS);
 } dg_grid_creator;
 
+/** const creator for 2d grid */
 const dg_grid_creator grid_2d_creator = {
         dg_grid_set_vert2d,
         dg_grid_partition,
@@ -30,7 +34,7 @@ const dg_grid_creator grid_2d_creator = {
         dg_grid_init_BS,
         dg_grid_add_BS2d,
 };
-
+/** const creator for 3d grid */
 const dg_grid_creator grid_3d_creator = {
         dg_grid_set_vert3d,
         dg_grid_partition,
@@ -44,13 +48,13 @@ const dg_grid_creator grid_3d_creator = {
 /**
  * @brief
  * create dg_grid structure with input grid geometry.
- * @param cell standard cell
- * @param K number of element
- * @param Nv number of vertex
- * @param vx,vy,vz coordinate of vertex
- * @param EToV element to vertex list
+ * @param cell pointer to the dg_cell structure;
+ * @param K number of element;
+ * @param Nv number of vertex;
+ * @param vx,vy,vz coordinate of vertex;
+ * @param EToV element to vertex list;
  * @return
- * grid dg_grid structure
+ * pointer to a new dg_grid structure.
  */
 dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, double *vz, int **EToV){
 
@@ -97,11 +101,20 @@ dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, do
     return grid;
 }
 
+/**
+ * @brief add boundary types to the dg_grid structure.
+ * @param grid pointer to a dg_grid structure;
+ * @param Nsurf number of srufaces;
+ * @param SFToBS surface types;
+ */
 void dg_grid_add_BS(dg_grid *grid, int Nsurf, int **SFToBS){
     grid->add_BS(grid, Nsurf, SFToBS);
     return;
 }
-
+/**
+ * @brief free the memory of dg_grid type.
+ * @param grid dg_grid structure;
+ */
 void dg_grid_free(dg_grid *grid){
     matrix_int_free(grid->EToV);
     matrix_int_free(grid->EToE);
@@ -179,7 +192,7 @@ static void dg_grid_set_vert2d(dg_grid *grid, double *vx, double *vy, double *vz
     grid->vx  = vector_double_create(Nv);
     grid->vy  = vector_double_create(Nv);
     grid->vz  = vector_double_create(Nv);
-    // allocation
+    // assignment
     for(i=0;i<Nv;i++){
         grid->vx[i] = vx[i];
         grid->vy[i] = vy[i];
@@ -187,7 +200,7 @@ static void dg_grid_set_vert2d(dg_grid *grid, double *vx, double *vy, double *vz
 }
 
 /**
- * @brief allocate and assignment the vertex coordinate in 3d geoGrid object
+ * @brief allocate and assignment the vertex coordinate to grid;
  * @param[in,out] grid geoGrid object
  * @param[in] vx coordinate of vertex
  * @param[in] vy coordinate of vertex
@@ -199,7 +212,7 @@ static void dg_grid_set_vert3d(dg_grid *grid, double *vx, double *vy, double *vz
     grid->vx  = vector_double_create(Nv);
     grid->vy  = vector_double_create(Nv);
     grid->vz  = vector_double_create(Nv);
-    // allocation
+    // assignment
     for(i=0;i<Nv;i++){
         grid->vx[i] = vx[i];
         grid->vy[i] = vy[i];

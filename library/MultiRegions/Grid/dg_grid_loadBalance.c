@@ -1,5 +1,4 @@
 #include "parmetis.h"
-#include "metis.h"
 #include "dg_grid.h"
 
 #define MAXNCON 12
@@ -17,7 +16,7 @@ void dg_grid_load_balance3d(dg_grid *grid){
  * Redistribute the elements on each process.
  * @details
  * Call ParMetis library to redistribute the mesh.
- * @param [in,out] grid dg_grid structure
+ * @param[in,out] grid pointer to dg_grid structure;
  * @note The properties of EToV and K is updated.
  */
 void dg_grid_load_balance2d(dg_grid *grid){

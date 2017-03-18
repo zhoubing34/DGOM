@@ -4,6 +4,10 @@
 
 #include "dg_cell_face.h"
 
+/**
+ * @brief deallocate the memory of dg_cell_face type pointer.
+ * @param face pointer of dg_cell_face type;
+ */
 void dg_cell_face_free(dg_cell_face *face){
     vector_int_free(face->Nfp);
     array_double_free(face->ws);
@@ -14,10 +18,9 @@ void dg_cell_face_free(dg_cell_face *face){
 }
 
 /**
- * @brief
- * set the properties of Nfptotal and Nfp in dg_cell_face structure.
- * @param cell
- * @param face
+ * @brief set the properties of Nfptotal and Nfp in face.
+ * @param cell pointer of dg_cell type;
+ * @param face pointer of dg_cell_face type;
  */
 static void dg_cell_face_info(dg_cell *cell, dg_cell_face *face){
     const int N = dg_cell_N(cell);
@@ -36,7 +39,16 @@ static void dg_cell_face_info(dg_cell *cell, dg_cell_face *face){
     face->Nfp = Nfp;
     return;
 }
-
+/**
+ * @brief Calculate the LIFT matrix.
+ * @details
+ * The LIFT matrix is to lift the surface integral flux into nodal terms.
+ * @param cell pointer of dg_cell type;
+ * @param Nfptotal total number of nodes on each faces;
+ * @param Fmask nodex index on all faces;
+ * @return
+ * pointer to a new LIFT matrix.
+ */
 static double **dg_cell_face_LIFT(dg_cell *cell, int Nfptotal, int **Fmask){
     const int N = dg_cell_N(cell);
     const int Np = dg_cell_Np(cell);
@@ -76,7 +88,14 @@ static double **dg_cell_face_LIFT(dg_cell *cell, int Nfptotal, int **Fmask){
     return LIFT;
 }
 
-
+/**
+ * @brief calculate the Fmask matrix.
+ * @details
+ * Fmask matrix contains all the nodal index on faces. This program searches
+ * all the nodal points to match all the face nodes.
+ * @param cell pointer of dg_cell type;
+ * @param Fmask the Fmask matrix;
+ */
 void dg_face_cell_Fmask(dg_cell *cell, int **Fmask){
     const int N = dg_cell_N(cell);
     const int Np = dg_cell_Np(cell);
@@ -94,7 +113,9 @@ void dg_face_cell_Fmask(dg_cell *cell, int **Fmask){
             f_vs[n] = dg_cell_vs(cell)[ dg_cell_FToV(cell)[f][n] ];
             f_vt[n] = dg_cell_vt(cell)[ dg_cell_FToV(cell)[f][n] ];
         }
-        double f_r[Nface_node], f_s[Nface_node], f_t[Nface_node]; // face node coordinate
+        // face node coordinate
+        double f_r[Nface_node], f_s[Nface_node], f_t[Nface_node];
+        // get the face node coordinate by map from vertex
         face_cell->proj_vert2node(face_cell, f_vr, f_r);
         face_cell->proj_vert2node(face_cell, f_vs, f_s);
         face_cell->proj_vert2node(face_cell, f_vt, f_t);
@@ -102,7 +123,7 @@ void dg_face_cell_Fmask(dg_cell *cell, int **Fmask){
             double x1 = f_r[n];
             double y1 = f_s[n];
             double z1 = f_t[n];
-            for(m=0;m<Np;m++){
+            for(m=0;m<Np;m++){ // loop over all the nodes
                 double x2 = dg_cell_r(cell)[m];
                 double y2 = dg_cell_s(cell)[m];
                 double z2 = dg_cell_t(cell)[m];
@@ -115,14 +136,12 @@ void dg_face_cell_Fmask(dg_cell *cell, int **Fmask){
 }
 
 /**
- * @brief
- * @param cell
- * @param Nfaces
- * @param type
+ * @brief creating the dg_cell_face structure.
+ * @param cell pointer of dg_cell type;
  * @return
+ * pointer to a new dg_cell_face structure.
  */
-dg_cell_face *dg_cell_face_create(dg_cell *cell, const dg_cell_creator *creator){
-
+dg_cell_face *dg_cell_face_create(dg_cell *cell){
     dg_cell_face *face = (dg_cell_face *) calloc(1, sizeof(dg_cell_face));
     const int N = dg_cell_N(cell);
     const int Nfaces = dg_cell_Nfaces(cell);

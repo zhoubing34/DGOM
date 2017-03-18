@@ -7,29 +7,32 @@
 
 #include "MultiRegions/Mesh/dg_mesh.h"
 
+/**
+ * @brief
+ */
 typedef struct dg_edge{
-    int Nedge; ///< total number of edges
-    int Nnode; ///< total number of nodes
-    int procid;
-    int nprocs;
+    int Nedge; ///< total number of edges;
+    int Nnode; ///< total number of nodes;
+    int procid; ///< process id;
+    int nprocs; ///< number of process;
 
     dg_cell *cell;
     dg_grid *grid;
     dg_region *region;
     dg_mesh *mesh;
     /* face info */
-    int *varkM, *varkP; ///< cell index of local and adjacent cell
-    int *varfM, *varfP; ///< face index of local and adjacent cell
-    int *ftype; ///< face type of each edges
-    int *surfinfo; ///< gather the varkM/varkP, varfM/varfP and ftype
+    int *varkM,*varkP; ///< cell index of local and adjacent cell;
+    int *varfM,*varfP; ///< face index of local and adjacent cell;
+    int *ftype; ///< face type of each edges;
+    int *surfinfo; ///< gather the varkM/varkP, varfM/varfP and ftype;
     /* node info */
-    int *varpM, *varpP; ///< node index of local and adjacent node
-    int *varfpM, *varfpP; ///< face node index of local and adjacent node
-    dg_real *fsc; ///< face Jacobi divided by volume Jacobi
-    dg_real *nx, *ny, *nz; ///< outward normal vector of local cell
-    dg_real *nodeinfo; ///< gather the varpM/varpP, fsc and nx/ny/nz
+    int *varpM,*varpP; ///< node index of local and adjacent node;
+    int *varfpM,*varfpP; ///< face node index of local and adjacent node;
+    dg_real *fsc; ///< face Jacobi divided by volume Jacobi;
+    dg_real *nx,*ny,*nz; ///< outward normal vector of local cell;
+    dg_real *nodeinfo; ///< gather the varpM/varpP, fsc and nx/ny/nz;
 
-    void(*free_func)(struct dg_edge *edge);
+    void(*free_func)(struct dg_edge *edge); ///<
 }dg_edge;
 
 dg_edge *dg_edge_create(dg_mesh *mesh);

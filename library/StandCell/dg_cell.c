@@ -11,6 +11,7 @@
 #include "Utility/unit_test.h"
 #endif
 
+/** creator for creating standard point cell */
 static const dg_cell_creator point_creator = {
         dg_cell_point_info,
         dg_cell_point_set_node,
@@ -18,7 +19,7 @@ static const dg_cell_creator point_creator = {
         dg_cell_point_deri_orthog_func,
         dg_cell_point_proj,
 };
-
+/** creator for creating standard line cell */
 static const dg_cell_creator line_creator = {
         dg_cell_line_info,
         dg_cell_line_set_nood,
@@ -26,7 +27,7 @@ static const dg_cell_creator line_creator = {
         dg_cell_line_deri_orthog_func,
         dg_cell_line_proj,
 };
-
+/** creator for creating standard triangle cell */
 static const dg_cell_creator tri_creator = {
         dg_cell_tri_info,
         dg_cell_tri_set_node,
@@ -34,7 +35,7 @@ static const dg_cell_creator tri_creator = {
         dg_cell_tri_deriorthog_func,
         dg_cell_tri_proj,
 };
-
+/** creator for creating standard quadrilateral cell */
 static const dg_cell_creator quad_creator = {
         dg_cell_quad_info,
         dg_cell_quad_set_nood,
@@ -43,14 +44,15 @@ static const dg_cell_creator quad_creator = {
         dg_cell_quad_proj,
 };
 
-/** declaration of local functions */
+/** copy the Dr,Dr,Dt and LIFT from double to user specific precision */
 static void dg_cell_d2f(dg_cell *cell);
 
 /***
- * @brief
- * @param N
- * @param type
+ * @brief creating standard dg_cell structure.
+ * @param N order;
+ * @param type cell type;
  * @return
+ * pointer of dg_cell type.
  */
 dg_cell *dg_cell_creat(int N, dg_cell_type type){
     dg_cell *cell = (dg_cell *) calloc(1, sizeof(dg_cell));
@@ -70,12 +72,16 @@ dg_cell *dg_cell_creat(int N, dg_cell_type type){
     }
     cell->info = creator->cell_info_create(N);
     cell->volume = dg_cell_volume_create(cell, creator);
-    cell->face = dg_cell_face_create(cell, creator);
+    cell->face = dg_cell_face_create(cell);
     cell->proj_vert2node = creator->proj_func;
     dg_cell_d2f(cell);
     return cell;
 }
 
+/**
+ * @brief deallocate the memory of dg_cell_info structure.
+ * @param info pointer of dg_cell_info type;
+ */
 static void dg_cell_info_free(dg_cell_info *info){
     free(info->face_type);
     matrix_int_free(info->FToV);
@@ -86,6 +92,10 @@ static void dg_cell_info_free(dg_cell_info *info){
     return;
 }
 
+/**
+ * @brief deallocate the memory of dg_cell structure.
+ * @param cell pointer of dg_cell type;
+ */
 void dg_cell_free(dg_cell *cell){
     dg_cell_info_free(cell->info);
     dg_cell_volume_free(cell->volume);
@@ -96,8 +106,8 @@ void dg_cell_free(dg_cell *cell){
 
 /**
  * @brief
- * copy double type to user specific precision.
- * @param [in,out] cell dg_cell structure
+ * copy double type of Dr,Ds,Dt and LIFT to user specific precision.
+ * @param[in,out] cell pointer of dg_cell type;
  */
 static void dg_cell_d2f(dg_cell *cell){
     const int Np = dg_cell_Np(cell);
@@ -129,9 +139,9 @@ static void dg_cell_d2f(dg_cell *cell){
 }
 
 /**
- * @brief Project the vertex value to interpolation nodes.
- * @param[in] vertVal value on vertex
- * @param[in] nodeVal value on nodes
+ * @brief project the vertex value to interpolation nodes.
+ * @param[in] vertVal value on vertex;
+ * @param[in] nodeVal value on nodes;
  */
 void dg_cell_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal){
     cell->proj_vert2node(cell, vertVal, nodeVal);

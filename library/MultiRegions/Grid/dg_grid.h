@@ -4,38 +4,46 @@
 #include "StandCell/dg_cell.h"
 #include "mpi.h"
 
+/**
+ * @brief cell surface type list.
+ */
 typedef enum {
-    INNERLOC=0, // 0-inner face2d, adjacent face2d in the same process
-    INNERBS=1,  // 1-inner boundary surface, adjacent face2d in other process
-    SLIPWALL=2, // 2-slip wall
-    NSLIPWALL=3, // 3-non-slip wall
-    OPENBS = 4   // 4-open boundary
+    FACE_INNER = 0, ///< inner local faces, adjacent to other cells;
+    FACE_PARALL = 1, ///< inner boundary surface, adjacent to other processes;
+    FACE_SLIPWALL = 2, ///< slip wall;
+    FACE_NSLIPWALL = 3, ///< non-slip wall;
+    FACE_OPENBS = 4, ///< open boundary;
 } dg_face_type;
 
+/**
+ * @brief cell type list.
+ */
 typedef enum{
-    COMPUTE_CELL = 0,
-    SPONGE_CELL = 1,
-    REFINED_CELL = 2,
-    TROUBLE_CELL = 3
+    CELL_COMPUTE = 0, ///< normal compute cell;
+    CELL_SPONGE = 1, ///< sponge region cell;
+    CELL_REFINED = 2, ///< refined cell;
+    CELL_TROUBLE = 3, ///< tourble cell;
 } dg_grid_cell_type;
 
-/* geometry grid structure */
+/**
+ * @brief geometry grid structure
+ */
 typedef struct dg_grid{
-    dg_cell *cell; ///< standard element
+    dg_cell *cell; ///< standard element;
 
-    int nprocs; ///< number of process
-    int procid; ///< index of process
-    int Nv;///< Num of vertex
-    int K; ///< Num of element
-    int **EToV; ///< vertex list in elements, start from 0
-    int **EToE; ///< adjacent element id
-    int **EToF; ///< adjacent face id (0,1,2...)
-    int **EToP; ///< process id of adjacent element
-    int **EToBS; ///< boundary surface type of adjacent element
-    int *EToR; ///< region id of each cell
-    double *vx, *vy, *vz; ///< vertex coordinate
+    int nprocs; ///< number of process;
+    int procid; ///< index of process;
+    int Nv;///< Num of vertex;
+    int K; ///< Num of element;
+    int **EToV; ///< vertex list in elements, start from 0;
+    int **EToE; ///< adjacent element id;
+    int **EToF; ///< adjacent face id (0,1,2...);
+    int **EToP; ///< process id of adjacent element;
+    int **EToBS; ///< boundary surface type of adjacent element;
+    int *EToR; ///< region id of each cell;
+    double *vx, *vy, *vz; ///< vertex coordinate;
 
-    void (*add_BS)(struct dg_grid *grid, int Nsurf, int **SFToV);
+    void (*add_BS)(struct dg_grid *grid, int Nsurf, int **SFToV); ///< add boundary surface to grid;
 } dg_grid;
 
 

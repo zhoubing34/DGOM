@@ -107,6 +107,9 @@ void dg_grid_parallelPairs(void *objs, int Nmyobjs, int sizeobj,
                   outN, cumoutN, MPI_INT, MPI_COMM_WORLD);
 
     free(otherobjs);
-    free(outN); free(inN); free(cumoutN); free(cuminN);
+    free(outN);
+    free(inN);
+    free(cumoutN);
+    free(cuminN);
 }
 

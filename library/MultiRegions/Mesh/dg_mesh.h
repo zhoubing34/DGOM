@@ -7,27 +7,31 @@
 
 #include "MultiRegions/Region/dg_region.h"
 
+/**
+ * @brief mesh structure to communicate the infomation with other processes.
+ */
 typedef struct dg_mesh{
+    int procid; ///< process id;
+    int nprocs; ///< number of process;
 
-    int procid; ///< process id
-    int nprocs; ///< number of process
+    dg_region *region; ///< multi-region object;
+    dg_grid *grid; ///< geometry grid object;
+    dg_cell *cell; ///< standard cell object;
 
-    dg_region *region; ///< multi-region object
-    dg_grid *grid; ///< geometry grid object
-    dg_cell *cell; ///< standard element object
+    int *Nface2procs; ///< number of faces adjacent to each process;
+    int NfetchFace; ///< total number of parallel faces;
+    int *CBFToK; ///< map of cell index for buffer;
+    int *CBFToF; ///< map of local face (0,1,2..) index for buffer;
 
-    int *Nface2procs; ///< number of faces adjacent to each process
-    int NfetchFace; ///< total number of parallel faces
-    int *CBFToK; ///< map of cell index for buffer
-    int *CBFToF; ///< map of local face (0,1,2..) index for buffer
+    int *Nfp2procs; ///< number of nodes adjacent to each process;
+    int NfetchNode; ///< total number of nodes to send and recv;
+    int *NBFToN; ///< index list of nodes to send out;
 
-    int *Nfp2procs; ///< number of nodes adjacent to each process
-    int NfetchNode; ///< total number of nodes to send recv
-    int *NBFToN; ///< index list of nodes to send out
-
+    /** fetch the node buffer with other processes */
     int (*fetch_node_buffer)(struct dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
                              MPI_Request *send_requests,
                              MPI_Request *recv_requests);
+    /** fetch the cell buffer with other processes */
     int (*fetch_cell_buffer)(struct dg_mesh *mesh, int Nfield, dg_real *f_Q, dg_real *f_recvQ,
                              MPI_Request *send_requests,
                              MPI_Request *recv_requests);
@@ -38,7 +42,7 @@ void dg_mesh_free(dg_mesh *mesh);
 
 #define dg_mesh_procid(mesh) mesh->procid
 #define dg_mesh_nprocs(mesh) mesh->nprocs
-#define dg_mesh_Nparf(mesh) mesh->NfetchFace
-#define dg_mesh_Nparn(mesh) mesh->NfetchNode
+#define dg_mesh_NfetchFace(mesh) mesh->NfetchFace
+#define dg_mesh_NfetchNode(mesh) mesh->NfetchNode
 
 #endif //DGOM_MR_MESH_H

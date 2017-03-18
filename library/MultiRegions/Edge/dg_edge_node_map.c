@@ -14,7 +14,7 @@ void dg_edge_node_map(dg_edge *edge){
     dg_region *region = edge->region;
     const int Nedge = dg_edge_Nedge(edge);
     const int Np = dg_cell_Np(cell);
-    const int TotalParNode = dg_mesh_Nparn(edge->mesh);
+    const int TotalParNode = dg_mesh_NfetchNode(edge->mesh);
     const int Nfaces = dg_cell_Nfaces(cell);
     int **Fmask = dg_cell_Fmask(cell);
     double **x = dg_region_x(region);
@@ -57,7 +57,7 @@ void dg_edge_node_map(dg_edge *edge){
             double yM = y[0][idM];
             double zM = z[0][idM];
 
-            if(ftype != INNERBS){
+            if(ftype != FACE_PARALL){
                 for(n2=0;n2<Nfp;n2++){
                     const int idP = k2*Np + Fmask[f2][n2];
                     double xP = x[0][idP];

@@ -4,13 +4,13 @@
 
 #define DEBUG 0
 
-/* create node coordinate for 2d dg_region object */
-static void dg_region_node2d(dg_region *region);
 static void dg_region_node(dg_region *region);
-/* calculate the volume/area and the length scale of each element */
 static void dg_region_volumeScale2d(dg_region *region);
 static void dg_region_volumeScale3d(dg_region *region);
 
+/**
+ * @brief functions of creating structure dg_region
+ */
 typedef struct dg_region_creator{
     void (*set_nood)(dg_region *reg);
     void (*set_volumInfo)(dg_region *reg);
