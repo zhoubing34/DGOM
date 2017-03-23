@@ -135,13 +135,13 @@ int dg_point_LIFT_test(dg_cell *cell, int verbose){
 }
 
 
-int dg_point_vert_proj_test(dg_cell *point, int verbose){
+int dg_point_vert_proj_test(dg_cell *cell, int verbose){
     int fail=0;
     extern double point_VX[NV];
-    const int Np = dg_cell_Np(point);
+    const int Np = dg_cell_Np(cell);
     double x[Np];
-    dg_cell_proj_vert2node(point, 1, point_VX, x);
-    fail = vector_double_test("dg_point_vert_proj_test", x, dg_cell_r(point), Np);
+    cell->proj_vert2node(cell, 1, point_VX, x);
+    fail = vector_double_test("dg_point_vert_proj_test", x, dg_cell_r(cell), Np);
 
     if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;

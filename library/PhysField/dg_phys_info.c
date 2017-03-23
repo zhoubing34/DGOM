@@ -4,12 +4,11 @@
 
 #include "dg_phys_info.h"
 
-static int dg_phys_fetch_node_buffer(dg_phys_info *phys_info,
-                                     MPI_Request *mpi_send_requests,
+static int dg_phys_fetch_node_buffer(dg_phys_info *phys_info, MPI_Request *mpi_send_requests,
                                      MPI_Request *mpi_recv_requests);
-static int dg_phys_fetch_cell_buffer(dg_phys_info *phys_info,
-                                     MPI_Request *mpi_send_requests,
+static int dg_phys_fetch_cell_buffer(dg_phys_info *phys_info, MPI_Request *mpi_send_requests,
                                      MPI_Request *mpi_recv_requests);
+static void dg_phys_cell_mean(dg_phys_info *phys);
 
 /**
  * @brief create a new pointer to dg_phys_info structure.
@@ -46,8 +45,10 @@ dg_phys_info* dg_phys_info_create(int Nfields, dg_edge *edge){
     phys_info->f_rhsQ = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));
     phys_info->f_resQ = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));
 
+    /* methods */
     phys_info->fetch_node_buffer = dg_phys_fetch_node_buffer;
     phys_info->fetch_cell_buffer = dg_phys_fetch_cell_buffer;
+    phys_info->cell_mean = dg_phys_cell_mean;
 
     return phys_info;
 }
@@ -142,3 +143,30 @@ static int dg_phys_fetch_cell_buffer(dg_phys_info *phys_info,
     return Nmess;
 }
 
+
+/**
+ * @brief calculate the integral averaged cell value of each physical field
+ * @param[in,out] phys physical field object
+ */
+static void dg_phys_cell_mean(dg_phys_info *phys){
+
+    dg_region *region = phys->region;
+    const int Nfield = phys->Nfield;
+    const int K = dg_grid_K(phys->grid);
+    const int Np = dg_cell_Np(phys->cell);
+
+    register int k,fld;
+
+    dg_real *f_Q = phys->f_Q;
+    dg_real *c_Q = phys->c_Q;
+
+    for(k=0;k<K;k++){
+        region->vol_integral(region, Nfield, k, f_Q+k*Np*Nfield, c_Q+k*Nfield);
+        const double Area = 1.0/phys->region->size[k];
+        for(fld=0;fld<Nfield;fld++){ // divided the area
+            c_Q[k*Nfield + fld] *= Area;
+        }
+    }
+
+    return;
+}

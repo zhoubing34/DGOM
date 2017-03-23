@@ -164,17 +164,17 @@ int dg_quad_LIFT_test(dg_cell *quad, int verbose){
 }
 
 
-int dg_quad_vert_proj_test(dg_cell *quad, int verbose){
+int dg_quad_vert_proj_test(dg_cell *cell, int verbose){
     int fail=0;
     extern double quad_VX[NV];
     extern double quad_VY[NV];
-    const int Np = dg_cell_Np(quad);
+    const int Np = dg_cell_Np(cell);
     double x[Np], y[Np];
-    dg_cell_proj_vert2node(quad, 1, quad_VX, x);
-    fail = vector_double_test("dg_quad_vert_proj_test", x, dg_cell_r(quad), Np);
+    cell->proj_vert2node(cell, 1, quad_VX, x);
+    fail = vector_double_test("dg_quad_vert_proj_test", x, dg_cell_r(cell), Np);
 
-    dg_cell_proj_vert2node(quad, 1, quad_VY, y);
-    fail = vector_double_test("dg_quad_vert_proj_test", y, dg_cell_s(quad), Np);
+    cell->proj_vert2node(cell, 1, quad_VY, y);
+    fail = vector_double_test("dg_quad_vert_proj_test", y, dg_cell_s(cell), Np);
     if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }

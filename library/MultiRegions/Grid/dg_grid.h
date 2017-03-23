@@ -48,7 +48,6 @@ typedef struct dg_grid{
 
 
 dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, double *vz, int **EToV);
-void dg_grid_add_BS(dg_grid *grid, int Nsurf, int **SFToBS);
 void dg_grid_free(dg_grid *grid);
 
 #define dg_grid_K(grid) grid->K

@@ -233,18 +233,19 @@ static dg_phys* user_phys_init(dg_grid *grid){
 
 static void conv_time_init(dg_phys *phys){
     double dt = 1e6; // initial time step
-    const int N = dg_cell_N(phys->cell);
-    const int Np = dg_cell_Np(phys->cell);
-    const int K = dg_grid_K(phys->grid);
-    double *len = phys->region->len;
+    const int N = dg_cell_N(dg_phys_cell(phys));
+    const int Np = dg_cell_Np(dg_phys_cell(phys));
+    const int K = dg_grid_K(dg_phys_grid(phys));
+    double *len = dg_phys_region(phys)->len;
 
+    dg_real *f_Q = dg_phys_f_Q(phys);
     int k,n,sk = 0;
     for(k=0;k<K;++k){
         double r = len[k]/(N+1);
         for(n=0;n<Np;n++){
             sk++; // jump c field
-            const dg_real u = phys->f_Q[sk++];
-            const dg_real v = phys->f_Q[sk++];
+            const dg_real u = f_Q[sk++];
+            const dg_real v = f_Q[sk++];
             double spe = sqrt(u*u+v*v);
             dt = min(dt, r/spe);
         }

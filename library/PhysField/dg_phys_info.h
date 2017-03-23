@@ -30,6 +30,7 @@ typedef struct dg_phys_info{
     /** function to fetch cell buffer with other process; */
     int (*fetch_cell_buffer)(struct dg_phys_info *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
 
+    void (*cell_mean)(struct dg_phys_info *phys);
 }dg_phys_info;
 
 dg_phys_info* dg_phys_info_create(int Nfields, dg_edge *edge);

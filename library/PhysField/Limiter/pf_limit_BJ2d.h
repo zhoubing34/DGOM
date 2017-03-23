@@ -5,10 +5,8 @@
 #ifndef DGOM_PF_LIMIT_BJ2D_H
 #define DGOM_PF_LIMIT_BJ2D_H
 
-#include "PhysField/dg_phys.h"
-#include "PhysField/dg_phys_fetch_buffer.h"
-#include "../pf_cellMean.h"
+#include "PhysField/dg_phys_limiter.h"
 
-void pf_limit_BJ2d(physField *phys, double beta);
+void pf_limit_BJ2d(dg_phys_info *phys, double beta);
 
 #endif //DGOM_PF_LIMIT_BJ2D_H

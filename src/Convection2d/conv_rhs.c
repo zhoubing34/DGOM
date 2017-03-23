@@ -29,12 +29,13 @@ int conv_upWindFlux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_rea
 
 
 void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
-    const int K = dg_grid_K(phys->grid);
-    const int nprocs = dg_grid_nprocs(phys->grid);
-    const int Np = dg_cell_Np(phys->cell);
+    dg_grid *grid = dg_phys_grid(phys);
+    const int K = dg_grid_K(grid);
+    const int nprocs = dg_grid_nprocs(grid);
+    const int Np = dg_cell_Np(dg_phys_cell(phys));
     const int Nfield = dg_phys_Nfield(phys);
 
-    dg_real *f_Q = phys->f_Q;
+    dg_real *f_Q = dg_phys_f_Q(phys);
 
     /* mpi request buffer */
     MPI_Request *mpi_send_requests = (MPI_Request *) calloc((size_t) nprocs, sizeof(MPI_Request));
@@ -43,14 +44,14 @@ void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
     /* fetch nodal value through all procss */
     int Nmess = phys->fetch_node_buffer(phys, mpi_send_requests, mpi_recv_requests);
 
-    /* volume integral */
+    /* volume vol_integral */
     dg_phys_strong_vol_opt2d(phys, conv_fluxTerm);
 
     /* waite to recv */
     MPI_Status instatus[nprocs];
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
-    /* surface integral */
+    /* surface vol_integral */
     dg_phys_strong_surf_opt2d(phys, NULL, NULL, conv_fluxTerm, conv_upWindFlux);
 
     /* waite for finishing send buffer */
@@ -58,8 +59,8 @@ void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
 
     /* viscosity flux */
 
-    dg_real *f_resQ = phys->f_resQ;
-    const dg_real *f_rhsQ = phys->f_rhsQ;
+    dg_real *f_resQ = dg_phys_f_resQ(phys);
+    const dg_real *f_rhsQ = dg_phys_f_rhsQ(phys);
     int t;
     for(t=0;t<K*Np*Nfield;++t){
         f_resQ[t] = frka*f_resQ[t]+fdt*f_rhsQ[t];   // calculate the resdiual of the equation

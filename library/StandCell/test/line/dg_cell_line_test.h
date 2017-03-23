@@ -12,6 +12,6 @@ int dg_line_mass_matrix_test(dg_cell *cell, int verbose);
 int dg_line_deri_matrix_test(dg_cell *cell, int verbose);
 int dg_line_Fmask_test(dg_cell *cell, int verbose);
 int dg_line_LIFT_test(dg_cell *quad, int verbose);
-int dg_line_vert_proj_test(dg_cell *line, int verbose);
+int dg_line_vert_proj_test(dg_cell *cell, int verbose);
 
 #endif //DGOM_DG_CELL_LINE_TEST_H

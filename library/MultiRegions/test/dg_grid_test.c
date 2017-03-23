@@ -89,5 +89,7 @@ int dg_grid_EToBS_test(dg_grid *grid, int verbose){
         print_int_matrix2file(fp, "EToBS", grid->EToBS, K, Nv);
         fclose(fp);
     }
+    const int procid = grid->procid;
+    if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }

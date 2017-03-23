@@ -64,7 +64,7 @@ dg_phys *rectangle_tri_physfield(){
     dg_edge *edge = dg_edge_create(mesh);
     dg_phys *phys = dg_phys_create(Nfield, edge);
     char obcfile[] = "example/SWE2d/Rectangle/Rectangle.obc4.nc";
-    dg_phys_obc_add(phys, obcfile);
+    phys->obc_add(phys, obcfile);
     return phys;
 }
 

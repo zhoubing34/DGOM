@@ -12,6 +12,6 @@ int dg_point_mass_matrix_test(dg_cell *cell, int verbose);
 int dg_point_deri_matrix_test(dg_cell *cell, int verbose);
 int dg_point_Fmask_test(dg_cell *cell, int verbose);
 int dg_point_LIFT_test(dg_cell *cell, int verbose);
-int dg_point_vert_proj_test(dg_cell *point, int verbose);
+int dg_point_vert_proj_test(dg_cell *cell, int verbose);
 
 #endif //DGOM_DG_CELL_POINT_TEST_H

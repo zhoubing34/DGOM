@@ -20,9 +20,9 @@ double xmin = -1, xmax = 1;
 double ymin = -1, ymax = 1;
 
 /** mesh creating function */
-#define Nmesh 3
+#define Nmesh 1
 typedef dg_grid* (* grid_create_func)();
-grid_create_func grid_func[Nmesh] = {uniform_tri_grid, uniform_quad_grid, user_set_tri_grid};
+grid_create_func grid_func[Nmesh] = {uniform_quad_grid};
 
 /**
  * @brief create uniform triangle mesh
@@ -108,6 +108,7 @@ int main(int argc, char **argv){
         err = dg_region_volume_factor_test(region, isverbose); if(err){ Nfail+=1; }
         err = dg_region_face_factor_test(region, isverbose); if(err){ Nfail+=1; }
         err = dg_region_scale_test(region, isverbose); if(err){ Nfail+=1; }
+        err = dg_region_face_integral_test(region, isverbose); if(err){ Nfail+=1; }
 
         mesh = dg_mesh_create(region);
         err = dg_mesh_parallel_test(mesh, isverbose); if(err){ Nfail+=1; }

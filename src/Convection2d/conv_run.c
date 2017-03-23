@@ -54,7 +54,7 @@ void conv_run(){
     double elapsetime = mpitime1 - mpitime0;
 
     MPI_Barrier(MPI_COMM_WORLD);
-    const int procid = phys->mesh->procid;
+    const int procid = dg_mesh_procid(dg_phys_mesh(phys));
     if(!procid)
         printf("proc: %d, time taken: %lg\n", procid, elapsetime);
 }

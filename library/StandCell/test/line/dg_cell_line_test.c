@@ -146,13 +146,13 @@ int dg_line_LIFT_test(dg_cell *quad, int verbose){
     return fail;
 }
 
-int dg_line_vert_proj_test(dg_cell *line, int verbose){
+int dg_line_vert_proj_test(dg_cell *cell, int verbose){
     int fail=0;
     extern double line_VX[NV];
-    const int Np = dg_cell_Np(line);
+    const int Np = dg_cell_Np(cell);
     double x[Np];
-    dg_cell_proj_vert2node(line, 1, line_VX, x);
-    fail = vector_double_test("dg_line_vert_proj_test", x, dg_cell_r(line), Np);
+    cell->proj_vert2node(cell, 1, line_VX, x);
+    fail = vector_double_test("dg_line_vert_proj_test", x, dg_cell_r(cell), Np);
 
     if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;

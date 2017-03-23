@@ -159,19 +159,19 @@ int dg_tri_LIFT_test(dg_cell *tri, int verbose){
     return fail;
 }
 
-int dg_tri_vert_proj_test(dg_cell *tri, int verbose){
+int dg_tri_vert_proj_test(dg_cell *cell, int verbose){
     int fail = 0;
-    const int Np = dg_cell_Np(tri);
+    const int Np = dg_cell_Np(cell);
     extern double tri_VX[NV];
     extern double tri_VY[NV];
 
     double x[Np], y[Np];
 
-    dg_cell_proj_vert2node(tri, 1, tri_VX, x);
-    fail = vector_double_test("sc_triVertProj_x_test", x, dg_cell_r(tri), Np);
+    cell->proj_vert2node(cell, 1, tri_VX, x);
+    fail = vector_double_test("sc_triVertProj_x_test", x, dg_cell_r(cell), Np);
 
-    dg_cell_proj_vert2node(tri, 1, tri_VY, y);
-    fail = vector_double_test("sc_triVertProj_y_test", y, dg_cell_s(tri), Np);
+    cell->proj_vert2node(cell, 1, tri_VY, y);
+    fail = vector_double_test("sc_triVertProj_y_test", y, dg_cell_s(cell), Np);
     if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }

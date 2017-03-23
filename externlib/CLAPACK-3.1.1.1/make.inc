@@ -17,11 +17,11 @@ PREFIX =/Users/mac/Documents/Model/DGOM/externlib/install
 #
 #######################################################
 # This is used to compile C libary
-CC        = /usr/local/Cellar/mpich2/1.4.1/bin/mpicc
+CC        = /usr/local/Cellar/mpich2/1.4.1//bin/mpicc
 # if no wrapping of the blas library is needed, uncomment next line
 #CC        = gcc -DNO_BLAS_WRAP
 CFLAGS    = -O3
-LOADER    = /usr/local/Cellar/mpich2/1.4.1/bin/mpicc
+LOADER    = /usr/local/Cellar/mpich2/1.4.1//bin/mpicc
 LOADOPTS  = 
 NOOPT     = -O0 
 DRVCFLAGS = $(CFLAGS)

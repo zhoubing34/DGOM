@@ -87,3 +87,63 @@ int dg_region_scale_test(dg_region *reg, int verbose){
     if(!procid) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }
+
+int dg_region_face_integral_test(dg_region *region, int verbose){
+    int fail = 0;
+    const int K = dg_grid_K(region->grid);
+    const int Nfaces = dg_cell_Nfaces(region->cell);
+    const int Nfield = 2;
+    const int Np = dg_cell_Np(region->cell);
+    int k,f,n,fld,sk=0;
+    dg_real *f_Q = vector_real_create(Nfield*K*Np);
+    dg_real *face_Q = vector_real_create(Nfield*K*Nfaces);
+    dg_real *face_extQ = vector_real_create(Nfield*K*Nfaces);
+    // assignment node value
+    for(k=0;k<K;k++){
+        for(n=0;n<Np;n++){
+            f_Q[sk++] = dg_region_x(region)[k][n];
+            f_Q[sk++] = dg_region_y(region)[k][n];
+        }
+    }
+    // exact value
+    sk = 0;
+    for(k=0;k<K;k++){
+        for(f=0;f<Nfaces;f++){
+            const int Nfp = dg_cell_Nfp(region->cell)[f];
+            int *fmask = dg_cell_Fmask(region->cell)[f];
+            double x1 = dg_region_x(region)[k][fmask[0]];
+            double x2 = dg_region_x(region)[k][fmask[Nfp-1]];
+            face_extQ[sk++] = (x1+x2)*0.5;
+            double y1 = dg_region_y(region)[k][fmask[0]];
+            double y2 = dg_region_y(region)[k][fmask[Nfp-1]];
+            face_extQ[sk++] = (y1+y2)*0.5;
+        }
+    }
+    dg_real ones[Np], face_len[Nfaces];
+    for(n=0;n<Np;n++){
+        ones[n] = 1.0;
+    }
+
+    for(k=0;k<K;k++){
+        region->face_integral(region, Nfield, k, f_Q+k*Np*Nfield, face_Q+k*Nfaces*Nfield);
+        region->face_integral(region, 1, k, ones, face_len);
+        for(f=0;f<Nfaces;f++){
+            for(fld=0;fld<Nfield;fld++){
+                face_Q[k*Nfaces*Nfield + f*Nfield + fld] /= face_len[f];
+            }
+        }
+    }
+
+    fail = vector_double_test(__FUNCTION__, face_Q, face_extQ, Nfield*K*Nfaces);
+
+    if(verbose){
+        FILE *fp = create_log(__FUNCTION__, region->procid, region->nprocs);
+        print_double_vector2file(fp, "face_Q", face_Q, Nfield*K*Nfaces);
+        print_double_vector2file(fp, "face_extQ", face_extQ, Nfield*K*Nfaces);
+        fclose(fp);
+    }
+    vector_real_free(f_Q);
+    vector_real_free(face_Q);
+    vector_real_free(face_extQ);
+    return fail;
+}

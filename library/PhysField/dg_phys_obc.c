@@ -173,7 +173,7 @@ static void dg_phys_obc_obtain(dg_phys_obc *phys_obc, Interp_Parameter *par){
                 vertbc[m*Nfield+fld] = obc[v1*Nfield+fld];
             }
         }
-        dg_cell_proj_vert2node(cell, Nfield, vertbc, nodebc);
+        cell->proj_vert2node(cell, Nfield, vertbc, nodebc);
         // assignment to nodes value
         int sk = k*Np*Nfield;
         for(m=0;m<Np*Nfield;m++){

@@ -19,18 +19,21 @@ typedef struct dg_phys{
     dg_phys_info *info; ///< physical information structure;
     dg_phys_obc *obc; ///< open boundary condition structure;
 
+    /** initialize from input file */
+    void (*init_file)(struct dg_phys *phys, char *casename);
     /** function to fetch node buffer with other process */
     int (*fetch_node_buffer)(struct dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
     /** function to fetch cell buffer with other process */
     int (*fetch_cell_buffer)(struct dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
-    /** initialize from input file */
-    void (*init_file)(struct dg_phys *phys, char *casename);
+    /** add boundary condition file to physical field */
+    void (*obc_add)(struct dg_phys *phys, char *filename);
+    /** obtain the interpolated open boundary data from file */
+    void (*obc_update)(struct dg_phys *phys, double elapseTime);
 } dg_phys;
 
 dg_phys* dg_phys_create(int Nfields, dg_edge *edge);
 void dg_phys_free(dg_phys *phys);
-void dg_phys_obc_add(dg_phys *phys, char *filename);
-void dg_phys_obc_update(dg_phys *phys, double elapseTime);
+
 
 #define dg_phys_cell(phys) (phys->info->cell)
 #define dg_phys_grid(phys) (phys->info->grid)

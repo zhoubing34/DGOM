@@ -7,7 +7,10 @@
 static void dg_region_node(dg_region *region);
 static void dg_region_volumeScale2d(dg_region *region);
 static void dg_region_volumeScale3d(dg_region *region);
-
+static void dg_region_vol_integral(dg_region *region, int Nfield, int k,
+                                   dg_real *f_Q, dg_real *c_Q);
+static void dg_region_face_integral(dg_region *region, int Nfield, int k,
+                                    dg_real *f_Q, dg_real *face_Q);
 /**
  * @brief functions of creating structure dg_region
  */
@@ -52,7 +55,8 @@ dg_region* dg_region_create(dg_grid *grid){
                     __FUNCTION__, __LINE__, dg_cell_celltype(grid->cell));
             exit(-1);
     }
-
+    region->vol_integral = dg_region_vol_integral;
+    region->face_integral = dg_region_face_integral;
     creator->set_nood(region);
     creator->set_volumInfo(region);
     creator->set_surfInfo(region);
@@ -111,9 +115,9 @@ static void dg_region_node(dg_region *region){
             gy[i] = vy[EToV[k][i]];
             gz[i] = vz[EToV[k][i]];
         }
-        dg_cell_proj_vert2node(cell, 1, gx, region->x[k]);
-        dg_cell_proj_vert2node(cell, 1, gy, region->y[k]);
-        dg_cell_proj_vert2node(cell, 1, gz, region->z[k]);
+        cell->proj_vert2node(cell, 1, gx, region->x[k]);
+        cell->proj_vert2node(cell, 1, gy, region->y[k]);
+        cell->proj_vert2node(cell, 1, gz, region->z[k]);
     }
     return;
 }
@@ -126,12 +130,13 @@ static void dg_region_volumeScale2d(dg_region *region){
     region->len = vector_double_create(K); // length of element
     int k,i;
     /* initialize ones */
-    double ones[Np];
+    dg_real ones[Np];
     for(i=0;i<Np;i++) {ones[i] = 1.0;}
 
     // elemental size
     for(k=0;k<K;k++){
-        double area = dg_region_integral(region, k, ones);
+        dg_real area;
+        region->vol_integral(region, 1, k, ones, &area);
         region->size[k] = area;
         region->len[k] = sqrt(area/M_PI);
     }
@@ -151,7 +156,8 @@ static void dg_region_volumeScale3d(dg_region *region){
 
     // elemental size
     for(k=0;k<K;k++){
-        double area = dg_region_integral(region, k, ones);
+        double area;
+        region->vol_integral(region, 1, k, ones, &area);
         region->size[k] = area;
         region->len[k] = pow(area*3.0/4./M_PI, 1.0/3);
     }
@@ -159,23 +165,66 @@ static void dg_region_volumeScale3d(dg_region *region){
 }
 
 /**
- * @brief integral in the specific element
+ * @brief calculate the integral value in kth cell.
  *
- * @param[in] region multi-region object
- * @param[in] ind index of integral element
- * @param[in] nodalVal value on interpolation points
- * @return integral integral value
+ * @param[in] region pointer to a dg_region structure;
+ * @param[in] Nfield number of physical field;
+ * @param[in] k index of integral element;
+ * @param[in] f_Q value on interpolation points;
+ * @param[out] c_Q integral value of each physical field;
  */
-double dg_region_integral(dg_region *region, int ind, double *nodalVal){
-    double integral = 0;
+static void dg_region_vol_integral(dg_region *region, int Nfield, int k,
+                                   dg_real *f_Q, dg_real *c_Q){
 
-    const double *J = region->J[ind];
+    const double *J = region->J[k];
     const double *w = dg_cell_w(region->cell);
     const int Np = dg_cell_Np(region->cell);
 
-    register int i;
-    for(i=0;i<Np;i++){
-        integral += J[i]*w[i]*nodalVal[i];
+    register int i,fld;
+    // initialize
+    for(fld=0;fld<Nfield;fld++){
+        c_Q[fld] = 0;
     }
-    return integral;
+    // vol_integral at all nodes
+    for(i=0;i<Np;i++){
+        for(fld=0;fld<Nfield;fld++){
+            c_Q[fld] += J[i]*w[i]*f_Q[i*Nfield+fld];
+        }
+    }
+    return;
+}
+/**
+ * @brief calculate the integral value at each face in kth cell.
+ * @param[in] region pointer to a dg_region structure;
+ * @param[in] Nfield number of physical field;
+ * @param[in] k index of integral element;
+ * @param[in] f_Q value on interpolation points;
+ * @param[out] face_Q integral value on each face;
+ */
+static void dg_region_face_integral(dg_region *region, int Nfield, int k,
+                                    dg_real *f_Q, dg_real *face_Q){
+    dg_cell *cell = region->cell;
+    const int Nfaces = dg_cell_Nfaces(cell);
+
+    register int f,n,fld;
+    // initialize
+    for(fld=0;fld<Nfield*Nfaces;fld++){
+        face_Q[fld] = 0;
+    }
+    // vol_integral at all faces
+    for(f=0;f<Nfaces;f++){
+        const int Nfp = dg_cell_Nfp(cell)[f];
+        int *fmask = dg_cell_Fmask(cell)[f];
+        const double sJ = region->sJ[k][f];
+        for(n=0;n<Nfp;n++){
+            const double ws = dg_cell_ws(cell)[f][n];
+            for(fld=0;fld<Nfield;fld++){
+                face_Q[f*Nfield + fld] += sJ*ws*f_Q[fmask[n]*Nfield+fld];
+//                if(!region->procid) printf("k=%d, f=%d, n=%d, fld=%d, sJ=%f, ws=%f, "
+//                                                   "f_Q=%f, face_Q=%f\n",
+//                                           k, f, n, fld, sJ, ws, f_Q[fmask[n]*Nfield+fld],
+//                                           face_Q[f*Nfield + fld]);
+            }
+        }
+    }
 }

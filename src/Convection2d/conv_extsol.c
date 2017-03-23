@@ -19,8 +19,9 @@ static void advection_diffusion_ext(int Np, dg_real *x, dg_real *y, double *ext)
     const double x0 = -0.5, y0 = -0.5;
     int register n;
     dg_phys *phys = solver.phys;
-    const double u = phys->f_Q[1];
-    const double v = phys->f_Q[2];
+    dg_real *f_Q = dg_phys_f_Q(phys);
+    const double u = f_Q[1];
+    const double v = f_Q[2];
 
     const double sigma = 125*1e3/(33*33);
     for(n=0;n<Np;n++){
@@ -71,14 +72,15 @@ typedef void (*Ext_Fun)(int Np, dg_real *x, dg_real *y, double *ext);
 void conv_normerr(Conv_Case_Type case_type){
 
     dg_phys *phys = solver.phys;
-    const int K = dg_grid_K(phys->grid);
+    dg_region *region = dg_phys_region(phys);
+    const int K = dg_grid_K(dg_phys_grid(phys));
     const int Nfield = dg_phys_Nfield(phys);
-    const int Np = dg_cell_Np(phys->cell);
-    const int procid = dg_grid_procid(phys->grid);
+    const int Np = dg_cell_Np(dg_phys_cell(phys));
+    const int procid = dg_grid_procid(dg_phys_grid(phys));
 
     double Linf=0, L2=0, L1=0;
-    double **x = phys->region->x;
-    double **y = phys->region->y;
+    double **x = dg_region_x(region);
+    double **y = dg_region_y(region);
 
     Ext_Fun ext_fun=NULL;
     switch (case_type){
@@ -95,23 +97,26 @@ void conv_normerr(Conv_Case_Type case_type){
     }
 
     int register k,n,sk=0;
-    dg_real *f_Q = phys->f_Q;
-    double var[Np], ext_Q[Np];
-    double err1[Np], err2[Np];
-    double Aloc=0; /* total area */
+    dg_real *f_Q = dg_phys_f_Q(phys);
+    dg_real var[Np], ext_Q[Np];
+    dg_real err1[Np], err2[Np];
+    dg_real Aloc=0; /* total area */
 
     for(k=0;k<K;k++){
         ext_fun(Np, x[k], y[k], ext_Q);
         for(n=0;n<Np;n++){
-            var[n] = (double) f_Q[sk]; sk+=Nfield;
+            var[n] = f_Q[sk]; sk+=Nfield;
             err1[n] = fabs(var[n] - ext_Q[n]);
             err2[n] = err1[n]*err1[n];
             Linf = max(Linf, err1[n]);
         }
 
-        Aloc += phys->region->size[k];
-        L1 += dg_region_integral(phys->region, k, err1);
-        L2 += dg_region_integral(phys->region, k, err2);
+        dg_real tmp;
+        Aloc += region->size[k];
+        region->vol_integral(region, 1, k, err1, &tmp);
+        L1 += tmp;
+        region->vol_integral(region, 1, k, err2, &tmp);
+        L2 += tmp;
     }
     double gL1, gLinf, gL2, Atol;
 

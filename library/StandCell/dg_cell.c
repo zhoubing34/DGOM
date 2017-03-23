@@ -137,13 +137,3 @@ static void dg_cell_d2f(dg_cell *cell){
     }
     return;
 }
-
-/**
- * @brief project the vertex value to interpolation nodes.
- * @param[in] vertVal value on vertex;
- * @param[in] nodeVal value on nodes;
- */
-void dg_cell_proj_vert2node(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal){
-    cell->proj_vert2node(cell, Nfield, vertVal, nodeVal);
-    return;
-}

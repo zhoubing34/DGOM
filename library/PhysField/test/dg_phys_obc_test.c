@@ -2,7 +2,6 @@
 // Created by li12242 on 17/2/23.
 //
 
-#include <PhysField/dg_phys.h>
 #include "dg_phys_obc_test.h"
 
 int dg_phys_obc_test(dg_phys *phys, int verbose){
@@ -54,7 +53,7 @@ int dg_phys_obc_test(dg_phys *phys, int verbose){
 
     /* print values */
     for(time=-0.1;time<ftime;time+=dt){
-        dg_phys_obc_update(phys, time);
+        phys->obc_update(phys, time);
         fprintf(fp, "time = %f\nf_ext = [", time);
         for(n=0;n<NOBnodes;n++){
             for(fld=0;fld<Nfield;fld++){

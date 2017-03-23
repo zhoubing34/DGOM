@@ -11,15 +11,14 @@
  * @param[in] phys physical field structure.
  * @param[in,out] f_mean integral averaged values of each faces
  */
-static void pf_face_mean(physField *phys, dg_real *f_mean){
+static void pf_face_mean(dg_phys_info *phys, dg_real *f_mean){
 
+    dg_cell *cell = phys->cell;
     const int Nfield = phys->Nfield;
-    const int Nfaces = phys->cell->Nfaces;
-    const int Nfp = phys->cell->Nfp;
-    const int Np = phys->cell->Np;
-    const int K = phys->grid->K;
+    const int Nfaces = dg_cell_Nfaces(cell);
+    const int Np = dg_cell_Np(cell);
+    const int K = dg_grid_K(phys->grid);
 
-    double *ws = phys->cell->ws;
     register int k,f,n,m,fld;
     for(k=0;k<K;k++){
         dg_real *f_Q = phys->f_Q + k*Np*Nfield;
@@ -29,7 +28,9 @@ static void pf_face_mean(physField *phys, dg_real *f_mean){
             for(fld=0;fld<Nfield;fld++){
                 f_mean[sk+fld] = 0;
             }
-            int *fmask = phys->cell->Fmask[f];
+            int *fmask = dg_cell_Fmask(cell)[f];
+            const int Nfp = dg_cell_Nfp(cell)[f];
+            double *ws = dg_cell_ws(cell)[f];
             for(n=0;n<Nfp;n++){
                 m = fmask[n]*Nfield;
                 double w = ws[n]*0.5;
@@ -157,14 +158,14 @@ static void pf_weiface_mean(physField *phys, dg_real *f_mean){
  * @param[out] px
  * @param[out] py
  */
-static void phys_gradient_Green(physField *phys, dg_real *px, dg_real *py){
-    const int K = phys->grid->K;
+static void phys_gradient_Green(dg_phys_info *phys, dg_real *px, dg_real *py){
+    dg_cell *cell = phys->cell;
+    const int K = dg_grid_K(phys->grid);
     const int Nfield = phys->Nfield;
-    const int Nfaces = phys->cell->Nfaces;
-    const int Nfp = phys->cell->Nfp;
+    const int Nfaces = dg_cell_Nfaces(cell);
 
     register int k,f,fld,sk;
-    int **fmask = phys->cell->Fmask;
+    int **fmask = dg_cell_Fmask(cell);
 
     dg_real f_mean[K*Nfaces*Nfield];
     pf_face_mean(phys, f_mean);
@@ -181,6 +182,7 @@ static void phys_gradient_Green(physField *phys, dg_real *px, dg_real *py){
         }
 
         for(f=0;f<Nfaces;f++){
+            const int Nfp = dg_cell_Nfp(cell)[f];
             int v1 = fmask[f][0];
             int v2 = fmask[f][Nfp-1];
             double x1 = x[v1];
@@ -209,12 +211,13 @@ static void phys_gradient_Green(physField *phys, dg_real *px, dg_real *py){
  * @param cell_max
  * @param cell_min
  */
-static void pf_adjacent_cellinfo(physField *phys, dg_real *cell_max, dg_real *cell_min){
-    const int K = phys->grid->K;
+static void pf_adjacent_cellinfo(dg_phys_info *phys, dg_real *cell_max, dg_real *cell_min){
+    dg_grid *grid = phys->grid;
+    const int K = dg_grid_K(grid);
     const int Nfield = phys->Nfield;
-    const int procid = phys->mesh->procid;
-    const int nprocs = phys->mesh->nprocs;
-    const int Nfaces = phys->cell->Nfaces;
+    const int procid = dg_grid_procid(grid);
+    const int nprocs = dg_grid_nprocs(grid);
+    const int Nfaces = dg_cell_Nfaces(phys->cell);
 
     register int k,n,f,fld;
 
@@ -223,11 +226,11 @@ static void pf_adjacent_cellinfo(physField *phys, dg_real *cell_max, dg_real *ce
     int Nmess;
 
     /* do sends and recv */
-    pf_fetchCellBuffer(phys, mpi_out_requests, mpi_in_requests, &Nmess);
+    Nmess = phys->fetch_cell_buffer(phys, mpi_out_requests, mpi_in_requests);
 
     /* local cell loop */
-    int **EToE = phys->mesh->EToE;
-    int **EToP = phys->mesh->EToP;
+    int **EToE = dg_grid_EToE(grid);
+    int **EToP = dg_grid_EToP(grid);
     for(k=0;k<K;k++){
         dg_real *c_mean = phys->c_Q + k*Nfield; // mean value of k-th cell
         dg_real c_max[Nfield];
@@ -264,10 +267,11 @@ static void pf_adjacent_cellinfo(physField *phys, dg_real *cell_max, dg_real *ce
 
     /* parallel cell loop */
     dg_mesh *mesh = phys->mesh;
-    for(n=0;n<mesh->Nparf;n++){
-        k = mesh->Pcid_recv[n];
+    const int NfetchFace = dg_mesh_NfetchFace(mesh);
+    for(n=0;n<NfetchFace;n++){
+        k = mesh->CBFToK[n];
         for(fld=0;fld<Nfield;fld++){
-            dg_real c_next = phys->c_inQ[n*Nfield+fld];
+            dg_real c_next = phys->c_recvQ[n*Nfield+fld];
             int sk = k*Nfield+fld;
             cell_max[sk] = max(cell_max[sk], c_next);
             cell_min[sk] = min(cell_min[sk], c_next);
@@ -283,7 +287,7 @@ static void pf_adjacent_cellinfo(physField *phys, dg_real *cell_max, dg_real *ce
  * @param beta
  * @param psi
  */
-static void pf_BJ_limiter(physField *phys, dg_real *cell_max, dg_real *cell_min,
+static void pf_BJ_limiter(dg_phys_info *phys, dg_real *cell_max, dg_real *cell_min,
                           double beta, dg_real *psi){
 
     const int K = phys->grid->K;
@@ -381,11 +385,11 @@ static void pf_edge_indicator(physField *phys, int *tind){
  * scalar distribution.
  * @param[in] phys
  */
-void pf_limit_BJ2d(physField *phys, double beta){
+void pf_limit_BJ2d(dg_phys_info *phys, double beta){
 
-    const int K = phys->grid->K;
+    const int K = dg_grid_K(phys->grid);
     const int Nfield = phys->Nfield;
-    const int Np = phys->cell->Np;
+    const int Np = dg_cell_Np(phys->cell);
     register int k,n,fld;
 
 #if DEBUG
@@ -393,7 +397,7 @@ void pf_limit_BJ2d(physField *phys, double beta){
 #endif
 
     /* 1. calculate the cell average value */
-    pf_cellMean(phys);
+    phys->cell_mean(phys);
 
     /* 2. fetch cell info with other processes */
     dg_real cell_max[K*Nfield], cell_min[K*Nfield];

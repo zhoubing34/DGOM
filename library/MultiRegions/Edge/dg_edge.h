@@ -32,7 +32,6 @@ typedef struct dg_edge{
     dg_real *nx,*ny,*nz; ///< outward normal vector of local cell;
     dg_real *nodeinfo; ///< gather the varpM/varpP, fsc and nx/ny/nz;
 
-    void(*free_func)(struct dg_edge *edge); ///<
 }dg_edge;
 
 dg_edge *dg_edge_create(dg_mesh *mesh);

@@ -7,7 +7,6 @@
 #include "dg_edge_node_map.h"
 #include "dg_edge_surfinfo.h"
 
-void dg_edge_free2d(dg_edge *edge);
 void dg_edge_setinfo2d(dg_edge *edge);
 
 /**
@@ -18,7 +17,6 @@ typedef struct dg_edge_creator{
     void (*map_node)(dg_edge *edge);
     void (*surf_info)(dg_edge *edge);
     void (*set_info)(dg_edge *edge);
-    void (*free_func)(dg_edge *edge);
 }dg_edge_creator;
 
 static const dg_edge_creator edge_creator2d = {
@@ -26,7 +24,6 @@ static const dg_edge_creator edge_creator2d = {
         dg_edge_node_map,
         dg_edge_surfinfo2d,
         dg_edge_setinfo2d,
-        dg_edge_free2d,
 };
 
 dg_edge* dg_edge_create(dg_mesh *mesh){
@@ -55,7 +52,6 @@ dg_edge* dg_edge_create(dg_mesh *mesh){
     creator->map_node(edge);
     creator->surf_info(edge);
     creator->set_info(edge);
-    edge->free_func = creator->free_func;
     return edge;
 }
 
@@ -90,12 +86,6 @@ static void dg_edge_setinfo2d(dg_edge *edge){
 }
 
 void dg_edge_free(dg_edge *edge){
-    edge->free_func(edge);
-    return;
-}
-
-static void dg_edge_free2d(dg_edge *edge){
-
     vector_int_free(edge->varkM);
     vector_int_free(edge->varkP);
     vector_int_free(edge->varfM);

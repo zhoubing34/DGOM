@@ -7,11 +7,11 @@ set(PHYSDOMAIN_SOURCE
         dg_phys.c
         dg_phys_strong_vol_opt.c
         dg_phys_strong_surf_opt.c
+        dg_phys_limiter.c
         #pf_add_LDG_solver.c
         #pf_strong_viscosity_LDG_flux2d.c
         #pf_cellMean.c
-        dg_phys_init.c
-        #Limiter/pf_limit_BJ2d.c)
+        #Limiter/pf_limit_BJ2d.c
         )
 
 add_library(physfield STATIC ${PHYSDOMAIN_SOURCE})

@@ -96,8 +96,6 @@ typedef struct dg_cell_creator{
 dg_cell* dg_cell_creat(int N, dg_cell_type type);
 /** free dg_cell object */
 void dg_cell_free(dg_cell *);
-/** project the vertex value to interpolation nodes */
-void dg_cell_proj_vert2node(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal);
 
 /* basic info */
 #define dg_cell_celltype(cell) cell->info->type

@@ -14,9 +14,9 @@ typedef enum{
 } dg_phys_obc_interp_type;
 
 typedef struct dg_phys_obc{
-    dg_phys_info *info;
-    NC_File *file;
-    dg_real *f_extQ;
+    dg_phys_info *info; ///< physical information;
+    NC_File *file; ///< open boundary condition file;
+    dg_real *f_extQ; ///< external data;
 
     int Ntime; ///< number of time steps in obc file;
     int Nvert; ///< number of vertex in obc file;
@@ -24,7 +24,9 @@ typedef struct dg_phys_obc{
     int *vert; ///< index of vertex in obc file;
     dg_phys_obc_interp_type interp_type; ///< interpolation type;
 
+    /** add open boundary file */
     void (*add_obc)(struct dg_phys_obc *obc, char *filename);
+    /** update the external data from open boundary file */
     void (*update_obc)(struct dg_phys_obc *obc, double time);
 }dg_phys_obc;
 
