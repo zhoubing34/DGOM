@@ -2,7 +2,8 @@
 #define DGOM_PHYSDOMAIN_H
 
 #include "MultiRegions/Edge/dg_edge.h"
-
+#include "dg_phys_obc.h"
+#include "dg_phys_info.h"
 
 typedef struct {
     dg_real *px_Q; ///< dfdx partial derivative for x direction
@@ -11,46 +12,41 @@ typedef struct {
     dg_real *py_inQ, *py_outQ; ///< send and recv buffers for q_Q
     dg_real *vis_Q; ///< viscosity on each node
 } pf_LDG_solver;
-
 /**
  * @brief physical field structure.
  */
 typedef struct dg_phys{
-    int Nfield; ///< number of variable fields;
+    dg_phys_info *info; ///< physical information structure;
+    dg_phys_obc *obc; ///< open boundary condition structure;
 
-    dg_edge *edge; ///< parallel edge structure;
-    dg_mesh *mesh; ///< parallel mesh structure;
-    dg_region *region; ///< multi-region structure;
-    dg_grid *grid; ///< geometry grid structure;
-    dg_cell *cell; ///< standard cell structure;
-
-    /* cell info */
-    dg_real *c_Q; ///< cell information;
-    dg_real *c_recvQ; ///< recv buffers for cell information;
-
-    dg_real *f_Q; ///< nodal information;
-    dg_real *f_recvQ; ///< recv buffers for nodal information;
-    dg_real *f_extQ; ///< external nodal data;
-
-    dg_real *f_rhsQ; ///< RHS data;
-    dg_real *f_resQ; ///< residual data;
-
-    /** function to fetch node buffer with other process; */
+    /** function to fetch node buffer with other process */
     int (*fetch_node_buffer)(struct dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
-    /** function to fetch cell buffer with other process; */
+    /** function to fetch cell buffer with other process */
     int (*fetch_cell_buffer)(struct dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
-
+    /** initialize from input file */
+    void (*init_file)(struct dg_phys *phys, char *casename);
 } dg_phys;
 
 dg_phys* dg_phys_create(int Nfields, dg_edge *edge);
 void dg_phys_free(dg_phys *phys);
+void dg_phys_obc_add(dg_phys *phys, char *filename);
+void dg_phys_obc_update(dg_phys *phys, double elapseTime);
 
-#define dg_phys_Nfield(phys) phys->Nfield
-#define dg_phys_f_Q(phys) phys->f_Q
-#define dg_phys_f_extQ(phys) phys->f_extQ
-#define dg_phys_f_recvQ(phys) phys->f_recvQ
-#define dg_phys_f_rhsQ(phys) phys->f_rhsQ
-#define dg_phys_c_Q(phys) phys->c_Q
-#define dg_phys_c_recvQ(phys) phys->c_recvQ
+#define dg_phys_cell(phys) (phys->info->cell)
+#define dg_phys_grid(phys) (phys->info->grid)
+#define dg_phys_region(phys) (phys->info->region)
+#define dg_phys_mesh(phys) (phys->info->mesh)
+#define dg_phys_edge(phys) (phys->info->edge)
+
+#define dg_phys_Nfield(phys) (phys->info->Nfield)
+#define dg_phys_f_Q(phys) (phys->info->f_Q)
+#define dg_phys_f_recvQ(phys) (phys->info->f_recvQ)
+#define dg_phys_c_Q(phys) phys->info->c_Q
+#define dg_phys_c_recvQ(phys) phys->info->c_recvQ
+
+#define dg_phys_f_rhsQ(phys) (phys->info->f_rhsQ)
+#define dg_phys_f_resQ(phys) phys->info->f_resQ
+
+#define dg_phys_f_extQ(phys) (phys->obc->f_extQ)
 
 #endif //DGOM_PHYSDOMAIN_H

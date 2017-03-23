@@ -13,7 +13,7 @@ typedef enum {
     FACE_SLIPWALL = 2, ///< slip wall;
     FACE_NSLIPWALL = 3, ///< non-slip wall;
     FACE_OPENBS = 4, ///< open boundary;
-} dg_face_type;
+} dg_grid_face_type;
 
 /**
  * @brief cell type list.

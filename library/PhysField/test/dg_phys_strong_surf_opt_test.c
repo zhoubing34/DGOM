@@ -33,13 +33,17 @@ static int wall_func(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP){
 int dg_phys_strong_surf_opt2d_test(dg_phys *phys, int verbose){
     int fail = 0;
 
-    dg_mesh *mesh = phys->mesh;
-    dg_region *region = phys->region;
-    dg_cell *cell = phys->cell;
+    dg_mesh *mesh = dg_phys_mesh(phys);
+    dg_region *region = dg_phys_region(phys);
+    dg_grid *grid = dg_phys_grid(phys);
+    dg_cell *cell = dg_phys_cell(phys);
 
-    const int K = phys->grid->K;
+    const int K = dg_grid_K(grid);
     const int Np = dg_cell_Np(cell);
-    const int Nfield = phys->Nfield;
+    const int Nfield = dg_phys_Nfield(phys);
+
+    dg_real *f_rhsQ = dg_phys_f_rhsQ(phys);
+    dg_real *f_Q = dg_phys_f_Q(phys);
 
     int k,i;
     // initialize and assignment
@@ -48,10 +52,10 @@ int dg_phys_strong_surf_opt2d_test(dg_phys *phys, int verbose){
         for(i=0;i<Np;i++){
             dg_real u = region->x[k][i];
             dg_real v = region->y[k][i];
-            phys->f_rhsQ[sk] = 0.0;
-            phys->f_Q[sk++] = u;
-            phys->f_rhsQ[sk] = 0.0;
-            phys->f_Q[sk++] = v;
+            f_rhsQ[sk] = 0.0;
+            f_Q[sk++] = u;
+            f_rhsQ[sk] = 0.0;
+            f_Q[sk++] = v;
         }
     }
 
@@ -59,11 +63,11 @@ int dg_phys_strong_surf_opt2d_test(dg_phys *phys, int verbose){
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
-        fprintf(fp, "K = %d\n", phys->grid->K);
-        fprintf(fp, "Nfield = %d\n", phys->Nfield);
+        fprintf(fp, "K = %d\n", K);
+        fprintf(fp, "Nfield = %d\n", Nfield);
         fprintf(fp, "Np = %d\n", Np);
-        print_double_vector2file(fp, "f_Q", phys->f_Q, Nfield * Np * k);
-        print_double_vector2file(fp, "f_rhsQ", phys->f_rhsQ, Nfield * Np * k);
+        print_double_vector2file(fp, "f_Q", f_Q, Nfield * Np * k);
+        print_double_vector2file(fp, "f_rhsQ", f_rhsQ, Nfield * Np * k);
     }
 
     const int procid = region->procid;

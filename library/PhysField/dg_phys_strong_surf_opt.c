@@ -25,19 +25,19 @@ void dg_phys_strong_surf_opt2d(dg_phys *phys,
                                Nodal_Flux_Fun nodal_flux, // flux term
                                Numerical_Flux numerical_flux) // numerical flux function
 {
-    dg_edge *edge = phys->edge;
-    dg_cell *cell = phys->cell;
+    dg_edge *edge = dg_phys_edge(phys);
+    dg_cell *cell = dg_phys_cell(phys);
     const int Nfield = dg_phys_Nfield(phys);
     const int Nedge = dg_edge_Nedge(edge);
-    const int Nfaces = dg_cell_Nfaces(phys->cell);
-    const int Nfptotal = dg_cell_Nfptotal(phys->cell);
-    const int Np = dg_cell_Np(phys->cell);
+    const int Nfaces = dg_cell_Nfaces(cell);
+    const int Nfptotal = dg_cell_Nfptotal(cell);
+    const int Np = dg_cell_Np(cell);
 
-    dg_real *f_Q = phys->f_Q;
-    dg_real *f_inQ = phys->f_recvQ;
-    dg_real *f_ext = phys->f_extQ;
-    dg_real *f_LIFT  = phys->cell->f_LIFT;
-    dg_real *f_rhsQ = phys->f_rhsQ;
+    dg_real *f_Q = dg_phys_f_Q(phys);
+    dg_real *f_inQ = dg_phys_f_recvQ(phys); // phys->f_recvQ;
+    dg_real *f_ext = dg_phys_f_extQ(phys); // phys->f_extQ;
+    dg_real *f_LIFT  = dg_cell_f_LIFT(cell); //phys->cell->f_LIFT;
+    dg_real *f_rhsQ = dg_phys_f_rhsQ(phys); //phys->f_rhsQ;
 
     register int f,m,n,fld,surfid=0,nodeid=0;
 
@@ -117,8 +117,7 @@ void dg_phys_strong_surf_opt2d(dg_phys *phys,
                     const int col2 = fp_P[m];
                     const dg_real L = ptLIFT[col2];
                     const dg_real *s = flux_P+m*Nfield;
-                    for(fld=0;fld<Nfield;fld++)
-                        f_rhsP[fld] += L*s[fld];
+                    for(fld=0;fld<Nfield;fld++) {f_rhsP[fld] += L*s[fld];}
                 }
             }
         }

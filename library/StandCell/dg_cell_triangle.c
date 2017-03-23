@@ -13,7 +13,7 @@ static void dg_tri_transInd(int N, int ind, int *ti, int *tj);
 static void dg_tri_xytors(int Np, double *x, double *y, double *r, double *s);
 /* transform natural coordinate to collapse coordinate */
 static void dg_tri_rstoad(int Np, double *r, double *s, double *a, double *b);
-/* get the gradient of the modal basis (id,jd) on the 2D simplex at (a,b). */
+/* get the gradient of the modal basis (ncid,jd) on the 2D simplex at (a,b). */
 static void dg_tri_gradSimplex2DP(int Np, double *a, double *b, int id, int jd,
                                   double *dmodedr, double *dmodeds);
 /* Warp factor to connnect the Legendre-Gauss-Lobatto and equidistant nodes */
@@ -391,18 +391,24 @@ static void dg_tri_rstoad(int Np, double *r, double *s, double *a, double *b){
 /**
  * @brief
  * Project the triangular vertex value to interpolation nodes.
- *
- * @param[in] vertVal value of vertex
- * @param[in] nodeVal value of nodes
+ * @param[in] cell pointer to dg_cell structure;
+ * @param[in] Nfield number of field;
+ * @param[in] vertVal value of vertex;
+ * @param[out] nodeVal value of nodes;
  *
  */
-void dg_cell_tri_proj(dg_cell *cell, double *vertVal, double *nodeVal){
-    register int i;
+void dg_cell_tri_proj(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal){
+    register int i,fld,sk=0;
     double *r = dg_cell_r(cell);
     double *s = dg_cell_s(cell);
-    for (i = 0; i < dg_cell_Np(cell); ++i) {
+    const int Np = dg_cell_Np(cell);
+    for (i=0;i<Np;++i) {
         double ri=r[i];
         double si=s[i];
-        nodeVal[i] = 0.5*( -vertVal[0]*(ri + si) + vertVal[1]*(1.+ri) + vertVal[2]*(1.+si));
+        for(fld=0;fld<Nfield;fld++){
+            nodeVal[sk++] = 0.5*( -vertVal[0*Nfield+fld]*(ri + si)
+                                  + vertVal[1*Nfield+fld]*(1.+ri)
+                                  + vertVal[2*Nfield+fld]*(1.+si));
+        }
     }
 }

@@ -18,20 +18,24 @@
  */
 void dg_phys_strong_vol_opt2d(dg_phys *phys, Nodal_Flux_Fun nodal_flux){
 
-    const int K = dg_grid_K(phys->grid);
-    const int Np = dg_cell_Np(phys->cell);
+    dg_cell *cell = dg_phys_cell(phys);
+    dg_grid *grid = dg_phys_grid(phys);
+    dg_region *region = dg_phys_region(phys);
+
+    const int K = dg_grid_K(grid);
+    const int Np = dg_cell_Np(cell);
     const int Nfield = dg_phys_Nfield(phys);
 
-    dg_real *f_Q = phys->f_Q;
-    dg_real *f_rhsQ = phys->f_rhsQ;
-    dg_real *f_Dr = phys->cell->f_Dr;
-    dg_real *f_Ds = phys->cell->f_Ds;
+    dg_real *f_Q = dg_phys_f_Q(phys); //phys->f_Q;
+    dg_real *f_rhsQ = dg_phys_f_rhsQ(phys); //phys->f_rhsQ;
+    dg_real *f_Dr = dg_cell_f_Dr(cell); //phys->cell->f_Dr;
+    dg_real *f_Ds = dg_cell_f_Ds(cell); //phys->cell->f_Ds;
 
     register unsigned int k,n,m,fld,rhsid=0;
-    dg_real **drdx_p = phys->region->drdx;
-    dg_real **drdy_p = phys->region->drdy;
-    dg_real **dsdx_p = phys->region->dsdx;
-    dg_real **dsdy_p = phys->region->dsdy;
+    dg_real **drdx_p = region->drdx;
+    dg_real **drdy_p = region->drdy;
+    dg_real **dsdx_p = region->dsdx;
+    dg_real **dsdy_p = region->dsdy;
 
     dg_real Eflux[Np*Nfield], Gflux[Np*Nfield], rhs[Nfield];
     for(k=0;k<K;k++){

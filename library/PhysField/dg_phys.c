@@ -7,54 +7,76 @@
  */
 
 #include "dg_phys.h"
-#include "dg_phys_fetch_buffer.h"
+
+static int dg_phys_fetch_cell_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
+static int dg_phys_fetch_node_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
 
 #define DEBUG 0
 
+/**
+ * @brief create a pointer to a new dg_phys structure.
+ * @param Nfields number of physical field;
+ * @param edge pointer to dg_edge structure;
+ * @return
+ * phys pointer to a new dg_phys structure.
+ */
 dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
 
     dg_phys *phys = (dg_phys *) calloc(1, sizeof(dg_phys));
+    phys->info = dg_phys_info_create(Nfields, edge);
+    phys->obc = dg_phys_obc_create(phys->info);
 
-    phys->edge = edge;
-    phys->mesh = edge->mesh;
-    phys->region = edge->region;
-    phys->grid = edge->grid;
-    phys->cell = edge->cell;
-
-    phys->Nfield = Nfields; ///< number of fields
-
-    const int K = dg_grid_K(phys->grid);
-    const int Np = dg_cell_Np(phys->cell);
-    const int Nparface = dg_mesh_NfetchFace(phys->mesh);
-    const int Nparnode = dg_mesh_NfetchNode(phys->mesh);
-
-    /* nodal array */
-    phys->f_Q    = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));
-    phys->f_rhsQ = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));
-    phys->f_resQ = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));
-    phys->f_extQ = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));
-    phys->f_recvQ = (dg_real *) calloc((size_t) Nparnode*Nfields, sizeof(dg_real));
-
-    /* volume array */
-    phys->c_Q = (dg_real *) calloc((size_t) K*Nfields, sizeof(dg_real));
-    phys->c_recvQ = (dg_real *) calloc((size_t) Nparface*Nfields, sizeof(dg_real));
-
-    /* fetch buffer */
-    phys->fetch_node_buffer = dg_phys_fetch_node_buffer;
     phys->fetch_cell_buffer = dg_phys_fetch_cell_buffer;
+    phys->fetch_node_buffer = dg_phys_fetch_node_buffer;
     return phys;
 }
-
+/**
+ * @brief free the memory of pointer to dg_phys structure.
+ * @param phys pointer to a dg_phys structure;
+ */
 void dg_phys_free(dg_phys *phys){
-
-    free(phys->f_Q);
-    free(phys->f_rhsQ);
-    free(phys->f_resQ);
-    free(phys->f_extQ);
-    free(phys->f_recvQ);
-
-    free(phys->c_Q);
-    free(phys->c_recvQ);
+    dg_phys_info_free(phys->info);
+    dg_phys_obc_free(phys->obc);
     free(phys);
     return;
+}
+
+void dg_phys_obc_add(dg_phys *phys, char *filename){
+    phys->obc->add_obc(phys->obc, filename);
+    return;
+}
+void dg_phys_obc_update(dg_phys *phys, double elapseTime){
+    phys->obc->update_obc(phys->obc, elapseTime);
+    return;
+}
+
+/**
+ * @brief
+ * @param phys
+ * @param send_requests
+ * @param recv_requests
+ * @return
+ */
+static int dg_phys_fetch_cell_buffer(dg_phys *phys,
+                                      MPI_Request *send_requests,
+                                      MPI_Request *recv_requests){
+    dg_phys_info *info = phys->info;
+    int Nmess;
+    Nmess = info->fetch_cell_buffer(info, send_requests, recv_requests);
+    return Nmess;
+}
+/**
+ * @brief
+ * @param phys
+ * @param send_requests
+ * @param recv_requests
+ * @return
+ */
+static int dg_phys_fetch_node_buffer(dg_phys *phys,
+                                      MPI_Request *send_requests,
+                                      MPI_Request *recv_requests){
+    dg_phys_info *info = phys->info;
+    int Nmess;
+    Nmess = info->fetch_node_buffer(info, send_requests, recv_requests);
+    return Nmess;
 }

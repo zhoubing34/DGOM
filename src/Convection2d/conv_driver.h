@@ -31,7 +31,7 @@ typedef struct {
     dg_phys *phys;
     double dt; ///< delta time
     double finaltime; ///< final time
-    nc_file *outfile; ///< output file
+    NC_File *outfile; ///< output file
 } Conv_Solver;
 
 /* conv_input */

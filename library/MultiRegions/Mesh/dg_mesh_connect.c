@@ -28,7 +28,7 @@ void dg_mesh_init_node_fetch_buffer2d(dg_mesh *mesh){
     for(f=0;f<Nparf;f++){
         Nparn += dg_cell_Nfp(cell)[parface[f]];
     }
-    // adjacent node id
+    // adjacent node ncid
     int *n1 = vector_int_create(Nparn);
     int *n2 = vector_int_create(Nparn);
     double *xM = vector_double_create(Nparn);
@@ -210,8 +210,8 @@ void dg_mesh_init_cell_fetch_buffer2d(dg_mesh *mesh){
                         my_face[sk].f2 = grid->EToF[k][f];
                         // tmp is the indicator for each face pairs
                         // k2 * Ktotal + k1
-                        // k1 is the cell index in process 1 (smaller process id)
-                        // k2 and Ktotal is the cell index and total cell number in process 2 (greater process id)
+                        // k1 is the cell index in process 1 (smaller process ncid)
+                        // k2 and Ktotal is the cell index and total cell number in process 2 (greater process ncid)
                         my_face[sk].tmp = ((procid) < (p2) ? (k2*Ktotal+k1) : (k1*Ktotal+k2));
                         sk++;
                     }

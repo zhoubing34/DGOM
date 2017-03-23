@@ -197,7 +197,7 @@ dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
             fscanf(fp, "%d", EToV[0]+k*Nv+n);
             EToV[k][n] -= 1; // change index start from 0 (C style)
         }
-        fscanf(fp, "%d", EToR[k]+1); //read region id
+        fscanf(fp, "%d", EToR[k]+1); //read region ncid
     }
     fclose(fp);
 
@@ -212,7 +212,7 @@ dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
     double *vx = vector_double_create(Nvert);
     double *vy = vector_double_create(Nvert);
     for(n=0;n<Nvert;n++){
-        fscanf(fp, "%d", &temp); //read vertex id
+        fscanf(fp, "%d", &temp); //read vertex ncid
         fscanf(fp, "%lf", vx+n);
         fscanf(fp, "%lf", vy+n);
     }

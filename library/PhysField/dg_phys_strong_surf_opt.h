@@ -10,6 +10,7 @@
 typedef int (*Wall_Condition)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP);
 typedef int (*Nodal_Flux_Fun)(dg_real *var, dg_real *Eflux, dg_real *Gflux);
 typedef int (*Numerical_Flux)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_real *Fhs);
+typedef int (*OBC_Fun)(dg_real nx, dg_real ny, dg_real *f_M, int obc_ind, dg_real *f_P);
 
 void dg_phys_strong_surf_opt2d
         (dg_phys *phys,

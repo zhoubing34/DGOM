@@ -59,13 +59,22 @@ void dg_cell_line_deri_orthog_func(int N, int ind, int Np, double *r, double *s,
     return;
 }
 
-
-void dg_cell_line_proj(dg_cell *cell, double *vertVal, double *nodeVal){
-    register int i;
+/**
+ * @brief Project from node value from vertex value.
+ * @param cell
+ * @param Nfield
+ * @param vertVal
+ * @param nodeVal
+ */
+void dg_cell_line_proj(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal){
+    register int i,fld,sk=0;
+    const int Np = dg_cell_Np(cell);
     double *r = dg_cell_r(cell);
-    for (i = 0; i < dg_cell_Np(cell); ++i) {
+    for (i=0;i<Np;++i) {
         double ri=r[i];
-        nodeVal[i] = 0.5*( vertVal[0]*(1.-ri) + vertVal[1]*(1.+ri) );
+        for(fld=0;fld<Nfield;fld++){
+            nodeVal[sk++] = 0.5*( vertVal[0*Nfield+fld]*(1.-ri) + vertVal[1*Nfield+fld]*(1.+ri) );
+        }
     }
     return;
 }

@@ -116,9 +116,9 @@ void dg_face_cell_Fmask(dg_cell *cell, int **Fmask){
         // face node coordinate
         double f_r[Nface_node], f_s[Nface_node], f_t[Nface_node];
         // get the face node coordinate by map from vertex
-        face_cell->proj_vert2node(face_cell, f_vr, f_r);
-        face_cell->proj_vert2node(face_cell, f_vs, f_s);
-        face_cell->proj_vert2node(face_cell, f_vt, f_t);
+        face_cell->proj_vert2node(face_cell, 1, f_vr, f_r);
+        face_cell->proj_vert2node(face_cell, 1, f_vs, f_s);
+        face_cell->proj_vert2node(face_cell, 1, f_vt, f_t);
         for(n=0;n<Nface_node;n++){
             double x1 = f_r[n];
             double y1 = f_s[n];

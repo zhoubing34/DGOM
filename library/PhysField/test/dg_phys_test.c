@@ -4,6 +4,7 @@
 #include "dg_phys_test.h"
 #include "dg_phys_strong_vol_opt_test.h"
 #include "dg_phys_strong_surf_opt_test.h"
+#include "dg_phys_obc_test.h"
 
 int Mx = 4;
 int My = 2;
@@ -62,6 +63,8 @@ dg_phys *rectangle_tri_physfield(){
     dg_mesh *mesh = dg_mesh_create(region);
     dg_edge *edge = dg_edge_create(mesh);
     dg_phys *phys = dg_phys_create(Nfield, edge);
+    char obcfile[] = "example/SWE2d/Rectangle/Rectangle.obc4.nc";
+    dg_phys_obc_add(phys, obcfile);
     return phys;
 }
 
@@ -70,20 +73,21 @@ dg_phys *rectangle_tri_physfield(){
  * @param phys
  */
 void phys_free(dg_phys *phys){
-    dg_cell_free(phys->cell);
-    dg_grid_free(phys->grid);
-    dg_region_free(phys->region);
-    dg_mesh_free(phys->mesh);
-    dg_edge_free(phys->edge);
+    dg_cell_free(dg_phys_cell(phys));
+    dg_grid_free(dg_phys_grid(phys));
+    dg_region_free(dg_phys_region(phys));
+    dg_mesh_free(dg_phys_mesh(phys));
+    dg_edge_free(dg_phys_edge(phys));
     dg_phys_free(phys);
 }
 
 /** test functions */
-#define Ntest 2
+#define Ntest 3
 typedef int (*test_func)(dg_phys *, int verbose);
 static const test_func phys_test_func[Ntest] = {
         dg_phys_strong_vol_opt2d_test,
         dg_phys_strong_surf_opt2d_test,
+        dg_phys_obc_test,
 };
 
 /**

@@ -8,7 +8,7 @@
 #include "point/dg_cell_point_test.h"
 #include "line/dg_cell_line_test.h"
 
-#define NTEST 7
+#define NTEST 8
 
 int main(int argc, char **argv){
 
@@ -41,6 +41,7 @@ int main(int argc, char **argv){
     err[i++] = dg_point_deri_matrix_test(point, isverbose);
     err[i++] = dg_point_Fmask_test(point, isverbose);
     err[i++] = dg_point_LIFT_test(point, isverbose);
+    err[i++] = dg_point_vert_proj_test(point, isverbose);
 
     dg_cell_free(point);
     for(i=0;i<NTEST;i++) {fail += err[i];}
@@ -61,6 +62,7 @@ int main(int argc, char **argv){
     err[i++] = dg_line_deri_matrix_test(line, isverbose);
     err[i++] = dg_line_Fmask_test(line, isverbose);
     err[i++] = dg_line_LIFT_test(line, isverbose);
+    err[i++] = dg_line_vert_proj_test(line, isverbose);
 
     dg_cell_free(line);
     for(i=0;i<NTEST;i++) {fail += err[i];}
@@ -82,7 +84,7 @@ int main(int argc, char **argv){
     err[i++] = dg_tri_deri_matrix_test(tri, isverbose);
     err[i++] = dg_tri_Fmask_test(tri, isverbose);
     err[i++] = dg_tri_LIFT_test(tri, isverbose);
-//    err[i++] = sc_triVertProj_test(tri, isverbose);
+    err[i++] = dg_tri_vert_proj_test(tri, isverbose);
     dg_cell_free(tri);
 
     for(i=0;i<NTEST;i++) {fail += err[i];}
@@ -104,7 +106,7 @@ int main(int argc, char **argv){
     err[i++] = dg_quad_deri_matrix_test(quad, isverbose);
     err[i++] = dg_quad_Fmask_test(quad, isverbose);
     err[i++] = dg_quad_LIFT_test(quad, isverbose);
-//    err[i++] = sc_quadVertProj_test(quad, isverbose);
+    err[i++] = dg_quad_vert_proj_test(quad, isverbose);
     dg_cell_free(quad);
 
     for(i=0;i<NTEST;i++) {fail += err[i];}

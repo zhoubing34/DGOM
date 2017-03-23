@@ -67,7 +67,7 @@ void dg_grid_connect2d(dg_grid *grid){
 
         grid->EToE[k1][f1] = k2; /* adjacent element index */
         grid->EToF[k1][f1] = f2; /* local face2d index of adjacent element */
-        grid->EToP[k1][f1] = p2; /* process id of adjacent element */
+        grid->EToP[k1][f1] = p2; /* process ncid of adjacent element */
     }
 
     free(myfaces);

@@ -123,13 +123,26 @@ int dg_point_Fmask_test(dg_cell *cell, int verbose){
 }
 
 
-int dg_point_LIFT_test(dg_cell *quad, int verbose){
+int dg_point_LIFT_test(dg_cell *cell, int verbose){
     int fail = 0;
     if(verbose){
         FILE *fp = fopen("dg_point_LIFT_test.txt", "ws");
-        print_double_matrix2file(fp, "LIFT", dg_cell_LIFT(quad), NP, NFP);
+        print_double_matrix2file(fp, "LIFT", dg_cell_LIFT(cell), NP, NFP);
         fclose(fp);
     }
+    if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
+    return fail;
+}
+
+
+int dg_point_vert_proj_test(dg_cell *point, int verbose){
+    int fail=0;
+    extern double point_VX[NV];
+    const int Np = dg_cell_Np(point);
+    double x[Np];
+    dg_cell_proj_vert2node(point, 1, point_VX, x);
+    fail = vector_double_test("dg_point_vert_proj_test", x, dg_cell_r(point), Np);
+
     if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     return fail;
 }

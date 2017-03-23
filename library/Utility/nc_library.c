@@ -5,8 +5,9 @@
 
 #include "nc_library.h"
 #include "utility.h"
+#include "unit_test.h"
 
-#define NCNAMELEN 1024
+#define NC_MAX_NAME_LEN 1024
 
 /**
  * @brief
@@ -16,8 +17,8 @@
  * @return
  * pointer to a new nc_dim
  */
-nc_dim* nc_dim_create(const char *name, int len){
-    nc_dim *dim = (nc_dim*) calloc(1, sizeof(nc_dim));
+NC_Dim* nc_dim_create(const char *name, int len){
+    NC_Dim *dim = (NC_Dim*) calloc(1, sizeof(NC_Dim));
 
     /* allocate name */
     dim->name  = (char *) calloc(strlen(name), sizeof(char));
@@ -31,7 +32,7 @@ nc_dim* nc_dim_create(const char *name, int len){
  * @brief free nc_dim variable
  * @param dim nc_dim variable
  */
-static void nc_dim_free(nc_dim *dim){
+static void nc_dim_free(NC_Dim *dim){
     free(dim->name);
     free(dim);
 }
@@ -39,11 +40,10 @@ static void nc_dim_free(nc_dim *dim){
  * @brief print the infomation of nc_dim
  * @param dim nc_dim variable
  */
-static void nc_dim_print(nc_dim *dim){
-    printf("NetCDF Dimension\n");
-    printf("  name:   %s\n", dim->name);
-    printf("  length: %d\n", dim->len);
-    printf("\n");
+static void nc_dim_print(NC_Dim *dim){
+    printf(HEADEND "NetCDF Dimension\n");
+    printf(HEADLINE "  name:   %s\n", dim->name);
+    printf(HEADLINE "  length: %d\n", dim->len);
 }
 /**
  * @brief create nc_var
@@ -53,15 +53,15 @@ static void nc_dim_print(nc_dim *dim){
  * @param type variable type
  * @return var nc_var pointer
  */
-nc_var* nc_var_create(const char *name, int ndim, nc_dim **dim_vec_p, int type){
+NC_Var* nc_var_create(const char *name, int ndim, NC_Dim **dim_vec_p, int type){
 
-    nc_var *var = (nc_var*) calloc(1, sizeof(nc_var));
+    NC_Var *var = (NC_Var*) calloc(1, sizeof(NC_Var));
     /* allocate name length */
     var->name  = (char *) calloc(strlen(name), sizeof(char));
     /* assignment */
     strcpy(var->name, name);
     var->ndim = ndim; /* number of dimensions */
-    var->dim_vec_p = (nc_dim**) calloc(ndim, sizeof(nc_dim*) );
+    var->dim_vec_p = (NC_Dim**) calloc(ndim, sizeof(NC_Dim*) );
     int i;
     for(i=0;i<ndim;i++) {var->dim_vec_p[i] = dim_vec_p[i];}
 
@@ -80,7 +80,7 @@ nc_var* nc_var_create(const char *name, int ndim, nc_dim **dim_vec_p, int type){
  * @brief deallocate the nc_var
  * @param var nc_var variable
  */
-static void nc_var_free(nc_var *var){
+static void nc_var_free(NC_Var *var){
     free(var->name);
     free(var->dim_vec_p);
     free(var);
@@ -89,86 +89,158 @@ static void nc_var_free(nc_var *var){
  * @brief print the nc_var
  * @param var nc_var variable
  */
-void nc_var_print(nc_var *var){
-    printf("NetCDF Variable\n");
-    printf("  name: %s\n", var->name);
-    printf("  ndim: %d\n", var->ndim);
-    printf("  type: %d\n", var->type);
-    printf("  include dimensions\n");
-
+void nc_var_print(NC_Var *var){
+    printf(HEADEND "NetCDF Variable\n");
+    printf(HEADLINE "  name: %s\n", var->name);
+    printf(HEADLINE "  Ndim: %d\n", var->ndim);
+    printf(HEADLINE "  type: %d\n", var->type);
+    printf(HEADEND "Including dimensions:\n");
     int i;
-    for(i=0;i<var->ndim;i++){ nc_dim_print(var->dim_vec_p[i]); }
-    printf("\n");
+    for(i=0;i<var->ndim;i++){
+        printf(HEADLINE "  name: %s\n", var->dim_vec_p[i]->name);
+    }
 }
 /**
  * @brief create pointer to a new nc_file structure.
- * @param name name of nc_file;
+ * @param name name of NC_file;
  * @param procid process id;
  * @param nprocs number of process;
- * @param ndim number of nc_dim;
- * @param dim_vec_p pointer to the nc_dim vector;
- * @param nvar number of nc_var;
- * @param var_vec_p pointer to the nc_var vector;
- * @return file nc_file pointer.
+ * @param ndim number of NC_dim;
+ * @param dim_vec_p pointer to the NC_dim* vector;
+ * @param nvar number of NC_var;
+ * @param var_vec_p pointer to the NC_var* vector;
+ * @return file pointer to a new NC_file.
  */
-nc_file* nc_file_create(const char *name, int procid, int nprocs,
-                       int ndim, nc_dim **dim_vec_p,
-                       int nvar, nc_var **var_vec_p){
+NC_File* nc_file_create(const char *name, int procid, int nprocs,
+                       int ndim, NC_Dim **dim_vec_p,
+                       int nvar, NC_Var **var_vec_p){
 
-    nc_file *file = (nc_file*) calloc(1, sizeof(nc_file));
+    NC_File *file = (NC_File*) calloc(1, sizeof(NC_File));
     /* check name length */
     file->name  = (char *) calloc(strlen(name), sizeof(char));
 
     /* assignment */
-    file->procid = procid; /* process id */
+    file->procid = procid; /* process ncid */
     file->nprocs = nprocs; /* process number */
     /* name */
-    if(snprintf(file->name, NCNAMELEN, "%s%d-%d.nc", name, procid, nprocs) < 0 ){
+    if(snprintf(file->name, NC_MAX_NAME_LEN, "%s%d-%d.nc", name, procid, nprocs) < 0 ){
         fprintf(stderr, "%s(%d): Error in creating NetCDF output file\n", __FILE__, __LINE__);
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
     /* dimension */
-    file->ndim     = ndim;
-    file->dim_vec_p = (nc_dim**) calloc(ndim, sizeof(nc_dim*) );
+    file->Ndim     = ndim;
+    file->dim_vec_p = (NC_Dim**) calloc(ndim, sizeof(NC_Dim*) );
     int i;
     for(i=0;i<ndim;i++) {file->dim_vec_p[i] = dim_vec_p[i];}
     /* var */
-    file->nvar     = nvar;
-    file->var_vec_p = (nc_var**) calloc(nvar, sizeof(nc_var*) );
+    file->Nvar     = nvar;
+    file->var_vec_p = (NC_Var**) calloc(nvar, sizeof(NC_Var*) );
     for(i=0;i<nvar;i++) {file->var_vec_p[i] = var_vec_p[i];}
 
     return file;
 }
+
+/**
+ * @brief read NC_Dim structure from NetCDF file.
+ * @param ncid
+ * @param dimid
+ * @return
+ */
+NC_Dim* nc_dim_read_from_file(int ncid, int dimid){
+    NC_Dim *dim = (NC_Dim*)calloc(1, sizeof(NC_Dim));
+    dim->id = dimid;
+    dim->name = calloc(NC_MAX_NAME_LEN, sizeof(char));
+    nc_error( ncmpi_inq_dimname(ncid, dimid, dim->name) );
+    MPI_Offset lenp;
+    ncmpi_inq_dimlen(ncid, dimid, &lenp );
+    dim->len = (int)lenp;
+    return dim;
+}
+
+NC_Var* nc_var_read_from_file(int ncid, int varid, int NdimTol, NC_Dim **dim_p){
+    NC_Var *var = (NC_Var*) calloc(1, sizeof(NC_Var));
+    var->id = varid;
+    int ndim;
+    ncmpi_inq_varndims(ncid, varid, &(ndim));
+    var->ndim = ndim;
+    var->dim_vec_p = (NC_Dim**)calloc(ndim, sizeof(NC_Dim*) );
+    ncmpi_inq_vartype(ncid, varid, &(var->type));
+    var->name = calloc(NC_MAX_NAME_LEN, sizeof(char));
+    ncmpi_inq_varname(ncid, varid, var->name);
+    int n,m, dimid[ndim];
+    ncmpi_inq_vardimid(ncid, varid, dimid);
+    for(n=0;n<ndim;n++){
+        for(m=0;m<NdimTol;m++){
+            if(dimid[n] == dim_p[m]->id){ var->dim_vec_p[n] = dim_p[m]; }
+        }
+    }
+
+    return var;
+}
+/**
+ * @brief read the information from NetCDF file.
+ * @param name NetCDF file name;
+ * @param procid process id;
+ * @param nprocs number of process;
+ * @return file pointer to the NC_File structure;
+ */
+NC_File* nc_file_read_from_file(const char *name, int procid, int nprocs){
+    NC_File *file = (NC_File*) calloc(1, sizeof(NC_File));
+    /* open file */
+    file->name = calloc(NC_MAX_NAME_LEN, sizeof(char));
+    strcpy(file->name, name);
+    nc_error(ncmpi_open(MPI_COMM_WORLD, file->name, NC_NOWRITE, MPI_INFO_NULL, &(file->ncid) ));
+    /* read dimensions */
+    int Ndim,n;
+    nc_error( ncmpi_inq_ndims(file->ncid, &Ndim) );
+    file->Ndim = Ndim;
+    file->dim_vec_p = (NC_Dim**) calloc(Ndim, sizeof(NC_Dim*));
+    for(n=0;n<Ndim;n++){
+        file->dim_vec_p[n] = nc_dim_read_from_file(file->ncid, n);
+    }
+    /* read variables */
+    int Nvar;
+    nc_error( ncmpi_inq_nvars(file->ncid, &Nvar) );
+    file->Nvar = Nvar;
+    file->var_vec_p = (NC_Var**) calloc(Nvar, sizeof(NC_Var*));
+    for(n=0;n<Nvar;n++){
+        file->var_vec_p[n] = nc_var_read_from_file(file->ncid, n, Ndim, file->dim_vec_p);
+    }
+    return file;
+}
+
 /**
  * @brief print the information of nc_file.
  * @param file pointer to a nc_file structure;
  */
-void nc_file_print(nc_file *file){
-    printf("NetCDF Files\n");
-    printf("  name:   %s\n", file->name);
-    printf("  procid: %d\n", file->procid);
-    printf("  nprocs: %d\n", file->nprocs);
-    printf("  nvar:   %d\n", file->nvar);
-    printf("  ndim:   %d\n", file->ndim);
+void nc_file_print(NC_File *file){
+    printf(HEADEND "NetCDF files:\n");
+    printf(HEADLINE "  name: %s\n", file->name);
+    printf(HEADLINE "  procid: %d\n", file->procid);
+    printf(HEADLINE "  nprocs: %d\n", file->nprocs);
+    printf(HEADLINE "  Nvar: %d\n", file->Nvar);
+    printf(HEADLINE "  Ndim: %d\n", file->Ndim);
 
+    printf(HEADEND "Including variables:\n");
     int i;
-    for(i=0;i<file->nvar;i++){
-        nc_var_print(file->var_vec_p[i]);
+    for(i=0;i<file->Nvar;i++){
+        printf(HEADLINE "  name: %s\n", file->var_vec_p[i]->name);
     }
-    for(i=0;i<file->ndim;i++){
-        nc_dim_print(file->dim_vec_p[i]);
+    printf(HEADEND "Including dimensions:\n");
+    for(i=0;i<file->Ndim;i++){
+        printf(HEADLINE "  name: %s\n", file->dim_vec_p[i]->name);
     }
 }
 /**
  * @brief free the memory of nc_file and associated nc_dim and nc_var.
  * @param file pointer to nc_file;
  */
-void nc_file_free(nc_file *file){
+void nc_file_free(NC_File *file){
     int i;
     free(file->name);
-    for (i=0;i<file->ndim;i++){ nc_dim_free(file->dim_vec_p[i]); }
-    for (i=0;i<file->nvar;i++){ nc_var_free(file->var_vec_p[i]); }
+    for (i=0;i<file->Ndim;i++){ nc_dim_free(file->dim_vec_p[i]); }
+    for (i=0;i<file->Nvar;i++){ nc_var_free(file->var_vec_p[i]); }
     free(file);
     return;
 }
@@ -177,37 +249,36 @@ void nc_file_free(nc_file *file){
  * @brief create the NetCDF file and define its dimensions and variables
  * @param file nc_file pointer
  */
-void nc_file_init(nc_file *file){
+void nc_file_define(NC_File *file){
 
-    const int Ndim = file->ndim;
-    const int Nvar = file->nvar;
+    const int Ndim = file->Ndim;
+    const int Nvar = file->Nvar;
     /* create output file */
     nc_error(ncmpi_create(MPI_COMM_SELF, file->name, NC_CLOBBER|NC_64BIT_OFFSET,
-                          MPI_INFO_NULL, &file->id));
+                          MPI_INFO_NULL, &(file->ncid)));
     /* define dimensions */
     int i,j;
     for (i=0;i<Ndim;i++){
-        nc_dim *dim = file->dim_vec_p[i]; /* pointer of dim */
-        nc_error( ncmpi_def_dim(file->id, dim->name, dim->len, &dim->id) );
+        NC_Dim *dim = file->dim_vec_p[i]; /* pointer of dim */
+        nc_error( ncmpi_def_dim(file->ncid, dim->name, dim->len, &dim->id) );
     }
     /* define variables */
     for (i=0;i<Nvar; i++){
-        nc_var *var = file->var_vec_p[i]; /* pointer of var */
-        int *dimids = (int *)calloc(var->ndim, sizeof(int));
-        for(j=0;j<var->ndim;j++){ dimids[j] = var->dim_vec_p[j]->id; }
-
-        nc_error(ncmpi_def_var(file->id, var->name, var->type, var->ndim, dimids, &var->id));
-        free(dimids);
+        NC_Var *var = file->var_vec_p[i]; /* pointer of var */
+        int ndim = var->ndim;
+        int dimids[ndim];
+        for(j=0;j<ndim;j++){ dimids[j] = var->dim_vec_p[j]->id; }
+        nc_error(ncmpi_def_var(file->ncid, var->name, var->type, ndim, dimids, &(var->id) ));
     }
     /* finish definition */
-    nc_error( ncmpi_enddef(file->id) );
+    nc_error( ncmpi_enddef(file->ncid) );
 }
 
 /**
  * @brief close the NetCDF file
  * @param file nc_file pointer
  */
-void nc_file_close(nc_file *file){
-    nc_error( ncmpi_close(file->id) );
+void nc_file_close(NC_File *file){
+    nc_error( ncmpi_close(file->ncid) );
 
 }

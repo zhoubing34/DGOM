@@ -20,14 +20,18 @@ static int nodal_flux(dg_real *var, dg_real *Eflux, dg_real *Gflux){
 
 int dg_phys_strong_vol_opt2d_test(dg_phys *phys, int verbose){
     int fail = 0;
-    extern int Nfield;
 
-    dg_mesh *mesh = phys->mesh;
-    dg_region *region = phys->region;
-    dg_cell *cell = phys->cell;
+    dg_mesh *mesh = dg_phys_mesh(phys);
+    dg_region *region = dg_phys_region(phys);
+    dg_grid *grid = dg_phys_grid(phys);
+    dg_cell *cell = dg_phys_cell(phys);
 
-    const int K = phys->grid->K;
+    const int K = dg_grid_K(grid);
     const int Np = dg_cell_Np(cell);
+    const int Nfield = dg_phys_Nfield(phys);
+
+    dg_real *f_rhsQ = dg_phys_f_rhsQ(phys);
+    dg_real *f_Q = dg_phys_f_Q(phys);
 
     int k,i;
     dg_real rhs_ext[Np*Nfield*K];
@@ -37,9 +41,9 @@ int dg_phys_strong_vol_opt2d_test(dg_phys *phys, int verbose){
         for(i=0;i<Np;i++){
             dg_real u = region->x[k][i];
             dg_real v = region->y[k][i];
-            phys->f_Q[sk] = u; // field 0 of -(dEdx + dGdy)
+            f_Q[sk] = u; // field 0 of -(dEdx + dGdy)
             rhs_ext[sk++] = -(v + t);
-            phys->f_Q[sk] = v; // field 1 of -(dEdx + dGdy)
+            f_Q[sk] = v; // field 1 of -(dEdx + dGdy)
             rhs_ext[sk++] = -(s - t*u);
         }
     }
@@ -48,14 +52,14 @@ int dg_phys_strong_vol_opt2d_test(dg_phys *phys, int verbose){
     dg_phys_strong_vol_opt2d(phys, nodal_flux);
     double clockT2 = MPI_Wtime();
 
-    fail = vector_double_test(__FUNCTION__, phys->f_rhsQ, rhs_ext, Np * Nfield * K);
+    fail = vector_double_test(__FUNCTION__, f_rhsQ, rhs_ext, Np * Nfield * K);
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
-        fprintf(fp, "Nfield = %d\n", dg_phys_Nfield(phys));
+        fprintf(fp, "Nfield = %d\n", Nfield);
         fprintf(fp, "Np = %d\n", Np);
-        print_double_vector2file(fp, "f_Q", phys->f_Q, Nfield*Np*k);
-        print_double_vector2file(fp, "f_rhsQ", phys->f_rhsQ, Nfield*Np*k);
+        print_double_vector2file(fp, "f_Q", f_Q, Nfield*Np*k);
+        print_double_vector2file(fp, "f_rhsQ", f_rhsQ, Nfield*Np*k);
     }
 
     const int procid = region->procid;

@@ -15,48 +15,43 @@
 
 #include "pnetcdf.h"
 
-/**
- * @brief structure for NetCDF dimensions
- */
+/** @brief structure for NetCDF dimensions */
 typedef struct {
     char *name; ///< name of dimension
     int  len; ///< length of dimension
     int  id; ///< dimension id in NetCDF file
-}nc_dim;
-/**
- * @brief structure for NetCDF variable
- */
+}NC_Dim;
+/** @brief structure for NetCDF variable */
 typedef struct {
-    char  *name; ///< name of variables
-    int   ndim; ///< number of dimension in the variable
-    nc_dim **dim_vec_p; ///< pointer to the array of nc_dim
-    int   type; ///< variable type
-    int   id; ///< variable id in NetCDF file
-}nc_var;
-/**
- * @brief
- * structure for NetCDF file
- */
+    char *name; ///< name of variables
+    int ndim; ///< number of dimension in the variable
+    NC_Dim **dim_vec_p; ///< pointer to the array of nc_dim
+    int type; ///< variable type
+    int id; ///< variable id in NetCDF file
+}NC_Var;
+/** @brief structure for NetCDF file */
 typedef struct {
     char *name; ///< name of files;
     int procid; ///< process id;
     int nprocs; ///< number of processes;
-    int ndim; ///< number of dimensions;
-    int nvar; ///< number of variable;
-    nc_dim **dim_vec_p; ///< pointer to the array of nc_dim;
-    nc_var **var_vec_p; ///< pointer to the array of nc_var;
-    int id; ///< file id of NetCDF file;
-}nc_file;
+    int Ndim; ///< number of dimensions;
+    int Nvar; ///< number of variable;
+    NC_Dim **dim_vec_p; ///< pointer to the array of nc_dim;
+    NC_Var **var_vec_p; ///< pointer to the array of nc_var;
+    int ncid; ///< file id of NetCDF file;
+}NC_File;
 
 /* public function */
-nc_dim* nc_dim_create(const char *name, int len);
-nc_var* nc_var_create(const char *name, int ndim, nc_dim **dim_vec_p, int type);
-nc_file* nc_file_create(const char *name, int procid, int nprocs, int ndim,
-                        nc_dim **dim_vec_p, int nvar, nc_var **var_vec_p);
-void nc_file_init(nc_file *file);
-void nc_file_close(nc_file *file);
-void nc_file_free(nc_file *file);
-void nc_file_print(nc_file *file);
+NC_Dim* nc_dim_create(const char *name, int len);
+NC_Var* nc_var_create(const char *name, int ndim, NC_Dim **dim_vec_p, int type);
+NC_File* nc_file_create(const char *name, int procid, int nprocs, int ndim,
+                        NC_Dim **dim_vec_p, int nvar, NC_Var **var_vec_p);
+void nc_file_define(NC_File *file);
+NC_File* nc_file_read_from_file(const char *name, int procid, int nprocs);
+void nc_file_close(NC_File *file);
+void nc_file_free(NC_File *file);
+void nc_file_print(NC_File *file);
+void nc_var_print(NC_Var *var);
 
 /** marco for handing error of parallel-netcdf */
 #define nc_error(t)                                         \

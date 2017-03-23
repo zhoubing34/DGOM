@@ -7,7 +7,7 @@
 
 #define NP 1
 #define NFP 0
-#define NV 0
+#define NV 1
 
 double point_r[NP] = {0};
 
@@ -19,6 +19,6 @@ double point_Dr[NP][NP] = {{ 0 }};
 
 double point_LIFT[NP][NFP];
 
-double point_VX[NV];
+double point_VX[NV] = {0};
 
 #endif //DGOM_DG_CELL_LINE_DATA3_H

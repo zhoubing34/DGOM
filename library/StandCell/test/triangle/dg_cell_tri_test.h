@@ -14,6 +14,6 @@ int dg_tri_mass_matrix_test(dg_cell *tri, int verbose);
 int dg_tri_deri_matrix_test(dg_cell *tri, int verbose);
 int dg_tri_Fmask_test(dg_cell *tri, int verbose);
 int dg_tri_LIFT_test(dg_cell *tri, int verbose);
-int sc_triVertProj_test(dg_cell *tri, int verbose);
+int dg_tri_vert_proj_test(dg_cell *tri, int verbose);
 
 #endif //DGOM_SC_TRI_TEST_H

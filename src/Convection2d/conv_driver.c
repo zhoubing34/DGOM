@@ -55,10 +55,10 @@ void conv_finalize(){
     nc_file_free(solver.outfile);
 
     dg_phys *phys = solver.phys;
-    dg_cell_free(phys->cell);
-    dg_grid_free(phys->grid);
-    dg_region_free(phys->region);
-    dg_mesh_free(phys->mesh);
+    dg_cell_free(dg_phys_cell(phys));
+    dg_grid_free(dg_phys_grid(phys));
+    dg_region_free(dg_phys_region(phys));
+    dg_mesh_free(dg_phys_mesh(phys));
     dg_phys_free(phys);
     MPI_Finalize();
 }

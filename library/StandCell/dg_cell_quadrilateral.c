@@ -168,17 +168,20 @@ void dg_cell_quad_deri_orthog_func(int N, int ind, int Np, double *r, double *s,
  * @param[in] nodeVal value of nodes
  *
  */
-void dg_cell_quad_proj(dg_cell *cell, double *vertVal, double *nodeVal){
-    int i;
+void dg_cell_quad_proj(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal){
+    register int i,fld,sk=0;
     double *r = dg_cell_r(cell);
     double *s = dg_cell_s(cell);
-    for (i=0;i<dg_cell_Np(cell);++i) {
+    const int Np = dg_cell_Np(cell);
+    for (i=0;i<Np;++i) {
         double ri = r[i];
         double si = s[i];
-        nodeVal[i] = 0.25 * (vertVal[0] * (1. - ri) * (1. - si)
-                             + vertVal[1] * (1. + ri) * (1. - si)
-                             + vertVal[2] * (1. + ri) * (1. + si)
-                             + vertVal[3] * (1. - ri)*(1. + si));
+        for(fld=0;fld<Nfield;fld++){
+            nodeVal[sk++] = 0.25 * (vertVal[0*Nfield+fld]*(1.-ri)*(1.-si)
+                                 + vertVal[1*Nfield+fld]*(1.+ri)*(1.-si)
+                                 + vertVal[2*Nfield+fld]*(1.+ri)*(1.+si)
+                                 + vertVal[3*Nfield+fld]*(1.-ri)*(1.+si));
+        }
     }
     return;
 }

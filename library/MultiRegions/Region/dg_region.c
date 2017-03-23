@@ -111,9 +111,9 @@ static void dg_region_node(dg_region *region){
             gy[i] = vy[EToV[k][i]];
             gz[i] = vz[EToV[k][i]];
         }
-        dg_cell_proj_vert2node(cell, gx, region->x[k]);
-        dg_cell_proj_vert2node(cell, gy, region->y[k]);
-        dg_cell_proj_vert2node(cell, gz, region->z[k]);
+        dg_cell_proj_vert2node(cell, 1, gx, region->x[k]);
+        dg_cell_proj_vert2node(cell, 1, gy, region->y[k]);
+        dg_cell_proj_vert2node(cell, 1, gz, region->z[k]);
     }
     return;
 }

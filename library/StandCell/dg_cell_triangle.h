@@ -10,6 +10,6 @@ void dg_cell_tri_deriorthog_func(int N, int ind, int Np,
                                  double *r, double *s, double *t,
                                  double *dr, double *ds, double *dt);
 
-void dg_cell_tri_proj(dg_cell *cell, double *vertVal, double *nodeVal);
+void dg_cell_tri_proj(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal);
 
 #endif

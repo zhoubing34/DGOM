@@ -4,7 +4,7 @@
 #include "swe_output.h"
 #include "PhysField/Limiter/pf_limit_BJ2d.h"
 #include "swe_rhs.h"
-#include "PhysField/pf_openbc.h"
+#include "PhysField/dg_phys_obc.h"
 
 #define DEBUG 0
 

@@ -17,17 +17,19 @@ void dg_phys_init_file2d(dg_phys *phys, char *casename){
     strcpy(init_filename, casename);
     strcat(init_filename, ".init");
 
+    dg_grid *grid = dg_phys_grid(phys);
+
     /* open the init file */
     FILE *fp;
     dg_fopen(fp, init_filename, "Unable to open initial condition file");
 
     int Nvert, Nfield;
     fscanf(fp, "%d %d", &Nvert, &Nfield);
-    if( Nvert != phys->grid->Nv ){
+    if( Nvert != dg_grid_Nv(grid) ){
         fprintf(stderr, "%s (%d): Wrong number of vertex in initial file %s.\n",
                 __FILE__, __LINE__, init_filename);
     }
-    if( Nfield != phys->Nfield ){
+    if( Nfield != dg_phys_Nfield(phys) ){
         fprintf(stderr, "%s (%d): Wrong physical field number in initial file %s.\n",
                 __FILE__, __LINE__, init_filename);
     }
@@ -44,64 +46,34 @@ void dg_phys_init_file2d(dg_phys *phys, char *casename){
     }
 
     /* read element file */
-    int **EToV = dg_grid_EToV(phys->grid);
+    int **EToV = dg_grid_EToV(grid);
 
     /* assign to node fields */
-    dg_cell *cell = phys->cell;
+    dg_cell *cell = dg_phys_cell(phys);
     const int Np = dg_cell_Np(cell);
     const int Nv = dg_cell_Nv(cell);
-    const int K = dg_grid_K(phys->grid);
+    const int K = dg_grid_K(grid);
 
-    dg_real initial_vertex_value[Nv], initial_node_value[Np];
-    dg_real *f_Q = phys->f_Q;
+    dg_real initial_vert_value[Nv*Nfield];
+    dg_real initial_node_value[Np*Nfield];
+    dg_real *f_Q = dg_phys_f_Q(phys);
     for(k=0;k<K;k++){
-        for(fld=0;fld<Nfield;fld++){
-            for(n=0;n<Nv;n++){ // vertex initial values
-                initial_vertex_value[n] = init_value[ EToV[k][n] ][fld];
-            }
-            /* map from vertex to nodes */
-            dg_cell_proj_vert2node(cell, initial_vertex_value, initial_node_value);
-            for(n=0;n<Np;n++){ // assign to node values
-                f_Q[(k*Np+n)*Nfield + fld] = initial_node_value[n];
+        for(n=0;n<Nv;n++){ // vertex initial values
+            int vertID = EToV[k][n];
+            for(fld=0;fld<Nfield;fld++){
+                initial_vert_value[n*Nfield+fld] = init_value[vertID][fld];
             }
         }
+
+        dg_cell_proj_vert2node(cell, Nfield, initial_vert_value, initial_node_value);
+        int sk = (k*Np+n)*Nfield;
+        for(n=0;n<Np*Nfield;n++){ // assign to node values
+            f_Q[sk + n] = initial_node_value[n];
+        }
+
     }
 
     matrix_real_free(init_value);
     matrix_int_free(EToV);
     return;
 }
-
-//static int **read_EToV_file(dg_phys *phys, char *casename){
-//
-//    char element_file[MAX_NAME_LENGTH];
-//    strcpy(element_file, casename);
-//    strcat(element_file, ".ele");
-//    FILE *fp;
-//    if( (fp = fopen(element_file, "r")) == NULL ){
-//        fprintf(stderr, "%s (%d)\n"
-//                        "Unable to open element file %s.\n",
-//                __FUNCTION__,__LINE__,element_file);
-//    }
-//    int Nv, K, temp;
-//    // read cell number and cell vertex number
-//    fscanf(fp, "%d %d %d\n", &K, &Nv, &temp);
-//    // check element vertex
-//    if(dg_cell_Nv(phys->cell) !=  Nv){
-//        fprintf(stderr, "%s (%d)\n"
-//                "The input element type is not correct!\n", __FILE__, __LINE__);
-//        exit(-1);
-//    }
-//    int **EToV = matrix_int_create(K, Nv);
-//    int n,k;
-//    for(k=0;k<K;k++){
-//        fscanf(fp, "%d", &temp); //read index
-//        for(n=0;n<Nv;n++){
-//            fscanf(fp, "%d", EToV[0]+k*Nv+n);
-//            EToV[k][n] -= 1; // change index start from 0 (C style)
-//        }
-//        fscanf(fp, "%d", &temp); //read region id
-//    }
-//    fclose(fp);
-//    return EToV;
-//}

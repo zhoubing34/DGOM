@@ -12,6 +12,6 @@ void dg_cell_point_set_node(dg_cell *cell, int *Np, double **r, double **s, doub
 void dg_cell_point_orthog_func(int N, int ind, int Np, double *r, double *s, double *t, double *fun);
 void dg_cell_point_deri_orthog_func(int N, int ind, int Np, double *r, double *s, double *t,
                                     double *dr, double *ds, double *dt);
-void dg_cell_point_proj(dg_cell *cell, double *vertVal, double *nodeVal);
+void dg_cell_point_proj(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal);
 
 #endif //DGOM_DG_CELL_NODE_H

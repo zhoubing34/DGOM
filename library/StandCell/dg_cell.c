@@ -143,7 +143,7 @@ static void dg_cell_d2f(dg_cell *cell){
  * @param[in] vertVal value on vertex;
  * @param[in] nodeVal value on nodes;
  */
-void dg_cell_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal){
-    cell->proj_vert2node(cell, vertVal, nodeVal);
+void dg_cell_proj_vert2node(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal){
+    cell->proj_vert2node(cell, Nfield, vertVal, nodeVal);
     return;
 }

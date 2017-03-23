@@ -45,7 +45,7 @@ void dg_cell_point_deri_orthog_func(int N, int ind, int Np, double *r, double *s
     return;
 }
 
-void dg_cell_point_proj(dg_cell *cell, double *vertVal, double *nodeVal){
+void dg_cell_point_proj(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal){
     nodeVal[0] = vertVal[0];
     return;
 }

@@ -151,15 +151,17 @@ static dg_phys* rotation_phys_init(dg_grid *grid){
     dg_mesh *mesh = dg_mesh_create(region);
     dg_edge *edge = dg_edge_create(mesh);
     dg_phys *phys = dg_phys_create(3, edge);
-    const int K = dg_grid_K(phys->grid);
-    const int Np = dg_cell_Np(phys->cell);
+    const int K = dg_grid_K(dg_phys_grid(phys));
+    const int Np = dg_cell_Np( dg_phys_cell(phys));
     const double sigma = 125*1e3/(33*33);
     const double w = 5*M_PI/6;
     const double xc = 0.0;
     const double yc = 0.6;
 
-    double **x = phys->region->x;
-    double **y = phys->region->y;
+    double **x = dg_region_x(dg_phys_region(phys));
+    double **y = dg_region_y(dg_phys_region(phys));
+
+    dg_real *f_Q = dg_phys_f_Q(phys);
 
     int k,n,sk = 0;
     for(k=0;k<K;++k){
@@ -167,9 +169,9 @@ static dg_phys* rotation_phys_init(dg_grid *grid){
             const double xt = x[k][n];
             const double yt = y[k][n];
             double t = -sigma * (( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ));
-            phys->f_Q[sk++] = (dg_real) exp(t); // c field
-            phys->f_Q[sk++] = (dg_real)(-w * yt); // flow rate at x-coordinate
-            phys->f_Q[sk++] = (dg_real)( w * xt); // flow rate at y-coordinate
+            f_Q[sk++] = (dg_real) exp(t); // c field
+            f_Q[sk++] = (dg_real)(-w * yt); // flow rate at x-coordinate
+            f_Q[sk++] = (dg_real)( w * xt); // flow rate at y-coordinate
         }
     }
     return phys;
@@ -181,8 +183,8 @@ static dg_phys* advection_phys_init(dg_grid *grid){
     dg_edge *edge = dg_edge_create(mesh);
     dg_phys *phys = dg_phys_create(3, edge);
 
-    const int K = dg_grid_K(phys->grid);
-    const int Np = dg_cell_Np(phys->cell);
+    const int K = dg_grid_K(dg_phys_grid(phys));
+    const int Np = dg_cell_Np(dg_phys_cell(phys));
     const double xc = -0.5;
     const double yc = -0.5;
     const double sigma = 125*1e3/(33*33);
@@ -190,8 +192,8 @@ static dg_phys* advection_phys_init(dg_grid *grid){
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
 
-    double **x = phys->region->x;
-    double **y = phys->region->y;
+    double **x = dg_region_x(dg_phys_region(phys));
+    double **y = dg_region_y(dg_phys_region(phys));
     // read flow field
     arg_section **sec_p = conv_read_input();
     /// 4. phys info
@@ -204,6 +206,7 @@ static dg_phys* advection_phys_init(dg_grid *grid){
         printf(HEADLINE " v: %lf\n", vt);
     }
     conv_arg_section_free(sec_p);
+    dg_real *f_Q = dg_phys_f_Q(phys);
 
     int k,n,sk = 0;
     for(k=0;k<K;++k){
@@ -211,9 +214,9 @@ static dg_phys* advection_phys_init(dg_grid *grid){
             const double xt = x[k][n];
             const double yt = y[k][n];
             double t = -( ( xt - xc )*( xt - xc ) + ( yt - yc )*( yt - yc ) )*sigma;
-            phys->f_Q[sk++] = (dg_real) exp(t); // c field
-            phys->f_Q[sk++] = (dg_real) ut; // flow rate at x-coordinate
-            phys->f_Q[sk++] = (dg_real) vt; // flow rate at y-coordinate
+            f_Q[sk++] = (dg_real) exp(t); // c field
+            f_Q[sk++] = (dg_real) ut; // flow rate at x-coordinate
+            f_Q[sk++] = (dg_real) vt; // flow rate at y-coordinate
         }
     }
     return phys;

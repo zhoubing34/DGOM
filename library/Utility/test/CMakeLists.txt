@@ -4,7 +4,8 @@ set(UTILITIES_TEST_SOURCE
         utility_test.c
         utility_test.h
         MatrixInverse_test.c
-        MatrixMultiply_test.c)
+        MatrixMultiply_test.c
+        nc_library_test.c)
 
 add_executable(utility_test ${UTILITIES_TEST_SOURCE})
 add_dependencies(utility_test utility)

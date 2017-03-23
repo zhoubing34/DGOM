@@ -7,7 +7,7 @@ set(PHYSDOMAIN_TEST_SRC
         #pf_strong_viscosity_LDG_flux2d_test.c
         #pf_cellMean_test.c
         #pf_limiter_test.c
-        #pf_openbc_test.c
+        dg_phys_obc_test.c
         )
 
 add_executable(physfield_test ${PHYSDOMAIN_TEST_SRC})

@@ -65,7 +65,7 @@ typedef struct dg_cell{
     dg_cell_face *face; ///< face info
     /* user defined precision */
     dg_real *f_Dr,*f_Ds,*f_Dt,*f_LIFT; ///< user specific version of Dr,Ds,Dt and LIFT
-    void (*proj_vert2node)(struct dg_cell *cell, double *vertVal, double *nodeVal);
+    void (*proj_vert2node)(struct dg_cell *cell, int Nfield, double *vertVal, double *nodeVal);
     ///< function to project vertex value to nodes
 } dg_cell;
 
@@ -79,7 +79,7 @@ typedef void (*Orthogonal_Func)(int N, int ind, int Np, double *r, double *s, do
 typedef void (*Derivative_Orthogonal_Func)(int N, int ind, int Np, double *r, double *s, double *t,
                                            double *dr, double *ds, double *dt);
 /** function pointer of projecting vertex to nodes */
-typedef void (*Proj_Func)(dg_cell *cell, double *vertVal, double *nodeVal);
+typedef void (*Proj_Func)(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal);
 
 /**
  * @brief function handles for creating dg_cell
@@ -97,7 +97,7 @@ dg_cell* dg_cell_creat(int N, dg_cell_type type);
 /** free dg_cell object */
 void dg_cell_free(dg_cell *);
 /** project the vertex value to interpolation nodes */
-void dg_cell_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal);
+void dg_cell_proj_vert2node(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal);
 
 /* basic info */
 #define dg_cell_celltype(cell) cell->info->type
@@ -128,5 +128,11 @@ void dg_cell_proj_vert2node(dg_cell *cell, double *vertVal, double *nodeVal);
 #define dg_cell_ws(cell) cell->face->ws
 #define dg_cell_Fmask(cell) cell->face->Fmask
 #define dg_cell_LIFT(cell) cell->face->LIFT
+
+/* cell properties */
+#define dg_cell_f_LIFT(cell) cell->f_LIFT
+#define dg_cell_f_Dr(cell) cell->f_Dr
+#define dg_cell_f_Ds(cell) cell->f_Ds
+#define dg_cell_f_Dt(cell) cell->f_Dt
 
 #endif //DGOM_STDCELL_H

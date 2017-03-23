@@ -28,28 +28,28 @@ void conv_setoutput(){
     const int nprocs = dg_grid_nprocs(phys->grid);
 
     /* define dimensions */
-    nc_dim *ne = nc_dim_create("ne", K);
-    nc_dim *np = nc_dim_create("np", Np);
-    nc_dim *t  = nc_dim_create("t", 0);
+    NC_Dim *ne = nc_dim_create("ne", K);
+    NC_Dim *np = nc_dim_create("np", Np);
+    NC_Dim *t  = nc_dim_create("t", 0);
 
     const int ndim = 3;
     const int nvar = 4;
-    nc_dim *dimarray[ndim];
-    nc_var *vararray[nvar];
+    NC_Dim *dimarray[ndim];
+    NC_Var *vararray[nvar];
 
     /* define variables: x,y,time and h */
     dimarray[0] = ne;
     dimarray[1] = np; /* the inner loop dimension comes the last */
-    nc_var *x = nc_var_create("x", 2, dimarray, NC_DOUBLE);
-    nc_var *y = nc_var_create("y", 2, dimarray, NC_DOUBLE);
+    NC_Var *x = nc_var_create("x", 2, dimarray, NC_DOUBLE);
+    NC_Var *y = nc_var_create("y", 2, dimarray, NC_DOUBLE);
 
     dimarray[0] = t;
-    nc_var *time = nc_var_create("time", 1, dimarray, NC_DOUBLE);
+    NC_Var *time = nc_var_create("time", 1, dimarray, NC_DOUBLE);
 
     dimarray[0] = t;
     dimarray[1] = ne;
     dimarray[2] = np; /* inner loop */
-    nc_var *h = nc_var_create("var", 3, dimarray, NC_FLOAT);
+    NC_Var *h = nc_var_create("var", 3, dimarray, NC_FLOAT);
 
     /* define files */
     dimarray[0] = np;
@@ -60,10 +60,10 @@ void conv_setoutput(){
     vararray[1] = y;
     vararray[2] = time;
     vararray[3] = h;
-    nc_file *file = nc_file_create("conv2d.", procid, nprocs, ndim, dimarray, nvar, vararray);
+    NC_File *file = nc_file_create("conv2d.", procid, nprocs, ndim, dimarray, nvar, vararray);
 
     /* create files */
-    nc_file_init(file);
+    nc_file_define(file);
 
     /* set coordinate */
     nc_error( ncmpi_put_var_double_all(file->id, file->var_vec_p[0]->id, phys->region->x[0]) );
@@ -78,7 +78,7 @@ void conv_setoutput(){
 void conv_putvar(dg_phys *phys, int timestep, double time){
 
     extern Conv_Solver solver;
-    nc_file *file = solver.outfile;
+    NC_File *file = solver.outfile;
 
     const int K = dg_grid_K(phys->grid);
     const int Np = dg_cell_Np(phys->cell);
@@ -87,7 +87,7 @@ void conv_putvar(dg_phys *phys, int timestep, double time){
     MPI_Offset start_v[3], count_v[3];
     MPI_Offset start_t, count_t;
 
-    nc_var *ncvar = file->var_vec_p[2];
+    NC_Var *ncvar = file->var_vec_p[2];
     /* put time */
     start_t = timestep; // start index
     count_t = 1;       // length

@@ -165,7 +165,10 @@ Conv_Case_Type conv_read_type(){
     sscanf(sec->arg_vec_p[0], "%d\n", &(case_type));
     return case_type;
 }
-
+/**
+ * @brief read parameters from input file.
+ * @return
+ */
 arg_section** conv_read_input(){
     arg_section **sec_p = conv_arg_section_create();
     // read section from file

@@ -28,7 +28,7 @@ LIBRARY ROUTINES FOR ORTHOGONAL POLYNOMIAL CALCULUS AND INTERPOLATION
 
   Abbreviations
   - z    -   Set of collocation/quadrature points
-  - w    -   Set of quadrature weights
+  - weight    -   Set of quadrature weights
   - D    -   Derivative matrix
   - h    -   Lagrange Interpolant
   - I    -   Interpolation matrix

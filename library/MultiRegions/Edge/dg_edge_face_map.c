@@ -9,7 +9,7 @@ static int dg_mesh_face_cmp(const void *obj1, const void *obj2);
 typedef struct face2d{
     int k1, k2; ///< cell id
     int f1, f2; ///< face id
-    dg_face_type ftype; ///< face type
+    dg_grid_face_type ftype; ///< face type
     int tmp; ///< indicator for cell paris
 }face2d;
 
@@ -40,7 +40,7 @@ void dg_edge_face_map2d(dg_edge *edge){
             my_face[sk].k2 = EToE[k][f];
             my_face[sk].f1 = f;
             my_face[sk].f2 = EToF[k][f];
-            my_face[sk].ftype = (dg_face_type)EToBS[k][f];
+            my_face[sk].ftype = (dg_grid_face_type)EToBS[k][f];
             my_face[sk].tmp = min(n1, n2)*Nvert + max(n1, n2);
 //            if(!edge->procid) printf("face[%d]: k1=%d, k2=%d, f1=%d, f2=%d, tmp=%d\n",
 //                                     sk, my_face[sk].k1, my_face[sk].k2,

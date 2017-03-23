@@ -1,8 +1,0 @@
-//
-// Created by li12242 on 16/12/12.
-//
-
-#ifndef DGOM_UNIFORMMESH_TEST_H
-#define DGOM_UNIFORMMESH_TEST_H
-
-#endif //DGOM_UNIFORMMESH_TEST_H
