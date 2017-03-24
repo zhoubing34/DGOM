@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "Utility/utility.h"
 
 #define HEADLEN 20  // the length of title section in *.ele and *.edge files
