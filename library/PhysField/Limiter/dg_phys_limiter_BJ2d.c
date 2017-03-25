@@ -2,113 +2,103 @@
 // Created by li12242 on 17/2/28.
 //
 
-#include "pf_limit_BJ2d.h"
+#include "dg_phys_limiter_BJ2d.h"
 
 #define EXCEPTION(u, u1, u2) ( ((u-u1)>EPS)& ((u-u2)>EPS) )||( ((u1-u)>EPS)&((u2-u)>EPS))
 
+#define DEBUG 1
+#if DEBUG
+#include "Utility/unit_test.h"
+#endif
+
 /**
  * @brief integral averaged values of each faces
- * @param[in] phys physical field structure.
+ * @param[in] phys_info physical field structure.
  * @param[in,out] f_mean integral averaged values of each faces
  */
-static void pf_face_mean(dg_phys_info *phys, dg_real *f_mean){
+static void dg_phys_local_face_mean(dg_phys_info *phys_info, dg_real *f_mean){
 
-    dg_cell *cell = phys->cell;
-    const int Nfield = phys->Nfield;
+    dg_cell *cell = phys_info->cell;
+    dg_region *region = phys_info->region;
+    const int Nfield = phys_info->Nfield;
     const int Nfaces = dg_cell_Nfaces(cell);
     const int Np = dg_cell_Np(cell);
-    const int K = dg_grid_K(phys->grid);
+    const int K = dg_grid_K(phys_info->grid);
 
-    register int k,f,n,m,fld;
+    dg_real *f_Q = phys_info->f_Q;
+
+    register int k,f,fld,sk=0;
     for(k=0;k<K;k++){
-        dg_real *f_Q = phys->f_Q + k*Np*Nfield;
+        region->face_integral(region, Nfield, k, f_Q+k*Np*Nfield, f_mean+k*Nfaces*Nfield);
         for(f=0;f<Nfaces;f++){
-            int sk = k*Nfaces*Nfield + f*Nfield;
-            /* initialization */
-            for(fld=0;fld<Nfield;fld++){
-                f_mean[sk+fld] = 0;
-            }
-            int *fmask = dg_cell_Fmask(cell)[f];
-            const int Nfp = dg_cell_Nfp(cell)[f];
-            double *ws = dg_cell_ws(cell)[f];
-            for(n=0;n<Nfp;n++){
-                m = fmask[n]*Nfield;
-                double w = ws[n]*0.5;
-                for(fld=0;fld<Nfield;fld++){
-                    f_mean[sk+fld] += f_Q[m+fld]*w;
-                }
-            }
+            double ds = region->face_size[k][f];
+            for(fld=0;fld<Nfield;fld++)
+                f_mean[sk++] /= ds;
         }
     }
     return;
 }
 
-static void pf_weiface_mean(physField *phys, dg_real *f_mean){
-    const int Nfield = phys->Nfield;
-    const int Nfaces = phys->cell->Nfaces;
-    const int K = phys->grid->K;
-    const int Nfp = phys->cell->Nfp;
-    const int procid = phys->mesh->procid;
-    const int nprocs = phys->mesh->nprocs;
+static void dg_phys_weight_face_mean(dg_phys_info *phys_info, dg_real *f_mean){
 
-    dg_region *region = phys->region;
-    dg_mesh *mesh = phys->mesh;
+    dg_region *region = phys_info->region;
+    dg_mesh *mesh = phys_info->mesh;
+    dg_grid *grid = phys_info->grid;
+
+    const int Nfield = phys_info->Nfield;
+    const int Nfaces = dg_cell_Nfaces(phys_info->cell);
+    const int K = dg_grid_K(grid);
+    const int procid = dg_grid_procid(grid);
+    const int nprocs = dg_grid_nprocs(grid);
+
     register int k,f,n,fld;
+    /* calculate the center coordinate */
     dg_real *xc = vector_real_create(K);
     dg_real *yc = vector_real_create(K);
     for(k=0;k<K;k++){
         const double Area = 1.0/region->size[k];
-        xc[k] = Area * mr_reg_integral(region, k, region->x[k]);
-        yc[k] = Area * mr_reg_integral(region, k, region->y[k]);
+        region->vol_integral(region, 1, k, region->x[k], xc+k);
+        region->vol_integral(region, 1, k, region->y[k], yc+k);
+        xc[k] *= Area;
+        yc[k] *= Area;
     }
-    const int parallCellNum = phys->mesh->Nparf;
-    dg_real *xc_out = vector_real_create(parallCellNum);
-    dg_real *xc_in = vector_real_create(parallCellNum);
-    dg_real *yc_out = vector_real_create(parallCellNum);
-    dg_real *yc_in = vector_real_create(parallCellNum);
+    const int Nfetchfaces = dg_mesh_NfetchFace(mesh);
+    dg_real *xc_in = vector_real_create(Nfetchfaces);
+    dg_real *yc_in = vector_real_create(Nfetchfaces);
 
-    for(n=0;n<parallCellNum;++n){
-        int sk = mesh->Parcellid[n];
-        xc_out[n] = xc[sk];
-        yc_out[n] = yc[sk];
-    }
     MPI_Request xc_out_requests[nprocs];
     MPI_Request xc_in_requests[nprocs];
     MPI_Request yc_out_requests[nprocs];
     MPI_Request yc_in_requests[nprocs];
-    int Nmess;
-    pf_fetchBuffer(procid, nprocs, mesh->Parf, xc_out, xc_in,
-                   xc_out_requests, xc_in_requests, &Nmess);
-    pf_fetchBuffer(procid, nprocs, mesh->Parf, yc_out, yc_in,
-                   yc_out_requests, yc_in_requests, &Nmess);
 
-    dg_real *c_Q = phys->c_Q;
-    int **EToE = mesh->EToE;
-    int **EToP = mesh->EToP;
-    double **x = phys->region->x;
-    double **y = phys->region->y;
+    int Nmess;
+    Nmess = mesh->fetch_cell_buffer(mesh, 1, xc, xc_in, xc_out_requests, xc_in_requests);
+    Nmess = mesh->fetch_cell_buffer(mesh, 1, yc, yc_in, yc_out_requests, yc_in_requests);
+
+    dg_real *c_Q = phys_info->c_Q; ///< cell mean value;
+    int **EToE = dg_grid_EToE(grid);
+    int **EToP = dg_grid_EToP(grid);
+    double **x = region->x;
+    double **y = region->y;
     for(k=0;k<K;k++){
+        double xf[Nfaces], yf[Nfaces];
+        region->face_integral(region, 1, k, x[k], xf);
+        region->face_integral(region, 1, k, y[k], yf);
         for(f=0;f<Nfaces;f++){
-            int sk = k*Nfaces*Nfield + f*Nfield;
-            /* initialization */
-            for(fld=0;fld<Nfield;fld++){
-                f_mean[sk+fld] = 0;
-            }
 
             int e = EToE[k][f];
             int p = EToP[k][f];
             if(p!=procid) { continue; }
+            double ds = region->face_size[k][f];
+            xf[f] /= ds;
+            yf[f] /= ds;
 
-            int *fmask = phys->cell->Fmask[f];
-            int v1 = fmask[0];
-            int v2 = fmask[Nfp-1];
-            double xf = (x[k][v1] + x[k][v2])*0.5;
-            double yf = (y[k][v1] + y[k][v2])*0.5;
-
-            double d1 = (xf - xc[k])*(xf - xc[k]) + (yf - yc[k])*(yf - yc[k]);
-            double d2 = (xf - xc[e])*(xf - xc[e]) + (yf - yc[e])*(yf - yc[e]);
+            double d1 = (xf[f] - xc[k])*(xf[f] - xc[k]) + (yf[f] - yc[k])*(yf[f] - yc[k]);
+            double d2 = (xf[f] - xc[e])*(xf[f] - xc[e]) + (yf[f] - yc[e])*(yf[f] - yc[e]);
             dg_real w1 = d2/(d1 + d2);
             dg_real w2 = d1/(d1 + d2);
+
+            int sk = k*Nfaces*Nfield + f*Nfield;
             for(fld=0;fld<Nfield;fld++)
                 f_mean[sk+fld] = (c_Q[k*Nfield+fld]*w1 + c_Q[e*Nfield+fld]*w2);
         }
@@ -119,32 +109,32 @@ static void pf_weiface_mean(physField *phys, dg_real *f_mean){
     MPI_Waitall(Nmess, yc_in_requests, instatus);
     MPI_Waitall(Nmess, yc_out_requests, instatus);
 
-    for(n=0;n<parallCellNum;n++){
-        k = mesh->Pcid_recv[n];
-        f = mesh->Parfaceid[n];
+    for(n=0;n<Nfetchfaces;n++){
+        k = mesh->CBFToK[n];
+        f = mesh->CBFToF[n];
 
+        double ds = region->face_size[k][f];
         dg_real xc_next = xc_in[n];
         dg_real yc_next = yc_in[n];
-        int *fmask = phys->cell->Fmask[f];
-        int v1 = fmask[0];
-        int v2 = fmask[Nfp-1];
-        double xf = (x[k][v1] + x[k][v2])*0.5;
-        double yf = (y[k][v1] + y[k][v2])*0.5;
 
-        double d1 = (xf - xc[k])*(xf - xc[k]) + (yf - yc[k])*(yf - yc[k]);
-        double d2 = (xf - xc_next)*(xf - xc_next) + (yf - yc_next)*(yf - yc_next);
+        double xf[Nfaces], yf[Nfaces], zf[Nfaces];
+        region->face_integral(region, 1, k, x[k], xf);
+        region->face_integral(region, 1, k, y[k], yf);
+        xf[f] /= ds;
+        yf[f] /= ds;
+
+        double d1 = (xf[f] - xc[k])*(xf[f] - xc[k]) + (yf[f] - yc[k])*(yf[f] - yc[k]);
+        double d2 = (xf[f] - xc_next)*(xf[f] - xc_next) + (yf[f] - yc_next)*(yf[f] - yc_next);
         dg_real w1 = d2/(d1 + d2);
         dg_real w2 = d1/(d1 + d2);
 
         int sk = k*Nfaces*Nfield + f*Nfield;
         for(fld=0;fld<Nfield;fld++){
-            f_mean[sk+fld] = (c_Q[k*Nfield+fld]*w1 + phys->c_inQ[n*Nfield+fld]*w2);
+            f_mean[sk+fld] = (c_Q[k*Nfield+fld]*w1 + phys_info->c_recvQ[n*Nfield+fld]*w2);
         }
     }
 
-    vector_real_free(xc_out);
     vector_real_free(xc_in);
-    vector_real_free(yc_out);
     vector_real_free(yc_in);
 
     vector_real_free(xc);
@@ -158,22 +148,18 @@ static void pf_weiface_mean(physField *phys, dg_real *f_mean){
  * @param[out] px
  * @param[out] py
  */
-static void phys_gradient_Green(dg_phys_info *phys, dg_real *px, dg_real *py){
-    dg_cell *cell = phys->cell;
+static void dg_phys_gradient(dg_phys_info *phys, dg_real *px, dg_real *py){
+    dg_region *region = phys->region;
     const int K = dg_grid_K(phys->grid);
     const int Nfield = phys->Nfield;
-    const int Nfaces = dg_cell_Nfaces(cell);
+    const int Nfaces = dg_cell_Nfaces(phys->cell);
 
     register int k,f,fld,sk;
-    int **fmask = dg_cell_Fmask(cell);
-
-    dg_real f_mean[K*Nfaces*Nfield];
-    pf_face_mean(phys, f_mean);
+    dg_real *f_mean = vector_real_create(K*Nfaces*Nfield);
+    dg_phys_local_face_mean(phys, f_mean);
 
     for(k=0;k<K;k++){
-        double A = 1.0/phys->region->size[k];
-        double *x = phys->region->x[k];
-        double *y = phys->region->y[k];
+        double A = 1.0/dg_region_size(region)[k];
 
         for(fld=0;fld<Nfield;fld++){
             sk = k*Nfield+fld;
@@ -182,26 +168,19 @@ static void phys_gradient_Green(dg_phys_info *phys, dg_real *px, dg_real *py){
         }
 
         for(f=0;f<Nfaces;f++){
-            const int Nfp = dg_cell_Nfp(cell)[f];
-            int v1 = fmask[f][0];
-            int v2 = fmask[f][Nfp-1];
-            double x1 = x[v1];
-            double x2 = x[v2];
-            double y1 = y[v1];
-            double y2 = y[v2];
-
-            double dx =  (y2-y1);
-            double dy = -(x2-x1);
+            const double ds = dg_region_face_size(region)[k][f];
+            const double nx = dg_region_nx(region)[k][f];
+            const double ny = dg_region_ny(region)[k][f];
 
             for(fld=0;fld<Nfield;fld++){
                 sk = k*Nfield+fld;
                 int sf = k*Nfaces*Nfield + f*Nfield;
-                px[sk] += f_mean[sf+fld]*dx*A;
-                py[sk] += f_mean[sf+fld]*dy*A;
+                px[sk] += f_mean[sf+fld]*nx*ds*A;
+                py[sk] += f_mean[sf+fld]*ny*ds*A;
             }
         }
     }
-
+    vector_real_free(f_mean);
     return;
 }
 
@@ -211,7 +190,7 @@ static void phys_gradient_Green(dg_phys_info *phys, dg_real *px, dg_real *py){
  * @param cell_max
  * @param cell_min
  */
-static void pf_adjacent_cellinfo(dg_phys_info *phys, dg_real *cell_max, dg_real *cell_min){
+static void dg_phys_adjacent_cellinfo(dg_phys_info *phys, dg_real *cell_max, dg_real *cell_min){
     dg_grid *grid = phys->grid;
     const int K = dg_grid_K(grid);
     const int Nfield = phys->Nfield;
@@ -281,27 +260,27 @@ static void pf_adjacent_cellinfo(dg_phys_info *phys, dg_real *cell_max, dg_real 
 
 /**
  * @brief obtain Barth-Jeperson slope limiter.
- * @param phys
+ * @param phys_info
  * @param cell_max
  * @param cell_min
  * @param beta
  * @param psi
  */
-static void pf_BJ_limiter(dg_phys_info *phys, dg_real *cell_max, dg_real *cell_min,
-                          double beta, dg_real *psi){
+static void dg_phys_BJ_limiter(dg_phys_info *phys_info, dg_real *cell_max, dg_real *cell_min,
+                               double beta, dg_real *psi){
 
-    const int K = phys->grid->K;
-    const int Nfield = phys->Nfield;
-    const int Np = phys->cell->Np;
+    const int K = phys_info->grid->K;
+    const int Nfield = phys_info->Nfield;
+    const int Np = dg_cell_Np(phys_info->cell);
 
     register int k,fld,n;
     for(k=0;k<K;k++){
-        dg_real *f_Q = phys->f_Q + k*Np*Nfield; // variable of k-th cell
+        dg_real *f_Q = phys_info->f_Q + k*Np*Nfield; // variable of k-th cell
         for(fld=0;fld<Nfield;fld++){
             int sk = k*Nfield+fld;
             dg_real qmax = cell_max[sk];
             dg_real qmin = cell_min[sk];
-            dg_real qmean = phys->c_Q[sk];
+            dg_real qmean = phys_info->c_Q[sk];
             psi[sk] = 1.0;
             for(n=0;n<Np;n++){
                 dg_real qval = f_Q[n*Nfield+fld];
@@ -322,27 +301,29 @@ static void pf_BJ_limiter(dg_phys_info *phys, dg_real *cell_max, dg_real *cell_m
 
 /**
  * @brief
- * trouble cell indicator
+ * trouble cell indicator.
  * @details
  * The trouble cell is determined with the edge value exceeding the average values
  * of local and adjacent elements.
- * @param phys
- * @param tind trouble cell indicator
+ * @param phys pointer to dg_phys structure;
+ * @param tind indicator for trouble cell;
  */
-static void pf_edge_indicator(physField *phys, int *tind){
-    const int K = phys->grid->K;
+static void dg_phys_edge_indicator(dg_phys_info *phys, int *tind){
+
+    dg_grid *grid = phys->grid;
+    const int K = dg_grid_K(grid);
     const int Nfield = phys->Nfield;
-    const int Nfaces = phys->cell->Nfaces;
-    const int procid = phys->grid->procid;
+    const int Nfaces = dg_cell_Nfaces(phys->cell);
+    const int procid = dg_grid_procid(grid);
 
     dg_real f_mean[K*Nfaces*Nfield];
-    pf_face_mean(phys, f_mean);
+    dg_phys_local_face_mean(phys, f_mean);
 
     register int k,n,f,fld;
     for(k=0;k<K;k++){
         dg_real *c_mean = phys->c_Q + k*Nfield; // mean value of k-th cell
-        int **EToE = phys->mesh->EToE;
-        int **EToP = phys->mesh->EToP;
+        int **EToE = dg_grid_EToE(grid);
+        int **EToP = dg_grid_EToP(grid);
 
         for(f=0;f<Nfaces;f++){
             int e = EToE[k][f];
@@ -362,12 +343,13 @@ static void pf_edge_indicator(physField *phys, int *tind){
 
     /* parallel cell loop */
     dg_mesh *mesh = phys->mesh;
-    for(n=0;n<mesh->Nparf;n++){
-        k = mesh->Pcid_recv[n];
-        f = mesh->Parfaceid[n];
+    const int Nfetchfaces = dg_mesh_NfetchFace(mesh);
+    for(n=0;n<Nfetchfaces;n++){
+        k = mesh->CBFToK[n];
+        f = mesh->CBFToF[n];
         for(fld=0;fld<Nfield;fld++){
             dg_real c_mean = phys->c_Q[k*Nfield+fld];
-            dg_real c_next = phys->c_inQ[n*Nfield+fld];
+            dg_real c_next = phys->c_recvQ[n*Nfield+fld];
 
             if( EXCEPTION(f_mean[k*Nfaces*Nfield+f*Nfield+fld], c_next, c_mean) ) {
                 tind[k*Nfield + fld] = 1;
@@ -381,11 +363,11 @@ static void pf_edge_indicator(physField *phys, int *tind){
  * @brief
  * Slope limiter from Anastasiou and Chan (1997) for two dimensional problems.
  * @details
- * The slope limiter will act on each physical variables and reconstruct the
- * scalar distribution.
- * @param[in] phys
+ * The slope limiter will act on each physical variables and reconstruct the scalar distribution.
+ * @param[in,out] phys pointer to dg_phys structure;
+ * @param[in] beta
  */
-void pf_limit_BJ2d(dg_phys_info *phys, double beta){
+void dg_phys_limiter_BJ2d(dg_phys_info *phys, double beta){
 
     const int K = dg_grid_K(phys->grid);
     const int Nfield = phys->Nfield;
@@ -393,7 +375,7 @@ void pf_limit_BJ2d(dg_phys_info *phys, double beta){
     register int k,n,fld;
 
 #if DEBUG
-    FILE *fp = CreateLog("phys_slloc2d", phys->mesh->procid, phys->mesh->nprocs);
+    FILE *fp = create_log("dg_phys_limiter_BJ2d", phys->mesh->procid, phys->mesh->nprocs);
 #endif
 
     /* 1. calculate the cell average value */
@@ -401,26 +383,42 @@ void pf_limit_BJ2d(dg_phys_info *phys, double beta){
 
     /* 2. fetch cell info with other processes */
     dg_real cell_max[K*Nfield], cell_min[K*Nfield];
-    pf_adjacent_cellinfo(phys, cell_max, cell_min);
-
+    dg_phys_adjacent_cellinfo(phys, cell_max, cell_min);
+#if DEBUG
+    print_double_vector2file(fp, "cell_max", cell_max, K*Nfield);
+    print_double_vector2file(fp, "cell_min", cell_min, K*Nfield);
+#endif
     /* 3. calculate the unlimited gradient */
     dg_real px[K*Nfield], py[K*Nfield];
-    phys_gradient_Green(phys, px, py);
+    dg_phys_gradient(phys, px, py);
+
+#if DEBUG
+    print_double_vector2file(fp, "px", px, K*Nfield);
+    print_double_vector2file(fp, "py", py, K*Nfield);
+#endif
 
     /* 4. calculate the limited results */
     dg_real psi[K*Nfield];
-    pf_BJ_limiter(phys, cell_max, cell_min, beta, psi);
+    dg_phys_BJ_limiter(phys, cell_max, cell_min, beta, psi);
 
     /* 5. trouble cell indicator */
     int *tind = vector_int_create(K*Nfield);
-    pf_edge_indicator(phys, tind);
+    dg_phys_edge_indicator(phys, tind);
+
+#if DEBUG
+    print_int_vector2file(fp, "tind", tind, K*Nfield);
+#endif
 
     /* 6. reconstruction */
     dg_region *region = phys->region;
+
     for(k=0;k<K;k++){
-        double A = 1.0/phys->region->size[k];
-        double xc = A * mr_reg_integral(region, k, region->x[k]);
-        double yc = A * mr_reg_integral(region, k, region->y[k]);
+        double xc, yc;
+        const double Area = 1.0/region->size[k];
+        region->vol_integral(region, 1, k, region->x[k], &xc);
+        region->vol_integral(region, 1, k, region->y[k], &yc);
+        xc *= Area;
+        yc *= Area;
 
         dg_real *f_Q = phys->f_Q + k*Np*Nfield; // variable of k-th cell
         for(fld=0;fld<Nfield;fld++){
@@ -433,8 +431,8 @@ void pf_limit_BJ2d(dg_phys_info *phys, double beta){
             /* reconstruction of each element */
             dg_real qmean = phys->c_Q[sk];
             for(n=0;n<Np;n++){
-                dg_real dx = (dg_real)(region->x[k][n] - xc);
-                dg_real dy = (dg_real)(region->y[k][n] - yc);
+                dg_real dx = (dg_real)(dg_region_x(region)[k][n] - xc);
+                dg_real dy = (dg_real)(dg_region_y(region)[k][n] - yc);
 
                 f_Q[n*Nfield+fld] = qmean + dx*qx + dy*qy;
             }

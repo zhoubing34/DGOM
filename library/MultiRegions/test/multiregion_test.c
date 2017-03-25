@@ -14,7 +14,7 @@ dg_grid *user_set_tri_grid();
 
 /** global variable */
 int Mx = 4;
-int My = 4;
+int My = 2;
 int N  = 2;
 double xmin = -1, xmax = 1;
 double ymin = -1, ymax = 1;

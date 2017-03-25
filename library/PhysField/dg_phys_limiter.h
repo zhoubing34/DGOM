@@ -15,7 +15,10 @@ typedef enum{
 /** structure of limiter */
 typedef struct dg_phys_limiter{
     Limiter_Type type;
+    void (*set_limiter)(struct dg_phys_limiter *limiter, Limiter_Type type);
     void (*limit)(dg_phys_info *info, double parameter);
 }dg_phys_limiter;
+
+dg_phys_limiter* dg_phys_limiter_create();
 
 #endif //DGOM_DG_PHYS_LIMITER_H

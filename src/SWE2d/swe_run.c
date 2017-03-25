@@ -2,7 +2,7 @@
 #include "swe_driver2d.h"
 #include "PhysField/pf_cellMean.h"
 #include "swe_output.h"
-#include "PhysField/Limiter/pf_limit_BJ2d.h"
+#include "PhysField/Limiter/dg_phys_limiter_BJ2d.h"
 #include "swe_rhs.h"
 #include "PhysField/dg_phys_obc.h"
 

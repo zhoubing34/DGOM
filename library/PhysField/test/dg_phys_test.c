@@ -5,9 +5,10 @@
 #include "dg_phys_strong_vol_opt_test.h"
 #include "dg_phys_strong_surf_opt_test.h"
 #include "dg_phys_obc_test.h"
+#include "dg_phys_limiter_test.h"
 
 int Mx = 4;
-int My = 2;
+int My = 4;
 int N = 3;
 int Nfield = 2;
 double xmin = -1, xmax = 1;
@@ -18,12 +19,10 @@ dg_phys *uniform_tri_physfield();
 dg_phys *uniform_quad_physfield();
 dg_phys *rectangle_tri_physfield();
 
-#define Nphys 3
+#define Nphys 1
 typedef dg_phys* (*phys_func)();
 static const phys_func phys_creator[Nphys] = {
-        uniform_tri_physfield,
         uniform_quad_physfield,
-        rectangle_tri_physfield,
 };
 
 /**
@@ -82,12 +81,13 @@ void phys_free(dg_phys *phys){
 }
 
 /** test functions */
-#define Ntest 3
+#define Ntest 4
 typedef int (*test_func)(dg_phys *, int verbose);
 static const test_func phys_test_func[Ntest] = {
         dg_phys_strong_vol_opt2d_test,
         dg_phys_strong_surf_opt2d_test,
         dg_phys_obc_test,
+        dg_phys_limiter_test,
 };
 
 /**

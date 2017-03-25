@@ -6,6 +6,6 @@
 #define DGOM_PHYS_LIMITER_TEST_H
 
 #include "dg_phys_test.h"
-int phys_limiter_test(dg_phys *phys, int verbose);
+int dg_phys_limiter_test(dg_phys *phys, int verbose);
 
 #endif //DGOM_PHYS_LIMITER_TEST_H

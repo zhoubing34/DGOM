@@ -5,12 +5,12 @@
 #define DEBUG 0
 
 static void dg_region_node(dg_region *region);
-static void dg_region_volumeScale2d(dg_region *region);
-static void dg_region_volumeScale3d(dg_region *region);
-static void dg_region_vol_integral(dg_region *region, int Nfield, int k,
-                                   dg_real *f_Q, dg_real *c_Q);
-static void dg_region_face_integral(dg_region *region, int Nfield, int k,
-                                    dg_real *f_Q, dg_real *face_Q);
+static void dg_region_scale2d(dg_region *region);
+static void dg_region_scale3d(dg_region *region);
+static void dg_region_vol_integral(dg_region *region, int Nfield, int k, dg_real *f_Q,
+                                   dg_real *c_Q);
+static void dg_region_face_integral(dg_region *region, int Nfield, int k, dg_real *f_Q,
+                                    dg_real *face_Q);
 /**
  * @brief functions of creating structure dg_region
  */
@@ -18,21 +18,21 @@ typedef struct dg_region_creator{
     void (*set_nood)(dg_region *reg);
     void (*set_volumInfo)(dg_region *reg);
     void (*set_surfInfo)(dg_region *reg);
-    void (*set_volumScal)(dg_region *reg);
+    void (*set_scale)(dg_region *reg);
 }dg_region_creator;
 
 static const dg_region_creator region2d_creator={
         dg_region_node,
         dg_reg_volumInfo2d,
         dg_reg_surfInfo2d,
-        dg_region_volumeScale2d,
+        dg_region_scale2d,
 };
 
 static const dg_region_creator region3d_creator={
         dg_region_node,
         dg_reg_volumInfo3d,
         dg_reg_surfInfo3d,
-        dg_region_volumeScale3d,
+        dg_region_scale3d,
 };
 
 dg_region* dg_region_create(dg_grid *grid){
@@ -60,7 +60,7 @@ dg_region* dg_region_create(dg_grid *grid){
     creator->set_nood(region);
     creator->set_volumInfo(region);
     creator->set_surfInfo(region);
-    creator->set_volumScal(region);
+    creator->set_scale(region);
 
     return region;
 }
@@ -122,12 +122,14 @@ static void dg_region_node(dg_region *region){
     return;
 }
 
-static void dg_region_volumeScale2d(dg_region *region){
+static void dg_region_scale2d(dg_region *region){
     const int Np = dg_cell_Np(region->cell);
     const int K = dg_grid_K(region->grid);
+    const int Nfaces = dg_cell_Nfaces(region->cell);
 
     region->size = vector_double_create(K); // volume or area
     region->len = vector_double_create(K); // length of element
+    region->face_size = matrix_double_create(K, Nfaces);
     int k,i;
     /* initialize ones */
     dg_real ones[Np];
@@ -139,11 +141,12 @@ static void dg_region_volumeScale2d(dg_region *region){
         region->vol_integral(region, 1, k, ones, &area);
         region->size[k] = area;
         region->len[k] = sqrt(area/M_PI);
+        region->face_integral(region, 1, k, ones, region->face_size[k]);
     }
     return;
 }
 
-static void dg_region_volumeScale3d(dg_region *region){
+static void dg_region_scale3d(dg_region *region){
     const int Np = dg_cell_Np(region->cell);
     const int K = dg_grid_K(region->grid);
 
@@ -220,10 +223,6 @@ static void dg_region_face_integral(dg_region *region, int Nfield, int k,
             const double ws = dg_cell_ws(cell)[f][n];
             for(fld=0;fld<Nfield;fld++){
                 face_Q[f*Nfield + fld] += sJ*ws*f_Q[fmask[n]*Nfield+fld];
-//                if(!region->procid) printf("k=%d, f=%d, n=%d, fld=%d, sJ=%f, ws=%f, "
-//                                                   "f_Q=%f, face_Q=%f\n",
-//                                           k, f, n, fld, sJ, ws, f_Q[fmask[n]*Nfield+fld],
-//                                           face_Q[f*Nfield + fld]);
             }
         }
     }

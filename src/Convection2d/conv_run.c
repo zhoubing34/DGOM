@@ -41,7 +41,7 @@ void conv_run(){
             const dg_real fb = (dg_real)rk4b[intrk-1];
 
             conv_rhs(phys, fa, fb, fdt);
-            //pf_limit_BJ2d(phys, 1.0);
+            phys->limit(phys, 1.0);
         }
 
         printf("processing: %f%%\r", time/ftime);

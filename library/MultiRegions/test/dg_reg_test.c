@@ -76,11 +76,13 @@ int dg_region_face_factor_test(dg_region *reg, int verbose){
  */
 int dg_region_scale_test(dg_region *reg, int verbose){
     int fail = 0;
-    const int K = reg->grid->K;
+    const int K = dg_grid_K(reg->grid);
+    const int Nfaces = dg_cell_Nfaces(reg->cell);
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, reg->procid, reg->nprocs);
         print_double_vector2file(fp, "region->len", reg->len, K);
         print_double_vector2file(fp, "region->size", reg->size, K);
+        print_double_matrix2file(fp, "region->face_size", reg->face_size, K, Nfaces);
         fclose(fp);
     }
     const int procid = reg->procid;

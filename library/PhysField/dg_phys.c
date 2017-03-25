@@ -8,13 +8,13 @@
 
 #include "dg_phys.h"
 
-static int dg_phys_fetch_cell_buffer(dg_phys *phys, MPI_Request *send_requests,
-                                     MPI_Request *recv_requests);
-static int dg_phys_fetch_node_buffer(dg_phys *phys, MPI_Request *send_requests,
-                                     MPI_Request *recv_requests);
+static int dg_phys_fetch_cell_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
+static int dg_phys_fetch_node_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
 void dg_phys_obc_add(dg_phys *phys, char *filename);
 void dg_phys_obc_update(dg_phys *phys, double elapseTime);
 static void dg_phys_init_file(dg_phys *phys, char *casename);
+static void dg_phys_set_limiter(dg_phys *phys, Limiter_Type type);
+static void dg_phys_limit(dg_phys *phys, double parameter);
 
 #define DEBUG 0
 
@@ -30,12 +30,15 @@ dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
     dg_phys *phys = (dg_phys *) calloc(1, sizeof(dg_phys));
     phys->info = dg_phys_info_create(Nfields, edge);
     phys->obc = dg_phys_obc_create(phys->info);
+    phys->limiter = dg_phys_limiter_create();
 
     phys->init_file = dg_phys_init_file;
     phys->fetch_cell_buffer = dg_phys_fetch_cell_buffer;
     phys->fetch_node_buffer = dg_phys_fetch_node_buffer;
     phys->obc_add = dg_phys_obc_add;
     phys->obc_update = dg_phys_obc_update;
+    phys->set_limiter = dg_phys_set_limiter;
+    phys->limit = dg_phys_limit;
     return phys;
 }
 /**
@@ -46,6 +49,16 @@ void dg_phys_free(dg_phys *phys){
     dg_phys_info_free(phys->info);
     dg_phys_obc_free(phys->obc);
     free(phys);
+    return;
+}
+
+static void dg_phys_set_limiter(dg_phys *phys, Limiter_Type type){
+    phys->limiter->set_limiter(phys->limiter, type);
+    return;
+}
+
+static void dg_phys_limit(dg_phys *phys, double parameter){
+    phys->limiter->limit(phys->info, parameter);
     return;
 }
 

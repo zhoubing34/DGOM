@@ -4,6 +4,7 @@
 #include "MultiRegions/Edge/dg_edge.h"
 #include "dg_phys_obc.h"
 #include "dg_phys_info.h"
+#include "dg_phys_limiter.h"
 
 typedef struct {
     dg_real *px_Q; ///< dfdx partial derivative for x direction
@@ -16,8 +17,9 @@ typedef struct {
  * @brief physical field structure.
  */
 typedef struct dg_phys{
-    dg_phys_info *info; ///< physical information structure;
-    dg_phys_obc *obc; ///< open boundary condition structure;
+    dg_phys_info *info; ///< pointer to dg_phys_info structure;
+    dg_phys_obc *obc; ///< pointer to dg_phys_obc structure;
+    dg_phys_limiter *limiter; ///< pointer to dg_phys_limiter structure;
 
     /** initialize from input file */
     void (*init_file)(struct dg_phys *phys, char *casename);
@@ -29,6 +31,10 @@ typedef struct dg_phys{
     void (*obc_add)(struct dg_phys *phys, char *filename);
     /** obtain the interpolated open boundary data from file */
     void (*obc_update)(struct dg_phys *phys, double elapseTime);
+
+    void (*set_limiter)(struct dg_phys *phys, Limiter_Type type);
+    /** limit the result */
+    void (*limit)(struct dg_phys *phys, double parameter);
 } dg_phys;
 
 dg_phys* dg_phys_create(int Nfields, dg_edge *edge);
