@@ -42,13 +42,13 @@ typedef struct dg_grid{
     int **EToBS; ///< boundary surface type of adjacent element;
     int *EToR; ///< region id of each cell;
     double *vx, *vy, *vz; ///< vertex coordinate;
-
-    void (*add_BS)(struct dg_grid *grid, int Nsurf, int **SFToV); ///< add boundary surface to grid;
 } dg_grid;
 
 
 dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, double *vz, int **EToV);
 void dg_grid_free(dg_grid *grid);
+
+#include "dg_grid_reader.h"
 
 #define dg_grid_K(grid) grid->K
 #define dg_grid_Nv(grid) grid->Nv

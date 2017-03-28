@@ -22,7 +22,7 @@ typedef struct dg_phys{
     dg_phys_limiter *limiter; ///< pointer to dg_phys_limiter structure;
 
     /** initialize from input file */
-    void (*init_file)(struct dg_phys *phys, char *casename);
+    void (*init_file)(struct dg_phys *phys, char *filename);
     /** function to fetch node buffer with other process */
     int (*fetch_node_buffer)(struct dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
     /** function to fetch cell buffer with other process */

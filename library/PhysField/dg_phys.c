@@ -8,6 +8,11 @@
 
 #include "dg_phys.h"
 
+#define DEBUG 0
+#if DEBUG
+#include "Utility/unit_test.h"
+#endif
+
 static int dg_phys_fetch_cell_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
 static int dg_phys_fetch_node_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
 void dg_phys_obc_add(dg_phys *phys, char *filename);
@@ -15,8 +20,6 @@ void dg_phys_obc_update(dg_phys *phys, double elapseTime);
 static void dg_phys_init_file(dg_phys *phys, char *casename);
 static void dg_phys_set_limiter(dg_phys *phys, Limiter_Type type);
 static void dg_phys_limit(dg_phys *phys, double parameter);
-
-#define DEBUG 0
 
 /**
  * @brief create a pointer to a new dg_phys structure.
@@ -109,11 +112,7 @@ static int dg_phys_fetch_node_buffer(dg_phys *phys,
  * @note
  * The physical field is initialized with the vertex value
  */
-static void dg_phys_init_file(dg_phys *phys, char *casename){
-
-    char init_filename[MAX_NAME_LENGTH];
-    strcpy(init_filename, casename);
-    strcat(init_filename, ".init");
+static void dg_phys_init_file(dg_phys *phys, char *init_filename){
 
     dg_grid *grid = dg_phys_grid(phys);
 
@@ -142,7 +141,10 @@ static void dg_phys_init_file(dg_phys *phys, char *casename){
             fscanf(fp, "%lf", init_value[n]+fld);
         }
     }
-
+    fclose(fp);
+#if DEBUG
+    FILE *log_p = create_log(__FUNCTION__, dg_phys_grid(phys)->nprocs, dg_phys_grid(phys)->procid);
+#endif
     /* read element file */
     int **EToV = dg_grid_EToV(grid);
 
@@ -151,27 +153,39 @@ static void dg_phys_init_file(dg_phys *phys, char *casename){
     const int Np = dg_cell_Np(cell);
     const int Nv = dg_cell_Nv(cell);
     const int K = dg_grid_K(grid);
-
+#if DEBUG
+    print_int_matrix2file(fp, "EToV", EToV, K, Nv);
+#endif
     dg_real initial_vert_value[Nv*Nfield];
     dg_real initial_node_value[Np*Nfield];
     dg_real *f_Q = dg_phys_f_Q(phys);
     for(k=0;k<K;k++){
         for(n=0;n<Nv;n++){ // vertex initial values
             int vertID = EToV[k][n];
+#if DEBUG
+            fprintf(fp, "k=%d, vert=%d, ", k, vertID);
+#endif
             for(fld=0;fld<Nfield;fld++){
                 initial_vert_value[n*Nfield+fld] = init_value[vertID][fld];
+#if DEBUG
+                fprintf(fp, "c=%f, ", init_value[vertID][fld]);
+#endif
             }
+#if DEBUG
+            fprintf(fp, "\n");
+#endif
         }
 
         cell->proj_vert2node(cell, Nfield, initial_vert_value, initial_node_value);
-        int sk = (k*Np+n)*Nfield;
+        int sk = k*Np*Nfield;
         for(n=0;n<Np*Nfield;n++){ // assign to node values
             f_Q[sk + n] = initial_node_value[n];
         }
 
     }
-
+#if DEBUG
+    fclose(log_p);
+#endif
     matrix_real_free(init_value);
-    matrix_int_free(EToV);
     return;
 }

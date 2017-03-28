@@ -12,7 +12,7 @@
 #include "Utility/UTest.h"
 #endif
 
-physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
+physField* swe_uniform_mesh(SWE_Solver *solver, int Mx, int My,
                             double xmin, double xmax, double ymin, double ymax){
 
     dg_cell *cell = dg_cell_creat(solver->N, solver->celltype);
@@ -39,14 +39,14 @@ physField* swe_uniform_mesh(swe_solver *solver, int Mx, int My,
     return phys;
 }
 
-static void swe_boundary_condition(swe_solver *solver, dg_mesh *mesh){
+static void swe_boundary_condition(SWE_Solver *solver, dg_mesh *mesh){
     mr_mesh_read_bcfile2d(mesh, solver->casename);
 }
 
 /**
  * @brief create physical field from input mesh file
  * */
-physField* swe_file_mesh(swe_solver *solver, char *meshfile){
+physField* swe_file_mesh(SWE_Solver *solver, char *meshfile){
 
     dg_cell *cell = dg_cell_creat(solver->N, solver->celltype);
     dg_grid *grid = dg_grid_read_file2d(cell, meshfile);
@@ -66,7 +66,7 @@ physField* swe_file_mesh(swe_solver *solver, char *meshfile){
     return phys;
 }
 
-dg_real* swe_read_topography(swe_solver *solver, char *botfile){
+dg_real* swe_read_topography(SWE_Solver *solver, char *botfile){
     physField *phys = solver->phys;
     int Nvert;
     FILE *fp;
@@ -107,7 +107,7 @@ dg_real* swe_read_topography(swe_solver *solver, char *botfile){
     return bot;
 }
 
-dg_real* swe_flat_topography(swe_solver *solver){
+dg_real* swe_flat_topography(SWE_Solver *solver){
     physField *phys = solver->phys;
 
     const int Np = phys->cell->Np;
@@ -121,7 +121,7 @@ dg_real* swe_flat_topography(swe_solver *solver){
     return bot;
 }
 
-dg_real* swe_parabolic_topography(swe_solver *solver){
+dg_real* swe_parabolic_topography(SWE_Solver *solver){
     physField *phys = solver->phys;
 
     const int Np = phys->cell->Np;

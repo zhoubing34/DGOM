@@ -16,7 +16,8 @@
  */
 #define DEBUG 0
 
-#include "conv_driver.h"
+#include "conv2d.h"
+
 
 Conv_Solver solver; ///< global solver
 
@@ -28,20 +29,17 @@ int main(int argc, char **argv){
     /* initialize MPI */
     MPI_Init(&argc, &argv);
 
-    /* get parameters */
-    Conv_Case_Type case_type = conv_input(argc, argv);
+    /* run type */
+    conv_input(argc, argv);
 
-    /* initialization */
-    conv_init(case_type);
+    /* read parameter and initialize */
+    conv_init();
 
     /* set output */
     conv_setoutput();
 
     /* run solver */
     conv_run();
-
-    /* cal norm error */
-    conv_normerr(case_type);
 
     /* finalize */
     conv_finalize();
@@ -50,13 +48,13 @@ int main(int argc, char **argv){
 }
 
 void conv_finalize(){
-    extern Conv_Solver solver;
+    dg_phys *phys = solver.phys;
+
     nc_file_close(solver.outfile);
     nc_file_free(solver.outfile);
 
-    dg_phys *phys = solver.phys;
     dg_cell_free(dg_phys_cell(phys));
-    dg_grid_free(dg_phys_grid(phys));
+    dg_grid_free(dg_phys_grid(solver.phys));
     dg_region_free(dg_phys_region(phys));
     dg_mesh_free(dg_phys_mesh(phys));
     dg_phys_free(phys);

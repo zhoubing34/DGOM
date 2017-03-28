@@ -13,7 +13,7 @@
 static dg_real gra;
 static dg_real hcrit;
 
-static void swe_sour(swe_solver *solver, physField *phys);
+static void swe_sour(SWE_Solver *solver, physField *phys);
 
 int swe_flux_term(dg_real *var, dg_real *Eflux, dg_real *Gflux){
     const dg_real h  = var[0];
@@ -137,7 +137,7 @@ int swe_nonslip_wall(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP){
     return 0;
 }
 
-void swe_rhs(swe_solver *solver, dg_real frka, dg_real frkb, dg_real fdt){
+void swe_rhs(SWE_Solver *solver, dg_real frka, dg_real frkb, dg_real fdt){
 
     physField *phys = solver->phys;
     const int K = phys->grid->K;
@@ -196,7 +196,7 @@ void swe_rhs(swe_solver *solver, dg_real frka, dg_real frkb, dg_real fdt){
 /**
  * @brief add source term to the rhs field
  */
-static void swe_sour(swe_solver *solver, physField *phys){
+static void swe_sour(SWE_Solver *solver, physField *phys){
 
     const dg_real gra     = (dg_real)solver->gra;
     const dg_real *f_Dr   = phys->cell->f_Dr;
@@ -207,7 +207,7 @@ static void swe_sour(swe_solver *solver, physField *phys){
     const int Np       = phys->cell->Np;
     const int Nfields  = phys->Nfield;
 
-    const dg_real M2 = (dg_real) solver->roughness*solver->roughness;
+    const dg_real M2 = (dg_real) solver->rough*solver->rough;
 
     dg_real *f_Q = phys->f_Q;
     dg_real *f_rhsQ = phys->f_rhsQ;

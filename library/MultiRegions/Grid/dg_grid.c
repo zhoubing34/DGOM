@@ -21,7 +21,6 @@ typedef struct dg_grid_creator{
     void (*load_balance)(dg_grid *grid);
     void (*connect)(dg_grid *grid);
     void (*init_BS)(dg_grid *grid);
-    void (*add_BS)(dg_grid *grid, int Nsruf, int **SFToBS);
 } dg_grid_creator;
 
 /** const creator for 2d grid */
@@ -32,7 +31,6 @@ const dg_grid_creator grid_2d_creator = {
         dg_grid_load_balance2d,
         dg_grid_connect2d,
         dg_grid_init_BS,
-        dg_grid_add_BS2d,
 };
 /** const creator for 3d grid */
 const dg_grid_creator grid_3d_creator = {
@@ -42,7 +40,6 @@ const dg_grid_creator grid_3d_creator = {
         dg_grid_load_balance3d,
         dg_grid_connect3d,
         dg_grid_init_BS,
-        dg_grid_add_BS3d,
 };
 
 /**
@@ -97,20 +94,9 @@ dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, do
     creator->load_balance(grid);
     creator->connect(grid);
     creator->init_BS(grid);
-    grid->add_BS = creator->add_BS;
     return grid;
 }
 
-/**
- * @brief add boundary types to the dg_grid structure.
- * @param grid pointer to a dg_grid structure;
- * @param Nsurf number of srufaces;
- * @param SFToBS surface types;
- */
-void dg_grid_add_BS(dg_grid *grid, int Nsurf, int **SFToBS){
-    grid->add_BS(grid, Nsurf, SFToBS);
-    return;
-}
 /**
  * @brief free the memory of dg_grid type.
  * @param grid dg_grid structure;

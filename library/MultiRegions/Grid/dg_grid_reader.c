@@ -6,6 +6,8 @@
 #include "Utility/unit_test.h"
 #endif
 
+static void dg_grid_add_EToR(dg_grid *grid, int cell_num, int **RegionID);
+
 /**
  * @brief Generation of uniform triangle grid.
  * @details
@@ -160,8 +162,10 @@ dg_grid* dg_grid_uniform_quad(dg_cell *cell, int Mx, int My,
 /**
  * @brief Generate dg_grid structure from files.
  * @details
- * The mesh files include 'casename.node' and 'casename.ele',
- * while the 'casename' is defined as parameter.
+ * The mesh files include 'casename.node' and 'casename.ele', while the 'casename' is defined as parameter.
+ * In the node file 'casename.node',
+ * @param cell pointer to dg_cell structure;
+ * @param casename name of case;
  * */
 dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
     char element_file[MAX_NAME_LENGTH];
@@ -245,8 +249,12 @@ dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
     return grid;
 }
 
-
-void dg_grid_read_BSfile2d(dg_grid *grid, char *casename){
+/**
+ * @brief
+ * @param grid
+ * @param casename
+ */
+void dg_grid_add_BS_file2d(dg_grid *grid, char *casename){
     char filename[MAX_NAME_LENGTH];
     strcpy(filename, casename);
     strcat(filename, ".edge");
@@ -283,12 +291,18 @@ void dg_grid_read_BSfile2d(dg_grid *grid, char *casename){
     return;
 }
 
-void dg_grid_add_EToR(dg_grid *grid, int cell_num, int **RgionID){
+/**
+ * @brief add the region id to dg_grid.
+ * @param grid pointer to dg_grid structire;
+ * @param cell_num number of cells in RegionID;
+ * @param RegionID integer matrix containing the cell index and region ID;
+ */
+static void dg_grid_add_EToR(dg_grid *grid, int cell_num, int **RegionID){
     int k;
     int *EToR = grid->EToR;
     for(k=0;k<cell_num;k++){
-        int cell_id = RgionID[k][0];
-        EToR[ cell_id ] = RgionID[k][1];
+        int cell_id = RegionID[k][0];
+        EToR[ cell_id ] = RegionID[k][1];
     }
     return;
 }

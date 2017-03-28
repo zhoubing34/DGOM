@@ -1,5 +1,5 @@
 
-#include "conv_driver.h"
+#include "../ConvDriver2d/conv2d.h"
 
 int conv_fluxTerm(dg_real *var, dg_real *Eflux, dg_real *Gflux){
     const dg_real c = var[0];

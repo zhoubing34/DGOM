@@ -50,7 +50,7 @@ dg_grid *user_set_tri_grid(){
     dg_cell *shape = dg_cell_creat(N, TRIANGLE);
     char casename[] = "example/SWE2d/Rectangle/Rectangle";
     dg_grid *grid = dg_grid_read_file2d(shape, casename);
-    dg_grid_read_BSfile2d(grid, casename);
+    dg_grid_add_BS_file2d(grid, casename);
     return grid;
 }
 

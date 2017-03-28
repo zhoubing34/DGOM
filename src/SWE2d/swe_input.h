@@ -8,6 +8,6 @@
 #include "swe_driver2d.h"
 
 void swe_create_input();
-swe_solver* swe_create_solver();
+SWE_Solver* swe_create_solver();
 
 #endif //DGOM_SWE_GETPARAMETER_H

@@ -96,7 +96,7 @@ void section_free(arg_section* section_p){
  * @param section_p argument section structure
  * @param fp handle of file
  */
-void section_write_file(arg_section *section_p, FILE *fp){
+void section_write_file(FILE *fp, arg_section *section_p){
     int i;
     fprintf(fp, "%s", section_p->info_str);
     for(i=0;i<section_p->arg_num;i++){
@@ -108,7 +108,7 @@ void section_write_file(arg_section *section_p, FILE *fp){
  * @param section_p argument section strucutre
  * @param fp handle of file
  */
-void section_read_file(arg_section *section_p, FILE *fp){
+void section_read_file(FILE *fp, arg_section *section_p){
     char buffer[ARG_LEN];
     int i;
     for(i=0;i<section_p->info_linenum;i++){ fgets(buffer, ARG_LEN, fp); }

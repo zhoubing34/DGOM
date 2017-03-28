@@ -2,7 +2,7 @@
 // Created by li12242 on 17/1/6.
 //
 
-#include "conv_driver.h"
+#include "conv2d_st.h"
 
 extern Conv_Solver solver;
 
@@ -69,7 +69,7 @@ typedef void (*Ext_Fun)(int Np, dg_real *x, dg_real *y, double *ext);
  * @brief
  * @details
  */
-void conv_normerr(Conv_Case_Type case_type){
+void conv_normerr(){
 
     dg_phys *phys = solver.phys;
     dg_region *region = dg_phys_region(phys);
@@ -83,6 +83,13 @@ void conv_normerr(Conv_Case_Type case_type){
     double **y = dg_region_y(region);
 
     Ext_Fun ext_fun=NULL;
+    // read case ID
+    arg_section **sec_p = conv_read_inputfile_st(solver.filename);
+    arg_section *sec = sec_p[0];
+    Conv_St_Case case_type;
+    sscanf(sec->arg_vec_p[0], "%d\n", &(case_type));
+    conv_arg_section_free(sec_p);
+
     switch (case_type){
         case conv_rotational_convection:
             ext_fun = rotation_ext; break;

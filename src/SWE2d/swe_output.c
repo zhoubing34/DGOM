@@ -18,7 +18,7 @@
  *
  *
  */
-nc_file* swe_output(swe_solver *solver){
+nc_file* swe_output(SWE_Solver *solver){
 
     physField *phys = solver->phys;
 
@@ -107,13 +107,13 @@ nc_file* swe_output(swe_solver *solver){
  * calculation process the variables can be either `double` or `float`.
  *
  */
-void swe_save_var(swe_solver *solver, int tstep, double time){
+void swe_save_var(SWE_Solver *solver, int tstep, double time){
 
     physField *phys = solver->phys;
 
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
-    nc_file *file = solver->outfile;
+    nc_file *file = solver->ncfile;
 
     MPI_Offset start_v[3], count_v[3];
     MPI_Offset start_t, count_t;

@@ -3,6 +3,6 @@
 
 #include "swe_driver2d.h"
 
-swe_solver* swe_init(int argc, char **argv);
+SWE_Solver* swe_init(int argc, char **argv);
 
 #endif

@@ -32,7 +32,7 @@ void swe_parabolicbowl_ext(dg_real x, dg_real y, double t, dg_real *ext){
     }
 }
 
-void swe_normerr(swe_solver *solver){
+void swe_normerr(SWE_Solver *solver){
 
     const physField *phys = solver->phys;
     const int K = phys->grid->K;

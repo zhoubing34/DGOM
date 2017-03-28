@@ -6,7 +6,7 @@
 
 #define EXCEPTION(u, u1, u2) ( ((u-u1)>EPS)& ((u-u2)>EPS) )||( ((u1-u)>EPS)&((u2-u)>EPS))
 
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
 #include "Utility/unit_test.h"
 #endif

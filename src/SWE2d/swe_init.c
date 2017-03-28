@@ -5,20 +5,20 @@
 #include "PhysField/dg_phys_init.h"
 
 #define DEBUG 0
-static void swe_initial_condition(swe_solver *solver);
-static void swe_dambreakdry_init(swe_solver *solver);
-static void swe_dambreakwet_init(swe_solver *solver);
-static void swe_parabolicbowl_init(swe_solver *solver);
-static void swe_userset_init(swe_solver *solver);
-static void swe_set_topography(swe_solver *solver);
+static void swe_initial_condition(SWE_Solver *solver);
+static void swe_dambreakdry_init(SWE_Solver *solver);
+static void swe_dambreakwet_init(SWE_Solver *solver);
+static void swe_parabolicbowl_init(SWE_Solver *solver);
+static void swe_userset_init(SWE_Solver *solver);
+static void swe_set_topography(SWE_Solver *solver);
 
-swe_solver* swe_init(int argc, char **argv){
+SWE_Solver* swe_init(int argc, char **argv){
     swe_command_type type = swe_read_command(argc, argv);
 
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
 
-    swe_solver *solver = NULL;
+    SWE_Solver *solver = NULL;
     switch (type) {
         case swe_command_help:
             if(!procid) {swe_print_help();} exit(0); // print help info and exit
@@ -39,7 +39,7 @@ swe_solver* swe_init(int argc, char **argv){
 /**
  * @brief create initial condition
  */
-static void swe_initial_condition(swe_solver *solver){
+static void swe_initial_condition(SWE_Solver *solver){
     switch (solver->caseid){
         case swe_dambreakdry:
             swe_dambreakdry_init(solver); break;
@@ -52,7 +52,7 @@ static void swe_initial_condition(swe_solver *solver){
     }
 }
 
-static void swe_set_topography(swe_solver *solver){
+static void swe_set_topography(SWE_Solver *solver){
     char bot_filename[MAX_NAME_LENGTH];
     strcpy(bot_filename, solver->casename);
     strcat(bot_filename, ".bot");
@@ -68,12 +68,12 @@ static void swe_set_topography(swe_solver *solver){
     }
 }
 
-static void swe_userset_init(swe_solver *solver){
+static void swe_userset_init(SWE_Solver *solver){
     physField *phys = solver->phys;
     pf_init_file2d(phys, solver->casename);
 }
 
-static void swe_dambreakdry_init(swe_solver *solver){
+static void swe_dambreakdry_init(SWE_Solver *solver){
 
     physField *phys = solver->phys;
     const int K = phys->grid->K;
@@ -102,7 +102,7 @@ static void swe_dambreakdry_init(swe_solver *solver){
     return;
 }
 
-static void swe_dambreakwet_init(swe_solver *solver){
+static void swe_dambreakwet_init(SWE_Solver *solver){
 
     physField *phys = solver->phys;
     const int K = phys->grid->K;
@@ -131,7 +131,7 @@ static void swe_dambreakwet_init(swe_solver *solver){
     return;
 }
 
-static void swe_parabolicbowl_init(swe_solver *solver){
+static void swe_parabolicbowl_init(SWE_Solver *solver){
 
     physField *phys = solver->phys;
     const int K = phys->grid->K;

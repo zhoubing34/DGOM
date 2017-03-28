@@ -27,14 +27,13 @@
  *
  */
 
-#include <PhysField/pf_phys.h>
+#include <PhysField/dg_phys.h>
 #include "swe_driver2d.h"
 #include "swe_init.h"
-#include "MultiRegions/Mesh/mr_mesh_bc.h"
 #include "swe_output.h"
 #include "swe_run.h"
 #include "swe_extsol.h"
-static void swe_finalize(swe_solver*);
+static void swe_finalize(SWE_Solver*);
 
 int main(int argc, char **argv){
 
@@ -42,10 +41,10 @@ int main(int argc, char **argv){
     MPI_Init(&argc, &argv);
 
     /* initialize */
-    swe_solver *solver = swe_init(argc, argv);
+    SWE_Solver *solver = swe_init(argc, argv);
 
     /* output */
-    solver->outfile = swe_output(solver);
+    solver->ncfile = swe_output(solver);
 
     /* run */
     swe_run(solver);
@@ -60,7 +59,7 @@ int main(int argc, char **argv){
 }
 
 /* finalize the SWE and deallocate the variable */
-static void swe_finalize(swe_solver *solver){
+static void swe_finalize(SWE_Solver *solver){
 
     /* physcal field */
     dg_cell_free(solver->phys->cell);
@@ -71,8 +70,8 @@ static void swe_finalize(swe_solver *solver){
     pf_free(solver->phys);
 
     /* output file */
-    nc_file_close(solver->outfile);
-    nc_file_free(solver->outfile);
+    nc_file_close(solver->ncfile);
+    nc_file_free(solver->ncfile);
 
     /* solver */
     vector_real_free(solver->bot);

@@ -103,10 +103,10 @@ arg_section** swe_read_input(){
     return arg;
 }
 
-swe_solver* swe_create_solver(){
+SWE_Solver* swe_create_solver(){
 
     arg_section **arg = swe_read_input();
-    swe_solver *solver = (swe_solver*) calloc(1, sizeof(swe_solver));
+    SWE_Solver *solver = (SWE_Solver*) calloc(1, sizeof(SWE_Solver));
 
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
@@ -184,11 +184,11 @@ swe_solver* swe_create_solver(){
     sec_p = arg[4];
     sscanf(sec_p->arg_vec_p[0], "%lf\n", &(solver->gra));
     sscanf(sec_p->arg_vec_p[1], "%lf\n", &(solver->hcrit));
-    sscanf(sec_p->arg_vec_p[2], "%lf\n", &(solver->roughness));
+    sscanf(sec_p->arg_vec_p[2], "%lf\n", &(solver->rough));
 
     if(!procid) printf(HEAD_LINE " gra = %f\n", solver->gra);
     if(!procid) printf(HEAD_LINE " hcrit = %f\n", solver->hcrit);
-    if(!procid) printf(HEAD_LINE " manning factor = %f\n", solver->roughness);
+    if(!procid) printf(HEAD_LINE " manning factor = %f\n", solver->rough);
 
     /// 5. section: LDG info
     sec_p = arg[5];

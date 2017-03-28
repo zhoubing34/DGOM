@@ -10,10 +10,10 @@
 
 /* private function */
 void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
-double swe_time_interval(swe_solver *solver);
-void swe_ppreserve(swe_solver *solver);
+double swe_time_interval(SWE_Solver *solver);
+void swe_ppreserve(SWE_Solver *solver);
 
-static void swe_h2eta(swe_solver *solver){
+static void swe_h2eta(SWE_Solver *solver){
     physField *phys = solver->phys;
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
@@ -30,7 +30,7 @@ static void swe_h2eta(swe_solver *solver){
     }
 }
 
-static void swe_eta2h(swe_solver *solver){
+static void swe_eta2h(SWE_Solver *solver){
     physField *phys = solver->phys;
     const int K = phys->grid->K;
     const int Np = phys->cell->Np;
@@ -47,7 +47,7 @@ static void swe_eta2h(swe_solver *solver){
     }
 }
 
-void swe_run(swe_solver *solver){
+void swe_run(SWE_Solver *solver){
     /* Runge-Kutta time evaluation coefficient */
     double rk4a[5], rk4b[5], rk4c[6];
     swe_rk_parameter(rk4a, rk4b, rk4c);
@@ -151,7 +151,7 @@ void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c){
  * dt   | double | delta time
  *
  */
-double swe_time_interval(swe_solver *solver){
+double swe_time_interval(SWE_Solver *solver){
 
     double dt   = 1e4;
     const double gra  = solver->gra;
@@ -206,7 +206,7 @@ double swe_time_interval(swe_solver *solver){
  *
  * @param[in,out] solver SWE_Solver2d pointer
  */
-void swe_ppreserve(swe_solver *solver){
+void swe_ppreserve(SWE_Solver *solver){
 
     physField *phys = solver->phys;
 

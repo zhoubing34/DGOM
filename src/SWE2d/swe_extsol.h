@@ -6,6 +6,6 @@
 #define DGOM_SWE_EXTSOL_H
 
 #include "swe_driver2d.h"
-void swe_normerr(swe_solver *solver);
+void swe_normerr(SWE_Solver *solver);
 
 #endif //DGOM_SWE_EXTSOL_H

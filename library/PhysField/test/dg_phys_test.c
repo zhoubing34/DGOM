@@ -57,7 +57,7 @@ dg_phys *rectangle_tri_physfield(){
     dg_cell *tri = dg_cell_creat(N, TRIANGLE);
     char casename[] = "example/SWE2d/Rectangle/Rectangle";
     dg_grid *grid = dg_grid_read_file2d(tri, casename);
-    dg_grid_read_BSfile2d(grid, casename);
+    dg_grid_add_BS_file2d(grid, casename);
     dg_region *region = dg_region_create(grid);
     dg_mesh *mesh = dg_mesh_create(region);
     dg_edge *edge = dg_edge_create(mesh);

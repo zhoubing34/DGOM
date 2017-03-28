@@ -14,32 +14,30 @@
 
 typedef enum{
     conv_help = 1,
-    conv_preprocss = 2,
+    conv_create_input = 2,
     conv_execute = 3,
 } Conv_Run_Type;
 
+/** case ID for conv2d_st problem */
 typedef enum{
     conv_rotational_convection = 1,
     conv_advection_diffusion = 2,
-    conv_userset = 3,
-} Conv_Case_Type;
-
-
-#define INPUT_FILE_NAME "conv2d_paramter.inc"
+} Conv_St_Case;
 
 typedef struct {
     dg_phys *phys;
-    double dt; ///< delta time
-    double finaltime; ///< final time
-    NC_File *outfile; ///< output file
+    char filename[MAX_NAME_LENGTH]; ///< name of input file;
+    double dt; ///< delta time;
+    double finaltime; ///< final time;
+    NC_File *outfile; ///< output file;
 } Conv_Solver;
 
 /* conv_input */
-Conv_Case_Type conv_input(int argc, char *agrv[]);
+void conv_input(int argc, char *agrv[]);
 void conv_arg_section_free(arg_section **section_p);
-arg_section** conv_read_input();
+arg_section** conv_read_inputfile(char *);
 /* conv_init */
-void conv_init(Conv_Case_Type case_type);
+void conv_init();
 /* conv_output */
 void conv_setoutput();
 void conv_putvar(dg_phys *phys, int timestep, double time);
@@ -47,8 +45,4 @@ void conv_putvar(dg_phys *phys, int timestep, double time);
 void conv_run();
 /* conv_rhs */
 void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt);
-/* conv_extsol */
-void conv_normerr(Conv_Case_Type case_type);
-
-
 #endif

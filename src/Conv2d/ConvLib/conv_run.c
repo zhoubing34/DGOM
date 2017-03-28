@@ -1,4 +1,4 @@
-#include "conv_driver.h"
+#include "../ConvDriver2d/conv2d.h"
 
 /* assignment of RK45 parameter */
 static void conv_rk_parameter(double *rk4a, double *rk4b, double *rk4c);

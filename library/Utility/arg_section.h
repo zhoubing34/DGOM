@@ -30,7 +30,7 @@ typedef struct{
 void section_print(arg_section *section_p);
 arg_section* section_create(char *info_str, int arg_num);
 void section_free(arg_section* section_p);
-void section_write_file(arg_section *section_p, FILE *fp);
-void section_read_file(arg_section *section_p, FILE *fp);
+void section_write_file(FILE *fp, arg_section *section_p);
+void section_read_file(FILE *fp, arg_section *section_p);
 
 #endif //DGOM_ARG_SECTION_H

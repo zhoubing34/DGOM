@@ -5,7 +5,7 @@
 #ifndef DGOM_SWEDRIVER2D_H
 #define DGOM_SWEDRIVER2D_H
 
-#include "PhysField/pf_phys.h"
+#include "PhysField/dg_phys.h"
 #include "Utility/nc_library.h"
 #include "Utility/utility.h"
 
@@ -14,30 +14,20 @@ typedef enum {
     swe_dambreakdry = 2,
     swe_parabolicbowl = 3,
     swe_userset = 4,
-}swe_case;
+}SWE_Run_Type;
 
 typedef struct{
-    swe_case caseid; ///< case id
-    char *casename;
-    /* standard cell */
-    dg_cell_type celltype; ///< type id of standard cell
-    int N; ///< degree of polynomial
     /* physical field */
-    physField *phys;
-    /* time */
-    double cfl; ///< cfl number
-    //double dt; ///< minimum time step
+    dg_phys *phys; ///< physical field
     double ftime; ///< final time
     /* physical parameters */
     double gra; ///< gravity acceleration
-    double *bot; ///< bottom topography
     double hcrit; ///< minimum water depth
-    double roughness; ///< manning roughness coefficient for friction term
+    double *bot; ///< bottom topography
+    double *rough; ///< manning roughness coefficient for friction term
     /* output file */
-    nc_file *outfile; ///< netCDF output file
-    /* LDG parameter */
-    double c12;
-}swe_solver;
+    NC_File *ncfile; ///< netCDF output file
+}SWE_Solver;
 
 
 #endif //DGOM_SWEDRIVER2D_H
