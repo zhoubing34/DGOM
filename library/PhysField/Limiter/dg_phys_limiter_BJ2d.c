@@ -3,9 +3,6 @@
 //
 
 #include "dg_phys_limiter_BJ2d.h"
-
-#define EXCEPTION(u, u1, u2) ( ((u-u1)>EPS)& ((u-u2)>EPS) )||( ((u1-u)>EPS)&((u2-u)>EPS))
-
 #define DEBUG 0
 #if DEBUG
 #include "Utility/unit_test.h"
@@ -261,12 +258,13 @@ static void dg_phys_adjacent_cellinfo(dg_phys_info *phys, dg_real *cell_max, dg_
 /**
  * @brief obtain Barth-Jeperson slope limiter.
  * @param phys_info
- * @param cell_max
- * @param cell_min
+ * @param Cmax
+ * @param Cmin
  * @param beta
  * @param psi
  */
-static void dg_phys_BJ_limiter(dg_phys_info *phys_info, dg_real *cell_max, dg_real *cell_min,
+static void dg_phys_BJ_limiter(dg_phys_info *phys_info,
+                               dg_real *Cmax, dg_real *Cmin,
                                double beta, dg_real *psi){
 
     const int K = phys_info->grid->K;
@@ -278,8 +276,8 @@ static void dg_phys_BJ_limiter(dg_phys_info *phys_info, dg_real *cell_max, dg_re
         dg_real *f_Q = phys_info->f_Q + k*Np*Nfield; // variable of k-th cell
         for(fld=0;fld<Nfield;fld++){
             int sk = k*Nfield+fld;
-            dg_real qmax = cell_max[sk];
-            dg_real qmin = cell_min[sk];
+            dg_real qmax = Cmax[sk];
+            dg_real qmin = Cmin[sk];
             dg_real qmean = phys_info->c_Q[sk];
             psi[sk] = 1.0;
             for(n=0;n<Np;n++){
@@ -301,73 +299,14 @@ static void dg_phys_BJ_limiter(dg_phys_info *phys_info, dg_real *cell_max, dg_re
 
 /**
  * @brief
- * trouble cell indicator.
- * @details
- * The trouble cell is determined with the edge value exceeding the average values
- * of local and adjacent elements.
- * @param phys pointer to dg_phys structure;
- * @param tind indicator for trouble cell;
- */
-static void dg_phys_edge_indicator(dg_phys_info *phys, int *tind){
-
-    dg_grid *grid = phys->grid;
-    const int K = dg_grid_K(grid);
-    const int Nfield = phys->Nfield;
-    const int Nfaces = dg_cell_Nfaces(phys->cell);
-    const int procid = dg_grid_procid(grid);
-
-    dg_real f_mean[K*Nfaces*Nfield];
-    dg_phys_local_face_mean(phys, f_mean);
-
-    register int k,n,f,fld;
-    for(k=0;k<K;k++){
-        dg_real *c_mean = phys->c_Q + k*Nfield; // mean value of k-th cell
-        int **EToE = dg_grid_EToE(grid);
-        int **EToP = dg_grid_EToP(grid);
-
-        for(f=0;f<Nfaces;f++){
-            int e = EToE[k][f];
-            int p = EToP[k][f];
-            // if adjacent cell is on other process, jump this cycle
-            if(p!=procid) continue;
-
-            int sf = k*Nfaces*Nfield + f*Nfield;
-            for(fld=0;fld<Nfield;fld++){
-                dg_real c_next = phys->c_Q[e*Nfield+fld];
-                if( EXCEPTION(f_mean[sf+fld], c_next, c_mean[fld]) ) {
-                    tind[k*Nfield + fld] = 1;
-                }
-            }
-        }
-    }
-
-    /* parallel cell loop */
-    dg_mesh *mesh = phys->mesh;
-    const int Nfetchfaces = dg_mesh_NfetchFace(mesh);
-    for(n=0;n<Nfetchfaces;n++){
-        k = mesh->CBFToK[n];
-        f = mesh->CBFToF[n];
-        for(fld=0;fld<Nfield;fld++){
-            dg_real c_mean = phys->c_Q[k*Nfield+fld];
-            dg_real c_next = phys->c_recvQ[n*Nfield+fld];
-
-            if( EXCEPTION(f_mean[k*Nfaces*Nfield+f*Nfield+fld], c_next, c_mean) ) {
-                tind[k*Nfield + fld] = 1;
-            }
-        }
-    }
-    return;
-}
-
-/**
- * @brief
  * Slope limiter from Anastasiou and Chan (1997) for two dimensional problems.
  * @details
  * The slope limiter will act on each physical variables and reconstruct the scalar distribution.
  * @param[in,out] phys pointer to dg_phys structure;
+ * @param[in] tind trouble cell indicator (0 for smooth; 1 for trouble cell)
  * @param[in] beta
  */
-void dg_phys_limiter_BJ2d(dg_phys_info *phys, double beta){
+void dg_phys_limiter_BJ2d(dg_phys_info *phys, int *tind, double beta){
 
     const int K = dg_grid_K(phys->grid);
     const int Nfield = phys->Nfield;
@@ -401,17 +340,12 @@ void dg_phys_limiter_BJ2d(dg_phys_info *phys, double beta){
     dg_real psi[K*Nfield];
     dg_phys_BJ_limiter(phys, cell_max, cell_min, beta, psi);
 
-    /* 5. trouble cell indicator */
-    int *tind = vector_int_create(K*Nfield);
-    dg_phys_edge_indicator(phys, tind);
-
 #if DEBUG
     print_int_vector2file(fp, "tind", tind, K*Nfield);
 #endif
 
     /* 6. reconstruction */
     dg_region *region = phys->region;
-
     for(k=0;k<K;k++){
         double xc, yc;
         const double Area = 1.0/region->size[k];
@@ -439,7 +373,6 @@ void dg_phys_limiter_BJ2d(dg_phys_info *phys, double beta){
         }
     }
 
-    vector_int_free(tind);
 #if DEBUG
     fclose(fp);
 #endif

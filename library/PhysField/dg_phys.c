@@ -20,6 +20,7 @@ void dg_phys_obc_add(dg_phys *phys, char *filename);
 void dg_phys_obc_update(dg_phys *phys, double elapseTime);
 static void dg_phys_init_file(dg_phys *phys, char *casename);
 static void dg_phys_set_limiter(dg_phys *phys, Limiter_Type type);
+static void dg_phys_set_indicator(dg_phys *phys, Indicator_Type type);
 static void dg_phys_limit(dg_phys *phys, double parameter);
 
 /**
@@ -34,7 +35,7 @@ dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
     dg_phys *phys = (dg_phys *) calloc(1, sizeof(dg_phys));
     phys->info = dg_phys_info_create(Nfields, edge);
     phys->obc = dg_phys_obc_create(phys->info);
-    phys->limiter = dg_phys_limiter_create();
+    phys->limiter = dg_phys_limiter_create(phys->info);
 
     phys->cell_mean = dg_phys_cell_mesn;
     phys->init_file = dg_phys_init_file;
@@ -43,6 +44,7 @@ dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
     phys->obc_add = dg_phys_obc_add;
     phys->obc_update = dg_phys_obc_update;
     phys->set_limiter = dg_phys_set_limiter;
+    phys->set_indicator = dg_phys_set_indicator;
     phys->limit = dg_phys_limit;
     return phys;
 }
@@ -53,6 +55,7 @@ dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
 void dg_phys_free(dg_phys *phys){
     dg_phys_info_free(phys->info);
     dg_phys_obc_free(phys->obc);
+    dg_phys_limiter_free(phys->limiter);
     free(phys);
     return;
 }
@@ -67,8 +70,13 @@ static void dg_phys_set_limiter(dg_phys *phys, Limiter_Type type){
     return;
 }
 
+static void dg_phys_set_indicator(dg_phys *phys, Indicator_Type type){
+    phys->limiter->set_indicator(phys->limiter, type);
+    return;
+}
+
 static void dg_phys_limit(dg_phys *phys, double parameter){
-    phys->limiter->limit(phys->info, parameter);
+    phys->limiter->limit_trouble_cell(phys->limiter ,phys->info, parameter);
     return;
 }
 

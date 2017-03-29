@@ -36,7 +36,7 @@ Changes in version 4.0rc1
 r10592; 2011-07-16 16:17:53 -0500 (Sat, 16 Jul 2011)
 
 - Improved the quality of the geometric partitioning routines. 
-- Removed the 4K limit on the maximum number of processors for
+- Removed the 4K limit_trouble_cell on the maximum number of processors for
   geometric partitioning.
 - Fixed minor bugs that surfaced since 4.0a3.
 - Updated the manual.

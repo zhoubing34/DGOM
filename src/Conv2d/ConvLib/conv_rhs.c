@@ -52,7 +52,7 @@ void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
     /* surface vol_integral */
-    dg_phys_strong_surf_opt2d(phys, NULL, NULL, conv_fluxTerm, conv_upWindFlux);
+    dg_phys_strong_surf_opt2d(phys, NULL, NULL, NULL, conv_fluxTerm, conv_upWindFlux);
 
     /* waite for finishing send buffer */
     MPI_Waitall(Nmess, mpi_send_requests, instatus);

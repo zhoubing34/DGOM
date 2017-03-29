@@ -22,6 +22,14 @@ typedef enum {
     SWE_RUN = 2,
 }SWE_Run_Type;
 
+typedef enum{
+    ZERO_GRADIENT = 4,
+    CLAMPED_ALL = 5,
+    CLAMPED_H = 6,
+    CLAMPED_FLOW = 7,
+    FLATHER = 8,
+} SWE_OBC;
+
 typedef struct{
     char filename[MAX_NAME_LENGTH]; /// input file;
     dg_phys *phys; ///< physical field;

@@ -3,6 +3,7 @@ set(SWE_LIB
         SWELib/swe_run.c
         SWELib/swe_rhs.c
         SWELib/swe_flux.c
+        SWELib/swe_obc.c
         )
 add_library(swe2d_lib STATIC ${SWE_LIB})
 add_dependencies(swe2d_lib physfield)

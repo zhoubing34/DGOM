@@ -66,7 +66,7 @@ void swe_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
     /* surface integral */
-    dg_phys_strong_surf_opt2d(phys, swe_slip_wall, swe_nonslip_wall, swe_flux_term, swe_hll_flux);
+    dg_phys_strong_surf_opt2d(phys, swe_slip_wall, swe_nonslip_wall, swe_obc, swe_flux_term, swe_hll_flux);
 
     /* waite for finishing send buffer */
     MPI_Waitall(Nmess, mpi_send_requests, instatus);

@@ -22,6 +22,7 @@
 void dg_phys_strong_surf_opt2d(dg_phys *phys,
                                Wall_Condition slipwall_func,  // slip wall condition
                                Wall_Condition non_slipwall_func, // non-slip wall condition
+                               OBC_Fun obc_func,
                                Nodal_Flux_Fun nodal_flux, // flux term
                                Numerical_Flux numerical_flux) // numerical flux function
 {
@@ -79,8 +80,9 @@ void dg_phys_strong_surf_opt2d(dg_phys *phys,
                 case FACE_NSLIPWALL:
                     non_slipwall_func(nx, ny, f_M, f_P);
                     break;
-                default:
-                    for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_ext[idP*Nfield+fld]; }
+                default: /// open boundary condition
+                    obc_func(nx, ny, f_M, ftype, f_P);
+                    //for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_ext[idP*Nfield+fld]; }
                     break;
             }
 

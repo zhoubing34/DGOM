@@ -35,7 +35,8 @@ typedef struct dg_phys{
     void (*obc_update)(struct dg_phys *phys, double elapseTime);
 
     void (*set_limiter)(struct dg_phys *phys, Limiter_Type type);
-    /** limit the result */
+    void (*set_indicator)(struct dg_phys *phys, Indicator_Type type);
+    /** use slope limiter to eliminate the oscillatory */
     void (*limit)(struct dg_phys *phys, double parameter);
 } dg_phys;
 

@@ -12,6 +12,7 @@ set(PHYSDOMAIN_SOURCE
         #pf_strong_viscosity_LDG_flux2d.c
         #pf_cellMean.c
         Limiter/dg_phys_limiter_BJ2d.c
+        Limiter/dg_phys_indicator_edge.c
         )
 
 add_library(physfield STATIC ${PHYSDOMAIN_SOURCE})
