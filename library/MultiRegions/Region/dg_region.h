@@ -64,6 +64,7 @@ void dg_region_free(dg_region *region);
 #define dg_region_J(region) region->J
 #define dg_region_sJ(region) region->sJ
 #define dg_region_size(region) (region->size)
+#define dg_region_len(region) (region->len)
 #define dg_region_face_size(region) (region->face_size)
 
 #endif //DGOM_MULTIREGIONS_H

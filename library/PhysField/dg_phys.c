@@ -13,6 +13,7 @@
 #include "Utility/unit_test.h"
 #endif
 
+static void dg_phys_cell_mesn(dg_phys *phys);
 static int dg_phys_fetch_cell_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
 static int dg_phys_fetch_node_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
 void dg_phys_obc_add(dg_phys *phys, char *filename);
@@ -35,6 +36,7 @@ dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
     phys->obc = dg_phys_obc_create(phys->info);
     phys->limiter = dg_phys_limiter_create();
 
+    phys->cell_mean = dg_phys_cell_mesn;
     phys->init_file = dg_phys_init_file;
     phys->fetch_cell_buffer = dg_phys_fetch_cell_buffer;
     phys->fetch_node_buffer = dg_phys_fetch_node_buffer;
@@ -52,6 +54,11 @@ void dg_phys_free(dg_phys *phys){
     dg_phys_info_free(phys->info);
     dg_phys_obc_free(phys->obc);
     free(phys);
+    return;
+}
+
+static void dg_phys_cell_mesn(dg_phys *phys){
+    phys->info->cell_mean(phys->info);
     return;
 }
 
@@ -142,9 +149,7 @@ static void dg_phys_init_file(dg_phys *phys, char *init_filename){
         }
     }
     fclose(fp);
-#if DEBUG
-    FILE *log_p = create_log(__FUNCTION__, dg_phys_grid(phys)->nprocs, dg_phys_grid(phys)->procid);
-#endif
+
     /* read element file */
     int **EToV = dg_grid_EToV(grid);
 
@@ -153,27 +158,16 @@ static void dg_phys_init_file(dg_phys *phys, char *init_filename){
     const int Np = dg_cell_Np(cell);
     const int Nv = dg_cell_Nv(cell);
     const int K = dg_grid_K(grid);
-#if DEBUG
-    print_int_matrix2file(fp, "EToV", EToV, K, Nv);
-#endif
+
     dg_real initial_vert_value[Nv*Nfield];
     dg_real initial_node_value[Np*Nfield];
     dg_real *f_Q = dg_phys_f_Q(phys);
     for(k=0;k<K;k++){
         for(n=0;n<Nv;n++){ // vertex initial values
             int vertID = EToV[k][n];
-#if DEBUG
-            fprintf(fp, "k=%d, vert=%d, ", k, vertID);
-#endif
             for(fld=0;fld<Nfield;fld++){
                 initial_vert_value[n*Nfield+fld] = init_value[vertID][fld];
-#if DEBUG
-                fprintf(fp, "c=%f, ", init_value[vertID][fld]);
-#endif
             }
-#if DEBUG
-            fprintf(fp, "\n");
-#endif
         }
 
         cell->proj_vert2node(cell, Nfield, initial_vert_value, initial_node_value);
@@ -183,9 +177,7 @@ static void dg_phys_init_file(dg_phys *phys, char *init_filename){
         }
 
     }
-#if DEBUG
-    fclose(log_p);
-#endif
+
     matrix_real_free(init_value);
     return;
 }

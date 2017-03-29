@@ -21,6 +21,8 @@ typedef struct dg_phys{
     dg_phys_obc *obc; ///< pointer to dg_phys_obc structure;
     dg_phys_limiter *limiter; ///< pointer to dg_phys_limiter structure;
 
+    /** cell mean */
+    void (*cell_mean)(struct dg_phys *phys);
     /** initialize from input file */
     void (*init_file)(struct dg_phys *phys, char *filename);
     /** function to fetch node buffer with other process */

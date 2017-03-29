@@ -18,12 +18,6 @@ typedef enum{
     conv_execute = 3,
 } Conv_Run_Type;
 
-/** case ID for conv2d_st problem */
-typedef enum{
-    conv_rotational_convection = 1,
-    conv_advection_diffusion = 2,
-} Conv_St_Case;
-
 typedef struct {
     dg_phys *phys;
     char filename[MAX_NAME_LENGTH]; ///< name of input file;

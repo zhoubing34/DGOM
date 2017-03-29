@@ -27,53 +27,53 @@
  *
  */
 
-#include <PhysField/dg_phys.h>
-#include "swe_driver2d.h"
-#include "swe_init.h"
-#include "swe_output.h"
-#include "swe_run.h"
-#include "swe_extsol.h"
-static void swe_finalize(SWE_Solver*);
+#include "swe2d.h"
+#include "../SWELib/swe_lib.h"
+
+static void swe_finalize();
+
+SWE_Solver solver;
 
 int main(int argc, char **argv){
 
     /* initialize MPI */
     MPI_Init(&argc, &argv);
 
+    /* read input file */
+    swe_input(argc, argv);
+
     /* initialize */
-    SWE_Solver *solver = swe_init(argc, argv);
+    swe_init();
 
     /* output */
-    solver->ncfile = swe_output(solver);
+    swe_output();
 
     /* run */
-    swe_run(solver);
-
-    /* norm error */
-    //swe_normerr(solver);
+    swe_run();
 
     /* finalize */
-    swe_finalize(solver);
+    swe_finalize();
 
     return 0;
 }
 
 /* finalize the SWE and deallocate the variable */
-static void swe_finalize(SWE_Solver *solver){
+static void swe_finalize(){
 
+    extern SWE_Solver solver;
     /* physcal field */
-    dg_cell_free(solver->phys->cell);
-    dg_grid_free(solver->phys->grid);
-    mr_reg_free(solver->phys->region);
-    mr_mesh_del_bc2d(solver->phys->mesh);
-    mr_mesh_free(solver->phys->mesh);
-    pf_free(solver->phys);
+    dg_cell_free(dg_phys_cell(solver.phys));
+    dg_grid_free(dg_phys_grid(solver.phys));
+    dg_region_free(dg_phys_region(solver.phys));
+    dg_mesh_free(dg_phys_mesh(solver.phys));
+    dg_edge_free(dg_phys_edge(solver.phys));
+    dg_phys_free(solver.phys);
 
     /* output file */
-    nc_file_close(solver->ncfile);
-    nc_file_free(solver->ncfile);
+    nc_file_close(solver.outfile);
+    nc_file_free(solver.outfile);
 
     /* solver */
-    vector_real_free(solver->bot);
+    vector_real_free(solver.m);
     MPI_Finalize();
 }

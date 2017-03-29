@@ -1,101 +1,90 @@
-#include <PhysField/pf_phys.h>
-#include "swe_driver2d.h"
-#include "PhysField/pf_cellMean.h"
-#include "swe_output.h"
-#include "PhysField/Limiter/dg_phys_limiter_BJ2d.h"
-#include "swe_rhs.h"
-#include "PhysField/dg_phys_obc.h"
+#include "swe_lib.h"
 
 #define DEBUG 0
 
 /* private function */
 void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
-double swe_time_interval(SWE_Solver *solver);
-void swe_ppreserve(SWE_Solver *solver);
+double swe_time_interval(dg_phys *phys);
+void swe_ppreserve(dg_phys *phys);
 
-static void swe_h2eta(SWE_Solver *solver){
-    physField *phys = solver->phys;
-    const int K = phys->grid->K;
-    const int Np = phys->cell->Np;
-    const int Nfield = phys->Nfield;
-    dg_real *f_Q = phys->f_Q;
+//static void swe_h2eta(SWE_Solver *solver){
+//    dg_phys *phys = solver->phys;
+//    const int K = phys->grid->K;
+//    const int Np = phys->cell->Np;
+//    const int Nfield = phys->Nfield;
+//    dg_real *f_Q = phys->f_Q;
+//
+//    register int k,n,sk;
+//    for(k=0;k<K;k++){
+//        for(n=0;n<Np;n++){
+//            sk = k*Np+n;
+//            dg_real bot = solver->bot[sk];
+//            f_Q[sk*Nfield] -= bot;
+//        }
+//    }
+//}
+//
+//static void swe_eta2h(SWE_Solver *solver){
+//    physField *phys = solver->phys;
+//    const int K = phys->grid->K;
+//    const int Np = phys->cell->Np;
+//    const int Nfield = phys->Nfield;
+//    dg_real *f_Q = phys->f_Q;
+//
+//    register int k,n,sk;
+//    for(k=0;k<K;k++){
+//        for(n=0;n<Np;n++){
+//            sk = k*Np+n;
+//            dg_real bot = solver->bot[sk];
+//            f_Q[sk*Nfield] += bot;
+//        }
+//    }
+//}
 
-    register int k,n,sk;
-    for(k=0;k<K;k++){
-        for(n=0;n<Np;n++){
-            sk = k*Np+n;
-            dg_real bot = solver->bot[sk];
-            f_Q[sk*Nfield] -= bot;
-        }
-    }
-}
+void swe_run(){
 
-static void swe_eta2h(SWE_Solver *solver){
-    physField *phys = solver->phys;
-    const int K = phys->grid->K;
-    const int Np = phys->cell->Np;
-    const int Nfield = phys->Nfield;
-    dg_real *f_Q = phys->f_Q;
-
-    register int k,n,sk;
-    for(k=0;k<K;k++){
-        for(n=0;n<Np;n++){
-            sk = k*Np+n;
-            dg_real bot = solver->bot[sk];
-            f_Q[sk*Nfield] += bot;
-        }
-    }
-}
-
-void swe_run(SWE_Solver *solver){
     /* Runge-Kutta time evaluation coefficient */
     double rk4a[5], rk4b[5], rk4c[6];
     swe_rk_parameter(rk4a, rk4b, rk4c);
 
-    physField *phys = solver->phys;
-
+    extern SWE_Solver solver;
+    dg_phys *phys = solver.phys;
     /* store loop condition */
     int     INTRK, tstep=0;
-    int     procid = phys->mesh->procid;
-    double  time    = 0.0;
+    int     procid = dg_mesh_procid(dg_phys_mesh(phys));
+    double  time = 0.0;
     double  tloc = 0.0;
-    double  ftime   = solver->ftime;
+    double  ftime = solver.ftime;
     double  dt;  /* delta time */
-    /* save initial condition */
-    swe_save_var(solver, tstep++, time);
-    pf_limit_BJ2d(phys, 1.0);
-    swe_ppreserve(solver);
 
+    /* save initial condition */
+    swe_save_var(tstep++, time);
+    phys->limit(phys, 2.0);
+    swe_ppreserve(phys);
     double mpitime0 = MPI_Wtime();
 
     /* time step loop  */
     while (time<ftime){
         /* save result */
-        swe_save_var(solver, tstep++, time);
-
+        swe_save_var(tstep++, time);
         /* calculate time interval */
-        dt = swe_time_interval(solver);
-
-        //if(dt<1e-4) dt = 1e-4;
+        dt = swe_time_interval(phys);
         /* adjust final step to end exactly at FinalTime */
         if (time+dt > ftime) { dt = ftime-time; }
-
-         if(!procid){
-             printf("Process:%f, dt:%f\r", time/ftime, dt);
-         }
+        if(!procid){ printf("Process:%f, dt:%f\r", time/ftime, dt); }
 
         for (INTRK=1; INTRK<=5; ++INTRK) {
             /* compute rhs of equations */
             const dg_real fdt = (dg_real)dt;
             const dg_real fa = (dg_real)rk4a[INTRK-1];
             const dg_real fb = (dg_real)rk4b[INTRK-1];
-            pf_set_openbc(phys, time+rk4c[INTRK-1]*dt, time_interp_linear);
-            swe_rhs(solver, fa, fb, fdt);
+
+            phys->obc_update(phys, time+rk4c[INTRK-1]*dt);
+            swe_rhs(phys, fa, fb, fdt);
             //swe_h2eta(solver);
-            pf_limit_BJ2d(phys, 1.0);
+            phys->limit(phys, 1.0);
             //swe_eta2h(solver);
-            //pf_vert_limit(phys);
-            swe_ppreserve(solver);
+            swe_ppreserve(phys);
         }
         /* increment current time */
         time += dt;
@@ -104,15 +93,14 @@ void swe_run(SWE_Solver *solver){
     double elapsetime = mpitime1 - mpitime0;
 
     // last
-    swe_save_var(solver, tstep++, time);
+    swe_save_var(tstep++, time);
 
-    if(!procid)
-        printf("proc: %d, time taken: %lg\n", procid, elapsetime);
+    if(!procid) {printf("proc: %d, time taken: %lg\n", procid, elapsetime);}
 
     return;
 }
 
-void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c){
+static void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c){
     /* low storage RK coefficients */
     rk4a[0] =              0.0;
     rk4a[1] =  -567301805773.0 / 1357537059087.0;
@@ -151,38 +139,36 @@ void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c){
  * dt   | double | delta time
  *
  */
-double swe_time_interval(SWE_Solver *solver){
+static double swe_time_interval(dg_phys *phys){
 
-    double dt   = 1e4;
-    const double gra  = solver->gra;
-    const double hcrit = solver->hcrit;
+    extern SWE_Solver solver;
 
-    physField *phys = solver->phys;
-    const int Np = phys->cell->Np;
-    const int K = phys->grid->K;
-    const int Nfield = phys->Nfield;
+    double dt = 1e4;
+    const double gra  = solver.gra;
+    const double hcrit = solver.hcrit;
 
+    const int Np = dg_cell_Np( dg_phys_cell(phys) );
+    const int K = dg_grid_K( dg_phys_grid(phys) );
+    const int Nfield = dg_phys_Nfield(phys);
+    dg_real *f_Q = dg_phys_f_Q(phys);
     register int k,n;
-    double gdt;
     dg_real h,u,v;
 
     for(k=0;k<K;k++){
-        double len = phys->region->len[k];
+        double len = dg_region_len(dg_phys_region(phys))[k];
         double c = 1e-10;
         int isdry = 0;
         for(n=0;n<Np;n++){
             int ind = (k*Np+n)*Nfield;
-            h = phys->f_Q[ind++];
-            u = phys->f_Q[ind++]; u /= h;
-            v = phys->f_Q[ind  ]; v /= h;
+            h = f_Q[ind++];
+            u = f_Q[ind++]; u /= h;
+            v = f_Q[ind  ]; v /= h;
 
-            if(h<hcrit){
-                isdry = 1;
-            }
-            c = max(c, sqrt(gra*h)+sqrt(u*u+v*v));
-        }
-        if(isdry){ continue; } // jump this cell
-        dt = min(dt, len/(double)c);
+            if(h<hcrit){ isdry = 1; }
+        c = max(c, sqrt(gra*h)+sqrt(u*u+v*v));
+    }
+    if(isdry){ continue; } // jump this cell
+        dt = min(dt, len/c);
 #if 0
         int procid;
         MPI_Comm_rank(MPI_COMM_WORLD, &procid);
@@ -190,7 +176,8 @@ double swe_time_interval(SWE_Solver *solver){
 #endif
     }
     /* gather all the delta time in all process */
-    dt = dt*solver->cfl;
+    double gdt;
+    dt = dt*solver.cfl;
     MPI_Allreduce(&dt, &gdt, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
     return gdt;
 }
@@ -206,31 +193,32 @@ double swe_time_interval(SWE_Solver *solver){
  *
  * @param[in,out] solver SWE_Solver2d pointer
  */
-void swe_ppreserve(SWE_Solver *solver){
+static void swe_ppreserve(dg_phys *phys){
 
-    physField *phys = solver->phys;
+    const int Nfield = dg_phys_Nfield(phys);
+    const int Np = dg_cell_Np( dg_phys_cell(phys) );
+    const int K = dg_grid_K( dg_phys_grid(phys) );
 
-    const int Nfield = phys->Nfield;
-    const int Np = phys->cell->Np;
-    const int K = phys->grid->K;
-    const double hcrit = solver->hcrit;
+    extern SWE_Solver solver;
+    const double hcrit = solver.hcrit;
 
     register int i,k,ind;
 
-    pf_cellMean(phys);
-
+    phys->cell_mean(phys);
+    dg_real *c_Q = dg_phys_c_Q(phys);
+    dg_real *f_Q = dg_phys_f_Q(phys);
     for(k=0;k<K;k++){
         ind = k*Nfield; /* index of k-th cell */
-        dg_real hmean  = phys->c_Q[ind];
-        dg_real qxmean = phys->c_Q[ind+1];
-        dg_real qymean = phys->c_Q[ind+2];
+        dg_real hmean  = c_Q[ind];
+        dg_real qxmean = c_Q[ind+1];
+        dg_real qymean = c_Q[ind+2];
         /* correct negative water depth */
         if(hmean<0.0){
             for(i=0;i<Np;i++) {
                 ind = (k*Np + i)*Nfield;
-                phys->f_Q[ind  ] -= hmean;
-                phys->f_Q[ind+1]  = 0.0;
-                phys->f_Q[ind+2]  = 0.0;
+                f_Q[ind  ] -= hmean;
+                f_Q[ind+1]  = 0.0;
+                f_Q[ind+2]  = 0.0;
             }
             hmean = 0.0;
             qxmean = 0.0;
@@ -238,11 +226,11 @@ void swe_ppreserve(SWE_Solver *solver){
         }
 
         ind = k*Np*Nfield; /* index of first node */
-        dg_real hmin = phys->f_Q[ind];
+        dg_real hmin = f_Q[ind];
         /* compute minimum water depth */
         for(i=1;i<Np;i++){
             ind += Nfield;
-            hmin = min(hmin, phys->f_Q[ind]);
+            hmin = min(hmin, f_Q[ind]);
         }
         /* positive operator */
         dg_real theta;
@@ -254,13 +242,13 @@ void swe_ppreserve(SWE_Solver *solver){
         /* reconstruction */
         for(i=0;i<Np;i++){
             ind = (k*Np + i)*Nfield;
-            phys->f_Q[ind  ] = (phys->f_Q[ind  ] - hmean )*theta + hmean;
-            phys->f_Q[ind+1] = (phys->f_Q[ind+1] - qxmean)*theta + qxmean;
-            phys->f_Q[ind+2] = (phys->f_Q[ind+2] - qymean)*theta + qymean;
+            f_Q[ind  ] = (f_Q[ind  ] - hmean )*theta + hmean;
+            f_Q[ind+1] = (f_Q[ind+1] - qxmean)*theta + qxmean;
+            f_Q[ind+2] = (f_Q[ind+2] - qymean)*theta + qymean;
 
-            if(phys->f_Q[ind]<hcrit){
-                phys->f_Q[ind+1] = 0.0;
-                phys->f_Q[ind+2] = 0.0;
+            if(f_Q[ind]<hcrit){
+                f_Q[ind+1] = 0.0;
+                f_Q[ind+2] = 0.0;
             }
         }
     }
