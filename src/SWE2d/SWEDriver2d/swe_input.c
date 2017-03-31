@@ -10,10 +10,10 @@ static SWE_Run_Type swe_read_command(int argc, char **argv);
 static void swe_create_inputfile(char *filename);
 
 void swe_input(int argc, char **argv){
-    SWE_Run_Type run_type = swe_read_command(argc, argv);
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
 
+    SWE_Run_Type run_type = swe_read_command(argc, argv);
     char helpinfo[] = HEAD_LINE "DGOM:\n" HEAD_LINE "2d swe problem\n"
             HEAD_LINE "Optional features:\n"
             HEAD_LINE "   -help          print help information;\n"
@@ -24,23 +24,28 @@ void swe_input(int argc, char **argv){
             HEAD_LINE "\n"
             HEAD_LINE "   mpirun -n 2 -host localhost ./swe2d -run swe_parameter.inc\n";
 
-    if(run_type == SWE_HELP){
-        if(!procid) { printf("%s", helpinfo); } exit(0);
-    }else if(run_type == SWE_CREATE_INPUT){
-        if(!procid) { swe_create_inputfile(argv[2]); } exit(0);
-    }else if(run_type == SWE_RUN){
-        extern SWE_Solver solver;
-        strcpy(solver.filename, argv[2]); // set the input file name
-        printf(HEAD_LINE " input file: %s\n", solver.filename);
+    extern SWE_Solver solver;
+    switch (run_type){
+        case SWE_HELP:
+            if(!procid) { printf("%s", helpinfo); } exit(0);
+        case SWE_CREATE_INPUT:
+            if(!procid) { swe_create_inputfile(argv[2]); } exit(0);
+        case SWE_RUN:
+            strcpy(solver.filename, argv[2]); // set the input file name
+            printf(HEAD_LINE " input file: %s\n", solver.filename);
+            break;
+        case SWE_UNKNOWN:
+            fprintf(stderr, "%s (%d), Unknown input parameter\n", __FUNCTION__, __LINE__);
     }
     return;
 }
 
 static SWE_Run_Type swe_read_command(int argc, char **argv){
-    SWE_Run_Type run_type = SWE_RUN; // default
+    SWE_Run_Type run_type = SWE_UNKNOWN; // default
 
     char help_str[] = "-help";
     char pre_str[] = "-create_input";
+    char run_str[] = "-run";
 
     register int i;
     for(i=0;i<argc;i++){
@@ -48,6 +53,8 @@ static SWE_Run_Type swe_read_command(int argc, char **argv){
             run_type = SWE_HELP;
         }else if(!(memcmp(argv[i], pre_str, strlen(pre_str) ))){
             run_type = SWE_CREATE_INPUT;
+        }else if(!(memcmp(argv[i], pre_str, strlen(run_str) ))){
+            run_type = SWE_RUN;
         }
     }
     return run_type;
@@ -79,8 +86,9 @@ static arg_section** swe_create_section(){
     /// 3. section: time info
     char timeinfo[] = HEAD_LINE "time info (2 parameters):\n"
             HEAD_LINE "    1. CFL number;\n"
-            HEAD_LINE "    2. final time;\n";
-    var_num = 2;
+            HEAD_LINE "    2. dt;\n"
+            HEAD_LINE "    3. final time;\n";
+    var_num = 3;
     section_p[ind++] = section_create(timeinfo, var_num);
     /// 4. section: physical info
     char physinfo[] = HEAD_LINE "physical parameter (3 parameters)\n"
@@ -90,10 +98,11 @@ static arg_section** swe_create_section(){
             HEAD_LINE "    4. initial condition file (h, hu, hv, b);\n";
     var_num = 4;
     section_p[ind++] = section_create(physinfo, var_num);
-    /// 5. section: LDG info
-    char LDGinfo[] = HEAD_LINE "LDG parameter for viscosity term (1 parameters)\n"
-            HEAD_LINE "    1. C12\n";
-    var_num = 1;
+    /// 5. section: result info
+    char LDGinfo[] = HEAD_LINE "information for output (2 parameters)\n"
+            HEAD_LINE "    1. filename;\n"
+            HEAD_LINE "    2. output time interval;\n";
+    var_num = 2;
     section_p[ind++] = section_create(LDGinfo, var_num);
 
     return section_p;

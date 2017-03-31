@@ -14,7 +14,7 @@ program f90tst_vars4
   implicit none
 
   ! This is the name of the data file we will create.
-  character (len = *), parameter :: INPUT_FILE_NAME = "f90tst_vars4.nc"
+  character (len = *), parameter :: FILE_NAME = "f90tst_vars4.nc"
 
   integer, parameter :: MAX_DIMS = 2
   integer, parameter :: NX = 40, NY = 4096
@@ -40,7 +40,7 @@ program f90tst_vars4
 
   ! take filename from command-line argument if there is any
   if (my_rank .EQ. 0) then
-      filename = INPUT_FILE_NAME
+      filename = FILE_NAME
       err = get_args(cmd, filename)
   endif
   call MPI_Bcast(err, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)

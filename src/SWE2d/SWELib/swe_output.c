@@ -54,6 +54,8 @@ void swe_output(){
     vararray[2] = time; vararray[3] = h;
     vararray[4] = qx;   vararray[5] = qy;
     vararray[6] = bot;
+
+    /* outfilename */
     NC_File *file = nc_file_create("swe2d.", procid, nprocs, ndim, dimarray, nvar, vararray);
     free(dimarray);
     free(vararray);

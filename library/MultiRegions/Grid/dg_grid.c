@@ -5,11 +5,11 @@
 #include "dg_grid_BS.h"
 
 /* allocate and assignment the vertex coordinate in 2d dg_grid object */
-void dg_grid_set_vert2d(dg_grid *grid, double *vx, double *vy, double *vz);
+static void dg_grid_set_vert2d(dg_grid *grid, double *vx, double *vy, double *vz);
 /* allocate and assignment the vertex coordinate in 3d dg_grid object */
-void dg_grid_set_vert3d(dg_grid *grid, double *vx, double *vy, double *vz);
+static void dg_grid_set_vert3d(dg_grid *grid, double *vx, double *vy, double *vz);
 /* partition of the whole grid into each process */
-void dg_grid_partition(dg_grid *grid);
+static void dg_grid_partition(dg_grid *grid);
 
 /**
  * @brief creator for generating dg_grid structure.

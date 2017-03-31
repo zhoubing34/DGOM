@@ -93,7 +93,7 @@
 !       neigh(2,nfaces,i)     local and processor ids of block i's neighbors,
 !                               at i's refinement level. If a neighbor does 
 !                               not exist both values are set to -1, unless 
-!                               that face2d is at an external domain boundary
+!                               that face is at an external domain boundary
 !                               where non-periodic boundary conditions are to
 !                               be applied, in which case these are set to -20
 !                               or less, depending on the boundary conditions

@@ -3,43 +3,9 @@
 #define DEBUG 0
 
 /* private function */
-void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
-double swe_time_interval(dg_phys *phys);
-void swe_ppreserve(dg_phys *phys);
-
-//static void swe_h2eta(SWE_Solver *solver){
-//    dg_phys *phys = solver->phys;
-//    const int K = phys->grid->K;
-//    const int Np = phys->cell->Np;
-//    const int Nfield = phys->Nfield;
-//    dg_real *f_Q = phys->f_Q;
-//
-//    register int k,n,sk;
-//    for(k=0;k<K;k++){
-//        for(n=0;n<Np;n++){
-//            sk = k*Np+n;
-//            dg_real bot = solver->bot[sk];
-//            f_Q[sk*Nfield] -= bot;
-//        }
-//    }
-//}
-//
-//static void swe_eta2h(SWE_Solver *solver){
-//    physField *phys = solver->phys;
-//    const int K = phys->grid->K;
-//    const int Np = phys->cell->Np;
-//    const int Nfield = phys->Nfield;
-//    dg_real *f_Q = phys->f_Q;
-//
-//    register int k,n,sk;
-//    for(k=0;k<K;k++){
-//        for(n=0;n<Np;n++){
-//            sk = k*Np+n;
-//            dg_real bot = solver->bot[sk];
-//            f_Q[sk*Nfield] += bot;
-//        }
-//    }
-//}
+static void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
+static double swe_time_interval(dg_phys *phys);
+static void swe_ppreserve(dg_phys *phys);
 
 void swe_run(){
 
@@ -53,7 +19,8 @@ void swe_run(){
     int     INTRK, tstep=0;
     int     procid = dg_mesh_procid(dg_phys_mesh(phys));
     double  time = 0.0;
-    double  tloc = 0.0;
+    double  userDt = solver.dt;
+    double  outDt = solver.outDt;
     double  ftime = solver.ftime;
     double  dt;  /* delta time */
 
@@ -66,12 +33,13 @@ void swe_run(){
     /* time step loop  */
     while (time<ftime){
         /* save result */
-        swe_save_var(tstep++, time);
+        if(time > outDt*tstep) {swe_save_var(tstep++, time);}
         /* calculate time interval */
         dt = swe_time_interval(phys);
+        if(dt<userDt) dt = userDt;
         /* adjust final step to end exactly at FinalTime */
         if (time+dt > ftime) { dt = ftime-time; }
-        if(!procid){ printf("Process:%f, dt:%f\r", time/ftime, dt); }
+        if(!procid){ printf("Process:%f, dt:%f\n", time/ftime, dt); }
 
         for (INTRK=1; INTRK<=5; ++INTRK) {
             /* compute rhs of equations */
@@ -96,7 +64,6 @@ void swe_run(){
     swe_save_var(tstep++, time);
 
     if(!procid) {printf("proc: %d, time taken: %lg\n", procid, elapsetime);}
-
     return;
 }
 
@@ -121,23 +88,16 @@ static void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c){
 }
 
 /**
- * @brief
- * Predict the wave speed and give local delta time
+ * @brief Predict the wave speed and give local delta time
  *
  * @details
  * The wave speed is given as \f[ c = \sqrt{gh}+\left| \mathbf{u} \right| \f],
  * and the delta time is derived \f[ dt = dx/dt \f], while \f$ dx \f$ is the
  * characteristic length.
  *
- * @param[PhysDomain2d*] phys
- * @param[SWE_Solver2d*] solver
+ * @param[in] phys pointer to dg_phys structure;
  *
- * @return
- * return values:
- * name     | type     | description of value
- * -------- |----------|----------------------
- * dt   | double | delta time
- *
+ * @return dt calculation time interval.
  */
 static double swe_time_interval(dg_phys *phys){
 
@@ -191,7 +151,7 @@ static double swe_time_interval(dg_phys *phys){
  * The positive operator will reconstruct the conserve variables in each element
  * to eliminate the negative water depth.
  *
- * @param[in,out] solver SWE_Solver2d pointer
+ * @param[in,out] phys pointer to dg_phys structure;
  */
 static void swe_ppreserve(dg_phys *phys){
 

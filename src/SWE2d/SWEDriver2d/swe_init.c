@@ -1,4 +1,5 @@
 #include "swe2d.h"
+#include "../SWELib/swe_lib.h"
 
 #define DEBUG 0
 
@@ -80,9 +81,13 @@ static dg_phys* user_phys_init(dg_grid *grid){
     extern SWE_Solver solver;
     sec = sec_p[3];
     sscanf(sec->arg_vec_p[0], "%lf\n", &(solver.cfl));
-    sscanf(sec->arg_vec_p[1], "%lf\n", &(solver.ftime));
+    sscanf(sec->arg_vec_p[1], "%lf\n", &(solver.dt));
+    sscanf(sec->arg_vec_p[2], "%lf\n", &(solver.ftime));
+    sscanf(sec->arg_vec_p[3], "%lf\n", &(solver.outDt));
     if(!procid) printf(HEAD_LINE " cfl: %lf\n", solver.cfl);
+    if(!procid) printf(HEAD_LINE " dt: %lf\n", solver.dt);
     if(!procid) printf(HEAD_LINE " final time: %lf\n", solver.ftime);
+    if(!procid) printf(HEAD_LINE " output time interval: %lf\n", solver.outDt);
 
     /// 4. initial condition
     char filename[MAX_NAME_LENGTH];

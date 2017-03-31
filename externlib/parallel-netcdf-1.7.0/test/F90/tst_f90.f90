@@ -61,7 +61,7 @@ program netcdfTest
   ! Local variables
   integer (kind = EightByteInt), parameter :: numLats = 4, numLons = 3, &
                         numFrTimes = 2, timeStringLen = 20
-  character (len = *), parameter :: INPUT_FILE_NAME = "tst_f90.nc"
+  character (len = *), parameter :: FILE_NAME = "tst_f90.nc"
   integer :: counter, err, ierr, get_args
   real, dimension(numLons, numLats, numFrTimes) :: pressure
   integer (kind = FourByteInt), dimension(numFrTimes) :: frTimeVals
@@ -79,7 +79,7 @@ program netcdfTest
 
   ! take filename from command-line argument if there is any
   if (my_rank .EQ. 0) then
-      filename = INPUT_FILE_NAME
+      filename = FILE_NAME
       err = get_args(cmd, filename)
   endif
   call MPI_Bcast(err, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)

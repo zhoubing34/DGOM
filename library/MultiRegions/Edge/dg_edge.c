@@ -7,7 +7,7 @@
 #include "dg_edge_node_map.h"
 #include "dg_edge_surfinfo.h"
 
-void dg_edge_setinfo2d(dg_edge *edge);
+static void dg_edge_setinfo2d(dg_edge *edge);
 
 /**
  * @brief creator for generating dg_edge structure.

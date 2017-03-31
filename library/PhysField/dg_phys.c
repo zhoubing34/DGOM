@@ -16,8 +16,8 @@
 static void dg_phys_cell_mesn(dg_phys *phys);
 static int dg_phys_fetch_cell_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
 static int dg_phys_fetch_node_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
-void dg_phys_obc_add(dg_phys *phys, char *filename);
-void dg_phys_obc_update(dg_phys *phys, double elapseTime);
+static void dg_phys_obc_add(dg_phys *phys, char *filename);
+static void dg_phys_obc_update(dg_phys *phys, double elapseTime);
 static void dg_phys_init_file(dg_phys *phys, char *casename);
 static void dg_phys_set_limiter(dg_phys *phys, Limiter_Type type);
 static void dg_phys_set_indicator(dg_phys *phys, Indicator_Type type);

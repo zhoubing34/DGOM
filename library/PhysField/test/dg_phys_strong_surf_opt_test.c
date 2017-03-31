@@ -59,7 +59,7 @@ int dg_phys_strong_surf_opt2d_test(dg_phys *phys, int verbose){
         }
     }
 
-    dg_phys_strong_surf_opt2d(phys, wall_func, wall_func, nodal_flux, numerical_flux);
+    dg_phys_strong_surf_opt2d(phys, wall_func, wall_func, NULL, nodal_flux, numerical_flux);
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);

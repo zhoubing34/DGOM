@@ -15,7 +15,7 @@ program tst_flarge
 
   integer :: ncFileID, dimID, varID1, varID2 
   integer(KIND=MPI_OFFSET_KIND) :: BIG_DIMENSION = 300000000
-  character (len = *), parameter :: INPUT_FILE_NAME = "tst_flarge.nc"
+  character (len = *), parameter :: FILE_NAME = "tst_flarge.nc"
   character (len = *), parameter :: dimName = "really_big_dimension"
   character (len = *), parameter :: var1Name = "TweedleDum"
   character (len = *), parameter :: var2Name = "TweedleDee"
@@ -35,7 +35,7 @@ program tst_flarge
 
   ! take filename from command-line argument if there is any
   if (my_rank .EQ. 0) then
-      filename = INPUT_FILE_NAME
+      filename = FILE_NAME
       err = get_args(cmd, filename)
   endif
   call MPI_Bcast(err, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)

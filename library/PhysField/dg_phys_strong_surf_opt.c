@@ -81,7 +81,7 @@ void dg_phys_strong_surf_opt2d(dg_phys *phys,
                     non_slipwall_func(nx, ny, f_M, f_P);
                     break;
                 default: /// open boundary condition
-                    obc_func(nx, ny, f_M, ftype, f_P);
+                    obc_func(nx, ny, f_M, f_ext+idP*Nfield, ftype, f_P);
                     //for(fld=0;fld<Nfield;fld++){ f_P[fld] = f_ext[idP*Nfield+fld]; }
                     break;
             }
