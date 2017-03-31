@@ -53,7 +53,7 @@ static SWE_Run_Type swe_read_command(int argc, char **argv){
             run_type = SWE_HELP;
         }else if(!(memcmp(argv[i], pre_str, strlen(pre_str) ))){
             run_type = SWE_CREATE_INPUT;
-        }else if(!(memcmp(argv[i], pre_str, strlen(run_str) ))){
+        }else if(!(memcmp(argv[i], run_str, strlen(run_str) ))){
             run_type = SWE_RUN;
         }
     }
@@ -99,11 +99,11 @@ static arg_section** swe_create_section(){
     var_num = 4;
     section_p[ind++] = section_create(physinfo, var_num);
     /// 5. section: result info
-    char LDGinfo[] = HEAD_LINE "information for output (2 parameters)\n"
+    char outinfo[] = HEAD_LINE "information for output (2 parameters)\n"
             HEAD_LINE "    1. filename;\n"
             HEAD_LINE "    2. output time interval;\n";
     var_num = 2;
-    section_p[ind++] = section_create(LDGinfo, var_num);
+    section_p[ind++] = section_create(outinfo, var_num);
 
     return section_p;
 }

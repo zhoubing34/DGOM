@@ -20,3 +20,5 @@ target_link_libraries(swe2d swe2d_lib)
 
 # install command
 install(TARGETS swe2d RUNTIME DESTINATION bin)
+# install examples
+install(DIRECTORY example/ DESTINATION test/SWE2d)

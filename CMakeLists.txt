@@ -43,5 +43,4 @@ add_subdirectory(externlib)
 add_subdirectory(src)       # source
 add_subdirectory(library)   # static library
 add_subdirectory(doc)       # docs
-add_subdirectory(test)      # test example
 

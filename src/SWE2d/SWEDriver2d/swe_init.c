@@ -33,6 +33,7 @@ static dg_grid *swe_user_init_grid(){
     char casename[MAX_NAME_LENGTH];
     arg_section *sec = sec_p[0];
     strcpy(casename, sec->arg_vec_p[0]);
+
     if(!procid){ printf(HEAD_LINE " casename: %s\n", casename); }
     /// 1. cell info
     sec = sec_p[1];
@@ -83,30 +84,34 @@ static dg_phys* user_phys_init(dg_grid *grid){
     sscanf(sec->arg_vec_p[0], "%lf\n", &(solver.cfl));
     sscanf(sec->arg_vec_p[1], "%lf\n", &(solver.dt));
     sscanf(sec->arg_vec_p[2], "%lf\n", &(solver.ftime));
-    sscanf(sec->arg_vec_p[3], "%lf\n", &(solver.outDt));
+
     if(!procid) printf(HEAD_LINE " cfl: %lf\n", solver.cfl);
     if(!procid) printf(HEAD_LINE " dt: %lf\n", solver.dt);
     if(!procid) printf(HEAD_LINE " final time: %lf\n", solver.ftime);
-    if(!procid) printf(HEAD_LINE " output time interval: %lf\n", solver.outDt);
+
 
     /// 4. initial condition
     char filename[MAX_NAME_LENGTH];
     sec = sec_p[4];
-    /* 0. read gra */
-    sscanf(sec->arg_vec_p[0], "%lf\n", &(solver.gra));
-    /* 1. read hcrit */
-    sscanf(sec->arg_vec_p[1], "%lf\n", &(solver.hcrit));
-    /* 2. read Manning friction coefficient */
-    strcpy(filename, sec->arg_vec_p[2]); // manning coefficient file;
+    sscanf(sec->arg_vec_p[0], "%lf\n", &(solver.gra)); /* 0. read gra */
+    sscanf(sec->arg_vec_p[1], "%lf\n", &(solver.hcrit)); /* 1. read hcrit */
+    strcpy(filename, sec->arg_vec_p[2]); /* 2. read Manning friction coefficient */
     swe_read_manning_frict_file(phys, filename);
-    /* 3. read initial condition */
-    strcpy(filename, sec->arg_vec_p[3]);
+    strcpy(filename, sec->arg_vec_p[3]); /* 3. read initial condition file */
     phys->init_file(phys, filename);
 
     if(!procid) printf(HEAD_LINE " gra: %lf\n", solver.gra);
     if(!procid) printf(HEAD_LINE " hcrit: %lf\n", solver.hcrit);
     if(!procid) printf(HEAD_LINE " Manning friction file: %s\n", filename);
     if(!procid) printf(HEAD_LINE " initial condition file: %s\n", filename);
+
+    /// 5. output info
+    sec = sec_p[5];
+    strcpy(solver.outfilename, sec->arg_vec_p[0]); /* 0. output file name */
+    sscanf(sec->arg_vec_p[1], "%lf\n", &(solver.outDt));
+
+    if(!procid) printf(HEAD_LINE " output file name: %s\n", solver.outfilename);
+    if(!procid) printf(HEAD_LINE " output time interval: %lf\n", solver.outDt);
 
     swe_free_section(sec_p);
     return phys;

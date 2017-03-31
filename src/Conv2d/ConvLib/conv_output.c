@@ -61,7 +61,7 @@ void conv_setoutput(){
     vararray[1] = y;
     vararray[2] = time;
     vararray[3] = h;
-    NC_File *file = nc_file_create("conv2d.", procid, nprocs, ndim, dimarray, nvar, vararray);
+    NC_File *file = nc_file_create("conv2d", ndim, dimarray, nvar, vararray);
 
     /* create files */
     nc_file_define(file);

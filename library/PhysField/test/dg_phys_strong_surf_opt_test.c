@@ -30,6 +30,12 @@ static int wall_func(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP){
     return 0;
 }
 
+static int obc_func(dg_real nx, dg_real ny, dg_real *f_M, dg_real *f_ext, int obc_ind, dg_real *f_P){
+    f_P[0] = f_M[0];
+    f_P[1] = f_M[1];
+    return 0;
+}
+
 int dg_phys_strong_surf_opt2d_test(dg_phys *phys, int verbose){
     int fail = 0;
 
@@ -47,19 +53,20 @@ int dg_phys_strong_surf_opt2d_test(dg_phys *phys, int verbose){
 
     int k,i;
     // initialize and assignment
-    int sk = 0;
     for(k=0;k<K;k++){
         for(i=0;i<Np;i++){
             dg_real u = region->x[k][i];
             dg_real v = region->y[k][i];
+            int sk = k*Np*Nfield + i*Nfield;
+
             f_rhsQ[sk] = 0.0;
-            f_Q[sk++] = u;
-            f_rhsQ[sk] = 0.0;
-            f_Q[sk++] = v;
+            f_Q[sk] = u;
+            f_rhsQ[sk+1] = 0.0;
+            f_Q[sk+1] = v;
         }
     }
 
-    dg_phys_strong_surf_opt2d(phys, wall_func, wall_func, NULL, nodal_flux, numerical_flux);
+    dg_phys_strong_surf_opt2d(phys, wall_func, wall_func, obc_func, nodal_flux, numerical_flux);
 
     if(verbose){
         FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);

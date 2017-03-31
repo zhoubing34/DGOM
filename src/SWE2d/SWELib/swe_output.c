@@ -10,8 +10,6 @@ void swe_output(){
 
     const int K = dg_grid_K( dg_phys_grid(phys) );
     const int Np = dg_cell_Np( dg_phys_cell(phys) );
-    const int procid = dg_grid_procid( dg_phys_grid(phys) );
-    const int nprocs = dg_grid_nprocs( dg_phys_grid(phys) );
 
     /* define dimensions */
     NC_Dim *ne = nc_dim_create("ne", K);
@@ -56,7 +54,11 @@ void swe_output(){
     vararray[6] = bot;
 
     /* outfilename */
-    NC_File *file = nc_file_create("swe2d.", procid, nprocs, ndim, dimarray, nvar, vararray);
+    const int procid = dg_grid_procid( dg_phys_grid(phys) );
+    const int nprocs = dg_grid_nprocs( dg_phys_grid(phys) );
+    printf("procid=%d, nprocs=%d\n", procid, nprocs);
+    NC_File *file = nc_file_create(solver.outfilename, ndim, dimarray, nvar, vararray);
+    printf("procid=%d, outfilename=%s\n", procid, file->name);
     free(dimarray);
     free(vararray);
 

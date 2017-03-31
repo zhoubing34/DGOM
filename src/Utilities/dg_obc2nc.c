@@ -87,10 +87,6 @@ NC_File* create_ncfile(char *file_name){
     strcpy(ncfile_name, file_name);
     strcat(ncfile_name, ".nc");
 
-    int procid, nprocs;
-    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-
     /* read obc info */
     FILE *fp;
     dg_fopen(fp, file_name, "Unable to open obc file");
@@ -139,7 +135,7 @@ NC_File* create_ncfile(char *file_name){
     vararray[0] = vert;
     vararray[1] = time;
     vararray[2] = data;
-    NC_File *obcfile = nc_file_create(file_name, procid, nprocs, ndim, dimarray, nvar, vararray);
+    NC_File *obcfile = nc_file_create(file_name, ndim, dimarray, nvar, vararray);
     /* rename the file */
     free(obcfile->name);
     obcfile->name = ncfile_name;

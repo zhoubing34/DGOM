@@ -1,4 +1,4 @@
-fp = fopen('Rectangle.node', 'r');
+fp = fopen('Channel.node', 'r');
 Nv = fscanf(fp, '%d', 4); Nv = Nv(1);
 data = fscanf(fp, '%d %f %f', [3, Nv]);
 fclose(fp);

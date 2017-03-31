@@ -44,8 +44,7 @@ typedef struct {
 /* public function */
 NC_Dim* nc_dim_create(const char *name, int len);
 NC_Var* nc_var_create(const char *name, int ndim, NC_Dim **dim_vec_p, int type);
-NC_File* nc_file_create(const char *name, int procid, int nprocs, int ndim,
-                        NC_Dim **dim_vec_p, int nvar, NC_Var **var_vec_p);
+NC_File* nc_file_create(const char *name, int ndim, NC_Dim **dim_vec_p, int nvar, NC_Var **var_vec_p);
 void nc_file_define(NC_File *file);
 NC_File* nc_file_read_from_file(const char *name, int procid, int nprocs);
 void nc_file_close(NC_File *file);

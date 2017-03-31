@@ -29,3 +29,5 @@ set(SRC_LIST
 add_executable(conv2d ${SRC_LIST}) # set executable
 target_link_libraries(conv2d conv2d_lib) # set static library
 install(TARGETS conv2d RUNTIME DESTINATION bin) # install command
+
+install(DIRECTORY example/ DESTINATION test/Conv2d)

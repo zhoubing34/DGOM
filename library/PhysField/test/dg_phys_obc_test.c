@@ -25,7 +25,8 @@ int dg_phys_obc_test(dg_phys *phys, int verbose){
             }
         }
     }
-    int *OBnodes = vector_int_create(NOBnodes), sk=0;
+    int *OBnodes = vector_int_create(NOBnodes);
+    int sk=0;
     for(k=0;k<K;k++){
         for(f=0;f<Nfaces;f++){
             if(EToBS[k][f] >= FACE_OPENBS){
@@ -37,7 +38,7 @@ int dg_phys_obc_test(dg_phys *phys, int verbose){
         }
     }
 
-    double ftime = 1.1, dt = 0.2, time;
+    double ftime = 44714, dt = 600, time;
     /* print the open boundary value in files */
     FILE *fp = create_log(__FUNCTION__, procid, nprocs);
     /* print coordinates */
@@ -45,11 +46,11 @@ int dg_phys_obc_test(dg_phys *phys, int verbose){
     for(n=0;n<NOBnodes;n++){
         fprintf(fp, "%f, ", dg_phys_region(phys)->x[0][OBnodes[n]]);
     }
-    fprintf(fp, "]\ny = [");
+    fprintf(fp, "]\n\ny = [");
     for(n=0;n<NOBnodes;n++){
         fprintf(fp, "%f, ", dg_phys_region(phys)->y[0][OBnodes[n]]);
     }
-    fprintf(fp, "]\n");
+    fprintf(fp, "]\n\n");
 
     /* print values */
     for(time=-0.1;time<ftime;time+=dt){
@@ -60,7 +61,7 @@ int dg_phys_obc_test(dg_phys *phys, int verbose){
                 fprintf(fp, "%f, ", dg_phys_f_extQ(phys)[OBnodes[n]*Nfield + fld]);
             }
         }
-        fprintf(fp, "]\n");
+        fprintf(fp, "]\n\n");
     }
     fclose(fp);
 

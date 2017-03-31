@@ -36,22 +36,20 @@ int dg_phys_strong_vol_opt2d_test(dg_phys *phys, int verbose){
     int k,i;
     dg_real rhs_ext[Np*Nfield*K];
     // assignment
-    int sk = 0;
     for(k=0;k<K;k++){
         for(i=0;i<Np;i++){
             dg_real u = region->x[k][i];
             dg_real v = region->y[k][i];
+
+            int sk = k*Np*Nfield + i*Nfield;
             f_Q[sk] = u; // field 0 of -(dEdx + dGdy)
-            rhs_ext[sk++] = -(v + t);
-            f_Q[sk] = v; // field 1 of -(dEdx + dGdy)
-            rhs_ext[sk++] = -(s - t*u);
+            rhs_ext[sk] = -(v + t);
+            f_Q[sk+1] = v; // field 1 of -(dEdx + dGdy)
+            rhs_ext[sk+1] = -(s - t*u);
         }
     }
 
-    double clockT1 = MPI_Wtime();
     dg_phys_strong_vol_opt2d(phys, nodal_flux);
-    double clockT2 = MPI_Wtime();
-
     fail = vector_double_test(__FUNCTION__, f_rhsQ, rhs_ext, Np * Nfield * K);
 
     if(verbose){

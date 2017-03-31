@@ -37,7 +37,9 @@ void dg_phys_strong_vol_opt2d(dg_phys *phys, Nodal_Flux_Fun nodal_flux){
     dg_real **dsdx_p = region->dsdx;
     dg_real **dsdy_p = region->dsdy;
 
-    dg_real Eflux[Np*Nfield], Gflux[Np*Nfield], rhs[Nfield];
+    dg_real *Eflux = vector_real_create(Np*Nfield);
+    dg_real *Gflux = vector_real_create(Np*Nfield);
+    dg_real *rhs = vector_real_create(Nfield);
     for(k=0;k<K;k++){
         dg_real *var = f_Q + k*Np*Nfield; // variable in k-th element
         // calculate flux term
@@ -93,5 +95,9 @@ void dg_phys_strong_vol_opt2d(dg_phys *phys, Nodal_Flux_Fun nodal_flux){
             }
         }
     }
+
+    vector_real_free(Eflux);
+    vector_real_free(Gflux);
+    vector_real_free(rhs);
     return;
 }

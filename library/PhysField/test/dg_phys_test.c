@@ -19,10 +19,12 @@ dg_phys *uniform_tri_physfield();
 dg_phys *uniform_quad_physfield();
 dg_phys *rectangle_tri_physfield();
 
-#define Nphys 1
+#define Nphys 3
 typedef dg_phys* (*phys_func)();
 static const phys_func phys_creator[Nphys] = {
+        uniform_tri_physfield,
         uniform_quad_physfield,
+        rectangle_tri_physfield,
 };
 
 /**
@@ -54,15 +56,15 @@ dg_phys *uniform_quad_physfield(){
 }
 
 dg_phys *rectangle_tri_physfield(){
-    dg_cell *tri = dg_cell_creat(N, TRIANGLE);
-    char casename[] = "example/SWE2d/Rectangle/Rectangle";
+    dg_cell *tri = dg_cell_creat(N, QUADRIL);
+    char casename[] = "example/SWE2d/IdealTidalPropagation/Rectangle";
     dg_grid *grid = dg_grid_read_file2d(tri, casename);
     dg_grid_add_BS_file2d(grid, casename);
     dg_region *region = dg_region_create(grid);
     dg_mesh *mesh = dg_mesh_create(region);
     dg_edge *edge = dg_edge_create(mesh);
-    dg_phys *phys = dg_phys_create(Nfield, edge);
-    char obcfile[] = "example/SWE2d/Rectangle/Rectangle.obc4.nc";
+    dg_phys *phys = dg_phys_create(4, edge);
+    char obcfile[] = "example/SWE2d/IdealTidalPropagation/Rectangle.obc.nc";
     phys->obc_add(phys, obcfile);
     return phys;
 }

@@ -102,28 +102,28 @@ void nc_var_print(NC_Var *var){
 }
 /**
  * @brief create pointer to a new nc_file structure.
- * @param name name of NC_file;
- * @param procid process id;
- * @param nprocs number of process;
- * @param ndim number of NC_dim;
- * @param dim_vec_p pointer to the NC_dim* vector;
+ * @param name name of NC_File;
+ * @param ndim number of NC_Dim;
+ * @param dim_vec_p pointer to the NC_Dim* vector;
  * @param nvar number of NC_var;
- * @param var_vec_p pointer to the NC_var* vector;
- * @return file pointer to a new NC_file.
+ * @param var_vec_p pointer to the NC_Var* vector;
+ * @return file pointer to a new NC_File.
  */
-NC_File* nc_file_create(const char *name, int procid, int nprocs,
-                       int ndim, NC_Dim **dim_vec_p,
-                       int nvar, NC_Var **var_vec_p){
+NC_File* nc_file_create(const char *name, int ndim, NC_Dim **dim_vec_p, int nvar, NC_Var **var_vec_p){
 
     NC_File *file = (NC_File*) calloc(1, sizeof(NC_File));
     /* check name length */
-    file->name  = (char *) calloc(strlen(name), sizeof(char));
+    file->name  = (char *) calloc(MAX_NAME_LENGTH, sizeof(char));
+
+    int procid, nprocs;
+    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
     /* assignment */
     file->procid = procid; /* process ncid */
     file->nprocs = nprocs; /* process number */
     /* name */
-    if(snprintf(file->name, NC_MAX_NAME_LEN, "%s%d-%d.nc", name, procid, nprocs) < 0 ){
+    if(snprintf(file->name, NC_MAX_NAME_LEN, "%s.%d-%d.nc", name, procid, nprocs) < 0 ){
         fprintf(stderr, "%s(%d): Error in creating NetCDF output file\n", __FILE__, __LINE__);
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
