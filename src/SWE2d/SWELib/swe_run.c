@@ -50,7 +50,7 @@ void swe_run(){
             phys->obc_update(phys, time+rk4c[INTRK-1]*dt);
             swe_rhs(phys, fa, fb, fdt);
             //swe_h2eta(solver);
-            phys->limit(phys, 2.0);
+            //phys->limit(phys, 2.0);
             //swe_eta2h(solver);
             swe_ppreserve(phys);
         }

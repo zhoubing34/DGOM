@@ -29,7 +29,8 @@ typedef enum{
     CLAMPED_ALL = 5,
     CLAMPED_H = 6,
     CLAMPED_FLOW = 7,
-    FLATHER = 8,
+    FLATHER_H = 8,
+    FLATHER_FLOW = 9,
 } SWE_OBC;
 
 typedef struct{
