@@ -1,4 +1,4 @@
-init_file = 'SolidBodyRotation.init';
+initialize_from_file = 'SolidBodyRotation.init';
 node_file = 'SolidBodyRotation.node';
 
 % read mesh
@@ -40,7 +40,7 @@ plot3(x, y, c, 'r.')
 
 % write to file
 data = [1:Nv; c; u; v];
-fp = fopen(init_file, 'w');
+fp = fopen(initialize_from_file, 'w');
 fprintf(fp, '%d %d\n', Nv, 3);
 fprintf(fp, '%d %20.16f %20.16f %20.16f\n', data);
 fclose(fp);

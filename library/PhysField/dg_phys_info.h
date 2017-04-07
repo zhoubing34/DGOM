@@ -33,7 +33,18 @@ typedef struct dg_phys_info{
     void (*cell_mean)(struct dg_phys_info *phys);
 }dg_phys_info;
 
+/** slip wall and non-slop wall condition */
+typedef int (*Wall_Condition)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP);
+/** open boundary condition */
+typedef int (*OBC_Fun)(dg_real nx, dg_real ny, dg_real *f_M, dg_real *f_ext, int obc_ind, dg_real *f_P);
+/** two dimensional flux terms */
+typedef int (*Nodal_Flux_Fun)(dg_real *var, dg_real *Eflux, dg_real *Gflux);
+/** two dimensional numberical flux function */
+typedef int (*Numerical_Flux)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_real *Fhs);
+
+/** creator functions */
 dg_phys_info* dg_phys_info_create(int Nfields, dg_edge *edge);
+/** free function */
 void dg_phys_info_free(dg_phys_info *phys_info);
 
 #endif //DGOM_DG_PHYS_INFO_H

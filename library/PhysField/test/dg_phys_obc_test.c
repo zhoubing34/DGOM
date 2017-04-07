@@ -54,7 +54,7 @@ int dg_phys_obc_test(dg_phys *phys, int verbose){
 
     /* print values */
     for(time=-0.1;time<ftime;time+=dt){
-        phys->obc_update(phys, time);
+        phys->update_obc_data(phys, time);
         fprintf(fp, "time = %f\nf_ext = [", time);
         for(n=0;n<NOBnodes;n++){
             for(fld=0;fld<Nfield;fld++){

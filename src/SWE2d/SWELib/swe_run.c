@@ -47,7 +47,7 @@ void swe_run(){
             const dg_real fa = (dg_real)rk4a[INTRK-1];
             const dg_real fb = (dg_real)rk4b[INTRK-1];
 
-            phys->obc_update(phys, time+rk4c[INTRK-1]*dt);
+            phys->update_obc_data(phys, time+rk4c[INTRK-1]*dt);
             swe_rhs(phys, fa, fb, fdt);
             //swe_h2eta(solver);
             //phys->limit(phys, 2.0);

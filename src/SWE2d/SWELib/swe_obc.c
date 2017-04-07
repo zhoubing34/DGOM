@@ -36,16 +36,15 @@ static void obc_flather_h(dg_real nx, dg_real ny, dg_real *f_M, dg_real *f_ext, 
     extern SWE_Solver solver;
 
     dg_real hM = f_M[0];
-    dg_real hM_ext =  f_ext[0];
-    dg_real qx_ext =  f_ext[1];
-    dg_real qy_ext =  f_ext[2];
-    dg_real qn_ext =  qx_ext*nx + qy_ext*ny;
-    //dg_real qv_ext = -qx_ext*ny + qy_ext*nx;
-    dg_real qn = qn_ext - sqrt(solver.gra*hM)*(hM_ext - hM);
-    //dg_real qv = qv_ext;
+    dg_real h_ext = f_ext[0];
+    dg_real qx_ext = f_ext[1];
+    dg_real qy_ext = f_ext[2];
+    dg_real qn_ext = qx_ext*nx + qy_ext*ny;
+    dg_real qn = f_M[1]*nx + f_M[2]*ny;
 
-    dg_real hP = hM_ext - (qn_ext - qn)/sqrt(solver.gra*hM);
-    f_P[0] = 2*hP - hM;
+    dg_real hP = h_ext - (qn_ext - qn)/sqrt(solver.gra*hM);
+//    dg_real hP = 2*h_ext + qn/sqrt(solver.gra*hM);
+    f_P[0] = hP;
     f_P[1] = f_M[1];
     f_P[2] = f_M[2];
     f_P[3] = f_M[3];
@@ -56,13 +55,14 @@ static void obc_flather_flow(dg_real nx, dg_real ny, dg_real *f_M, dg_real *f_ex
     extern SWE_Solver solver;
 
     dg_real hM = f_M[0];
-    dg_real hM_ext =  f_ext[0];
+    dg_real h_ext =  f_ext[0];
     dg_real qx_ext =  f_ext[1];
     dg_real qy_ext =  f_ext[2];
     dg_real qn_ext =  qx_ext*nx + qy_ext*ny;
     dg_real qv_ext = -qx_ext*ny + qy_ext*nx;
-    dg_real qn = qn_ext - sqrt(solver.gra*hM)*(hM_ext - hM);
+    dg_real qn = qn_ext - sqrt(solver.gra*hM)*(h_ext - hM);
     dg_real qv = qv_ext;
+//    dg_real qn = - sqrt(solver.gra*hM)*(2*h_ext - hM);
 
     f_P[0] = f_M[0];
     f_P[1] = qn*nx - qv*ny;

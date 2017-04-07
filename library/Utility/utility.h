@@ -22,10 +22,12 @@
 typedef double dg_real; ///< user specific float type
 #define MPI_TYPE MPI_DOUBLE ///< variable type for MPI subroutines
 #define NC_TYPE NC_DOUBLE ///< variable type for netCDF subroutines
+#define dg_sqrt(x) sqrt(x) ///< sqrt operation
 #else
 typedef float dg_real; ///< user specific float type
 #define MPI_TYPE MPI_FLOAT ///< variable type for MPI subroutines
 #define NC_TYPE NC_FLOAT ///< variable type for netCDF subroutines
+#define dg_sqrt(x) sqrtf(x)
 #endif
 
 /* max character length */

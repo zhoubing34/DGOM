@@ -36,13 +36,14 @@ dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
     phys->info = dg_phys_info_create(Nfields, edge);
     phys->obc = dg_phys_obc_create(phys->info);
     phys->limiter = dg_phys_limiter_create(phys->info);
+    phys->ldg = dg_phys_LDG_create(phys->info);
 
     phys->cell_mean = dg_phys_cell_mesn;
-    phys->init_file = dg_phys_init_file;
+    phys->initialize_from_file = dg_phys_init_file;
     phys->fetch_cell_buffer = dg_phys_fetch_cell_buffer;
     phys->fetch_node_buffer = dg_phys_fetch_node_buffer;
-    phys->obc_add = dg_phys_obc_add;
-    phys->obc_update = dg_phys_obc_update;
+    phys->attach_obc_ncfile = dg_phys_obc_add;
+    phys->update_obc_data = dg_phys_obc_update;
     phys->set_limiter = dg_phys_set_limiter;
     phys->set_indicator = dg_phys_set_indicator;
     phys->limit = dg_phys_limit;
@@ -53,6 +54,7 @@ dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
  * @param phys pointer to a dg_phys structure;
  */
 void dg_phys_free(dg_phys *phys){
+    dg_phys_LDG_free(phys->ldg);
     dg_phys_info_free(phys->info);
     dg_phys_obc_free(phys->obc);
     dg_phys_limiter_free(phys->limiter);
@@ -158,34 +160,8 @@ static void dg_phys_init_file(dg_phys *phys, char *init_filename){
     }
     fclose(fp);
 
-    /* read element file */
-    int **EToV = dg_grid_EToV(grid);
-
-    /* assign to node fields */
-    dg_cell *cell = dg_phys_cell(phys);
-    const int Np = dg_cell_Np(cell);
-    const int Nv = dg_cell_Nv(cell);
-    const int K = dg_grid_K(grid);
-
-    dg_real initial_vert_value[Nv*Nfield];
-    dg_real initial_node_value[Np*Nfield];
-    dg_real *f_Q = dg_phys_f_Q(phys);
-    for(k=0;k<K;k++){
-        for(n=0;n<Nv;n++){ // vertex initial values
-            int vertID = EToV[k][n];
-            for(fld=0;fld<Nfield;fld++){
-                initial_vert_value[n*Nfield+fld] = init_value[vertID][fld];
-            }
-        }
-
-        cell->proj_vert2node(cell, Nfield, initial_vert_value, initial_node_value);
-        int sk = k*Np*Nfield;
-        for(n=0;n<Np*Nfield;n++){ // assign to node values
-            f_Q[sk + n] = initial_node_value[n];
-        }
-
-    }
-
+    /* project the vertex values to nodes */
+    grid->proj_vert2node(grid, Nfield, init_value[0], dg_phys_f_Q(phys));
     matrix_real_free(init_value);
     return;
 }

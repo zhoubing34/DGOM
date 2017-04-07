@@ -8,9 +8,8 @@ set(PHYSDOMAIN_SOURCE
         dg_phys_strong_vol_opt.c
         dg_phys_strong_surf_opt.c
         dg_phys_limiter.c
-        #pf_add_LDG_solver.c
-        #pf_strong_viscosity_LDG_flux2d.c
-        #pf_cellMean.c
+        dg_phys_LDG.c
+        dg_phys_strong_LDG_opt.c
         Limiter/dg_phys_limiter_BJ2d.c
         Limiter/dg_phys_indicator_edge.c
         )

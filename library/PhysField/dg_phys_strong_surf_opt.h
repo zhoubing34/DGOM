@@ -7,15 +7,6 @@
 
 #include "dg_phys.h"
 
-/** slip wall and non-slop wall condition */
-typedef int (*Wall_Condition)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP);
-/** open boundary condition */
-typedef int (*OBC_Fun)(dg_real nx, dg_real ny, dg_real *f_M, dg_real *f_ext, int obc_ind, dg_real *f_P);
-/** two dimensional flux terms */
-typedef int (*Nodal_Flux_Fun)(dg_real *var, dg_real *Eflux, dg_real *Gflux);
-/** two dimensional numberical flux function */
-typedef int (*Numerical_Flux)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_real *Fhs);
-
 
 void dg_phys_strong_surf_opt2d
         (dg_phys *phys,

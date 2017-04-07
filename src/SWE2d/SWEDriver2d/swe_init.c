@@ -75,7 +75,7 @@ static dg_phys* user_phys_init(dg_grid *grid){
     char obcfile[MAX_NAME_LENGTH];
     arg_section *sec = sec_p[2];
     strcpy(obcfile, sec->arg_vec_p[0]);
-    if(strlen(obcfile)) { phys->obc_add(phys, obcfile); }
+    if(strlen(obcfile)) { phys->attach_obc_ncfile(phys, obcfile); }
     if(!procid) printf(HEAD_LINE " open boundary file: %s\n", obcfile);
 
     /// 3. time info
@@ -98,7 +98,7 @@ static dg_phys* user_phys_init(dg_grid *grid){
     strcpy(filename, sec->arg_vec_p[2]); /* 2. read Manning friction coefficient */
     swe_read_manning_frict_file(phys, filename);
     strcpy(filename, sec->arg_vec_p[3]); /* 3. read initial condition file */
-    phys->init_file(phys, filename);
+    phys->initialize_from_file(phys, filename);
 
     if(!procid) printf(HEAD_LINE " gra: %lf\n", solver.gra);
     if(!procid) printf(HEAD_LINE " hcrit: %lf\n", solver.hcrit);
@@ -122,11 +122,11 @@ static void swe_read_manning_frict_file(dg_phys *phys, char *filename){
     dg_fopen(fp, filename, "Unable to open manning coefficient file");
 
     dg_cell *cell = dg_phys_cell(phys);
-    const int K = dg_grid_K(dg_phys_grid(phys));
+    dg_grid *grid = dg_phys_grid(phys);
+    const int K = dg_grid_K(grid);
     const int Np = dg_cell_Np(cell);
-    const int Nvert = dg_grid_Nv(dg_phys_grid(phys)); ///< number of vertex in grid;
-    const int Nv = dg_cell_Nv(cell); ///< number of vertex in cell;
-    int k,n,nvert;
+    const int Nvert = dg_grid_Nv(grid); ///< number of vertex in grid;
+    int n,nvert;
     fscanf(fp, "%d\n", &nvert); // read vertex number
     if(Nvert != nvert ){
         fprintf(stderr, "%s (%d): The vertex node number in %s is incorrect\n",
@@ -139,20 +139,10 @@ static void swe_read_manning_frict_file(dg_phys *phys, char *filename){
         fscanf(fp, "%d %lf", &tmp, vert_M+n);
     }
 
-    /* read element file */
-    int **EToV = dg_grid_EToV(dg_phys_grid(phys));
     extern SWE_Solver solver;
     dg_real *Mann = vector_real_create(Np*K);
-
-    dg_real node_Mann[Np], vert_Mann[Nv];
-    for(k=0;k<K;k++) {
-        // vertex initial values
-        for (n=0;n<Nv;n++) { vert_Mann[n] = vert_M[EToV[k][n]]; }
-        cell->proj_vert2node(cell, 1, vert_Mann, node_Mann);
-        // assignment
-        for(n=0;n<Np;n++){ Mann[k*Np+n] = node_Mann[n]; }
-    }
-
+    /* project the vertex value on nodes */
+    grid->proj_vert2node(grid, 1, vert_M, Mann);
     solver.m = Mann;
     vector_real_free(vert_M);
     fclose(fp);

@@ -42,6 +42,9 @@ typedef struct dg_grid{
     int **EToBS; ///< boundary surface type of adjacent element;
     int *EToR; ///< region id of each cell;
     double *vx, *vy, *vz; ///< vertex coordinate;
+
+    /** project the grid vertex values to nodes */
+    void (*proj_vert2node)(struct dg_grid *grid, int Nfield, double *vertval, double *nodeval);
 } dg_grid;
 
 
@@ -50,6 +53,7 @@ void dg_grid_free(dg_grid *grid);
 
 #include "dg_grid_reader.h"
 
+#define dg_grid_cell(grid) grid->cell
 #define dg_grid_K(grid) grid->K
 #define dg_grid_Nv(grid) grid->Nv
 #define dg_grid_EToV(grid) grid->EToV

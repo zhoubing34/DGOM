@@ -54,11 +54,7 @@ void swe_output(){
     vararray[6] = bot;
 
     /* outfilename */
-    const int procid = dg_grid_procid( dg_phys_grid(phys) );
-    const int nprocs = dg_grid_nprocs( dg_phys_grid(phys) );
-    printf("procid=%d, nprocs=%d\n", procid, nprocs);
     NC_File *file = nc_file_create(solver.outfilename, ndim, dimarray, nvar, vararray);
-    printf("procid=%d, outfilename=%s\n", procid, file->name);
     free(dimarray);
     free(vararray);
 

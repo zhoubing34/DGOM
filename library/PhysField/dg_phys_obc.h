@@ -24,7 +24,7 @@ typedef struct dg_phys_obc{
     int *vert; ///< index of vertex in obc file;
     dg_phys_obc_interp_type interp_type; ///< interpolation type;
 
-    /** add open boundary file */
+    /** add NetCDF format open boundary file */
     void (*add_obc)(struct dg_phys_obc *obc, char *filename);
     /** update the external data from open boundary file */
     void (*update_obc)(struct dg_phys_obc *obc, double time);

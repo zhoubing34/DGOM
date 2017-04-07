@@ -10,6 +10,7 @@ static void dg_grid_set_vert2d(dg_grid *grid, double *vx, double *vy, double *vz
 static void dg_grid_set_vert3d(dg_grid *grid, double *vx, double *vy, double *vz);
 /* partition of the whole grid into each process */
 static void dg_grid_partition(dg_grid *grid);
+static void dg_grid_proj_vert2node(dg_grid *grid, int Nfield, double *vertval, double *nodeval);
 
 /**
  * @brief creator for generating dg_grid structure.
@@ -94,6 +95,7 @@ dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, do
     creator->load_balance(grid);
     creator->connect(grid);
     creator->init_BS(grid);
+    grid->proj_vert2node = dg_grid_proj_vert2node;
     return grid;
 }
 
@@ -204,4 +206,41 @@ static void dg_grid_set_vert3d(dg_grid *grid, double *vx, double *vy, double *vz
         grid->vy[i] = vy[i];
         grid->vz[i] = vz[i];
     }
+}
+/**
+ * @brief project the vertex values to nodes.
+ * @param grid
+ * @param Nfield
+ * @param vertval
+ * @param nodeval
+ */
+static void dg_grid_proj_vert2node(dg_grid *grid, int Nfield, double *vertval, double *nodeval){
+
+    /* read element file */
+    int **EToV = dg_grid_EToV(grid);
+
+    int k,n,fld;
+    /* assign to node fields */
+    dg_cell *cell = dg_grid_cell(grid);
+    const int Np = dg_cell_Np(cell);
+    const int Nv = dg_cell_Nv(cell);
+    const int K = dg_grid_K(grid);
+
+    dg_real initial_vert_value[Nv*Nfield];
+    dg_real initial_node_value[Np*Nfield];
+    for(k=0;k<K;k++){
+        for(n=0;n<Nv;n++){ // vertex initial values
+            int vertID = EToV[k][n];
+            for(fld=0;fld<Nfield;fld++){
+                initial_vert_value[n*Nfield+fld] = vertval[vertID*Nfield+fld];
+            }
+        }
+
+        cell->proj_vert2node(cell, Nfield, initial_vert_value, initial_node_value);
+        int sk = k*Np*Nfield;
+        for(n=0;n<Np*Nfield;n++){ // assign to node values
+            nodeval[sk + n] = initial_node_value[n];
+        }
+    }
+    return;
 }

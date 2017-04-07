@@ -5,14 +5,8 @@
 #include "dg_phys_obc.h"
 #include "dg_phys_info.h"
 #include "dg_phys_limiter.h"
+#include "dg_phys_LDG.h"
 
-typedef struct {
-    dg_real *px_Q; ///< dfdx partial derivative for x direction
-    dg_real *py_Q; ///< dfdy partial derivative for y direction
-    dg_real *px_inQ, *px_outQ; ///< send and recv buffers for p_Q
-    dg_real *py_inQ, *py_outQ; ///< send and recv buffers for q_Q
-    dg_real *vis_Q; ///< viscosity on each node
-} pf_LDG_solver;
 /**
  * @brief physical field structure.
  */
@@ -20,19 +14,20 @@ typedef struct dg_phys{
     dg_phys_info *info; ///< pointer to dg_phys_info structure;
     dg_phys_obc *obc; ///< pointer to dg_phys_obc structure;
     dg_phys_limiter *limiter; ///< pointer to dg_phys_limiter structure;
+    dg_phys_LDG *ldg; ///< pointer to dg_phys_LDG structure;
 
     /** cell mean */
     void (*cell_mean)(struct dg_phys *phys);
     /** initialize from input file */
-    void (*init_file)(struct dg_phys *phys, char *filename);
+    void (*initialize_from_file)(struct dg_phys *phys, char *filename);
     /** function to fetch node buffer with other process */
     int (*fetch_node_buffer)(struct dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
     /** function to fetch cell buffer with other process */
     int (*fetch_cell_buffer)(struct dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
-    /** add boundary condition file to physical field */
-    void (*obc_add)(struct dg_phys *phys, char *filename);
+    /** add NetCDF format boundary condition file to physical field */
+    void (*attach_obc_ncfile)(struct dg_phys *phys, char *filename);
     /** obtain the interpolated open boundary data from file */
-    void (*obc_update)(struct dg_phys *phys, double elapseTime);
+    void (*update_obc_data)(struct dg_phys *phys, double elapseTime);
 
     void (*set_limiter)(struct dg_phys *phys, Limiter_Type type);
     void (*set_indicator)(struct dg_phys *phys, Indicator_Type type);

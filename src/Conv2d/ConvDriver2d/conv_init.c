@@ -87,14 +87,14 @@ static dg_phys* user_phys_init(dg_grid *grid){
     arg_section *sec = sec_p[2];
     strcpy(obcfile, sec->arg_vec_p[0]);
     if(!procid) printf(HEADLINE " open boundary file: %s\n", obcfile);
-    if(strlen(obcfile)) { phys->obc_add(phys, obcfile); }
+    if(strlen(obcfile)) { phys->attach_obc_ncfile(phys, obcfile); }
 
     /// 4. initial condition
     char filename[MAX_NAME_LENGTH];
     sec = sec_p[4];
     strcpy(filename, sec->arg_vec_p[0]);
     if(!procid) printf(HEADLINE " initial condition file: %s\n", filename);
-    phys->init_file(phys, filename);
+    phys->initialize_from_file(phys, filename);
 
     conv_arg_section_free(sec_p);
     return phys;
