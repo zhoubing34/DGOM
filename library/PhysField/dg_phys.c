@@ -149,7 +149,7 @@ static void dg_phys_init_file(dg_phys *phys, char *init_filename){
     }
 
     /* read vertex initial values */
-    register int k,n,fld;
+    register int n,fld;
     dg_real **init_value = matrix_real_create(Nvert, Nfield);
     for(n=0;n<Nvert;n++){
         int tmp; // node index

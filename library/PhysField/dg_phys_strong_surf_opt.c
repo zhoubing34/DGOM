@@ -30,7 +30,6 @@ void dg_phys_strong_surf_opt2d(dg_phys *phys,
     dg_cell *cell = dg_phys_cell(phys);
     const int Nfield = dg_phys_Nfield(phys);
     const int Nedge = dg_edge_Nedge(edge);
-    const int Nfaces = dg_cell_Nfaces(cell);
     const int Nfptotal = dg_cell_Nfptotal(cell);
     const int Np = dg_cell_Np(cell);
 
@@ -50,8 +49,8 @@ void dg_phys_strong_surf_opt2d(dg_phys *phys,
         const int ftype = edge->surfinfo[surfid++];
         const int Nfp = dg_cell_Nfp(cell)[f1];
 
-        dg_real flux_M[Nfp*Nfaces*Nfield];
-        dg_real flux_P[Nfp*Nfaces*Nfield];
+        dg_real flux_M[Nfp*Nfield];
+        dg_real flux_P[Nfp*Nfield];
         int fp_M[Nfp], fp_P[Nfp];
         for(m=0;m<Nfp;m++){
             const int idM = (int)edge->nodeinfo[nodeid++];
@@ -110,8 +109,7 @@ void dg_phys_strong_surf_opt2d(dg_phys *phys,
                 const int col1 = fp_M[m];
                 const dg_real L = ptLIFT[col1];
                 const dg_real *t = flux_M+m*Nfield;
-                for(fld=0;fld<Nfield;fld++)
-                    f_rhsM[fld] += L*t[fld];
+                for(fld=0;fld<Nfield;fld++) {f_rhsM[fld] += L*t[fld];}
             }
             if (ftype == FACE_INNER){
                 dg_real *f_rhsP = f_rhsQ + Nfield*(n+k2*Np);

@@ -10,32 +10,341 @@
 #include "LibUtilities/UTest.h"
 #endif
 
-void dg_phys_LDG_solve(dg_phys *phys,
-                       Wall_Condition slipwall_func,
-                       Wall_Condition non_slipwall_func,
-                       OBC_Fun obc_fun){
+static void ldg_auxi_vol_opt2d(dg_phys *phys, dg_phys_LDG *ldg, Vis_Fun vis_func);
+static void ldg_auxi_surf_opt2d(dg_phys *phys, dg_phys_LDG *ldg, Vis_Fun vis_func,
+                                Wall_Condition slipwall_func, Wall_Condition nonslipwall_func, OBC_Fun obc_fun);
+static void ldg_phys_vol_opt2d(dg_phys *phys, dg_phys_LDG *ldg);
+
+void dg_phys_LDG_solve_vis_opt2d(dg_phys *phys, Vis_Fun vis_func,
+                                 Wall_Condition slipwall_func,
+                                 Wall_Condition non_slipwall_func,
+                                 OBC_Fun obc_fun){
+
+    dg_mesh *mesh = dg_phys_mesh(phys);
+    dg_phys_LDG *ldg = phys->ldg;
+    const int nprocs = dg_mesh_nprocs(mesh);
+
+    /* 0. send/recv the viscosity value */
+    const int Nfield = dg_phys_Nfield(phys);
+    int Nmess;
+    MPI_Request mpi_x_send_requests[nprocs], mpi_x_recv_requests[nprocs];
+    MPI_Request mpi_y_send_requests[nprocs], mpi_y_recv_requests[nprocs];
+    Nmess = mesh->fetch_node_buffer(mesh, Nfield, ldg->sqrt_miux, ldg->px_recv,
+                                    mpi_x_send_requests, mpi_x_recv_requests);
+    Nmess = mesh->fetch_node_buffer(mesh, Nfield, ldg->sqrt_miuy, ldg->py_recv,
+                                    mpi_y_send_requests, mpi_y_recv_requests);
+
+    /* 1. calculate the auxiliary variables - volume integral */
+    ldg_auxi_vol_opt2d(phys, ldg, vis_func);
+    /* wait for message passing */
+    MPI_Status instatus[nprocs];
+    MPI_Waitall(Nmess, mpi_x_send_requests, instatus);
+    MPI_Waitall(Nmess, mpi_x_recv_requests, instatus);
+    MPI_Waitall(Nmess, mpi_y_send_requests, instatus);
+    MPI_Waitall(Nmess, mpi_y_recv_requests, instatus);
+    /* 2. calculate the auxiliary variables - surface integral */
+    ldg_auxi_surf_opt2d(phys, ldg, vis_func, slipwall_func, non_slipwall_func, obc_fun);
+
+    /* 3. calculate the volume term */
+    ldg_phys_vol_opt2d(phys, ldg);
     return;
 }
 
-static void ldg_solve_field(dg_phys *phys, int fld){
+static void ldg_auxi_vol_opt2d(dg_phys *phys, dg_phys_LDG *ldg, Vis_Fun vis_func){
+
+    dg_cell *cell = dg_phys_cell(phys);
+    dg_grid *grid = dg_phys_grid(phys);
+    dg_region *region = dg_phys_region(phys);
+
+    const int K = dg_grid_K(grid);
+    const int Np = dg_cell_Np(cell);
+    const int Nfield = dg_phys_Nfield(phys);
+
+    dg_real *f_Q = dg_phys_f_Q(phys); //phys->f_Q;
+    dg_real *f_Dr = dg_cell_f_Dr(cell); //phys->cell->f_Dr;
+    dg_real *f_Ds = dg_cell_f_Ds(cell); //phys->cell->f_Ds;
+    dg_real *px = dg_phys_ldg_px(ldg);
+    dg_real *py = dg_phys_ldg_py(ldg);
+
+    register unsigned int k,n,m,fld;
+    dg_real **drdx_p = region->drdx;
+    dg_real **drdy_p = region->drdy;
+    dg_real **dsdx_p = region->dsdx;
+    dg_real **dsdy_p = region->dsdy;
+    dg_real *miu_xp = dg_phys_ldg_miux(ldg);
+    dg_real *miu_yp = dg_phys_ldg_miuy(ldg);
+
+    dg_real *vis_term = vector_real_create(Np*Nfield);
+    dg_real *px_rhs = vector_real_create(Nfield);
+    dg_real *py_rhs = vector_real_create(Nfield);
+
+    for(k=0;k<K;k++){
+        dg_real *var = f_Q + k*Np*Nfield; // variable in k-th element
+        // calculate viscosity term
+        for(n=0;n<Np;n++){
+            vis_func(var+n*Nfield, vis_term+n*Nfield);
+        }
+
+        for(n=0;n<Np;n++){
+            const dg_real *ptDr = f_Dr+n*Np; // n-th row of Dr
+            const dg_real *ptDs = f_Ds+n*Np; // n-th row of Ds
+
+            const dg_real drdx = drdx_p[k][n]; // volume geometry for n-th point
+            const dg_real drdy = drdy_p[k][n]; // volume geometry for n-th point
+            const dg_real dsdx = dsdx_p[k][n]; // volume geometry for n-th point
+            const dg_real dsdy = dsdy_p[k][n]; // volume geometry for n-th point
+
+            const dg_real *miu_x = miu_xp + (k*Np + n)*Nfield;
+            const dg_real *miu_y = miu_yp + (k*Np + n)*Nfield;
+
+            // initialize rhs
+            for(m=0;m<Nfield;m++){
+                px_rhs[m] = 0;
+                py_rhs[m] = 0;
+            }
+
+            for(m=0;m<Np;++m){
+                const dg_real dr = ptDr[m]; // m-th column for Dr
+                const dg_real ds = ptDs[m]; // m-th column for Ds
+                const dg_real dx = drdx*dr+dsdx*ds;
+                const dg_real dy = drdy*dr+dsdy*ds;
+
+                const dg_real *vis = vis_term + m*Nfield;
+
+                for(fld=0;fld<Nfield;fld++){
+                    px_rhs[fld] += miu_x[fld]*dx*vis[fld];
+                    py_rhs[fld] += miu_y[fld]*dy*vis[fld];
+                }
+            }
+
+            const int sk = (k*Np+n)*Nfield;
+            for(fld=0;fld<Nfield;fld++){
+                px[ sk+fld ] = px_rhs[fld];
+                py[ sk+fld ] = py_rhs[fld];
+            }
+
+        }
+
+    }
+
+    vector_real_free(vis_term);
+    vector_real_free(px_rhs);
+    vector_real_free(py_rhs);
+
     return;
 }
 
-static void ldg_auli_vol(dg_phys *phys, dg_real *px, dg_real *py, dg_real *pz){
+static void ldg_auxi_surf_opt2d(dg_phys *phys, dg_phys_LDG *ldg, Vis_Fun vis_func,
+                                Wall_Condition slipwall_func,
+                                Wall_Condition non_slipwall_func,
+                                OBC_Fun obc_fun){
+
+    dg_edge *edge = dg_phys_edge(phys);
+    dg_cell *cell = dg_phys_cell(phys);
+    const int Nfield = dg_phys_Nfield(phys);
+    const int Nedge = dg_edge_Nedge(edge);
+    const int Nfptotal = dg_cell_Nfptotal(cell);
+    const int Np = dg_cell_Np(cell);
+
+    dg_real *f_Q = dg_phys_f_Q(phys);
+    dg_real *f_inQ = dg_phys_f_recvQ(phys); // phys->f_recvQ;
+    dg_real *f_ext = dg_phys_f_extQ(phys); // phys->f_extQ;
+    dg_real *f_LIFT  = dg_cell_f_LIFT(cell); //phys->cell->f_LIFT;
+
+    dg_real *px = dg_phys_ldg_px(ldg);
+    dg_real *py = dg_phys_ldg_py(ldg);
+    dg_real *miu_xp = dg_phys_ldg_miux(ldg);
+    dg_real *miu_yp = dg_phys_ldg_miuy(ldg);
+    dg_real *miux_recv = dg_phys_ldg_x_recv(ldg);
+    dg_real *miuy_recv = dg_phys_ldg_y_recv(ldg);
+
+    register int f,m,n,fld,surfid=0,nodeid=0;
+
+    for(f=0;f<Nedge;f++){
+        const int k1 = edge->surfinfo[surfid++];
+        const int k2 = edge->surfinfo[surfid++];
+        const int f1 = edge->surfinfo[surfid++];
+        const int f2 = edge->surfinfo[surfid++];
+        const int ftype = edge->surfinfo[surfid++];
+        const int Nfp = dg_cell_Nfp(cell)[f1];
+
+        dg_real pxFlux_M[Nfp*Nfield], pxFlux_P[Nfp*Nfield];
+        dg_real pyFlux_M[Nfp*Nfield], pyFlux_P[Nfp*Nfield];
+        int fp_M[Nfp], fp_P[Nfp];
+        for(m=0;m<Nfp;m++){
+            const int idM = (int)edge->nodeinfo[nodeid++];
+            const int idP = (int)edge->nodeinfo[nodeid++];
+            fp_M[m] = (int)edge->nodeinfo[nodeid++];
+            fp_P[m] = (int)edge->nodeinfo[nodeid++];
+            const dg_real nx = edge->nodeinfo[nodeid++];
+            const dg_real ny = edge->nodeinfo[nodeid++];
+            const dg_real fsc = edge->nodeinfo[nodeid++];
+
+            dg_real f_M[Nfield], f_P[Nfield];
+            dg_real miux_M[Nfield], miux_P[Nfield];
+            dg_real miuy_M[Nfield], miuy_P[Nfield];
+            // local face2d values
+            for(fld=0;fld<Nfield;fld++) {
+                f_M[fld] = f_Q[idM*Nfield+fld];
+                miux_M[fld] = miu_xp[idM*Nfield+fld];
+                miuy_M[fld] = miu_yp[idM*Nfield+fld];
+            }
+
+            // default adjacent node viscosity value
+            for(fld=0;fld<Nfield;fld++){
+                miux_P[fld] = miu_xp[idM*Nfield+fld];
+                miuy_P[fld] = miu_yp[idM*Nfield+fld];
+            }
+            // adjacent nodal values
+            switch (ftype){
+                case FACE_INNER:
+                    for(fld=0;fld<Nfield;fld++){
+                        f_P[fld] = f_Q[idP*Nfield+fld];
+                        miux_P[fld] = miu_xp[idP*Nfield+fld];
+                        miuy_P[fld] = miu_yp[idP*Nfield+fld];
+                    }
+                    break;
+                case FACE_PARALL:
+                    for(fld=0;fld<Nfield;fld++){
+                        f_P[fld] = f_inQ[idP*Nfield+fld];
+                        miux_P[fld] = miux_recv[idP*Nfield+fld];
+                        miuy_P[fld] = miuy_recv[idP*Nfield+fld];
+                    }
+                    break;
+                case FACE_SLIPWALL:
+                    slipwall_func(nx, ny, f_M, f_P);
+                    break;
+                case FACE_NSLIPWALL:
+                    non_slipwall_func(nx, ny, f_M, f_P);
+                    break;
+                default: /// open boundary condition
+                    obc_fun(nx, ny, f_M, f_ext+idP*Nfield, ftype, f_P);
+                    break;
+            }
+
+            dg_real vis_M[Nfield], vis_P[Nfield];
+
+            vis_func(f_M, vis_M);
+            vis_func(f_P, vis_P);
+
+            const int sk = m*Nfield;
+            for(fld=0;fld<Nfield;fld++){
+                dg_real miux_mean = (miux_M[fld]+miux_P[fld])*0.5;
+                dg_real miuy_mean = (miuy_M[fld]+miuy_P[fld])*0.5;
+
+                pxFlux_M[sk+fld] = -fsc*nx*(miux_M[fld]*vis_M[fld] - miux_mean*vis_P[fld] );
+                pxFlux_P[sk+fld] = +fsc*nx*(miux_P[fld]*vis_P[fld] - miux_mean*vis_M[fld] );
+
+                pyFlux_M[sk+fld] = -fsc*ny*(miuy_M[fld]*vis_M[fld] - miuy_mean*vis_P[fld] );
+                pyFlux_P[sk+fld] = +fsc*ny*(miuy_P[fld]*vis_P[fld] - miuy_mean*vis_M[fld] );
+            }
+
+        }
+
+        for(n=0;n<Np;n++){
+            const dg_real *ptLIFT = f_LIFT + n*Nfptotal;
+            dg_real *px_rhsM = px + Nfield*(n+k1*Np);
+            dg_real *py_rhsM = py + Nfield*(n+k1*Np);
+
+            for(m=0;m<Nfp;m++){
+                const int col1 = fp_M[m];
+                const dg_real L = ptLIFT[col1];
+                const dg_real *tx = pxFlux_M+m*Nfield;
+                const dg_real *ty = pyFlux_M+m*Nfield;
+                for(fld=0;fld<Nfield;fld++) {
+                    px_rhsM[fld] += L*tx[fld];
+                    py_rhsM[fld] += L*ty[fld];
+                }
+            }
+            if (ftype == FACE_INNER){
+                dg_real *px_rhsP = px + Nfield*(n+k1*Np);
+                dg_real *py_rhsP = py + Nfield*(n+k1*Np);
+                for(m=0;m<Nfp;m++){
+                    const int col2 = fp_P[m];
+                    const dg_real L = ptLIFT[col2];
+                    const dg_real *sx = pxFlux_P+m*Nfield;
+                    const dg_real *sy = pyFlux_P+m*Nfield;
+                    for(fld=0;fld<Nfield;fld++) {
+                        px_rhsP[fld] += L*sx[fld];
+                        py_rhsP[fld] += L*sy[fld];
+                    }
+                }
+            }
+        }
+    }
     return;
 }
 
-static void ldg_auli_surf(dg_phys *phys, dg_real *px, dg_real *py, dg_real *pz){
+static void ldg_phys_vol_opt2d(dg_phys *phys, dg_phys_LDG *ldg){
+
+    dg_cell *cell = dg_phys_cell(phys);
+    dg_grid *grid = dg_phys_grid(phys);
+    dg_region *region = dg_phys_region(phys);
+
+    const int K = dg_grid_K(grid);
+    const int Np = dg_cell_Np(cell);
+    const int Nfield = dg_phys_Nfield(phys);
+
+    dg_real *f_Dr = dg_cell_f_Dr(cell); //phys->cell->f_Dr;
+    dg_real *f_Ds = dg_cell_f_Ds(cell); //phys->cell->f_Ds;
+    dg_real *f_rhsQ = dg_phys_f_rhsQ(phys); //phys->f_rhsQ;
+    dg_real *px = dg_phys_ldg_px(ldg);
+    dg_real *py = dg_phys_ldg_py(ldg);
+
+    register unsigned int k,n,m,fld;
+    dg_real **drdx_p = region->drdx;
+    dg_real **drdy_p = region->drdy;
+    dg_real **dsdx_p = region->dsdx;
+    dg_real **dsdy_p = region->dsdy;
+    dg_real *miu_xp = dg_phys_ldg_miux(ldg);
+    dg_real *miu_yp = dg_phys_ldg_miuy(ldg);
+
+    dg_real *rhs = vector_real_create(Nfield);
+    for(k=0;k<K;k++){
+        // calculate viscosity term
+
+        for(n=0;n<Np;n++){
+            const dg_real *ptDr = f_Dr+n*Np; // n-th row of Dr
+            const dg_real *ptDs = f_Ds+n*Np; // n-th row of Ds
+
+            const dg_real drdx = drdx_p[k][n]; // volume geometry for n-th point
+            const dg_real drdy = drdy_p[k][n]; // volume geometry for n-th point
+            const dg_real dsdx = dsdx_p[k][n]; // volume geometry for n-th point
+            const dg_real dsdy = dsdy_p[k][n]; // volume geometry for n-th point
+
+            // initialize rhs
+            for(m=0;m<Nfield;m++){ rhs[m] = 0; }
+
+            for(m=0;m<Np;++m){
+                const dg_real dr = ptDr[m]; // m-th column for Dr
+                const dg_real ds = ptDs[m]; // m-th column for Ds
+                const dg_real dx = drdx*dr+dsdx*ds;
+                const dg_real dy = drdy*dr+dsdy*ds;
+
+                const dg_real *miu_x = miu_xp + (k*Np + m)*Nfield;
+                const dg_real *miu_y = miu_yp + (k*Np + m)*Nfield;
+
+                const int sk = (k*Np+m)*Nfield;
+                dg_real *pxk = px + sk; // variable in k-th element
+                dg_real *pyk = py + sk; // variable in k-th element
+
+                for(fld=0;fld<Nfield;fld++){
+                    rhs[fld] += dx * miu_x[fld] * pxk[fld]
+                            + dy * miu_y[fld] * pyk[fld];
+                }
+            }
+            const int sk = (k*Np+n)*Nfield;
+            for(fld=0;fld<Nfield;fld++){ f_rhsQ[ sk+fld ] += rhs[fld]; }
+        }
+    }
+    vector_real_free(rhs);
     return;
 }
 
-static void ldg_phys_vol(dg_phys *phys, dg_real *px, dg_real *py, dg_real *pz){
-    return;
-}
-
-static void ldg_phys_surf(dg_phys *phys, dg_real *px, dg_real *py, dg_real *pz){
-    return;
-}
+//static void ldg_phys_surf_opt2d(dg_phys *phys, dg_phys_LDG *ldg){
+//
+//    return;
+//}
 
 
 //void pf_strong_viscosity_LDG_flux2d(physField *phys,

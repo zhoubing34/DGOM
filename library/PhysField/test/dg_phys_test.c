@@ -6,6 +6,7 @@
 #include "dg_phys_strong_surf_opt_test.h"
 #include "dg_phys_obc_test.h"
 #include "dg_phys_limiter_test.h"
+#include "dg_phys_strong_LDG_opt_test.h"
 
 int Mx = 4;
 int My = 4;
@@ -83,13 +84,14 @@ void phys_free(dg_phys *phys){
 }
 
 /** test functions */
-#define Ntest 4
+#define Ntest 5
 typedef int (*test_func)(dg_phys *, int verbose);
 static const test_func phys_test_func[Ntest] = {
         dg_phys_strong_vol_opt2d_test,
         dg_phys_strong_surf_opt2d_test,
         dg_phys_obc_test,
         dg_phys_limiter_test,
+        dg_phys_strong_LDG_opt2d_test,
 };
 
 /**

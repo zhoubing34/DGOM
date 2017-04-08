@@ -64,9 +64,7 @@ void dg_phys_strong_vol_opt2d(dg_phys *phys, Nodal_Flux_Fun nodal_flux){
             const dg_real dsdy = dsdy_p[k][n]; // volume geometry for n-th point
 
             // initialize rhs
-            for(m=0;m<Nfield;m++){
-                rhs[m] = 0;
-            }
+            for(m=0;m<Nfield;m++){ rhs[m] = 0; }
 #if DEBUG
             if(!phys->grid->procid)
                 printf("k=%d, n=%d, drdx=%f, drdy=%f, dsdx=%f, dsdy=%f\n", k, n, drdx, drdy, dsdx, dsdy);

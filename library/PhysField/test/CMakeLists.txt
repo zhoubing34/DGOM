@@ -4,7 +4,7 @@ set(PHYSDOMAIN_TEST_SRC
         dg_phys_test.c
         dg_phys_strong_vol_opt_test.c
         dg_phys_strong_surf_opt_test.c
-        #pf_strong_viscosity_LDG_flux2d_test.c
+        dg_phys_strong_LDG_opt_test.c
         #pf_cellMean_test.c
         dg_phys_limiter_test.c
         dg_phys_obc_test.c
