@@ -8,27 +8,12 @@
 static dg_grid* user_grid_init();
 static dg_phys* user_phys_init(dg_grid *grid);
 static void conv_time_init(dg_phys *phys);
-
-typedef struct Conv_Init_Creator{
-    dg_grid *(*grid_init)();
-    dg_phys *(*phys_init)(dg_grid *grid);
-    void (*time_init)(dg_phys *phys);
-}Conv_Init_Creator;
-
-static const Conv_Init_Creator user_set_creator = {
-        user_grid_init,
-        user_phys_init,
-        conv_time_init,
-};
+static void set_const_vis_value(dg_phys *phys, double vis);
 
 void conv_init(){
-    extern Conv_Solver solver;
-    const Conv_Init_Creator *solver_creator = &user_set_creator;
-
-    dg_grid *grid = solver_creator->grid_init();
-    dg_phys *phys = solver_creator->phys_init(grid);
-    solver_creator->time_init(phys);
-    solver.phys = phys;
+    dg_grid *grid = user_grid_init();
+    dg_phys *phys = user_phys_init(grid);
+    conv_time_init(phys);
     return;
 }
 
@@ -43,6 +28,7 @@ static dg_grid* user_grid_init(){
     arg_section *sec = sec_p[0];
     strcpy(casename, sec->arg_vec_p[0]);
     if(!procid){ printf(HEADLINE " casename: %s\n", casename); }
+
     /// 1. cell info
     sec = sec_p[1];
     dg_cell_type cell_type;
@@ -73,31 +59,64 @@ static dg_grid* user_grid_init(){
 }
 
 static dg_phys* user_phys_init(dg_grid *grid){
+    extern Conv_Solver solver;
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
 
     dg_region *region = dg_region_create(grid);
     dg_mesh *mesh = dg_mesh_create(region);
     dg_edge *edge = dg_edge_create(mesh);
-    dg_phys *phys = dg_phys_create(3, edge);
+    dg_phys *phys = dg_phys_create(1, edge);
     /// 2. obc file
     extern Conv_Solver solver;
     arg_section **sec_p = conv_read_inputfile(solver.filename);
-    char obcfile[MAX_NAME_LENGTH];
+    char parameter_str[MAX_NAME_LENGTH];
     arg_section *sec = sec_p[2];
-    strcpy(obcfile, sec->arg_vec_p[0]);
-    if(!procid) printf(HEADLINE " open boundary file: %s\n", obcfile);
-    if(strlen(obcfile)) { phys->attach_obc_ncfile(phys, obcfile); }
+    strcpy(parameter_str, sec->arg_vec_p[0]);
+    if(!procid) printf(HEADLINE " open boundary file: %s\n", parameter_str);
+    if(strlen(parameter_str)) { phys->attach_obc_ncfile(phys, parameter_str); }
 
     /// 4. initial condition
-    char filename[MAX_NAME_LENGTH];
     sec = sec_p[4];
-    strcpy(filename, sec->arg_vec_p[0]);
-    if(!procid) printf(HEADLINE " initial condition file: %s\n", filename);
-    phys->initialize_from_file(phys, filename);
+    strcpy(parameter_str, sec->arg_vec_p[0]);
+    if(!procid) printf(HEADLINE " initial condition file: %s\n", parameter_str);
+    phys->initialize_from_file(phys, parameter_str);
+
+    strcpy(parameter_str, sec->arg_vec_p[1]);
+    solver.vis_flag = 0;
+    if(strlen(parameter_str)) {
+        if (!procid) printf(HEADLINE " viscosity value: %s\n", parameter_str);
+        double vis;
+        sscanf(sec->arg_vec_p[1], "%lf\n", &(vis));
+        set_const_vis_value(phys, vis);
+        solver.vis_flag = 1;
+    }
 
     conv_arg_section_free(sec_p);
+    /* assignment */
+    solver.phys = phys;
+
     return phys;
+}
+
+static void set_const_vis_value(dg_phys *phys, double vis){
+    const int K = dg_grid_K(dg_phys_grid(phys));
+    const int Nfield = dg_phys_Nfield(phys);
+    const int Np = dg_cell_Np(dg_phys_cell(phys));
+
+    dg_phys_LDG *ldg = phys->ldg;
+    const double sqrt_miu = sqrt(vis);
+    int k,n,fld;
+    for(k=0;k<K;k++){
+        for(n=0;n<Np;n++){
+            for(fld=0;fld<Nfield;fld++){
+                int sk = (k*Np+n)*Nfield+fld;
+                dg_phys_ldg_sqrt_miux(ldg)[sk] = sqrt_miu;
+                dg_phys_ldg_sqrt_miuy(ldg)[sk] = sqrt_miu;
+            }
+        }
+    }
+    return;
 }
 
 static void conv_time_init(dg_phys *phys){
@@ -123,11 +142,16 @@ static void conv_time_init(dg_phys *phys){
     extern Conv_Solver solver;
     arg_section **sec_p = conv_read_inputfile(solver.filename);
 
-    double cfl,dt_user,ftime;
+    double cfl,dt_user,ftime,out_dt;
     arg_section *sec = sec_p[3];
     sscanf(sec->arg_vec_p[0], "%lf\n", &(cfl));
     sscanf(sec->arg_vec_p[1], "%lf\n", &(dt_user));
     sscanf(sec->arg_vec_p[2], "%lf\n", &(ftime));
+
+    /// 5. output time interval
+    sec = sec_p[5];
+    sscanf(sec->arg_vec_p[0], "%lf\n", &(out_dt));
+
     conv_arg_section_free(sec_p);
 
     if(dt_user < dt) {dt = dt_user;}
@@ -139,9 +163,11 @@ static void conv_time_init(dg_phys *phys){
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     if(!procid) printf(HEADLINE " dt: %f\n", dt);
     if(!procid) printf(HEADLINE " final time: %f\n", ftime);
+    if(!procid) printf(HEADLINE " output dt: %f\n", out_dt);
     // assignment
     extern Conv_Solver solver;
     solver.finaltime = ftime;
     solver.dt = dt;
+    solver.outDt = out_dt;
     return;
 }

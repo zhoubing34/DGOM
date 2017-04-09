@@ -1,4 +1,4 @@
-#include "../ConvDriver2d/conv2d.h"
+#include "conv_lib2d.h"
 
 /* assignment of RK45 parameter */
 static void conv_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
@@ -15,9 +15,9 @@ void conv_run(){
     double ftime = solver.finaltime;
     double dt = solver.dt;
 
+    double out_dt = solver.outDt;
     double time = 0;
-    int    intrk, tstep=0;
-    int    counter = 0; // output step
+    int    intrk, counter = 0; // output step
     double rk4a[5], rk4b[5], rk4c[6];
 
     /* Runge-Kutta time evaluation coefficient */
@@ -41,22 +41,23 @@ void conv_run(){
             const dg_real fb = (dg_real)rk4b[intrk-1];
 
             conv_rhs(phys, fa, fb, fdt);
-            phys->limit(phys, 1.0);
+            //phys->limit(phys, 1.0);
         }
 
-        printf("processing: %f%%\r", time/ftime);
         time += dt;     /* increment current time */
-        tstep++;        /* increment timestep    */
-        conv_putvar(phys, counter++, time);
+        printf("processing: %f%%\r", time/ftime);
+        if(time > out_dt*counter) {conv_putvar(phys, counter++, time);}
     }
+
+    /* output the finial result */
+    conv_putvar(phys, counter++, time);
 
     double mpitime1 = MPI_Wtime();
     double elapsetime = mpitime1 - mpitime0;
 
     MPI_Barrier(MPI_COMM_WORLD);
     const int procid = dg_mesh_procid(dg_phys_mesh(phys));
-    if(!procid)
-        printf("proc: %d, time taken: %lg\n", procid, elapsetime);
+    if(!procid) {printf("proc: %d, time taken: %lg\n", procid, elapsetime);}
 }
 
 /**

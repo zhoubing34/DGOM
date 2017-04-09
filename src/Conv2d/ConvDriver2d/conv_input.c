@@ -15,9 +15,9 @@ static char helpinfo[] = HEADEND "DGOM:\n" HEADLINE "2d convection problem\n"
         HEADLINE "   -create_input  create input file;\n"
         HEADLINE "   -run           run with input file;\n"
         HEADLINE "Example usages:\n"
-        HEADLINE "   mpirun -n 2 -host localhost ./conv2d -create_input conv_parameter.inc\n"
+        HEADLINE "   mpirun -n 2 -host localhost ./conv2d -create_input conv.inc\n"
         HEADLINE "\n"
-        HEADLINE "   mpirun -n 2 -host localhost ./conv2d -run conv_parameter.inc\n";
+        HEADLINE "   mpirun -n 2 -host localhost ./conv2d -run conv.inc\n";
 
 //==============================function for conv2d====================================//
 
@@ -31,13 +31,13 @@ static arg_section** conv_arg_section_create(){
     /// 0. case info
     int ind = 0;
     char probleminfo[] = HEADEND "DGOM: 2d convection problem\n"
-            HEADLINE "case name (1 parameter)\n"
+            HEADLINE "case name\n"
             HEADLINE "    1. case indicator  |-- 1. casename\n";
     int var_num = 1;
     section_p[ind++] = section_create(probleminfo, var_num);
 
     /// 1. cell info
-    char scinfo[] = HEADEND "standard element info (2 parameters)\n"
+    char scinfo[] = HEADEND "standard cell info\n"
             HEADLINE "    1. element type  |--- 2. triangle\n"
             HEADLINE "                     |--- 3. quadrilateral\n"
             HEADLINE "    2. order of polynomial;\n";
@@ -45,13 +45,13 @@ static arg_section** conv_arg_section_create(){
     section_p[ind++] = section_create(scinfo, var_num);
 
     /// 2. obc info
-    char meshinfo[] = HEADEND "mesh info (3 parameters)\n"
+    char meshinfo[] = HEADEND "mesh info\n"
             HEADLINE "    1. open boundary condition file;\n";
     var_num = 1;
     section_p[ind++] = section_create(meshinfo, var_num);
 
     /// 3. time info
-    char timeinfo[] = HEADEND "time info (3 parameters)\n"
+    char timeinfo[] = HEADEND "time info\n"
             HEADLINE "    1. CFL number;\n"
             HEADLINE "    2. dt;\n"
             HEADLINE "    3. final time;\n";
@@ -59,18 +59,18 @@ static arg_section** conv_arg_section_create(){
     section_p[ind++] = section_create(timeinfo, var_num);
 
     /// 4. initial condition
-    char physinfo[] = HEADEND "physical parameter for advection-diffusion case (3 parameters)\n"
-            HEADLINE "    1. initial condition file (C and u,v);\n";
-    var_num = 1;
+    char physinfo[] = HEADEND "initial conditions\n"
+            HEADLINE "    1. initial condition field file (C, and flow field u ,v);\n"
+            HEADLINE "    2. viscosity value;\n";
+    var_num = 2;
     section_p[ind++] = section_create(physinfo, var_num);
 
-    /// 5. viscosity info
-    char LDGinfo[] = HEADEND "LDG parameter for viscosity term (3 parameters)\n"
-            HEADLINE "    1. C11 (0.0 recommend);\n"
-            HEADLINE "    2. C12 (0.5 recommend);\n"
-            HEADLINE "    3. C22;\n";
-    var_num = 3;
-    section_p[ind] = section_create(LDGinfo, var_num);
+    /// 5. output file
+    char outputinfo[] = HEADEND "output file parameters\n"
+            HEADLINE "    1. filename;\n"
+            HEADLINE "    2. output time interval;\n";
+    var_num = 2;
+    section_p[ind] = section_create(outputinfo, var_num);
 
     return section_p;
 }
@@ -101,13 +101,18 @@ void conv_input(int argc, char **argv){
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
 
-    if(run_type == conv_help){
+    if(run_type == CONV_HELP){
         if(!procid) { printf("%s", helpinfo); } exit(0);
-    }else if(run_type == conv_create_input){
+    }else if(run_type == CONV_CREATE_INPUT){
+        /* check the input parameters */
+        if( (!procid) & (argc < 2) ) { fprintf(stderr, "Unknown input filename\n"); exit(-1); }
         if(!procid) { conv_create_inputfile(argv[2]); } exit(0);
-    }else if(run_type == conv_execute){
+    }else if(run_type == CONV_RUN){
+        /* check the input parameters */
+        if( (!procid) & (argc < 2) ) { fprintf(stderr, "Unknown input filename\n"); exit(-1); }
+
         extern Conv_Solver solver;
-        strcpy(solver.filename, argv[2]); // set the parameter file
+        strcpy(solver.filename, argv[2]); // read the parameter file
         printf(HEADLINE " input file: %s\n", solver.filename);
     }
     return;
@@ -138,17 +143,20 @@ arg_section** conv_read_inputfile(char *filename){
  * run type.
  */
 static Conv_Run_Type conv_read_command(int argc, char **argv){
-    Conv_Run_Type command_type = conv_execute; // default
+    Conv_Run_Type command_type = CONV_HELP; // default
 
     char help_str[] = "-help";
     char pre_str[] = "-create_input";
+    char run_str[] = "-run";
 
     register int i;
     for(i=0;i<argc;i++){
-        if(!(memcmp(argv[i], help_str, strlen(help_str))) ){
-            command_type = conv_help;
-        }else if(!(memcmp(argv[i], pre_str, strlen(pre_str) ))){
-            command_type = conv_create_input;
+        if( !( memcmp( argv[i], help_str, strlen(help_str) ) ) ){
+            command_type = CONV_HELP;
+        }else if( !(memcmp( argv[i], pre_str, strlen(pre_str) ) ) ){
+            command_type = CONV_CREATE_INPUT;
+        }else if( !( memcmp( argv[i], run_str, strlen(run_str) ) ) ){
+            command_type = CONV_RUN;
         }
     }
     return command_type;

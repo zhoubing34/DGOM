@@ -71,13 +71,14 @@ static void ldg_auxi_vol_opt2d(dg_phys *phys, dg_phys_LDG *ldg, Vis_Fun vis_func
     dg_real **drdy_p = region->drdy;
     dg_real **dsdx_p = region->dsdx;
     dg_real **dsdy_p = region->dsdy;
-    dg_real *miu_xp = dg_phys_ldg_miux(ldg);
-    dg_real *miu_yp = dg_phys_ldg_miuy(ldg);
+    dg_real *miu_xp = dg_phys_ldg_sqrt_miux(ldg);
+    dg_real *miu_yp = dg_phys_ldg_sqrt_miuy(ldg);
 
     dg_real *vis_term = vector_real_create(Np*Nfield);
     dg_real *px_rhs = vector_real_create(Nfield);
     dg_real *py_rhs = vector_real_create(Nfield);
 
+    int rhsid = 0;
     for(k=0;k<K;k++){
         dg_real *var = f_Q + k*Np*Nfield; // variable in k-th element
         // calculate viscosity term
@@ -117,10 +118,9 @@ static void ldg_auxi_vol_opt2d(dg_phys *phys, dg_phys_LDG *ldg, Vis_Fun vis_func
                 }
             }
 
-            const int sk = (k*Np+n)*Nfield;
             for(fld=0;fld<Nfield;fld++){
-                px[ sk+fld ] = px_rhs[fld];
-                py[ sk+fld ] = py_rhs[fld];
+                px[ rhsid   ] = px_rhs[fld];
+                py[ rhsid++ ] = py_rhs[fld];
             }
 
         }
@@ -153,8 +153,8 @@ static void ldg_auxi_surf_opt2d(dg_phys *phys, dg_phys_LDG *ldg, Vis_Fun vis_fun
 
     dg_real *px = dg_phys_ldg_px(ldg);
     dg_real *py = dg_phys_ldg_py(ldg);
-    dg_real *miu_xp = dg_phys_ldg_miux(ldg);
-    dg_real *miu_yp = dg_phys_ldg_miuy(ldg);
+    dg_real *miu_xp = dg_phys_ldg_sqrt_miux(ldg);
+    dg_real *miu_yp = dg_phys_ldg_sqrt_miuy(ldg);
     dg_real *miux_recv = dg_phys_ldg_x_recv(ldg);
     dg_real *miuy_recv = dg_phys_ldg_y_recv(ldg);
 
@@ -296,10 +296,11 @@ static void ldg_phys_vol_opt2d(dg_phys *phys, dg_phys_LDG *ldg){
     dg_real **drdy_p = region->drdy;
     dg_real **dsdx_p = region->dsdx;
     dg_real **dsdy_p = region->dsdy;
-    dg_real *miu_xp = dg_phys_ldg_miux(ldg);
-    dg_real *miu_yp = dg_phys_ldg_miuy(ldg);
+    dg_real *miu_xp = dg_phys_ldg_sqrt_miux(ldg);
+    dg_real *miu_yp = dg_phys_ldg_sqrt_miuy(ldg);
 
     dg_real *rhs = vector_real_create(Nfield);
+    int rhsid = 0;
     for(k=0;k<K;k++){
         // calculate viscosity term
 
@@ -333,8 +334,8 @@ static void ldg_phys_vol_opt2d(dg_phys *phys, dg_phys_LDG *ldg){
                             + dy * miu_y[fld] * pyk[fld];
                 }
             }
-            const int sk = (k*Np+n)*Nfield;
-            for(fld=0;fld<Nfield;fld++){ f_rhsQ[ sk+fld ] += rhs[fld]; }
+
+            for(fld=0;fld<Nfield;fld++){ f_rhsQ[ rhsid++ ] += rhs[fld]; }
         }
     }
     vector_real_free(rhs);

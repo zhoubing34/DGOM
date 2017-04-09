@@ -44,8 +44,8 @@ int dg_phys_strong_LDG_opt2d_test(dg_phys *phys, int verbose){
     dg_real *f_Q = dg_phys_f_Q(phys);
 
     dg_phys_LDG *ldg = phys->ldg;
-    dg_real *miu_x = dg_phys_ldg_miux(ldg);
-    dg_real *miu_y = dg_phys_ldg_miuy(ldg);
+    dg_real *miu_x = dg_phys_ldg_sqrt_miux(ldg);
+    dg_real *miu_y = dg_phys_ldg_sqrt_miuy(ldg);
     // initialize
     for(k=0;k<K;k++){
         for(n=0;n<Np;n++){
@@ -79,6 +79,7 @@ int dg_phys_strong_LDG_opt2d_test(dg_phys *phys, int verbose){
     MPI_Waitall(Nmess, mpi_send_requests, instatus);
 
     dg_phys_LDG_solve_vis_opt2d(phys, vis_func, wall_func, wall_func, obc_func);
+    //dg_phys_LDG_solve_vis_opt2d(phys, vis_func, wall_func, wall_func, obc_func);
 
     if(!procid){
         fail = vector_double_test(__FUNCTION__, dg_phys_ldg_px(ldg), px_ext, Np * Nfield * K);

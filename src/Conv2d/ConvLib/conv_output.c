@@ -1,22 +1,9 @@
+#include "conv_lib2d.h"
 #include "../ConvDriver2d/conv2d.h"
-
 /**
- * @brief
- * Create output files in NetCDF format
- *
- * @details
- * Each process opens a file and returns its file object Ncfile
- *
- * @author
- * li12242, Tianjin University, li12242@tju.edu.cn
- *
- * @return
- * Ncfile* outfile
- * fields   | type      | description of value
- * -------- |---------- |----------------------
- * ncfile   | int       | netcdf file handle
- * varid    | int*      | variable ids
- *
+ * @brief create output files in NetCDF format.
+ * @details each process opens a file and returns its file object.
+ * @author li12242, Tianjin University, li12242@tju.edu.cn
  */
 void conv_setoutput(){
 
@@ -25,8 +12,6 @@ void conv_setoutput(){
     dg_grid *grid = dg_phys_grid(phys);
     const int K = dg_grid_K(grid);
     const int Np = dg_cell_Np(dg_phys_cell(phys));
-    const int procid = dg_grid_procid(grid);
-    const int nprocs = dg_grid_nprocs(grid);
 
     /* define dimensions */
     NC_Dim *ne = nc_dim_create("ne", K);
@@ -36,7 +21,6 @@ void conv_setoutput(){
     const int ndim = 3;
     const int nvar = 4;
     NC_Dim *dimarray[ndim];
-    NC_Var *vararray[nvar];
 
     /* define variables: x,y,time and h */
     dimarray[0] = ne;
@@ -57,11 +41,21 @@ void conv_setoutput(){
     dimarray[1] = ne;
     dimarray[2] = t;
 
+    NC_Var *vararray[nvar];
     vararray[0] = x;
     vararray[1] = y;
     vararray[2] = time;
     vararray[3] = h;
-    NC_File *file = nc_file_create("conv2d", ndim, dimarray, nvar, vararray);
+
+    /* read output filename */
+    extern Conv_Solver solver;
+    arg_section **sec_p = conv_read_inputfile(solver.filename);
+    char filename[MAX_NAME_LENGTH];
+    arg_section *sec = sec_p[5];
+    strcpy(filename, sec->arg_vec_p[0]);
+    /* create output file */
+    NC_File *file = nc_file_create(filename, ndim, dimarray, nvar, vararray);
+    conv_arg_section_free(sec_p);
 
     /* create files */
     nc_file_define(file);

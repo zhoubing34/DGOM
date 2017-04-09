@@ -1,7 +1,7 @@
 
-#include "../ConvDriver2d/conv2d.h"
+#include "conv_lib2d.h"
 
-int conv_fluxTerm(dg_real *var, dg_real *Eflux, dg_real *Gflux){
+static int conv_flux(dg_real *var, dg_real *Eflux, dg_real *Gflux){
     const dg_real c = var[0];
     const dg_real u = var[1];
     const dg_real v = var[2];
@@ -12,7 +12,7 @@ int conv_fluxTerm(dg_real *var, dg_real *Eflux, dg_real *Gflux){
     return 0;
 }
 
-int conv_upWindFlux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_real *Fhs){
+static int conv_upwind_flux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_real *Fhs){
     const dg_real cM = varM[0], cP = varP[0];
     const dg_real uM = varM[1], uP = varP[1];
     const dg_real vM = varM[2], vP = varP[2];
@@ -24,6 +24,13 @@ int conv_upWindFlux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_rea
     }
 
     Fhs[1] = 0; Fhs[2] = 0;
+    return 0;
+}
+
+static int vis_func(dg_real *f_Q, dg_real *vis){
+    vis[0] = f_Q[0];
+    vis[1] = 0;
+    vis[2] = 0;
     return 0;
 }
 
@@ -45,19 +52,23 @@ void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
     int Nmess = phys->fetch_node_buffer(phys, mpi_send_requests, mpi_recv_requests);
 
     /* volume vol_integral */
-    dg_phys_strong_vol_opt2d(phys, conv_fluxTerm);
+    dg_phys_strong_vol_opt2d(phys, conv_flux);
 
     /* waite to recv */
     MPI_Status instatus[nprocs];
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
     /* surface vol_integral */
-    dg_phys_strong_surf_opt2d(phys, NULL, NULL, NULL, conv_fluxTerm, conv_upWindFlux);
+    dg_phys_strong_surf_opt2d(phys, NULL, NULL, NULL, conv_flux, conv_upwind_flux);
 
     /* waite for finishing send buffer */
     MPI_Waitall(Nmess, mpi_send_requests, instatus);
 
     /* viscosity flux */
+    extern Conv_Solver solver;
+    if(solver.vis_flag){
+        dg_phys_LDG_solve_vis_opt2d(phys, vis_func, NULL, NULL, NULL);
+    }
 
     dg_real *f_resQ = dg_phys_f_resQ(phys);
     const dg_real *f_rhsQ = dg_phys_f_rhsQ(phys);
