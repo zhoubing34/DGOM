@@ -22,6 +22,8 @@ typedef struct dg_grid_creator{
     void (*load_balance)(dg_grid *grid);
     void (*connect)(dg_grid *grid);
     void (*init_BS)(dg_grid *grid);
+    void (*add_BS)(dg_grid *grid, int Nsurface, int **SFToV);
+    void (*add_BS_from_file)(struct dg_grid *grid, char *casename);
 } dg_grid_creator;
 
 /** const creator for 2d grid */
@@ -32,6 +34,8 @@ const dg_grid_creator grid_2d_creator = {
         dg_grid_load_balance2d,
         dg_grid_connect2d,
         dg_grid_init_BS,
+        dg_grid_add_BS2d,
+        dg_grid_add_BS_file2d,
 };
 /** const creator for 3d grid */
 const dg_grid_creator grid_3d_creator = {
@@ -41,6 +45,8 @@ const dg_grid_creator grid_3d_creator = {
         dg_grid_load_balance3d,
         dg_grid_connect3d,
         dg_grid_init_BS,
+        dg_grid_add_BS3d,
+        dg_grid_add_BS_file3d,
 };
 
 /**
@@ -95,6 +101,8 @@ dg_grid* dg_grid_create(dg_cell *cell, int K, int Nv, double *vx, double *vy, do
     creator->load_balance(grid);
     creator->connect(grid);
     creator->init_BS(grid);
+    grid->add_BS = creator->add_BS;
+    grid->add_BS_from_file = creator->add_BS_from_file;
     grid->proj_vert2node = dg_grid_proj_vert2node;
     return grid;
 }

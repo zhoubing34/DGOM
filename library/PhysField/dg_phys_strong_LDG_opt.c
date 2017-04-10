@@ -275,11 +275,11 @@ static void ldg_auxi_surf_opt2d(dg_phys *phys, dg_phys_LDG *ldg, Vis_Fun vis_fun
             for(fld=0;fld<Nfield;fld++){
                 dg_real vis_delta = miux_M[fld]*vis_M[fld] - miux_P[fld]*vis_P[fld];
 
-                pxFlux_M[sk+fld] = -fsc*nx*(  0.5*vis_delta );//- BETA*nx*vis_delta );
-                pxFlux_P[sk+fld] = +fsc*nx*( -0.5*vis_delta );//- BETA*nx*vis_delta );
+                pxFlux_M[sk+fld] = -fsc*nx*(  0.5*vis_delta - BETA*nx*vis_delta );
+                pxFlux_P[sk+fld] = +fsc*nx*( -0.5*vis_delta - BETA*nx*vis_delta );
 
-                pyFlux_M[sk+fld] = -fsc*ny*(  0.5*vis_delta );//- BETA*ny*vis_delta );
-                pyFlux_P[sk+fld] = +fsc*ny*( -0.5*vis_delta );//- BETA*ny*vis_delta );
+                pyFlux_M[sk+fld] = -fsc*ny*(  0.5*vis_delta - BETA*ny*vis_delta );
+                pyFlux_P[sk+fld] = +fsc*ny*( -0.5*vis_delta - BETA*ny*vis_delta );
             }
 
         }
@@ -453,8 +453,8 @@ static void ldg_phys_sruf_opt2d(dg_phys *phys, dg_phys_LDG *ldg){
                 dg_real px_delta = px_M[fld] - px_P[fld];
                 dg_real py_delta = py_M[fld] - py_P[fld];
 
-                flux_M[sk+fld] = -fsc*( nx*0.5*px_delta + ny*0.5*py_delta );//+ BETA*(nx+ny)*(nx*px_delta + ny*py_delta) );
-                flux_P[sk+fld] = -fsc*( nx*0.5*px_delta + ny*0.5*py_delta );//- BETA*(nx+ny)*(nx*px_delta + ny*py_delta) );
+                flux_M[sk+fld] = -fsc*( nx*0.5*px_delta + ny*0.5*py_delta + BETA*(nx+ny)*(nx*px_delta + ny*py_delta) );
+                flux_P[sk+fld] = -fsc*( nx*0.5*px_delta + ny*0.5*py_delta - BETA*(nx+ny)*(nx*px_delta + ny*py_delta) );
             }
 
         }

@@ -207,9 +207,8 @@ dg_grid* dg_grid_read_file2d(dg_cell *cell, char *casename){
 
     /* read vertex */
     if( (fp = fopen(vertex_file, "r")) == NULL ){
-        fprintf(stderr, "mr_grid_read_file (%s): %d\n"
-                        "Unable to open node file %s.\n",
-                __FILE__,__LINE__,vertex_file);
+        fprintf(stderr, "%s (%d): Unable to open node file %s.\n",
+                __FUNCTION__,__LINE__,vertex_file);
     }
     int Nvert;
     fscanf(fp, "%d %d %d %d\n", &Nvert, &temp, &temp, &temp);
@@ -274,10 +273,10 @@ void dg_grid_add_BS_file2d(dg_grid *grid, char *casename){
         for(n=0;n<Nsurf;n++){
             fscanf(fp, "%d", &tmp);
             fscanf(fp, "%d %d %d", SFToV[n], SFToV[n]+1, SFToV[n]+2);
-            SFToV[n][0] -= 1;
+            SFToV[n][0] -= 1; // change to C type
             SFToV[n][1] -= 1; // change to C type
         }
-        dg_grid_add_BS2d(grid, Nsurf, SFToV);
+        grid->add_BS(grid, Nsurf, SFToV);
 #if DEBUG
         PrintIntMatrix2File(fh, "SFToV", SFToV, Nsurf, 3);
         PrintIntMatrix2File(fh, "ETBS", mesh->EToBS, mesh->grid->K, mesh->cell->Nfaces);
@@ -288,6 +287,10 @@ void dg_grid_add_BS_file2d(dg_grid *grid, char *casename){
         dg_grid_add_BS2d(grid, Nsurf, NULL);
     }
     fclose(fp);
+    return;
+}
+
+void dg_grid_add_BS_file3d(dg_grid *grid, char *casename){
     return;
 }
 

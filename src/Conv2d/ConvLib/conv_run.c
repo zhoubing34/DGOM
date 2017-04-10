@@ -45,12 +45,12 @@ void conv_run(){
         }
 
         time += dt;     /* increment current time */
-        printf("processing: %f%%\r", time/ftime);
-        if(time > out_dt*counter) {conv_putvar(phys, counter++, time);}
+        //printf("processing: %f%%\r", time/ftime);
+        //if(time > out_dt*counter) {conv_putvar(phys, counter++, time);}
     }
 
     /* output the finial result */
-    conv_putvar(phys, counter++, time);
+    conv_putvar(phys, counter, time);
 
     double mpitime1 = MPI_Wtime();
     double elapsetime = mpitime1 - mpitime0;

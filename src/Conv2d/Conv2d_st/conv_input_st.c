@@ -19,7 +19,8 @@ static arg_section** conv_arg_section_create_st(){
     char probleminfo[] = HEADEND "DGOM: 2d convection problem\n"
     HEADLINE "case indicator (1 parameter)\n"
     HEADLINE "    1. case indicator  |-- 0. rotational convection\n"
-    HEADLINE "                       |-- 1. advection-diffusion\n";
+    HEADLINE "                       |-- 1. advection-diffusion\n"
+    HEADLINE "                       |-- 2. pure advection\n";
     int var_num = 1;
     section_p[ind++] = section_create(probleminfo, var_num);
 
@@ -125,7 +126,6 @@ arg_section** conv_read_inputfile(char *filename){
     return sec_p;
 }
 
-//==============================utility functions====================================//
 /**
  * @brief read all the command line arguments and return the Conv_Run_Type.
  * @param argc number of command argument;

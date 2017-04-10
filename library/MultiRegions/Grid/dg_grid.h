@@ -43,6 +43,10 @@ typedef struct dg_grid{
     int *EToR; ///< region id of each cell;
     double *vx, *vy, *vz; ///< vertex coordinate;
 
+    /** add boundary surface condition */
+    void (*add_BS)(struct dg_grid *grid, int Nsurface, int **SFToV);
+    /** add boundary surface condition from input file */
+    void (*add_BS_from_file)(struct dg_grid *grid, char *casename);
     /** project the grid vertex values to nodes */
     void (*proj_vert2node)(struct dg_grid *grid, int Nfield, double *vertval, double *nodeval);
 } dg_grid;

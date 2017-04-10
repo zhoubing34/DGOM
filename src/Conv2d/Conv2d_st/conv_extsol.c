@@ -13,7 +13,7 @@ extern Conv_Solver solver;
  * @param [in] y coordinate
  * @param [in,out] ext exact solution
  */
-static void advection_diffusion_ext(int Np, dg_real *x, dg_real *y, double *ext){
+static void advdiff_ext(int Np, dg_real *x, dg_real *y, double *ext){
 
     const double t = solver.finaltime;
     const double x0 = -0.5, y0 = -0.5;
@@ -66,6 +66,26 @@ static void rotation_ext(int Np, dg_real *x, dg_real *y, double *ext){
     return;
 }
 
+static void adv_ext(int Np, dg_real *x, dg_real *y, double *ext){
+    const double t = solver.finaltime;
+    dg_phys *phys = solver.phys;
+    dg_real *f_Q = dg_phys_f_Q(phys);
+    const double x0 = -0.5;
+    const double y0 = -0.5;
+    const double u = f_Q[1];
+    const double v = f_Q[2];
+
+    const double sigma = 125*1e3/(33*33);
+
+    int register n;
+    for(n=0;n<Np;n++){
+        const double xt = x[n]-x0-u*t;
+        const double yt = y[n]-y0-v*t;
+        double c = -sigma * ( xt*xt + yt*yt );
+        ext[n] = exp(c);
+    }
+    return;
+}
 
 typedef void (*Ext_Fun)(int Np, dg_real *x, dg_real *y, double *ext);
 
@@ -98,12 +118,11 @@ void conv_normerr(){
         case Conv_Rotation:
             ext_fun = rotation_ext; break;
         case Conv_AdvDiff:
-            ext_fun = advection_diffusion_ext; break;
+            ext_fun = advdiff_ext; break;
+        case Conv_Adv:
+            ext_fun = adv_ext; break;
         default:
-            if(!procid) {
-                printf("%s (%d)\nUnknown exact solution, exit\n",
-                       __FUNCTION__, __LINE__);
-            }
+            if(!procid){ printf("%s (%d)\nUnknown exact solution.\n", __FUNCTION__, __LINE__); }
             return;
     }
 

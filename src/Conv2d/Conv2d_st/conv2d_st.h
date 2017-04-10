@@ -13,6 +13,7 @@
 typedef enum{
     Conv_Rotation = 0,
     Conv_AdvDiff = 1,
+    Conv_Adv = 2,
 } Conv_St_Case;
 
 /* conv_input */

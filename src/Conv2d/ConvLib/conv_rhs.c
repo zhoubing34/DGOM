@@ -27,6 +27,13 @@ static int conv_upwind_flux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP
     return 0;
 }
 
+static int conv_obc_func(dg_real nx, dg_real ny, dg_real *f_M, dg_real *f_ext, int obc_ind, dg_real *f_P){
+    f_P[0] = 0;
+    f_P[2] = 0;
+    f_P[1] = 0;
+    return 0;
+}
+
 static int vis_func(dg_real *f_Q, dg_real *vis){
     vis[0] = f_Q[0];
     vis[1] = 0;
@@ -59,7 +66,7 @@ void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
     MPI_Waitall(Nmess, mpi_recv_requests, instatus);
 
     /* surface vol_integral */
-    dg_phys_strong_surf_opt2d(phys, NULL, NULL, NULL, conv_flux, conv_upwind_flux);
+    dg_phys_strong_surf_opt2d(phys, NULL, NULL, conv_obc_func, conv_flux, conv_upwind_flux);
 
     /* waite for finishing send buffer */
     MPI_Waitall(Nmess, mpi_send_requests, instatus);
@@ -67,7 +74,7 @@ void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
     /* viscosity flux */
     extern Conv_Solver solver;
     if(solver.vis_flag){
-        dg_phys_LDG_solve_vis_opt2d(phys, vis_func, NULL, NULL, NULL);
+        dg_phys_LDG_solve_vis_opt2d(phys, vis_func, NULL, NULL, conv_obc_func);
     }
 
     dg_real *f_resQ = dg_phys_f_resQ(phys);
