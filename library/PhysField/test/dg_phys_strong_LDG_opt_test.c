@@ -56,15 +56,19 @@ int dg_phys_strong_LDG_opt2d_test(dg_phys *phys, int verbose){
 
             f_Q[sk] = xt*xt;
             f_rhsQ[sk] = 0;
-            miu_x[sk] = sqrt_miu; miu_y[sk] = sqrt_miu;
-            px_ext[sk] = 2.*xt*sqrt_miu; py_ext[sk] = 0.0*sqrt_miu;
+            miu_x[sk] = sqrt_miu;
+            miu_y[sk] = sqrt_miu;
+            px_ext[sk] = 2.*xt*miu;
+            py_ext[sk] = 0.0*miu;
             rhs_ext[sk] = 2.0*miu;
 
             const int st = sk+1;
-            f_rhsQ[st] = 0;
             f_Q[st] = xt*yt+yt*yt;
-            miu_x[st] = sqrt_miu; miu_y[st] = sqrt_miu;
-            px_ext[st] = yt*sqrt_miu; py_ext[st] = (xt+2.*yt)*sqrt_miu;
+            f_rhsQ[st] = 0;
+            miu_x[st] = sqrt_miu;
+            miu_y[st] = sqrt_miu;
+            px_ext[st] = yt*miu;
+            py_ext[st] = (xt+2.*yt)*miu;
             rhs_ext[st] = 2.0*miu;
         }
     }
@@ -96,9 +100,9 @@ int dg_phys_strong_LDG_opt2d_test(dg_phys *phys, int verbose){
         print_double_vector2file(fp, "px_ext", px_ext, Nfield * Np * K);
         print_double_vector2file(fp, "px_Q", dg_phys_ldg_px(ldg), Nfield * Np * K);
         print_double_vector2file(fp, "py_ext", py_ext, Nfield * Np * K);
-        print_double_vector2file(fp, "py_Q", dg_phys_ldg_px(ldg), Nfield * Np * K);
+        print_double_vector2file(fp, "py_Q", dg_phys_ldg_py(ldg), Nfield * Np * K);
         print_double_vector2file(fp, "rhsQ_ext", rhs_ext, Nfield * Np * k);
-        print_double_vector2file(fp, "f_rhsQ", dg_phys_ldg_px(ldg), Nfield * Np * K);
+        print_double_vector2file(fp, "f_rhsQ", dg_phys_f_rhsQ(phys), Nfield * Np * K);
         fclose(fp);
     }
 
