@@ -25,8 +25,7 @@ static void advdiff_ext(int Np, dg_real *x, dg_real *y, double *ext){
     const double v = f_Q[2];
 
     //const double sigma = 125*1e3/(33*33);
-    const double sqrt_miu = dg_phys_ldg_sqrt_miux(ldg)[0];
-    const double miu = 1.0/(sqrt_miu*sqrt_miu);
+    const double miu = 1.0/(dg_phys_ldg_sqrt_miux(ldg)[0]);
     const double tiff = 1.0/(4.0*t+1);
     for(n=0;n<Np;n++){
         double xiff = x[n]-x0-u*t;

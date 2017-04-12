@@ -10,8 +10,6 @@
 #include "Utility/unit_test.h"
 #endif
 
-
-
 typedef struct Conv_Init_Creator{
     dg_grid *(*grid_init)();
     dg_phys *(*phys_init)(dg_grid *grid);
@@ -278,12 +276,11 @@ static dg_phys* advection_phys_init(dg_grid *grid){
     }
 
     dg_phys_LDG *ldg = phys->ldg;
-    const double sqrt_miu = sqrt(miu);
     for(k=0;k<K;k++){
         for(n=0;n<Np;n++){
             int sk = (k*Np+n)*Nfield;
-            dg_phys_ldg_sqrt_miux(ldg)[sk] = sqrt_miu;
-            dg_phys_ldg_sqrt_miuy(ldg)[sk] = sqrt_miu;
+            dg_phys_ldg_sqrt_miux(ldg)[sk] = miu;
+            dg_phys_ldg_sqrt_miuy(ldg)[sk] = miu;
         }
     }
 
@@ -368,6 +365,7 @@ static void set_time_info(double dt){
 
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
+    if(!procid) printf(HEADLINE " cfl: %f\n", cfl);
     if(!procid) printf(HEADLINE " dt: %f\n", dt);
     if(!procid) printf(HEADLINE " final time: %f\n", ftime);
     if(!procid) printf(HEADLINE " output dt: %f\n", out_dt);
@@ -386,8 +384,7 @@ static void advdiff_time_init(dg_phys *phys){
     double *len = dg_phys_region(phys)->len;
 
     dg_phys_LDG *ldg = phys->ldg;
-    const double sqrt_miu = dg_phys_ldg_sqrt_miux(ldg)[0];
-    const double miu = sqrt_miu*sqrt_miu;
+    const double miu = dg_phys_ldg_sqrt_miux(ldg)[0];
 
     dg_real *f_Q = dg_phys_f_Q(phys);
     int k,n,sk = 0;
@@ -399,7 +396,7 @@ static void advdiff_time_init(dg_phys *phys){
             const dg_real v = f_Q[sk++];
             double spe = sqrt(u*u+v*v);
             dt = min(dt, r/spe);
-            dt = min(dt, r*r/miu);
+            dt = min(dt, r*r/sqrt(miu));
         }
     }
 

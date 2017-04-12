@@ -13,9 +13,9 @@ dg_phys_LDG* dg_phys_LDG_create(dg_phys_info *info){
     const int NfetchNode = dg_mesh_NfetchNode(info->mesh);
 
     ldg->info = info;
-    ldg->sqrt_miux = vector_real_create(K*Np*Nfield);
-    ldg->sqrt_miuy = vector_real_create(K*Np*Nfield);
-    ldg->sqrt_miuz = vector_real_create(K*Np*Nfield);
+    ldg->miux = vector_real_create(K*Np*Nfield);
+    ldg->miuy = vector_real_create(K*Np*Nfield);
+    ldg->miuz = vector_real_create(K*Np*Nfield);
 
     ldg->px = vector_real_create(K*Np*Nfield);
     ldg->py = vector_real_create(K*Np*Nfield);
@@ -30,9 +30,9 @@ dg_phys_LDG* dg_phys_LDG_create(dg_phys_info *info){
 
 void dg_phys_LDG_free(dg_phys_LDG *ldg){
 
-    vector_real_free(ldg->sqrt_miux);
-    vector_real_free(ldg->sqrt_miuy);
-    vector_real_free(ldg->sqrt_miuz);
+    vector_real_free(ldg->miux);
+    vector_real_free(ldg->miuy);
+    vector_real_free(ldg->miuz);
     vector_real_free(ldg->px);
     vector_real_free(ldg->py);
     vector_real_free(ldg->pz);
@@ -55,7 +55,7 @@ static void ldg_set_vis(dg_phys_LDG *ldg, dg_real *vis){
         for(n=0;n<Np;n++){
             for(fld=0;fld<Nfield;fld++){
                 const int sk = (k*Np+n)*Nfield+fld;
-                ldg->sqrt_miux[sk] = dg_sqrt(vis[sk]);
+                ldg->miux[sk] = dg_sqrt(vis[sk]);
             }
         }
     }

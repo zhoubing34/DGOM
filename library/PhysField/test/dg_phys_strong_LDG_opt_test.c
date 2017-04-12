@@ -56,8 +56,8 @@ int dg_phys_strong_LDG_opt2d_test(dg_phys *phys, int verbose){
 
             f_Q[sk] = xt*xt;
             f_rhsQ[sk] = 0;
-            miu_x[sk] = sqrt_miu;
-            miu_y[sk] = sqrt_miu;
+            miu_x[sk] = miu;
+            miu_y[sk] = miu;
             px_ext[sk] = 2.*xt*miu;
             py_ext[sk] = 0.0*miu;
             rhs_ext[sk] = 2.0*miu;
@@ -65,8 +65,8 @@ int dg_phys_strong_LDG_opt2d_test(dg_phys *phys, int verbose){
             const int st = sk+1;
             f_Q[st] = xt*yt+yt*yt;
             f_rhsQ[st] = 0;
-            miu_x[st] = sqrt_miu;
-            miu_y[st] = sqrt_miu;
+            miu_x[st] = miu;
+            miu_y[st] = miu;
             px_ext[st] = yt*miu;
             py_ext[st] = (xt+2.*yt)*miu;
             rhs_ext[st] = 2.0*miu;

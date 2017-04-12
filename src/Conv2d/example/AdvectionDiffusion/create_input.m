@@ -1,4 +1,4 @@
-function main
+function create_input
 caseName = {'adv', 'diff'};
 cellType = {'quad', 'tri'};
 cellNum = [20, 40, 60, 80];
@@ -36,7 +36,7 @@ for icase = 1:numel(caseName)
                 fprintf(fp, '[------------]    1. CFL number;\n');
                 fprintf(fp, '[------------]    2. dt;\n');
                 fprintf(fp, '[------------]    3. final time;\n');
-                fprintf(fp, '%f\n', 0.1);
+                fprintf(fp, '%f\n', 0.3);
                 dt = dt_func{icase}(cellNum(inum), cellDeg(ideg));
                 fprintf(fp, '%f\n', dt);
                 fprintf(fp, '%f\n', 2);
@@ -70,7 +70,7 @@ function dt = diff_dt(cellNum, deg)
 spe = 0.5*sqrt(2);
 miu = 0.01;
 len = 2/cellNum/(deg+1);
-dt = min(len/spe, len^2/miu);
+dt = min(len/spe, len^2/(miu)/2);
 end
 
 
