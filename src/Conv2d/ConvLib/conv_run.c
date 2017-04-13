@@ -20,6 +20,9 @@ void conv_run(){
     int    intrk, counter = 0; // output step
     double rk4a[5], rk4b[5], rk4c[6];
 
+    int procid;
+    MPI_Comm_rank(MPI_COMM_WORLD, &procid);
+
     /* Runge-Kutta time evaluation coefficient */
     conv_rk_parameter(rk4a, rk4b, rk4c);
 
@@ -32,7 +35,6 @@ void conv_run(){
 
         /* adjust final step to end exactly at ftime */
         if (time+dt > ftime) { dt = ftime-time; }
-
         for (intrk=1; intrk<=5; ++intrk) {
 
             /* compute rhs of equations */
@@ -44,9 +46,9 @@ void conv_run(){
             //phys->limit(phys, 1.0);
         }
 
-        time += dt;     /* increment current time */
-        printf("processing: %f%%\r", time/ftime);
-        if(time > out_dt*counter) {conv_putvar(phys, counter++, time);}
+        time += dt; /* increment current time */
+        if(!procid) printf("processing: %f%%\r", time/ftime);
+        //if(time > out_dt*counter) {conv_putvar(phys, counter++, time);}
     }
 
     /* output the finial result */
@@ -56,7 +58,6 @@ void conv_run(){
     double elapsetime = mpitime1 - mpitime0;
 
     MPI_Barrier(MPI_COMM_WORLD);
-    const int procid = dg_mesh_procid(dg_phys_mesh(phys));
     if(!procid) {printf("proc: %d, time taken: %lg\n", procid, elapsetime);}
 }
 

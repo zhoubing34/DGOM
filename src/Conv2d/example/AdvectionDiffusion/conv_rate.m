@@ -1,7 +1,7 @@
 function conv_rate
-caseName = {'adv'};
+caseName = {'adv', 'diff'};
 cellType = {'tri', 'quad'};
-cellDeg = [1, 2, 3];
+cellDeg = [1, 2, 3, 4];
 cellNum = [20, 40, 60, 80];
 
 num = numel(cellNum);
@@ -26,7 +26,7 @@ for icase = 1:numel(caseName)
                     num2str(cellNum(inum)), '_', num2str(cellDeg(ideg)), '.log'];
                 [time(inum), L1(inum), L2(inum), Lf(inum)] = read_reasult(filename);
             end
-            plot(dx, time, marker{itype}{ideg}, markerface{itype}{:}); hold on;
+            plot(dx, L2, marker{itype}{ideg}, markerface{itype}{:}); hold on;
         end
     end
     set(gca, 'XScale', 'log', 'YScale', 'log');

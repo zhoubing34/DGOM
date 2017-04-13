@@ -7,7 +7,7 @@
 #define DEBUG 0
 //#define DELTA_1 0
 //#define DELTA_2 0
-#define DELTA_3 0
+//#define DELTA_3 0
 
 #if DEBUG
 #include "LibUtilities/UTest.h"
@@ -241,11 +241,11 @@ static void ldg_auxi_surf_opt2d(dg_phys *phys, dg_phys_LDG *ldg, Vis_Fun vis_fun
             for(fld=0;fld<Nfield;fld++){
                 dg_real vis_delta = (vis_M[fld] - vis_P[fld])*0.5;
 
-                pxFlux_M[sk+fld] = -fsc*nx*(  vis_delta - DELTA_3*nx*vis_delta);// + DELTA_2*pn_delta );
-                pxFlux_P[sk+fld] =  fsc*nx*( -vis_delta - DELTA_3*nx*vis_delta);// + DELTA_2*pn_delta );
+                pxFlux_M[sk+fld] = -fsc*nx*(  vis_delta );// + DELTA_2*pn_delta );
+                pxFlux_P[sk+fld] =  fsc*nx*( -vis_delta );// + DELTA_2*pn_delta );
 
-                pyFlux_M[sk+fld] = -fsc*ny*(  vis_delta - DELTA_3*ny*vis_delta);// + DELTA_2*pn_delta );
-                pyFlux_P[sk+fld] =  fsc*ny*( -vis_delta - DELTA_3*ny*vis_delta);// + DELTA_2*pn_delta );
+                pyFlux_M[sk+fld] = -fsc*ny*(  vis_delta );// + DELTA_2*pn_delta );
+                pyFlux_P[sk+fld] =  fsc*ny*( -vis_delta );// + DELTA_2*pn_delta );
             }
 
         }
@@ -408,8 +408,8 @@ static void ldg_phys_sruf_opt2d(dg_phys *phys, dg_phys_LDG *ldg){
                     break;
                 default: /// open boundary condition
                     for(fld=0;fld<Nfield;fld++){
-                        px_P[fld] = px[idM*Nfield+fld];
-                        py_P[fld] = py[idM*Nfield+fld];
+                        px_P[fld] = px_M[fld];
+                        py_P[fld] = py_M[fld];
                     }
                     break;
             }
@@ -420,8 +420,8 @@ static void ldg_phys_sruf_opt2d(dg_phys *phys, dg_phys_LDG *ldg){
                 dg_real py_delta = (py_M[fld] - py_P[fld])*0.5;
                 dg_real pn_delta = nx*px_delta + ny*py_delta;
 
-                flux_M[sk+fld] = -fsc*( pn_delta + (nx+ny)*DELTA_3*pn_delta );
-                flux_P[sk+fld] = -fsc*( pn_delta - (nx+ny)*DELTA_3*pn_delta );
+                flux_M[sk+fld] = -fsc*( pn_delta );
+                flux_P[sk+fld] = -fsc*( pn_delta );
             }
 
         }

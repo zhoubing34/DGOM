@@ -70,7 +70,7 @@ function dt = diff_dt(cellNum, deg)
 spe = 0.5*sqrt(2);
 miu = 0.01;
 len = 2/cellNum/(deg+1);
-dt = min(len/spe, len^2/(miu)/2);
+dt = min(len/spe, len^2/(miu)/4);
 end
 
 

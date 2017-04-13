@@ -19,7 +19,6 @@ void conv_setoutput(){
     NC_Dim *t  = nc_dim_create("t", 0);
 
     const int ndim = 3;
-    const int nvar = 4;
     NC_Dim *dimarray[ndim];
 
     /* define variables: x,y,time and h */
@@ -35,17 +34,22 @@ void conv_setoutput(){
     dimarray[1] = ne;
     dimarray[2] = np; /* inner loop */
     NC_Var *h = nc_var_create("var", 3, dimarray, NC_FLOAT);
+    NC_Var *px = nc_var_create("px", 3, dimarray, NC_FLOAT);
+    NC_Var *py = nc_var_create("py", 3, dimarray, NC_FLOAT);
 
     /* define files */
     dimarray[0] = np;
     dimarray[1] = ne;
     dimarray[2] = t;
 
+    const int nvar = 6;
     NC_Var *vararray[nvar];
     vararray[0] = x;
     vararray[1] = y;
     vararray[2] = time;
     vararray[3] = h;
+    vararray[4] = px;
+    vararray[5] = py;
 
     /* read output filename */
     extern Conv_Solver solver;
@@ -109,6 +113,29 @@ void conv_putvar(dg_phys *phys, int timestep, double time){
     for (k=0;k<K;k++){
         for (n=0;n<Np;n++){
             var[sk++] = (float) f_Q[ind]; // c field is the first
+            ind += Nfield;
+        }
+    }
+    nc_error( ncmpi_put_vara_float_all(file->ncid, ncvar->id, start_v, count_v, var) );
+
+    /* put variable px and py */
+    dg_real *px = dg_phys_ldg_px(phys->ldg);
+    dg_real *py = dg_phys_ldg_px(phys->ldg);
+    ncvar = file->var_vec_p[4];
+    ind=0; sk = 0;
+    for (k=0;k<K;k++){
+        for (n=0;n<Np;n++){
+            var[sk++] = (float) px[ind]; // c field is the first
+            ind += Nfield;
+        }
+    }
+    nc_error( ncmpi_put_vara_float_all(file->ncid, ncvar->id, start_v, count_v, var) );
+
+    ncvar = file->var_vec_p[5];
+    ind=0; sk = 0;
+    for (k=0;k<K;k++){
+        for (n=0;n<Np;n++){
+            var[sk++] = (float) py[ind]; // c field is the first
             ind += Nfield;
         }
     }

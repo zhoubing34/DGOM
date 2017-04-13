@@ -146,27 +146,27 @@ static void set_uniform_obc(dg_grid *grid, int Mx, int My){
     const int Nsurf = 2*(Mx+My);
     int **SFToV = matrix_int_create(Nsurf, 3);
     int n, sf=0;
-    /* bottom */
+    /* bottom - inflow */
     for(n=0;n<Mx;n++){
         SFToV[sf  ][0] = n;
         SFToV[sf  ][1] = n+1;
         SFToV[sf++][2] = FACE_OPENBS;
     }
-    /* top */
+    /* top - outflow */
     int sk = (Mx+1)*My;
     for(n=0;n<Mx;n++){
         SFToV[sf  ][0] = n + sk;
         SFToV[sf  ][1] = n+1 + sk;
         SFToV[sf++][2] = FACE_OPENBS;
     }
-    /* left */
+    /* left - inflow */
     sk = Mx+1;
     for(n=0;n<My;n++){
         SFToV[sf  ][0] = n*sk;
         SFToV[sf  ][1] = (n+1)*sk;
         SFToV[sf++][2] = FACE_OPENBS;
     }
-    /* right */
+    /* right - outflow */
     for(n=0;n<My;n++){
         SFToV[sf  ][0] = Mx+n*sk;
         SFToV[sf  ][1] = Mx+(n+1)*sk;

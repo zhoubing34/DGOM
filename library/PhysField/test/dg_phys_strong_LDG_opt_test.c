@@ -36,7 +36,7 @@ int dg_phys_strong_LDG_opt2d_test(dg_phys *phys, int verbose){
     const int nprocs = dg_region_nprocs(region);
 
     int k,n;
-    const dg_real miu = 0.5;
+    const dg_real miu = 0.005;
     const dg_real sqrt_miu = dg_sqrt(miu);
     dg_real px_ext[Np*Nfield*K], py_ext[Np*Nfield*K], rhs_ext[Np*Nfield*K];
 

@@ -12,10 +12,10 @@ static int conv_flux(dg_real *var, dg_real *Eflux, dg_real *Gflux){
     return 0;
 }
 
-static int conv_upwind_flux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_real *Fhs){
-    const dg_real cM = varM[0], cP = varP[0];
-    const dg_real uM = varM[1], uP = varP[1];
-    const dg_real vM = varM[2], vP = varP[2];
+static int conv_upwind_flux(dg_real nx, dg_real ny, dg_real *f_M, dg_real *f_P, dg_real *Fhs){
+    const dg_real cM = f_M[0], cP = f_P[0];
+    const dg_real uM = f_M[1], uP = f_P[1];
+    const dg_real vM = f_M[2], vP = f_P[2];
 
     if( (uM*nx+vM*ny) > 0.0 ){
         Fhs[0] = nx*cM*uM + ny*cM*vM;
@@ -28,9 +28,17 @@ static int conv_upwind_flux(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP
 }
 
 static int conv_obc_func(dg_real nx, dg_real ny, dg_real *f_M, dg_real *f_ext, int obc_ind, dg_real *f_P){
-    f_P[0] = 0;
-    f_P[2] = 0;
-    f_P[1] = 0;
+    const dg_real cM = f_M[0];
+    const dg_real uM = f_M[1];
+    const dg_real vM = f_M[2];
+
+    if( (uM*nx+vM*ny) > 0.0 ){
+        f_P[0] = cM;
+    }else{
+        f_P[0] = 0 - cM;
+    }
+
+    f_P[1] = 0; f_P[2] = 0;
     return 0;
 }
 
