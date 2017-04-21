@@ -20,12 +20,12 @@
 /* float type */
 #ifdef DOUBLE_PRECISION
 typedef double dg_real; ///< user specific float type
-#define MPI_TYPE MPI_DOUBLE ///< variable type for MPI subroutines
-#define NC_TYPE NC_DOUBLE ///< variable type for netCDF subroutines
+#define MPI_DG_REAL MPI_DOUBLE ///< variable type for MPI subroutines
+#define NC_DG_REAL NC_DOUBLE ///< variable type for netCDF subroutines
 #define dg_sqrt(x) sqrt(x) ///< sqrt operation
 #else
 typedef float dg_real; ///< user specific float type
-#define MPI_TYPE MPI_FLOAT ///< variable type for MPI subroutines
+#define MPI_DG_REAL MPI_FLOAT ///< variable type for MPI subroutines
 #define NC_TYPE NC_FLOAT ///< variable type for netCDF subroutines
 #define dg_sqrt(x) sqrtf(x)
 #endif
@@ -49,5 +49,9 @@ if( (fp = fopen(filename, "r")) == NULL ){ \
 void str2int(char *str, int *N, char* errmessage);
 void str2double(char *str, double *scal, char* errmessage);
 int unique_int(int len, int *list);
+
+/* testfile_IO */
+int read_int_file(char *filename, int Nlen, int Nfield, ...);
+int read_double_file(char *filename, int Nlen, int Nfield, ...);
 
 #endif //LIBUTILITIES_H

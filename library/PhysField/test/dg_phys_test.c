@@ -35,11 +35,8 @@ static const phys_func phys_creator[Nphys] = {
 dg_phys *uniform_tri_physfield(){
     int type = 1;
     dg_cell *tri = dg_cell_creat(N, TRIANGLE);
-    dg_grid *grid = dg_grid_uniform_tri(tri, Mx, My, xmin, xmax, ymin, ymax, type);
-    dg_region *region = dg_region_create(grid);
-    dg_mesh *mesh = dg_mesh_create(region);
-    dg_edge *edge = dg_edge_create(mesh);
-    dg_phys *phys = dg_phys_create(Nfield, edge);
+    dg_area *area = dg_area_create_uniform(tri, Mx, My, xmin, xmax, ymin, ymax, type);
+    dg_phys *phys = dg_phys_create(Nfield, area);
     return phys;
 }
 /**
@@ -48,23 +45,17 @@ dg_phys *uniform_tri_physfield(){
  */
 dg_phys *uniform_quad_physfield(){
     dg_cell *quad = dg_cell_creat(N, QUADRIL);
-    dg_grid *grid = dg_grid_uniform_quad(quad, Mx, My, xmin, xmax, ymin, ymax);
-    dg_region *region = dg_region_create(grid);
-    dg_mesh *mesh = dg_mesh_create(region);
-    dg_edge *edge = dg_edge_create(mesh);
-    dg_phys *phys = dg_phys_create(Nfield, edge);
+    int type = 1;
+    dg_area *area = dg_area_create_uniform(quad, Mx, My, xmin, xmax, ymin, ymax, type);
+    dg_phys *phys = dg_phys_create(Nfield, area);
     return phys;
 }
 
 dg_phys *rectangle_tri_physfield(){
     dg_cell *tri = dg_cell_creat(N, TRIANGLE);
     char casename[] = "SWE2d/Rectangle/Rectangle";
-    dg_grid *grid = dg_grid_read_file2d(tri, casename);
-    dg_grid_add_BS_file2d(grid, casename);
-    dg_region *region = dg_region_create(grid);
-    dg_mesh *mesh = dg_mesh_create(region);
-    dg_edge *edge = dg_edge_create(mesh);
-    dg_phys *phys = dg_phys_create(2, edge);
+    dg_area *area = dg_area_create_from_file(tri, casename);
+    dg_phys *phys = dg_phys_create(2, area);
     char obcfile[] = "SWE2d/Rectangle/Rectangle.obc4.nc";
     phys->attach_obc_ncfile(phys, obcfile);
     return phys;

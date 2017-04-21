@@ -16,11 +16,11 @@ static void dg_phys_local_face_mean(dg_phys_info *phys_info, dg_real *f_mean);
  */
 void dg_phys_indicator_edge(dg_phys_info *phys, int *tind){
 
-    dg_grid *grid = phys->grid;
+    dg_grid *grid = dg_phys_info_grid(phys);
     const int K = dg_grid_K(grid);
     const int Nfield = phys->Nfield;
-    const int Nfaces = dg_cell_Nfaces(phys->cell);
-    const int procid = dg_grid_procid(grid);
+    const int Nfaces = dg_cell_Nfaces(dg_phys_info_cell(phys));
+    const int procid = dg_phys_info_procid(phys);
 
     dg_real f_mean[K*Nfaces*Nfield];
     dg_phys_local_face_mean(phys, f_mean);
@@ -48,7 +48,7 @@ void dg_phys_indicator_edge(dg_phys_info *phys, int *tind){
     }
 
     /* parallel cell loop */
-    dg_mesh *mesh = phys->mesh;
+    dg_mesh *mesh = dg_phys_info_mesh(phys);
     const int Nfetchfaces = dg_mesh_NfetchFace(mesh);
     for(n=0;n<Nfetchfaces;n++){
         k = mesh->CBFToK[n];
@@ -71,12 +71,12 @@ void dg_phys_indicator_edge(dg_phys_info *phys, int *tind){
  * @param f_mean
  */
 static void dg_phys_local_face_mean(dg_phys_info *phys_info, dg_real *f_mean){
-    dg_cell *cell = phys_info->cell;
-    dg_region *region = phys_info->region;
+    dg_cell *cell = dg_phys_info_cell(phys_info);
+    dg_region *region = dg_phys_info_region(phys_info);
     const int Nfield = phys_info->Nfield;
     const int Nfaces = dg_cell_Nfaces(cell);
     const int Np = dg_cell_Np(cell);
-    const int K = dg_grid_K(phys_info->grid);
+    const int K = dg_grid_K(dg_phys_info_grid(phys_info));
 
     dg_real *f_Q = phys_info->f_Q;
 

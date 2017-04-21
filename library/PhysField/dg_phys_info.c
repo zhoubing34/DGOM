@@ -8,7 +8,7 @@ static int dg_phys_fetch_node_buffer(dg_phys_info *phys_info, MPI_Request *mpi_s
                                      MPI_Request *mpi_recv_requests);
 static int dg_phys_fetch_cell_buffer(dg_phys_info *phys_info, MPI_Request *mpi_send_requests,
                                      MPI_Request *mpi_recv_requests);
-static void dg_phys_cell_mean(dg_phys_info *phys);
+static void dg_phys_info_cell_mean(dg_phys_info *phys);
 
 /**
  * @brief create a new pointer to dg_phys_info structure.
@@ -17,21 +17,16 @@ static void dg_phys_cell_mean(dg_phys_info *phys);
  * @return
  * phys_info pointer to a dg_phys_info structure.
  */
-dg_phys_info* dg_phys_info_create(int Nfields, dg_edge *edge){
+dg_phys_info* dg_phys_info_create(int Nfields, dg_area *area){
     dg_phys_info *phys_info = (dg_phys_info*)calloc(1, sizeof(dg_phys_info));
 
-    phys_info->edge = edge;
-    phys_info->mesh = edge->mesh;
-    phys_info->region = edge->region;
-    phys_info->grid = edge->grid;
-    phys_info->cell = edge->cell;
-
+    phys_info->area = area;
     phys_info->Nfield = Nfields; ///< number of fields
 
-    const int K = dg_grid_K(phys_info->grid);
-    const int Np = dg_cell_Np(phys_info->cell);
-    const int NfetchFace = dg_mesh_NfetchFace(phys_info->mesh);
-    const int NfetchNode = dg_mesh_NfetchNode(phys_info->mesh);
+    const int K = dg_grid_K(dg_area_grid(area));
+    const int Np = dg_cell_Np(dg_area_cell(area));
+    const int NfetchFace = dg_mesh_NfetchFace(dg_area_mesh(area));
+    const int NfetchNode = dg_mesh_NfetchNode(dg_area_mesh(area));
 
     /* nodal array */
     phys_info->f_Q    = (dg_real *) calloc((size_t) K*Np*Nfields, sizeof(dg_real));
@@ -48,7 +43,7 @@ dg_phys_info* dg_phys_info_create(int Nfields, dg_edge *edge){
     /* methods */
     phys_info->fetch_node_buffer = dg_phys_fetch_node_buffer;
     phys_info->fetch_cell_buffer = dg_phys_fetch_cell_buffer;
-    phys_info->cell_mean = dg_phys_cell_mean;
+    phys_info->cell_mean = dg_phys_info_cell_mean;
 
     return phys_info;
 }
@@ -97,7 +92,7 @@ void dg_phys_info_free(dg_phys_info *phys_info){
 static int dg_phys_fetch_node_buffer(dg_phys_info *phys_info,
                                      MPI_Request *mpi_send_requests,
                                      MPI_Request *mpi_recv_requests) {
-    dg_mesh *mesh = phys_info->mesh;
+    dg_mesh *mesh = dg_phys_info_mesh(phys_info);
     const int Nfield = phys_info->Nfield;
     int Nmess;
     Nmess = mesh->fetch_node_buffer(mesh, Nfield, phys_info->f_Q, phys_info->f_recvQ,
@@ -135,25 +130,25 @@ static int dg_phys_fetch_cell_buffer(dg_phys_info *phys_info,
                                      MPI_Request *mpi_send_requests,
                                      MPI_Request *mpi_recv_requests){
 
-    dg_mesh *mesh = phys_info->mesh;
+    dg_mesh *mesh = dg_phys_info_mesh(phys_info);
     const int Nfield = phys_info->Nfield;
     int Nmess;
-    Nmess = mesh->fetch_cell_buffer(mesh, Nfield, phys_info->f_Q, phys_info->f_recvQ,
+    Nmess = mesh->fetch_cell_buffer(mesh, Nfield, phys_info->c_Q, phys_info->c_recvQ,
                                     mpi_send_requests, mpi_recv_requests);
     return Nmess;
 }
 
 
 /**
- * @brief calculate the integral averaged cell value of each physical field
- * @param[in,out] phys physical field object
+ * @brief calculate the integral averaged cell value of each physical field.
+ * @param[in,out] phys pointer to dg_phys structure;
  */
-static void dg_phys_cell_mean(dg_phys_info *phys){
+static void dg_phys_info_cell_mean(dg_phys_info *phys){
 
-    dg_region *region = phys->region;
+    dg_region *region = dg_phys_info_region(phys);
     const int Nfield = phys->Nfield;
-    const int K = dg_grid_K(phys->grid);
-    const int Np = dg_cell_Np(phys->cell);
+    const int K = dg_grid_K(dg_phys_info_grid(phys));
+    const int Np = dg_cell_Np(dg_phys_info_cell(phys));
 
     register int k,fld;
 
@@ -162,7 +157,7 @@ static void dg_phys_cell_mean(dg_phys_info *phys){
 
     for(k=0;k<K;k++){
         region->vol_integral(region, Nfield, k, f_Q+k*Np*Nfield, c_Q+k*Nfield);
-        const double Area = 1.0/phys->region->size[k];
+        const double Area = 1.0/region->size[k];
         for(fld=0;fld<Nfield;fld++){ // divided the area
             c_Q[k*Nfield + fld] *= Area;
         }

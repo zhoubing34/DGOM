@@ -1,5 +1,5 @@
 add_subdirectory(Polylib)
 add_subdirectory(Utility)
 add_subdirectory(StandCell)
-add_subdirectory(MultiRegions)
+add_subdirectory(MultiArea)
 add_subdirectory(PhysField)

@@ -5,16 +5,17 @@
 #ifndef DGOM_DG_PHYS_INFO_H
 #define DGOM_DG_PHYS_INFO_H
 
-#include "MultiRegions/Edge/dg_edge.h"
+#include "MultiArea/dg_area.h"
 
 typedef struct dg_phys_info{
     int Nfield;
 
-    dg_edge *edge; ///< parallel edge structure;
-    dg_mesh *mesh; ///< parallel mesh structure;
-    dg_region *region; ///< multi-region structure;
-    dg_grid *grid; ///< geometry grid structure;
-    dg_cell *cell; ///< standard cell structure;
+//    dg_edge *edge; ///< parallel edge structure;
+//    dg_mesh *mesh; ///< parallel mesh structure;
+//    dg_region *region; ///< multi-region structure;
+//    dg_grid *grid; ///< geometry grid structure;
+//    dg_cell *cell; ///< standard cell structure;
+    dg_area *area;
 
     dg_real *c_Q; ///< cell information;
     dg_real *c_recvQ; ///< recv buffers for cell information;
@@ -43,8 +44,17 @@ typedef int (*Nodal_Flux_Fun)(dg_real *var, dg_real *Eflux, dg_real *Gflux);
 typedef int (*Numerical_Flux)(dg_real nx, dg_real ny, dg_real *varM, dg_real *varP, dg_real *Fhs);
 
 /** creator functions */
-dg_phys_info* dg_phys_info_create(int Nfields, dg_edge *edge);
+dg_phys_info* dg_phys_info_create(int Nfields, dg_area *area);
 /** free function */
 void dg_phys_info_free(dg_phys_info *phys_info);
+
+#define dg_phys_info_area(info) info->area
+#define dg_phys_info_cell(info) dg_area_cell(info->area)
+#define dg_phys_info_grid(info) dg_area_grid(info->area)
+#define dg_phys_info_region(info) dg_area_region(info->area)
+#define dg_phys_info_mesh(info) dg_area_mesh(info->area)
+#define dg_phys_info_edge(info) dg_area_edge(info->area)
+#define dg_phys_info_procid(info) dg_area_procid(info->area)
+#define dg_phys_info_nprocs(info) dg_area_nprocs(info->area)
 
 #endif //DGOM_DG_PHYS_INFO_H

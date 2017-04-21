@@ -10,7 +10,7 @@ int nc_file_read_from_file_test(int verbose){
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
-    char filename[] = "example/SWE2d/TsuamiRunup2d/TsuamiRunup.obc4.nc";
+    char filename[] = "SWE2d/TsuamiRunup2d/TsuamiRunup.obc4.nc";
     NC_File *file = nc_file_read_from_file(filename, procid, nprocs);
 
     if(!procid) {

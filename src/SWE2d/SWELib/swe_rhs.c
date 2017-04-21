@@ -48,7 +48,7 @@ void swe_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
     const int K = dg_grid_K( dg_phys_grid(phys) );
     const int Np = dg_cell_Np( dg_phys_cell(phys) );
     const int Nfield = dg_phys_Nfield(phys);
-    const int nprocs = dg_grid_nprocs( dg_phys_grid(phys) );
+    const int nprocs = dg_phys_nprocs(phys);
 
     /* mpi request buffer */
     MPI_Request *mpi_send_requests = (MPI_Request *) calloc((size_t) nprocs, sizeof(MPI_Request));

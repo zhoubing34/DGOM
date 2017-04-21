@@ -5,8 +5,8 @@ set(CONV_LIB
         )
 
 add_library(conv2d_lib STATIC ${CONV_LIB})
-add_dependencies(conv2d_lib physfield)
-target_link_libraries(conv2d_lib physfield)
+add_dependencies(conv2d_lib phys_field)
+target_link_libraries(conv2d_lib phys_field)
 
 # standard conv2d solver
 set(SRC_LIST

@@ -1,31 +1,11 @@
-body {
-        background-color: #CCC;
-        color: black;
-        margin: 0;
-}
+#titlearea1:before 
+{ 
+        content:url('dgom_logo.png'); 
+        position:absolute; 
+        right:0px; 
+} 
 
-div.contents {
-        margin-bottom: 10px;
-        padding: 12px;
-        margin-left: auto;
-        margin-right: auto;
-        width: 960px;
-        background-color: white;
-        border-radius: 8px;
-}
-
-div.image img[src="example.png"]{
-        width:30px;
-}
-
-#titlearea {
-        background-color: white;
-}
-
-hr.footer {
-        display: none;
-}
-
-.footer {
-        background-color: #AAA;
-}
+#titlearea1 
+{ 
+    padding-right:64px; 
+} 

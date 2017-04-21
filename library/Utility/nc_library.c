@@ -190,7 +190,7 @@ NC_File* nc_file_read_from_file(const char *name, int procid, int nprocs){
     /* open file */
     file->name = calloc(NC_MAX_NAME_LEN, sizeof(char));
     strcpy(file->name, name);
-    nc_error(ncmpi_open(MPI_COMM_WORLD, file->name, NC_NOWRITE, MPI_INFO_NULL, &(file->ncid) ));
+    nc_error( ncmpi_open(MPI_COMM_WORLD, file->name, NC_NOWRITE, MPI_INFO_NULL, &(file->ncid)) );
     /* read dimensions */
     int Ndim,n;
     nc_error( ncmpi_inq_ndims(file->ncid, &Ndim) );

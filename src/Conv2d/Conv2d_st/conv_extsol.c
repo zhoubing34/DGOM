@@ -99,7 +99,7 @@ void conv_normerr(){
     const int K = dg_grid_K(dg_phys_grid(phys));
     const int Nfield = dg_phys_Nfield(phys);
     const int Np = dg_cell_Np(dg_phys_cell(phys));
-    const int procid = dg_grid_procid(dg_phys_grid(phys));
+    const int procid = dg_phys_procid(phys);
 
     double Linf=0, L2=0, L1=0;
     double **x = dg_region_x(region);

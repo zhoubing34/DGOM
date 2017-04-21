@@ -240,7 +240,7 @@ void print_double_vector2file(FILE *fp, char *message, double *Mat, int len){
 FILE* create_log(const char *name, int rank, int nprocs){
     int ret;
     char filename[MAX_NAME_LENGTH];
-    ret = snprintf(filename, MAX_NAME_LENGTH, "%s%d-%d.txt", name, rank, nprocs);
+    ret = snprintf(filename, MAX_NAME_LENGTH, "%s.%d-%d.txt", name, rank, nprocs);
     if (ret >= MAX_NAME_LENGTH) {
         fprintf(stderr, "%s (%s): %d\nthe function name %s is too long \n",
                 __FUNCTION__, __FILE__, __LINE__, name);

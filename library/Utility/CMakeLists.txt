@@ -10,7 +10,8 @@ set(LIBUTILITIES_SOURCE
         nc_library.c
         nc_library.h
         arg_section.c
-        arg_section.h)
+        arg_section.h
+        textfile_IO.c)
 
 add_library(utility STATIC ${LIBUTILITIES_SOURCE})
 target_link_libraries(utility m lapack blas f2c pnetcdf)# extern lapack library

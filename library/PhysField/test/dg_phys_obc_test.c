@@ -6,8 +6,8 @@
 
 int dg_phys_obc_test(dg_phys *phys, int verbose){
     dg_cell *cell = dg_phys_cell(phys);
-    const int procid = dg_mesh_procid(dg_phys_mesh(phys));
-    const int nprocs = dg_mesh_nprocs(dg_phys_mesh(phys));
+    const int procid = dg_phys_procid(phys);
+    const int nprocs = dg_phys_nprocs(phys);
     const int Nfield = dg_phys_Nfield(phys);
     const int K = dg_grid_K(dg_phys_grid(phys));
     const int Np = dg_cell_Np(cell);

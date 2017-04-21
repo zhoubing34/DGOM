@@ -2,7 +2,6 @@
 // Created by li12242 on 17/1/10.
 //
 
-#include <MultiRegions/Region/dg_region.h>
 #include "dg_phys_limiter_test.h"
 
 int dg_phys_limiter_test(dg_phys *phys, int verbose){
@@ -26,13 +25,14 @@ int dg_phys_limiter_test(dg_phys *phys, int verbose){
         }
     }
     phys->limit(phys, 1.0);
+    const int procid = dg_phys_procid(phys);
+    const int nprocs = dg_phys_nprocs(phys);
     if(verbose) {
-        FILE *fp = create_log(__FUNCTION__, dg_region_procid(region), dg_region_nprocs(region));
+        FILE *fp = create_log(__FUNCTION__, procid, nprocs);
         print_double_vector2file(fp, "f_Q", f_Q, K*Np*Nfield);
         fclose(fp);
     }
 
-    const int procid = region->procid;
     if(!procid) {
         if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     }

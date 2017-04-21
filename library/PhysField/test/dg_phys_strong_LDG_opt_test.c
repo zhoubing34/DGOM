@@ -25,19 +25,15 @@ static int vis_func(dg_real *f_Q, dg_real *vis_Q){
 
 int dg_phys_strong_LDG_opt2d_test(dg_phys *phys, int verbose){
     int fail = 0;
-    dg_mesh *mesh = dg_phys_mesh(phys);
     dg_region *region = dg_phys_region(phys);
     dg_cell *cell = dg_phys_cell(phys);
 
     const int Nfield = dg_phys_Nfield(phys);
     const int K = dg_grid_K(dg_phys_grid(phys));
     const int Np = dg_cell_Np(cell);
-    const int procid = dg_region_procid(region);
-    const int nprocs = dg_region_nprocs(region);
 
     int k,n;
     const dg_real miu = 0.005;
-    const dg_real sqrt_miu = dg_sqrt(miu);
     dg_real px_ext[Np*Nfield*K], py_ext[Np*Nfield*K], rhs_ext[Np*Nfield*K];
 
     dg_real *f_rhsQ = dg_phys_f_rhsQ(phys);
@@ -73,6 +69,9 @@ int dg_phys_strong_LDG_opt2d_test(dg_phys *phys, int verbose){
         }
     }
 
+    const int procid = dg_phys_procid(phys);
+    const int nprocs = dg_phys_nprocs(phys);
+
     MPI_Request mpi_send_requests[nprocs];
     MPI_Request mpi_recv_requests[nprocs];
     int Nmess=0;
@@ -92,7 +91,7 @@ int dg_phys_strong_LDG_opt2d_test(dg_phys *phys, int verbose){
     }
 
     if(verbose){
-        FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
+        FILE *fp = create_log(__FUNCTION__, procid, nprocs);
         fprintf(fp, "K = %d\n", K);
         fprintf(fp, "Nfield = %d\n", Nfield);
         fprintf(fp, "Np = %d\n", Np);

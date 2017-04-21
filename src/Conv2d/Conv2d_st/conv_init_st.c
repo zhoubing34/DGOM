@@ -3,7 +3,7 @@
 //
 #include "conv2d_st.h"
 #include "../ConvLib/conv_lib2d.h"
-#include "MultiRegions/Grid/dg_grid_BS.h"
+#include "MultiArea/Grid/dg_grid_BS.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -11,32 +11,33 @@
 #endif
 
 typedef struct Conv_Init_Creator{
-    dg_grid *(*grid_init)();
-    dg_phys *(*phys_init)(dg_grid *grid);
+    dg_area *(*grid_init)();
+    dg_phys *(*phys_init)(dg_area *grid);
     void (*time_init)(dg_phys *phys);
-}Conv_Init_Creator;
+} Conv_Init_Creator;
 
 static void conv_time_init(dg_phys *phys);
 static void set_uniform_obc(dg_grid *grid, int Mx, int My);
-static dg_grid* uniform_grid_init();
-static dg_phys* rotation_phys_init(dg_grid *grid);
-static dg_phys* advection_phys_init(dg_grid *grid);
-static dg_phys* pure_advection_phys_init(dg_grid *grid);
+
+static dg_area* uniform_area_init();
+static dg_phys* rotation_phys_init(dg_area *grid);
+static dg_phys* advection_phys_init(dg_area *area);
+static dg_phys* pure_advection_phys_init(dg_area *grid);
 static void advection_time_init(dg_phys *phys);
 static void advdiff_time_init(dg_phys *phys);
 
 static const Conv_Init_Creator rotation_creator = {
-        uniform_grid_init,
+        uniform_area_init,
         rotation_phys_init,
         advection_time_init,
 };
 static const Conv_Init_Creator advdiff_creator = {
-        uniform_grid_init,
+        uniform_area_init,
         advection_phys_init,
         advdiff_time_init,
 };
 static const Conv_Init_Creator pure_advection = {
-        uniform_grid_init,
+        uniform_area_init,
         pure_advection_phys_init,
         advection_time_init,
 };
@@ -66,14 +67,14 @@ void conv_init_st(){
             exit(-1);
     }
 
-    dg_grid *grid = solver_creator->grid_init();
-    dg_phys *phys = solver_creator->phys_init(grid);
+    dg_area *area = solver_creator->grid_init();
+    dg_phys *phys = solver_creator->phys_init(area);
     solver_creator->time_init(phys);
     solver.phys = phys;
     return;
 }
 
-static dg_grid* uniform_grid_init(){
+static dg_area* uniform_area_init(){
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     extern Conv_Solver solver;
@@ -122,24 +123,14 @@ static dg_grid* uniform_grid_init(){
     int Mx, My;
     sscanf(sec->arg_vec_p[0], "%d\n", &(Mx));
     sscanf(sec->arg_vec_p[1], "%d\n", &(My));
-    dg_grid *grid = NULL;
     if(!procid){
         printf(HEADLINE " Ne on x: %d\n", Mx);
         printf(HEADLINE " Ne on y: %d\n", My);
     }
-    switch (cell_type){
-        case TRIANGLE:
-            grid = dg_grid_uniform_tri(cell, Mx, My, -1, 1, -1, 1, 0); break;
-        case QUADRIL:
-            grid = dg_grid_uniform_quad(cell, Mx, My, -1, 1, -1, 1); break;
-        default:
-            fprintf(stderr, "%s (%d)\nUnknown cell type %d.\n",
-                    __FUNCTION__, __LINE__, cell_type);
-            MPI_Abort(MPI_COMM_WORLD, -1);
-    }
     conv_arg_section_free(sec_p);
-    set_uniform_obc(grid, Mx, My);
-    return grid;
+    dg_area *area = dg_area_create_uniform(cell, Mx, My, -1, 1, -1, 1, 0);
+    set_uniform_obc(area->grid, Mx, My);
+    return area;
 }
 
 static void set_uniform_obc(dg_grid *grid, int Mx, int My){
@@ -180,7 +171,7 @@ static void set_uniform_obc(dg_grid *grid, int Mx, int My){
     print_int_matrix2file(fp,"SFToV", SFToV, Nsurf, 3);
 #endif
 
-    dg_grid_add_BS2d(grid, Nsurf, SFToV);
+    dg_grid_set_EToBS2d(grid, Nsurf, SFToV);
 #if DEBUG
     print_int_matrix2file(fp, "EToV", grid->EToV, grid->K, dg_cell_Nfaces(grid->cell));
     print_int_matrix2file(fp, "EToBS", grid->EToBS, grid->K, dg_cell_Nfaces(grid->cell));
@@ -190,11 +181,10 @@ static void set_uniform_obc(dg_grid *grid, int Mx, int My){
     return;
 }
 
-static dg_phys* rotation_phys_init(dg_grid *grid){
-    dg_region *region = dg_region_create(grid);
-    dg_mesh *mesh = dg_mesh_create(region);
-    dg_edge *edge = dg_edge_create(mesh);
-    dg_phys *phys = dg_phys_create(3, edge);
+static dg_phys* rotation_phys_init(dg_area *area){
+
+    dg_phys *phys = dg_phys_create(3, area);
+
     const int K = dg_grid_K(dg_phys_grid(phys));
     const int Np = dg_cell_Np( dg_phys_cell(phys));
     const double sigma = 125*1e3/(33*33);
@@ -221,11 +211,8 @@ static dg_phys* rotation_phys_init(dg_grid *grid){
     return phys;
 }
 
-static dg_phys* advection_phys_init(dg_grid *grid){
-    dg_region *region = dg_region_create(grid);
-    dg_mesh *mesh = dg_mesh_create(region);
-    dg_edge *edge = dg_edge_create(mesh);
-    dg_phys *phys = dg_phys_create(3, edge);
+static dg_phys* advection_phys_init(dg_area *area){
+    dg_phys *phys = dg_phys_create(3, area);
 
     const int K = dg_grid_K(dg_phys_grid(phys));
     const int Np = dg_cell_Np(dg_phys_cell(phys));
@@ -295,12 +282,9 @@ static dg_phys* advection_phys_init(dg_grid *grid){
     return phys;
 }
 
-static dg_phys* pure_advection_phys_init(dg_grid *grid){
+static dg_phys* pure_advection_phys_init(dg_area *area){
 
-    dg_region *region = dg_region_create(grid);
-    dg_mesh *mesh = dg_mesh_create(region);
-    dg_edge *edge = dg_edge_create(mesh);
-    dg_phys *phys = dg_phys_create(3, edge);
+    dg_phys *phys = dg_phys_create(3, area);
 
     const int K = dg_grid_K(dg_phys_grid(phys));
     const int Np = dg_cell_Np(dg_phys_cell(phys));

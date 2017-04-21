@@ -3,29 +3,23 @@
 
 #define DEBUG 0
 
-static dg_grid *swe_user_init_grid();
-static dg_phys* user_phys_init(dg_grid *grid);
+static dg_area* swe_user_init_area();
+static dg_phys* user_phys_init(dg_area *area);
 static void swe_read_manning_frict_file(dg_phys *phys, char *filename);
 
-typedef struct SWE_Init_Creator{
-    dg_grid *(*grid_init)();
-    dg_phys *(*phys_init)(dg_grid *grid);
-}SWE_Init_Creator;
-
-const static SWE_Init_Creator user_init = {swe_user_init_grid, user_phys_init};
 
 void swe_init(){
-    const SWE_Init_Creator *creator = &user_init;
 
     extern SWE_Solver solver;
-    dg_grid *grid = creator->grid_init();
-    dg_phys *phys = creator->phys_init(grid);
+    dg_area *area = swe_user_init_area();
+    dg_phys *phys = user_phys_init(area);
 
     solver.phys = phys;
     return;
 }
 
-static dg_grid *swe_user_init_grid(){
+static dg_area *swe_user_init_area(){
+
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     arg_section **sec_p = swe_read_section();
@@ -33,7 +27,6 @@ static dg_grid *swe_user_init_grid(){
     char casename[MAX_NAME_LENGTH];
     arg_section *sec = sec_p[0];
     strcpy(casename, sec->arg_vec_p[0]);
-
     if(!procid){ printf(HEAD_LINE " casename: %s\n", casename); }
     /// 1. cell info
     sec = sec_p[1];
@@ -44,12 +37,10 @@ static dg_grid *swe_user_init_grid(){
     dg_cell *cell = dg_cell_creat(N, cell_type);
     if(!procid){
         switch (cell_type){
-            case TRIANGLE:
-                printf(HEAD_LINE " cell type: triangle\n"); break;
-            case QUADRIL:
-                printf(HEAD_LINE " cell type: quadrilateral\n"); break;
+            case TRIANGLE: printf(HEAD_LINE " cell type: triangle\n"); break;
+            case QUADRIL: printf(HEAD_LINE " cell type: quadrilateral\n"); break;
             default:
-                fprintf(stderr, "%s (%d)\nUnknown cell type %d.\n",
+                fprintf(stderr, "%s (%d): Unknown cell type %d.\n",
                         __FUNCTION__, __LINE__, cell_type);
                 MPI_Abort(MPI_COMM_WORLD, -1);
         }
@@ -57,19 +48,15 @@ static dg_grid *swe_user_init_grid(){
     }
     swe_free_section(sec_p);
     // create grid
-    dg_grid *grid = dg_grid_read_file2d(cell, casename);
-    dg_grid_add_BS_file2d(grid, casename); // read boundary condition
-    return grid;
+    dg_area *area = dg_area_create_from_file(cell, casename);
+    return area;
 }
 
-static dg_phys* user_phys_init(dg_grid *grid){
+static dg_phys* user_phys_init(dg_area *area){
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
 
-    dg_region *region = dg_region_create(grid);
-    dg_mesh *mesh = dg_mesh_create(region);
-    dg_edge *edge = dg_edge_create(mesh);
-    dg_phys *phys = dg_phys_create(4, edge); // physical field for (h, hu, hv, b)
+    dg_phys *phys = dg_phys_create(4, area); // physical field for (h, hu, hv, b)
     /// 2. obc file
     arg_section **sec_p = swe_read_section();
     char obcfile[MAX_NAME_LENGTH];

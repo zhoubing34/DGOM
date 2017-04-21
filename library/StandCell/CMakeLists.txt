@@ -9,11 +9,11 @@ set(STDREGIONS_SOURCE
         dg_cell_triangle.c
         dg_cell_quadrilateral.c)
 
-add_library(standcell STATIC ${STDREGIONS_SOURCE})
-add_dependencies(standcell utility polylib)
-target_link_libraries(standcell utility polylib)
+add_library(stand_cell STATIC ${STDREGIONS_SOURCE})
+add_dependencies(stand_cell utility polylib)
+target_link_libraries(stand_cell utility polylib)
 
-install(TARGETS standcell ARCHIVE DESTINATION lib)
+install(TARGETS stand_cell ARCHIVE DESTINATION lib)
 
 if(UNITTEST_FOUND)
     add_subdirectory(test)

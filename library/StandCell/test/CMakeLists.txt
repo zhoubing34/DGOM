@@ -8,10 +8,10 @@ set(STDREGIONS_SCR
         triangle/dg_cell_tri_test.c
         quadrilateral/dg_cell_quad_test.c)
 
-add_executable(standcell_test ${STDREGIONS_SCR})
+add_executable(stand_cell_test ${STDREGIONS_SCR})
 
-add_dependencies(standcell_test utility standcell)
-target_link_libraries(standcell_test utility standcell)
+add_dependencies(stand_cell_test utility stand_cell)
+target_link_libraries(stand_cell_test utility stand_cell)
 
-install(TARGETS standcell_test
+install(TARGETS stand_cell_test
         RUNTIME DESTINATION test)

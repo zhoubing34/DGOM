@@ -5,7 +5,7 @@
 #ifndef DGOM_PF_LIMIT_BJ2D_H
 #define DGOM_PF_LIMIT_BJ2D_H
 
-#include "PhysField/dg_phys_limiter.h"
+#include "dg_phys_limiter.h"
 
 void dg_phys_limiter_BJ2d(dg_phys_info *phys, int *, double beta);
 

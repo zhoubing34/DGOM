@@ -5,19 +5,19 @@
 
 #define DEBUG 0
 
-static dg_grid* user_grid_init();
-static dg_phys* user_phys_init(dg_grid *grid);
+static dg_area* user_grid_init();
+static dg_phys* user_phys_init(dg_area *area);
 static void conv_time_init(dg_phys *phys);
 static void set_const_vis_value(dg_phys *phys, double vis);
 
 void conv_init(){
-    dg_grid *grid = user_grid_init();
-    dg_phys *phys = user_phys_init(grid);
+    dg_area *area = user_grid_init();
+    dg_phys *phys = user_phys_init(area);
     conv_time_init(phys);
     return;
 }
 
-static dg_grid* user_grid_init(){
+static dg_area* user_grid_init(){
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
     extern Conv_Solver solver;
@@ -52,21 +52,17 @@ static dg_grid* user_grid_init(){
     conv_arg_section_free(sec_p);
 
     // create grid
-    dg_grid *grid = dg_grid_read_file2d(cell, casename);
-    dg_grid_add_BS_file2d(grid, casename); // read boundary condition
+    dg_area *area = dg_area_create_from_file(cell, casename);
 
-    return grid;
+    return area;
 }
 
-static dg_phys* user_phys_init(dg_grid *grid){
+static dg_phys* user_phys_init(dg_area *area){
     extern Conv_Solver solver;
     int procid;
     MPI_Comm_rank(MPI_COMM_WORLD, &procid);
 
-    dg_region *region = dg_region_create(grid);
-    dg_mesh *mesh = dg_mesh_create(region);
-    dg_edge *edge = dg_edge_create(mesh);
-    dg_phys *phys = dg_phys_create(1, edge);
+    dg_phys *phys = dg_phys_create(3, area);
     /// 2. obc file
     extern Conv_Solver solver;
     arg_section **sec_p = conv_read_inputfile(solver.filename);

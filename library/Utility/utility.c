@@ -41,10 +41,10 @@ static int cmp_increase(const void *a, const void *b){
 }
 
 /**
- * @brief count the number of uique elements in an array
- * @param len length of the array
- * @param list array of integer
- * @return n number of unique elements
+ * @brief count the number of uique elements in an integer array.
+ * @param len length of the array;
+ * @param list array of integer;
+ * @return n number of unique elements;
  */
 int unique_int(int len, int *list){
     if(len ==0) { return 0; }

@@ -7,18 +7,19 @@ set(PHYSDOMAIN_SOURCE
         dg_phys.c
         dg_phys_strong_vol_opt.c
         dg_phys_strong_surf_opt.c
-        dg_phys_limiter.c
+        Limiter/dg_phys_limiter.c
         dg_phys_LDG.c
         dg_phys_strong_LDG_opt.c
         Limiter/dg_phys_limiter_BJ2d.c
         Limiter/dg_phys_indicator_edge.c
+        Limiter/dg_phys_indicator_all.c
         )
 
-add_library(physfield STATIC ${PHYSDOMAIN_SOURCE})
-add_dependencies(physfield multiregions)
-target_link_libraries(physfield multiregions)
+add_library(phys_field STATIC ${PHYSDOMAIN_SOURCE})
+add_dependencies(phys_field multi_area)
+target_link_libraries(phys_field multi_area)
 
-install(TARGETS physfield ARCHIVE DESTINATION lib)
+install(TARGETS phys_field ARCHIVE DESTINATION lib)
 
 if(UNITTEST_FOUND)
     add_subdirectory(test)

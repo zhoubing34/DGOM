@@ -6,6 +6,8 @@
 static void swe_rk_parameter(double *rk4a, double *rk4b, double *rk4c);
 static double swe_time_interval(dg_phys *phys);
 static void swe_ppreserve(dg_phys *phys);
+static void swe_eta2h(dg_phys *phys);
+static void swe_h2eta(dg_phys *phys);
 
 void swe_run(){
 
@@ -17,7 +19,7 @@ void swe_run(){
     dg_phys *phys = solver.phys;
     /* store loop condition */
     int     INTRK, tstep=0;
-    int     procid = dg_mesh_procid(dg_phys_mesh(phys));
+    int     procid = dg_phys_procid(phys);
     double  time = 0.0;
     double  userDt = solver.dt;
     double  outDt = solver.outDt;
@@ -39,7 +41,7 @@ void swe_run(){
         if(dt<userDt) dt = userDt;
         /* adjust final step to end exactly at FinalTime */
         if (time+dt > ftime) { dt = ftime-time; }
-        if(!procid){ printf("Process:%f, dt:%f\n", time/ftime, dt); }
+        if(!procid){ printf("Process:%f, dt:%f\r", time/ftime, dt); }
 
         for (INTRK=1; INTRK<=5; ++INTRK) {
             /* compute rhs of equations */
@@ -49,9 +51,9 @@ void swe_run(){
 
             phys->update_obc_data(phys, time+rk4c[INTRK-1]*dt);
             swe_rhs(phys, fa, fb, fdt);
-            //swe_h2eta(solver);
-            //phys->limit(phys, 2.0);
-            //swe_eta2h(solver);
+            //swe_h2eta(phys);
+            phys->limit(phys, 1.0);
+            //swe_eta2h(phys);
             swe_ppreserve(phys);
         }
         /* increment current time */
@@ -60,7 +62,7 @@ void swe_run(){
     double mpitime1 = MPI_Wtime();
     double elapsetime = mpitime1 - mpitime0;
 
-    // last
+    // final result
     swe_save_var(tstep++, time);
 
     if(!procid) {printf("proc: %d, time taken: %lg\n", procid, elapsetime);}
@@ -142,6 +144,37 @@ static double swe_time_interval(dg_phys *phys){
     return gdt;
 }
 
+static void swe_h2eta(dg_phys *phys){
+    const int Np = dg_cell_Np( dg_phys_cell(phys) );
+    const int K = dg_grid_K( dg_phys_grid(phys) );
+    const int Nfield = dg_phys_Nfield(phys);
+    dg_real *f_Q = dg_phys_f_Q(phys);
+
+    register int k,n,sk=0;
+    for(k=0;k<K;k++){
+        for(n=0;n<Np;n++){
+            f_Q[sk] += f_Q[sk+3]; // eta = h+b
+            sk += Nfield;
+        }
+    }
+    return;
+}
+
+static void swe_eta2h(dg_phys *phys){
+    const int Np = dg_cell_Np( dg_phys_cell(phys) );
+    const int K = dg_grid_K( dg_phys_grid(phys) );
+    const int Nfield = dg_phys_Nfield(phys);
+    dg_real *f_Q = dg_phys_f_Q(phys);
+
+    register int k,n,sk=0;
+    for(k=0;k<K;k++){
+        for(n=0;n<Np;n++){
+            f_Q[sk] -= f_Q[sk+3]; // eta = h-b
+            sk += Nfield;
+        }
+    }
+    return;
+}
 
 /**
  * @brief

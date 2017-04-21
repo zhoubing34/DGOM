@@ -6,8 +6,8 @@ set(SWE_LIB
         SWELib/swe_obc.c
         )
 add_library(swe2d_lib STATIC ${SWE_LIB})
-add_dependencies(swe2d_lib physfield)
-target_link_libraries(swe2d_lib physfield)
+add_dependencies(swe2d_lib phys_field)
+target_link_libraries(swe2d_lib phys_field)
 
 set(SRC_LIST
         SWEDriver2d/swe2d.c

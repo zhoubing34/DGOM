@@ -21,7 +21,6 @@ static int nodal_flux(dg_real *var, dg_real *Eflux, dg_real *Gflux){
 int dg_phys_strong_vol_opt2d_test(dg_phys *phys, int verbose){
     int fail = 0;
 
-    dg_mesh *mesh = dg_phys_mesh(phys);
     dg_region *region = dg_phys_region(phys);
     dg_grid *grid = dg_phys_grid(phys);
     dg_cell *cell = dg_phys_cell(phys);
@@ -52,15 +51,16 @@ int dg_phys_strong_vol_opt2d_test(dg_phys *phys, int verbose){
     dg_phys_strong_vol_opt2d(phys, nodal_flux);
     fail = vector_double_test(__FUNCTION__, f_rhsQ, rhs_ext, Np * Nfield * K);
 
+    const int procid = dg_phys_procid(phys);
+    const int nprocs = dg_phys_nprocs(phys);
     if(verbose){
-        FILE *fp = create_log(__FUNCTION__, mesh->procid, mesh->nprocs);
+        FILE *fp = create_log(__FUNCTION__, procid, nprocs);
         fprintf(fp, "Nfield = %d\n", Nfield);
         fprintf(fp, "Np = %d\n", Np);
         print_double_vector2file(fp, "f_Q", f_Q, Nfield*Np*k);
         print_double_vector2file(fp, "f_rhsQ", f_rhsQ, Nfield*Np*k);
     }
 
-    const int procid = region->procid;
     if(!procid) {
         if(!fail) printf(HEADPASS "1 test passed from %s\n", __FUNCTION__);
     }

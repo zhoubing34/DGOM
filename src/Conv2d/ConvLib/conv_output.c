@@ -1,8 +1,11 @@
 #include "conv_lib2d.h"
 #include "../ConvDriver2d/conv2d.h"
 /**
- * @brief create output files in NetCDF format.
- * @details each process opens a file and returns its file object.
+ * @brief Create output files in NetCDF format.
+ *
+ * @details
+ * Each process creates a file and returns its file object.
+ *
  * @author li12242, Tianjin University, li12242@tju.edu.cn
  */
 void conv_setoutput(){
@@ -142,5 +145,3 @@ void conv_putvar(dg_phys *phys, int timestep, double time){
     nc_error( ncmpi_put_vara_float_all(file->ncid, ncvar->id, start_v, count_v, var) );
     return;
 }
-
-

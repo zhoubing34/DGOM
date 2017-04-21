@@ -1,11 +1,12 @@
 #ifndef DGOM_PHYSDOMAIN_H
 #define DGOM_PHYSDOMAIN_H
 
-#include "MultiRegions/Edge/dg_edge.h"
+#include "MultiArea/Edge/dg_edge.h"
 #include "dg_phys_obc.h"
 #include "dg_phys_info.h"
-#include "dg_phys_limiter.h"
 #include "dg_phys_LDG.h"
+#include "PhysField/Limiter/dg_phys_limiter.h"
+
 
 /**
  * @brief physical field structure.
@@ -35,15 +36,17 @@ typedef struct dg_phys{
     void (*limit)(struct dg_phys *phys, double parameter);
 } dg_phys;
 
-dg_phys* dg_phys_create(int Nfields, dg_edge *edge);
+dg_phys* dg_phys_create(int Nfields, dg_area *area);
 void dg_phys_free(dg_phys *phys);
 
 
-#define dg_phys_cell(phys) (phys->info->cell)
-#define dg_phys_grid(phys) (phys->info->grid)
-#define dg_phys_region(phys) (phys->info->region)
-#define dg_phys_mesh(phys) (phys->info->mesh)
-#define dg_phys_edge(phys) (phys->info->edge)
+#define dg_phys_cell(phys) dg_phys_info_cell(phys->info)
+#define dg_phys_grid(phys) dg_phys_info_grid(phys->info)
+#define dg_phys_region(phys) dg_phys_info_region(phys->info)
+#define dg_phys_mesh(phys) dg_phys_info_mesh(phys->info)
+#define dg_phys_edge(phys) dg_phys_info_edge(phys->info)
+#define dg_phys_nprocs(phys) dg_area_nprocs(dg_phys_info_area(phys->info))
+#define dg_phys_procid(phys) dg_area_procid(dg_phys_info_area(phys->info))
 
 #define dg_phys_Nfield(phys) (phys->info->Nfield)
 #define dg_phys_f_Q(phys) (phys->info->f_Q)

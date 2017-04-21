@@ -53,7 +53,7 @@ static int vis_func(dg_real *f_Q, dg_real *vis){
 void conv_rhs(dg_phys *phys, dg_real frka, dg_real frkb, dg_real fdt){
     dg_grid *grid = dg_phys_grid(phys);
     const int K = dg_grid_K(grid);
-    const int nprocs = dg_grid_nprocs(grid);
+    const int nprocs = dg_phys_nprocs(phys);
     const int Np = dg_cell_Np(dg_phys_cell(phys));
     const int Nfield = dg_phys_Nfield(phys);
 

@@ -44,8 +44,8 @@ static SWE_Run_Type swe_read_command(int argc, char **argv){
     SWE_Run_Type run_type = SWE_UNKNOWN; // default
 
     char help_str[] = "-help";
-    char pre_str[] = "-create_input";
-    char run_str[] = "-run";
+    char pre_str[]  = "-create_input";
+    char run_str[]  = "-run";
 
     register int i;
     for(i=0;i<argc;i++){

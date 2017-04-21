@@ -1,6 +1,5 @@
 /**
- * @file
- * Public function for standard cell dg_cell structure.
+ * @file Public function for standard cell class.
  * @brief
  * standard cell definition.
  * @author
@@ -12,9 +11,7 @@
 
 #include "Utility/utility.h"
 
-/**
- * @brief enum for standard cell type
- */
+/** @brief enum for standard cell type */
 typedef enum {
     POINT    =0, ///< point;
     LINE     =1, ///< line;
@@ -24,9 +21,8 @@ typedef enum {
     TRIPRISM =5, ///< triangle prism;
     HEXA     =6, ///< hexahedron;
 } dg_cell_type;
-/**
- * @brief basic information of dg_cell
- */
+
+/** @brief basic information of dg_cell */
 typedef struct dg_cell_info{
     int N; ///< order;
     int Nv; ///< number of vertex;
@@ -36,9 +32,8 @@ typedef struct dg_cell_info{
     double *vr,*vs,*vt; ///< vertex coordinate;
     int **FToV; ///< Face to vertex list;
 }dg_cell_info;
-/**
- * @brief volume information of dg_cell
- */
+
+/** @brief volume information of dg_cell */
 typedef struct dg_cell_volume{
     int Np; ///< number of nodes;
     double *r,*s,*t; ///< coordinate of nodes;
@@ -46,9 +41,8 @@ typedef struct dg_cell_volume{
     double **M, **V; ///< Mass and Vandermonde matrix;
     double **Dr,**Ds,**Dt; ///< Derivative matrix;
 } dg_cell_volume;
-/**
- * @brief face information of dg_cell
- */
+
+/** @brief face information of dg_cell */
 typedef struct dg_cell_face{
     int *Nfp; ///< number of nodes on each faces;
     int Nfptotal; ///< total number of Nfp;
@@ -56,17 +50,16 @@ typedef struct dg_cell_face{
     double **ws; ///< Gauss quadrature weights for face integral;
     double **LIFT; ///< lift matrix;
 } dg_cell_face;
-/**
- * @brief structure of standard cell
- */
+
+/** @brief structure of standard cell */
 typedef struct dg_cell{
-    dg_cell_info *info; ///< basic info
-    dg_cell_volume *volume; ///< volume info
-    dg_cell_face *face; ///< face info
+    dg_cell_info *info; ///< basic info;
+    dg_cell_volume *volume; ///< volume info;
+    dg_cell_face *face; ///< face info;
     /* user defined precision */
-    dg_real *f_Dr,*f_Ds,*f_Dt,*f_LIFT; ///< user specific version of Dr,Ds,Dt and LIFT
+    dg_real *f_Dr,*f_Ds,*f_Dt,*f_LIFT; ///< user specific version of Dr,Ds,Dt and LIFT;
+    /** function to project vertex value to nodes */
     void (*proj_vert2node)(struct dg_cell *cell, int Nfield, double *vertVal, double *nodeVal);
-    ///< function to project vertex value to nodes
 } dg_cell;
 
 /** function pointer of create cell_info structure */
@@ -82,7 +75,7 @@ typedef void (*Derivative_Orthogonal_Func)(int N, int ind, int Np, double *r, do
 typedef void (*Proj_Func)(dg_cell *cell, int Nfield, double *vertVal, double *nodeVal);
 
 /**
- * @brief function handles for creating dg_cell
+ * @brief function handles for creating dg_cell.
  */
 typedef struct dg_cell_creator{
     Cell_Info_Create_Func cell_info_create; ///< generate dg_cell_info struct;
@@ -97,7 +90,7 @@ dg_cell* dg_cell_creat(int N, dg_cell_type type);
 /** free dg_cell object */
 void dg_cell_free(dg_cell *);
 
-/* basic info */
+/* get dg_cell_info propreties */
 #define dg_cell_celltype(cell) cell->info->type
 #define dg_cell_Nv(cell) cell->info->Nv
 #define dg_cell_N(cell) cell->info->N
@@ -122,7 +115,7 @@ void dg_cell_free(dg_cell *);
 
 /* face properties */
 #define dg_cell_Nfptotal(cell) cell->face->Nfptotal
-#define dg_cell_Nfp(cell) cell->face->Nfp ///< number of points on fth face
+#define dg_cell_Nfp(cell) cell->face->Nfp
 #define dg_cell_ws(cell) cell->face->ws
 #define dg_cell_Fmask(cell) cell->face->Fmask
 #define dg_cell_LIFT(cell) cell->face->LIFT

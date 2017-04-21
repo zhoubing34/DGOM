@@ -3,6 +3,9 @@
 //
 #include "utility_test.h"
 #include "nc_library_test.h"
+#include "testfile_IO_test.h"
+
+#define NTEST 4
 
 int main(int argc, char **argv){
 
@@ -26,13 +29,13 @@ int main(int argc, char **argv){
         return 0;
     }
 
-    int i, flag[2];
-
-    if(!procid) printf(HEADSTART "Running 2 test from LibUtilities_Test\n");
+    int i, flag[NTEST];
+    if(!procid) printf(HEADSTART "Running %d test from LibUtilities_Test\n", NTEST);
 
     flag[0] = MatrixInverse_test();
     flag[1] = MatrixMultiply_test();
     flag[2] = nc_file_read_from_file_test(isverbose);
+    flag[3] = testfile_IO_test(isverbose);
 
     int failNum = 0;
     for(i=0; i<2; i++){
@@ -41,7 +44,7 @@ int main(int argc, char **argv){
     if(failNum) {
         if(!procid) printf(HEADEND "%d test faild from LibUtilities_Test\n", failNum);
     } else {
-        if(!procid) printf(HEADEND "2 test passed from LibUtilities_Test\n");
+        if(!procid) printf(HEADEND "%d test passed from LibUtilities_Test\n", NTEST);
     }
 
     MPI_Finalize();

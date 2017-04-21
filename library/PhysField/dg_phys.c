@@ -2,7 +2,6 @@
  * @file
  * physical fields
  * @brief
- *
  * @author li12242, Tianjin University, li12242@tju.edu.cn
  */
 
@@ -13,32 +12,31 @@
 #include "Utility/unit_test.h"
 #endif
 
-static void dg_phys_cell_mesn(dg_phys *phys);
-static int dg_phys_fetch_cell_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
-static int dg_phys_fetch_node_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
-static void dg_phys_obc_add(dg_phys *phys, char *filename);
-static void dg_phys_obc_update(dg_phys *phys, double elapseTime);
+static inline void dg_phys_cell_mean(dg_phys *phys);
+static inline int dg_phys_fetch_cell_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
+static inline int dg_phys_fetch_node_buffer(dg_phys *phys, MPI_Request *send_requests, MPI_Request *recv_requests);
+static inline void dg_phys_obc_add(dg_phys *phys, char *filename);
+static inline void dg_phys_obc_update(dg_phys *phys, double elapseTime);
+static inline void dg_phys_set_limiter(dg_phys *phys, Limiter_Type type);
+static inline void dg_phys_set_indicator(dg_phys *phys, Indicator_Type type);
+static inline void dg_phys_limit(dg_phys *phys, double parameter);
 static void dg_phys_init_file(dg_phys *phys, char *casename);
-static void dg_phys_set_limiter(dg_phys *phys, Limiter_Type type);
-static void dg_phys_set_indicator(dg_phys *phys, Indicator_Type type);
-static void dg_phys_limit(dg_phys *phys, double parameter);
 
 /**
  * @brief create a pointer to a new dg_phys structure.
- * @param Nfields number of physical field;
- * @param edge pointer to dg_edge structure;
- * @return
- * phys pointer to a new dg_phys structure.
+ * @param[in] Nfields number of physical field;
+ * @param[in] edge pointer to dg_edge structure;
+ * @return phys pointer to a new dg_phys structure.
  */
-dg_phys* dg_phys_create(int Nfields, dg_edge *edge){
+dg_phys* dg_phys_create(int Nfields, dg_area *area){
 
     dg_phys *phys = (dg_phys *) calloc(1, sizeof(dg_phys));
-    phys->info = dg_phys_info_create(Nfields, edge);
+    phys->info = dg_phys_info_create(Nfields, area);
     phys->obc = dg_phys_obc_create(phys->info);
     phys->limiter = dg_phys_limiter_create(phys->info);
     phys->ldg = dg_phys_LDG_create(phys->info);
 
-    phys->cell_mean = dg_phys_cell_mesn;
+    phys->cell_mean = dg_phys_cell_mean;
     phys->initialize_from_file = dg_phys_init_file;
     phys->fetch_cell_buffer = dg_phys_fetch_cell_buffer;
     phys->fetch_node_buffer = dg_phys_fetch_node_buffer;
@@ -62,31 +60,31 @@ void dg_phys_free(dg_phys *phys){
     return;
 }
 
-static void dg_phys_cell_mesn(dg_phys *phys){
+static inline void dg_phys_cell_mean(dg_phys *phys){
     phys->info->cell_mean(phys->info);
     return;
 }
 
-static void dg_phys_set_limiter(dg_phys *phys, Limiter_Type type){
+static inline void dg_phys_set_limiter(dg_phys *phys, Limiter_Type type){
     phys->limiter->set_limiter(phys->limiter, type);
     return;
 }
 
-static void dg_phys_set_indicator(dg_phys *phys, Indicator_Type type){
+static inline void dg_phys_set_indicator(dg_phys *phys, Indicator_Type type){
     phys->limiter->set_indicator(phys->limiter, type);
     return;
 }
 
-static void dg_phys_limit(dg_phys *phys, double parameter){
-    phys->limiter->limit_trouble_cell(phys->limiter ,phys->info, parameter);
+static inline void dg_phys_limit(dg_phys *phys, double parameter){
+    phys->limiter->limit_trouble_cell(phys->limiter, phys->info, parameter);
     return;
 }
 
-static void dg_phys_obc_add(dg_phys *phys, char *filename){
+static inline void dg_phys_obc_add(dg_phys *phys, char *filename){
     phys->obc->add_obc(phys->obc, filename);
     return;
 }
-static void dg_phys_obc_update(dg_phys *phys, double elapseTime){
+static inline void dg_phys_obc_update(dg_phys *phys, double elapseTime){
     phys->obc->update_obc(phys->obc, elapseTime);
     return;
 }
@@ -98,7 +96,7 @@ static void dg_phys_obc_update(dg_phys *phys, double elapseTime){
  * @param recv_requests
  * @return
  */
-static int dg_phys_fetch_cell_buffer(dg_phys *phys,
+static inline int dg_phys_fetch_cell_buffer(dg_phys *phys,
                                       MPI_Request *send_requests,
                                       MPI_Request *recv_requests){
     dg_phys_info *info = phys->info;
@@ -113,7 +111,7 @@ static int dg_phys_fetch_cell_buffer(dg_phys *phys,
  * @param recv_requests
  * @return
  */
-static int dg_phys_fetch_node_buffer(dg_phys *phys,
+static inline int dg_phys_fetch_node_buffer(dg_phys *phys,
                                       MPI_Request *send_requests,
                                       MPI_Request *recv_requests){
     dg_phys_info *info = phys->info;

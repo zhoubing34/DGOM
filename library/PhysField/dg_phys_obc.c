@@ -95,8 +95,8 @@ static void dg_phys_obc_add(dg_phys_obc *phys_obc, char *filename){
     phys_obc->file = file;
 
     /* allocation */
-    const int K = dg_grid_K(phys_obc->info->grid);
-    const int Np = dg_cell_Np(phys_obc->info->cell);
+    const int K = dg_grid_K(dg_phys_info_grid(phys_obc->info));
+    const int Np = dg_cell_Np(dg_phys_info_cell(phys_obc->info));
     phys_obc->f_extQ = (dg_real *) calloc((size_t) K*Np*Nfield, sizeof(dg_real));
     return;
 }
@@ -132,7 +132,7 @@ static void dg_phys_obc_obtain(dg_phys_obc *phys_obc, Interp_Parameter *par){
     const int varid = phys_obc->file->var_vec_p[2]->id;
     const int Nfield = phys_obc->info->Nfield;
     const int Nvobc = phys_obc->Nvert; ///< number of vertex in obc file;
-    const int Nvert = dg_grid_Nv(phys_obc->info->grid); ///< number of vertex on geometry grid;
+    const int Nvert = dg_grid_Nv(dg_phys_info_grid(phys_obc->info)); ///< number of vertex on geometry grid;
     const int Nstep = par->Nstep;
     double *weight = par->weight;
     int *tstep = par->timeStep;
@@ -157,13 +157,13 @@ static void dg_phys_obc_obtain(dg_phys_obc *phys_obc, Interp_Parameter *par){
         }
     }
     /* interp the open boundary vertex onto nodes */
-    dg_cell *cell = phys_obc->info->cell;
-    const int K = dg_grid_K(phys_obc->info->grid);
+    dg_cell *cell = dg_phys_info_cell(phys_obc->info);
+    const int K = dg_grid_K(dg_phys_info_grid(phys_obc->info));
     const int Nv = dg_cell_Nv(cell);
     const int Np = dg_cell_Np(cell);
 
     double *f_ext = phys_obc->f_extQ;
-    int **EToV = dg_grid_EToV(phys_obc->info->grid);
+    int **EToV = dg_grid_EToV(dg_phys_info_grid(phys_obc->info));
     for(k=0;k<K;k++){
         double vertbc[Nv*Nfield];
         double nodebc[Np*Nfield];
